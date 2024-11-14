@@ -22,4 +22,20 @@ public class Ghost extends PlayerObject {
         super(x, y);
     }
 
+    /**
+     * moves Ghost to new coords
+     * 
+     * @param x x-coordinate
+     * @param y y-coordinate
+     */
+    @Override
+    public void move(int x, int y) {
+    }
+
+/* 
+    @Override
+    public void handle(Event event) {
+    }
+*/
+
 }

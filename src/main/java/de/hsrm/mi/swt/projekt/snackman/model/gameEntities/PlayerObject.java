@@ -1,15 +1,15 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 /**
- * The `PlayerObject` class represents an object in a game with an `id`
- * and coordinates (`x`, `y`) on a plane.
+ * The `PlayerObject` class represents an moveable object in a game with an `id`
+ * and coordinates (`x`, `y`) on a plane. 
  * 
  * This class provides methods to get and set the coordinates of the player object.
  * 
  * 
  * @author Mohamad Hajjar
  */
-public abstract class PlayerObject {
+public abstract class PlayerObject implements Moveable {
 
     /** The unique identifier for the player object */
     private int id;

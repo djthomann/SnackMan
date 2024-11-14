@@ -10,7 +10,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * 
  * @author Mohamad Hajjar
  */
-public class Chicken extends NonPlayerObject {
+public class Chicken extends NonPlayerObject implements Moveable, CanEat {
 
     /**
      * Constructs a new Chicken with the specified starting position and
@@ -22,6 +22,30 @@ public class Chicken extends NonPlayerObject {
      */
     public Chicken(int x, int y, int calories) {
         super(x, y,  calories);
-    }       
+    }
+
+    /**
+     * moves chicken to new coords
+     * 
+     * @param x x-coordinate
+     * @param y y-coordinate
+     */
+    @Override
+    public void move(int x, int y) {
+    }
+    
+    /**
+     * Consumes the food, affecting the weight (calories) of the entity
+     *
+     * @param food the calorie resource to be consumed by the entity
+     */
+    @Override
+    public void eat(Food food) {
+    } 
+    
+    /*      
+    @Override
+    public void handle(Event event) {
+    } */
     
 }

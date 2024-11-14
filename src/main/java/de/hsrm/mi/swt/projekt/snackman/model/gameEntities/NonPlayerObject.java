@@ -9,7 +9,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * 
  * @author Mohamad Hajjar
  */
-public abstract class NonPlayerObject {
+public abstract class NonPlayerObject  {
 
     /** The unique identifier for the non-player object */
     private int id;
