@@ -12,6 +12,9 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  */
 public class Food extends NonPlayerObject {
 
+    /** The calorie count of the food */
+    private int calories;
+
     /**
      * Constructs a new Food with the specified position and
      * initial calorie count.
@@ -20,8 +23,27 @@ public class Food extends NonPlayerObject {
      * @param y        the initial y-coordinate of the Food       
      * @param calories  the initial number of calories of the Food
      */
-    public Food(int x, int y, int calories) {
-        super(x, y,  calories);
+    public Food(float x, float y, int calories) {
+        super(x, y);
+        this.calories = calories;
     }       
+
+    /**
+     * Returns the number of calories of the food.
+     * 
+     * @return the current calories
+     */
+    public int getCalories() {
+        return calories;
+    }
+
+    /**
+     * Sets the number of calories of the food.
+     * 
+     * @param calories the new calories to set
+     */
+    public void setCalories(int calories) {
+        this.calories = calories;
+    }
     
 }

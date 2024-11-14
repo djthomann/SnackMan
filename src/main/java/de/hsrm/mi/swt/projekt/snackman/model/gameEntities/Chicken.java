@@ -8,9 +8,10 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * coordinates management.
  * 
  * 
- * @author Mohamad Hajjar
  */
 public class Chicken extends NonPlayerObject implements Moveable, CanEat {
+
+    private int gainedCalories;
 
     /**
      * Constructs a new Chicken with the specified starting position and
@@ -18,10 +19,29 @@ public class Chicken extends NonPlayerObject implements Moveable, CanEat {
      * 
      * @param x        the initial x-coordinate of the Chicken
      * @param y        the initial y-coordinate of the Chicken       
-     * @param calories  the initial number of calories of the Chicken
+     * @param gainedCalories  the initial number of calories of the Chicken
      */
-    public Chicken(int x, int y, int calories) {
-        super(x, y,  calories);
+    public Chicken(float x, float y, int gainedCalories) {
+        super(x, y);
+        this.gainedCalories = gainedCalories;
+    }
+
+     /**
+     * Returns the number of calories of the food.
+     * 
+     * @return the current calories
+     */
+    public int getGainedCalories() {
+        return gainedCalories;
+    }
+
+    /**
+     * Sets the number of calories of the food.
+     * 
+     * @param gainedCalories the new calories to set
+     */
+    public void setGainedCalories(int gainedCalories) {
+        this.gainedCalories = gainedCalories;
     }
 
     /**
@@ -31,7 +51,7 @@ public class Chicken extends NonPlayerObject implements Moveable, CanEat {
      * @param y y-coordinate
      */
     @Override
-    public void move(int x, int y) {
+    public void move(float x, float y) {
     }
     
     /**

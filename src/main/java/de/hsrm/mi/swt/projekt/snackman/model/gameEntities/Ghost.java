@@ -8,7 +8,6 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * coordinates management.
  * 
  * 
- * @author Mohamad Hajjar
  */
 public class Ghost extends PlayerObject {
 
@@ -18,7 +17,7 @@ public class Ghost extends PlayerObject {
      * @param x the initial x-coordinate of the `Ghost`
      * @param y the initial y-coordinate of the `Ghost`
      */
-    public Ghost(int x, int y) {
+    public Ghost(float x, float y) {
         super(x, y);
     }
 
@@ -29,7 +28,7 @@ public class Ghost extends PlayerObject {
      * @param y y-coordinate
      */
     @Override
-    public void move(int x, int y) {
+    public void move(float x, float y) {
     }
 
 /* 

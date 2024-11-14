@@ -8,13 +8,11 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * the calorie count of the `SnackMan`.
  * 
  * 
- * @author Mohamad Hajjar
- * 
  */
 public class SnackMan extends PlayerObject implements CanEat {
 
     /** The calorie count of the SnackMan */
-    private int calories;
+    private int gainedCalories;
 
     /**
      * Constructs a new `SnackMan` with the specified starting position and
@@ -22,20 +20,20 @@ public class SnackMan extends PlayerObject implements CanEat {
      * 
      * @param x        the initial x-coordinate of the `SnackMan`
      * @param y        the initial y-coordinate of the `SnackMan`       
-     * @param calories the initial number of calories of the `SnackMan`
+     * @param gainedCalories the initial number of gainedCalories of the `SnackMan`
      */
-    public SnackMan(int x, int y, int calories) {
+    public SnackMan(float x, float y, int gainedCalories) {
         super(x, y);
-        this.calories = calories;
+        this.gainedCalories = gainedCalories;
     }
 
     /**
-     * Returns the current calorie count of the `SnackMan`.
+     * Returns the current gained calorie count of the `SnackMan`.
      * 
-     * @return the current calorie count
+     * @return the current gained calorie count
      */
-    public int getCalories() {
-        return calories;
+    public int getGainedCalories() {
+        return gainedCalories;
     }
 
     /**
@@ -43,8 +41,8 @@ public class SnackMan extends PlayerObject implements CanEat {
      * 
      * @param calories the new calorie count to set
      */
-    public void setCalories(int calories) {
-        this.calories = calories;
+    public void setGainedCalories(int gainedCalories) {
+        this.gainedCalories = gainedCalories;
     }
 
     /**
@@ -54,7 +52,7 @@ public class SnackMan extends PlayerObject implements CanEat {
      * @param y y-coordinate
      */
     @Override
-    public void move(int x, int y) {
+    public void move(float x, float y) {
     }
 
     /**
@@ -77,6 +75,4 @@ public class SnackMan extends PlayerObject implements CanEat {
     }
  */
 
-
-   
 }
