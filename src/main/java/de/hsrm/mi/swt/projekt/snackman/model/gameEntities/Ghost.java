@@ -36,5 +36,4 @@ public class Ghost extends PlayerObject {
     public void handle(Event event) {
     }
 */
-
 }

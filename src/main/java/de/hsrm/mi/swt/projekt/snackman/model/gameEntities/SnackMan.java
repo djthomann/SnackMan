@@ -20,28 +20,9 @@ public class SnackMan extends PlayerObject implements CanEat {
      * 
      * @param x        the initial x-coordinate of the `SnackMan`
      * @param y        the initial y-coordinate of the `SnackMan`       
-     * @param gainedCalories the initial number of gainedCalories of the `SnackMan`
      */
-    public SnackMan(float x, float y, int gainedCalories) {
+    public SnackMan(float x, float y) {
         super(x, y);
-        this.gainedCalories = gainedCalories;
-    }
-
-    /**
-     * Returns the current gained calorie count of the `SnackMan`.
-     * 
-     * @return the current gained calorie count
-     */
-    public int getGainedCalories() {
-        return gainedCalories;
-    }
-
-    /**
-     * Resets the  gainedCalories count for the `SnackMan` to 0.
-     * 
-     * @param gainedCalories the new calorie count to set
-     */
-    public void resetGainedCalories(int gainedCalories) {
         this.gainedCalories = 0;
     }
 
@@ -58,11 +39,30 @@ public class SnackMan extends PlayerObject implements CanEat {
     /**
      * method to Consume Food
      *
-     * @param food the calorie resource to be consumed by the entity
+     * @param food the calorie resource to be consumed by the `SnackMan`. 
      */
     @Override
     public void eat(Food food) {
-    } 
+    }
+
+    /**
+     * Returns the current gained calorie count of the `SnackMan`.
+     * 
+     * @return the current gained calorie count
+     */
+    public int getGainedCalories() {
+        return gainedCalories;
+    }
+
+    /**
+     * Resets the gainedCalories count for the `SnackMan` to 0.
+     * 
+     */
+    public void resetGainedCalories() {
+        this.gainedCalories = 0;
+    }
+    
+
 
     // /**
     //  * Handles a specified event (e.g. jump event, move event).

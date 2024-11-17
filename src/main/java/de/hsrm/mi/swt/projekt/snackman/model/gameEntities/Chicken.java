@@ -4,13 +4,23 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * The `Chicken` class represents a non-player character in the game with
  * an initial position on a plane.
  * 
- * This class extends `NonPlayerObject` and inherits its properties for
- * coordinates management.
- * 
  * 
  */
-public class Chicken extends NonPlayerObject implements Moveable, CanEat {
+public class Chicken implements Moveable, CanEat {
+    
+    /** Counter for the unique identifier for the chicken */
+    private static int counter = 0;
 
+    /** The unique identifier for the chicken */
+    private final int id;
+
+    /** The x-coordinate of the chicken */
+    private float x;
+
+    /** The y-coordinate of the chicken */
+    private float y;
+
+    /** The calorie count of the chicken */
     private int gainedCalories;
 
     /**
@@ -21,31 +31,15 @@ public class Chicken extends NonPlayerObject implements Moveable, CanEat {
      * @param y        the initial y-coordinate of the Chicken       
      * @param gainedCalories  the initial number of gainedCalories by the Chicken
      */
-    public Chicken(float x, float y, int gainedCalories) {
-        super(x, y);
-        this.gainedCalories = gainedCalories;
-    }
-
-     /**
-     * Returns the number of gainedCalories.
-     * 
-     * @return the current calories
-     */
-    public int getGainedCalories() {
-        return gainedCalories;
-    }
-
-    /**
-     * reset the number of gainedCalories auf 0.
-     * 
-     * @param gainedCalories the new calories to set
-     */
-    public void resetGainedCalories(int gainedCalories) {
+    public Chicken(float x, float y) {
+        this.id = ++counter; 
+        this.x = x; 
+        this.y = y; 
         this.gainedCalories = 0;
     }
 
     /**
-     * moves chicken to new coords
+     * Moves chicken to new coords
      * 
      * @param x x-coordinate
      * @param y y-coordinate
@@ -63,9 +57,70 @@ public class Chicken extends NonPlayerObject implements Moveable, CanEat {
     public void eat(Food food) {
     } 
     
+    /**
+     * Returns the number of gainedCalories.
+     * 
+     * @return the current calories
+     */
+    public int getGainedCalories() {
+        return gainedCalories;
+    }
+
+    /**
+     * Reset the number of gainedCalories auf 0.
+     * 
+     */
+    public void resetGainedCalories() {
+        this.gainedCalories = 0;
+    }
+
+    /**
+     * Returns the unique identifier of the chicken.
+     * 
+     * @return the `id` of the chicken
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Returns the x-coordinate of the chicken.
+     * 
+     * @return the current x-coordinate
+     */
+    public float getX() {
+        return x;
+    }
+
+    /**
+     * Sets the x-coordinate of the chicken.
+     * 
+     * @param newX the new x-coordinate to set
+     */
+    public void setX(float newX) {
+        this.x = newX;
+    }
+
+    /**
+     * Returns the y-coordinate of the chicken.
+     * 
+     * @return the current y-coordinate
+     */
+    public float getY() {
+        return y;
+    }
+
+    /**
+     * Sets the y-coordinate of the chicken.
+     * 
+     * @param newY the new y-coordinate to set
+     */
+    public void setY(float newY) {
+        this.y = newY;
+    }
+
     /*      
     @Override
     public void handle(Event event) {
     } */
-    
 }
