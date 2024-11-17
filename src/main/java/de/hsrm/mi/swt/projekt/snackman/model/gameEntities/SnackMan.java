@@ -18,22 +18,31 @@ public class SnackMan extends PlayerObject implements CanEat {
      * Constructs a new `SnackMan` with the specified starting position and
      * initial calorie count.
      * 
+     * @param id       the unique identifier of the `SnackMan`
      * @param x        the initial x-coordinate of the `SnackMan`
      * @param y        the initial y-coordinate of the `SnackMan`       
      */
-    public SnackMan(float x, float y) {
-        super(x, y);
+    public SnackMan(int id, float x, float y) {
+        super(id, x, y);
         this.gainedCalories = 0;
     }
 
     /**
+     * Resets the gainedCalories for the `SnackMan` to 0.
+     * 
+     */
+    public void resetGainedCalories() {
+        this.gainedCalories = 0;
+    }
+    
+    /**
      * moves SnackMan to new coords
      * 
-     * @param x x-coordinate
-     * @param y y-coordinate
+     * @param newX the x-coordinate to move the `SnackMan` to
+     * @param newY the y-coordinate to move the `SnackMan` to
      */
     @Override
-    public void move(float x, float y) {
+    public void move(float newX, float newY) {
     }
 
     /**
@@ -46,33 +55,17 @@ public class SnackMan extends PlayerObject implements CanEat {
     }
 
     /**
-     * Returns the current gained calorie count of the `SnackMan`.
+     * Returns the current gainedCalories count of the `SnackMan`.
      * 
-     * @return the current gained calorie count
+     * @return the current gainedCalories count
      */
     public int getGainedCalories() {
         return gainedCalories;
     }
 
-    /**
-     * Resets the gainedCalories count for the `SnackMan` to 0.
-     * 
-     */
-    public void resetGainedCalories() {
-        this.gainedCalories = 0;
-    }
-    
-
-
-    // /**
-    //  * Handles a specified event (e.g. jump event, move event).
-    //  *
-    //  * @param event the event to handle
-    //  */
-/*
+    /*
     @Override
-    public void handle(Event event) {
-    }
- */
+    public void handle(Event event) {}
+    */
 
 }

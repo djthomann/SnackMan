@@ -7,25 +7,39 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  */
 public abstract class PlayerObject implements Moveable {
 
-    /** The x-coordinate of the game object */
+    /** The unique identifier for the PlayerObject */
+    private final int id;
+    
+    /** The x-coordinate of the PlayerObject */
     private float x;
 
-    /** The y-coordinate of the game object */
+    /** The y-coordinate of the PlayerObject */
     private float y; 
 
     /**
      * Constructs a new `PlayerObject` with the specified starting coordinates.
      * 
-     * @param x the initial x-coordinate of the player object
-     * @param y the initial y-coordinate of the player object
+     * @param x the initial x-coordinate of the PlayerObject
+     * @param y the initial y-coordinate of the PlayerObject
      */
-    public PlayerObject(float x, float y) {
+    public PlayerObject(int id, float x, float y) {
+        this.id = id;
         this.x = x; 
-        this.y = y; 
+        this.y = y;  
     }
 
     /**
-     * Returns the x-coordinate of the game object.
+     * Returns the unique identifier of the PlayerObject.
+     * 
+     * @return the `id` of the PlayerObject
+     */
+    public int getId() {
+        return id;
+    }
+
+
+    /**
+     * Returns the x-coordinate of the PlayerObject.
      * 
      * @return the current x-coordinate
      */
@@ -34,30 +48,12 @@ public abstract class PlayerObject implements Moveable {
     }
 
     /**
-     * Sets the x-coordinate of the game object.
-     * 
-     * @param newX the new x-coordinate to set
-     */
-    public void setX(float newX) {
-        this.x = newX;
-    }
-
-    /**
-     * Returns the y-coordinate of the game object.
+     * Returns the y-coordinate of the PlayerObject.
      * 
      * @return the current y-coordinate
      */
     public float getY() {
         return y;
-    }
-
-    /**
-     * Sets the y-coordinate of the game object.
-     * 
-     * @param newY the new y-coordinate to set
-     */
-    public void setY(float newY) {
-        this.y = newY;
     }
     
 }

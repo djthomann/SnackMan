@@ -1,38 +1,33 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 /**
- * The `Chicken` class represents a non-player character in the game with
- * an initial position on a plane.
+ * The `Chicken` class represents a NPC in the game.
  * 
  * 
  */
 public class Chicken implements Moveable, CanEat {
-    
-    /** Counter for the unique identifier for the chicken */
-    private static int counter = 0;
 
-    /** The unique identifier for the chicken */
+    /** The unique identifier for the Chicken */
     private final int id;
 
-    /** The x-coordinate of the chicken */
+    /** The x-coordinate of the Chicken */
     private float x;
 
-    /** The y-coordinate of the chicken */
+    /** The y-coordinate of the Chicken */
     private float y;
 
-    /** The calorie count of the chicken */
+    /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
 
     /**
-     * Constructs a new Chicken with the specified starting position and
-     * initial calorie count.
+     * Constructs a new Chicken with the id, and specified starting Coords.
      * 
+     * @param id       the unique identifier of the Chicken
      * @param x        the initial x-coordinate of the Chicken
      * @param y        the initial y-coordinate of the Chicken       
-     * @param gainedCalories  the initial number of gainedCalories by the Chicken
      */
-    public Chicken(float x, float y) {
-        this.id = ++counter; 
+    public Chicken(int id,float x, float y) {
+        this.id = id; 
         this.x = x; 
         this.y = y; 
         this.gainedCalories = 0;
@@ -41,50 +36,50 @@ public class Chicken implements Moveable, CanEat {
     /**
      * Moves chicken to new coords
      * 
-     * @param x x-coordinate
-     * @param y y-coordinate
+     * @param newX the x-coordinate to move the Chicken to
+     * @param newY the y-coordinate to move the Chicken to
      */
     @Override
-    public void move(float x, float y) {
+    public void move(float newX, float newY) {
     }
     
     /**
-     * Consumes the food, affecting the weight (calories) of the entity
+     * Consumes the food, make the Chicken gain Calories.
      *
      * @param food the calorie resource to be consumed by the entity
      */
     @Override
     public void eat(Food food) {
     } 
+
+    /**
+     * Resets the gainedCalories for the Chicken to 0.
+     * 
+     */
+    public void resetGainedCalories() {
+        this.gainedCalories = 0;
+    }    
     
     /**
      * Returns the number of gainedCalories.
      * 
-     * @return the current calories
+     * @return the current gainedCalories
      */
     public int getGainedCalories() {
         return gainedCalories;
     }
 
     /**
-     * Reset the number of gainedCalories auf 0.
+     * Returns the unique identifier of the Chicken.
      * 
-     */
-    public void resetGainedCalories() {
-        this.gainedCalories = 0;
-    }
-
-    /**
-     * Returns the unique identifier of the chicken.
-     * 
-     * @return the `id` of the chicken
+     * @return the `id` of the Chicken
      */
     public int getId() {
         return id;
     }
 
     /**
-     * Returns the x-coordinate of the chicken.
+     * Returns the x-coordinate of the Chicken.
      * 
      * @return the current x-coordinate
      */
@@ -93,16 +88,7 @@ public class Chicken implements Moveable, CanEat {
     }
 
     /**
-     * Sets the x-coordinate of the chicken.
-     * 
-     * @param newX the new x-coordinate to set
-     */
-    public void setX(float newX) {
-        this.x = newX;
-    }
-
-    /**
-     * Returns the y-coordinate of the chicken.
+     * Returns the y-coordinate of the Chicken.
      * 
      * @return the current y-coordinate
      */
@@ -110,17 +96,8 @@ public class Chicken implements Moveable, CanEat {
         return y;
     }
 
-    /**
-     * Sets the y-coordinate of the chicken.
-     * 
-     * @param newY the new y-coordinate to set
-     */
-    public void setY(float newY) {
-        this.y = newY;
-    }
-
     /*      
     @Override
-    public void handle(Event event) {
-    } */
+    public void handle(Event event) {}
+    */
 }

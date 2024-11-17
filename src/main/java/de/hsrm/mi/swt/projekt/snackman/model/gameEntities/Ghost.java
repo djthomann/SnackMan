@@ -5,7 +5,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * an initial position on a plane.
  * 
  * This class extends `PlayerObject` and inherits its properties for
- * coordinates management.
+ * the id, and coordinates management.
  * 
  * 
  */
@@ -14,26 +14,26 @@ public class Ghost extends PlayerObject {
     /**
      * Constructs a new `Ghost` with the specified starting position.
      * 
-     * @param x the initial x-coordinate of the `Ghost`
-     * @param y the initial y-coordinate of the `Ghost`
+     * @param id        the unique identifier of the `Ghost`
+     * @param x         the initial x-coordinate of the `Ghost`
+     * @param y         the initial y-coordinate of the `Ghost`
      */
-    public Ghost(float x, float y) {
-        super(x, y);
+    public Ghost(int id, float x, float y) {
+        super(id, x, y);
     }
 
     /**
      * moves Ghost to new coords
      * 
-     * @param x x-coordinate
-     * @param y y-coordinate
+     * @param newX the x-coordinate to move the `Ghost` to
+     * @param newY the y-coordinate to move the `Ghost` to
      */
     @Override
-    public void move(float x, float y) {
+    public void move(float newX, float newY) {
     }
 
-/* 
+    /* 
     @Override
-    public void handle(Event event) {
-    }
-*/
+    public void handle(Event event) {}
+    */
 }
