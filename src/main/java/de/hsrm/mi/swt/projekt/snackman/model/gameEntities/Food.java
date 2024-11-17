@@ -36,14 +36,5 @@ public class Food extends NonPlayerObject {
     public int getCalories() {
         return calories;
     }
-
-    /**
-     * Sets the number of calories of the food.
-     * 
-     * @param calories the new calories to set
-     */
-    public void setCalories(int calories) {
-        this.calories = calories;
-    }
     
 }

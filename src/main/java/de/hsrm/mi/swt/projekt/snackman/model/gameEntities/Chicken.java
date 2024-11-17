@@ -19,7 +19,7 @@ public class Chicken extends NonPlayerObject implements Moveable, CanEat {
      * 
      * @param x        the initial x-coordinate of the Chicken
      * @param y        the initial y-coordinate of the Chicken       
-     * @param gainedCalories  the initial number of calories of the Chicken
+     * @param gainedCalories  the initial number of gainedCalories by the Chicken
      */
     public Chicken(float x, float y, int gainedCalories) {
         super(x, y);
@@ -27,7 +27,7 @@ public class Chicken extends NonPlayerObject implements Moveable, CanEat {
     }
 
      /**
-     * Returns the number of calories of the food.
+     * Returns the number of gainedCalories.
      * 
      * @return the current calories
      */
@@ -36,12 +36,12 @@ public class Chicken extends NonPlayerObject implements Moveable, CanEat {
     }
 
     /**
-     * Sets the number of calories of the food.
+     * reset the number of gainedCalories auf 0.
      * 
      * @param gainedCalories the new calories to set
      */
-    public void setGainedCalories(int gainedCalories) {
-        this.gainedCalories = gainedCalories;
+    public void resetGainedCalories(int gainedCalories) {
+        this.gainedCalories = 0;
     }
 
     /**

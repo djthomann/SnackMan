@@ -37,12 +37,12 @@ public class SnackMan extends PlayerObject implements CanEat {
     }
 
     /**
-     * Sets a new calorie count for the `SnackMan`.
+     * Resets the  gainedCalories count for the `SnackMan` to 0.
      * 
-     * @param calories the new calorie count to set
+     * @param gainedCalories the new calorie count to set
      */
-    public void setGainedCalories(int gainedCalories) {
-        this.gainedCalories = gainedCalories;
+    public void resetGainedCalories(int gainedCalories) {
+        this.gainedCalories = 0;
     }
 
     /**
@@ -56,7 +56,7 @@ public class SnackMan extends PlayerObject implements CanEat {
     }
 
     /**
-     * Consumes the food, for example to be able ready to jump
+     * method to Consume Food
      *
      * @param food the calorie resource to be consumed by the entity
      */
