@@ -8,6 +8,10 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 
+/**
+ * Defines an Endpoint/URL on which Client can register to exchange messages with 
+ * backend
+ */
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {

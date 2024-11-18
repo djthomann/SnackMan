@@ -7,6 +7,10 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+/**
+ * Handles connection and disconnection of clients, also send messages to clients
+ * --> right now contains logic which will later be done in Controller Classes
+ */
 public class WebSocketHandler extends TextWebSocketHandler {
 
     Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
@@ -23,7 +27,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String messageString = message.getPayload();
         String returnString = "Server Received: " + message.getPayload();
 
-        // Should be handed to Controller
+        // Should be handed to Controller --> Move logic
         if(messageString.startsWith("KEY")) {
             String key = messageString.split(":")[1];
             returnString = "MOVE:" + key;
