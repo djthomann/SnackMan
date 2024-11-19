@@ -1,121 +1,164 @@
 <template>
-    <div ref="rendererContainer" class="canvas-container"></div>
-  </template>
-  
-  <script lang="ts" setup>
-  import { ref, onMounted, onBeforeUnmount } from 'vue';
-  import * as THREE from 'three';
-  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-  
-  const rendererContainer = ref<HTMLDivElement | null>(null);
-  let renderer: THREE.WebGLRenderer;
-  let camera: THREE.PerspectiveCamera;
-  let scene: THREE.Scene;
-  let box: THREE.Mesh;
-  let plane: THREE.Mesh;
-  let ambientLight: THREE.AmbientLight;
-  let directionalLight: THREE.DirectionalLight;
-  let controls: OrbitControls | null = null;
-  
-  function initScene() {
-    // Szene erstellen
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111111);
-  
-    // Kamera erstellen
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(5, 7.5, 7.5);
-  
-    // Renderer erstellen
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
+  <div ref="rendererContainer" class="canvas-container"></div>
+</template>
+
+<script lang="ts">
+import { defineComponent, onUnmounted, ref, onMounted } from 'vue';
+import eventBus from '@/services/eventBus';
+import useWebSocket from '@/services/socketService';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+export default defineComponent({
+  name: 'Scene',
+  setup() {
     
-    // Füge den Renderer zur Komponente hinzu
-    rendererContainer.value?.appendChild(renderer.domElement);
-  
-    // Box erstellen
-    const boxGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-    const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
-    box = new THREE.Mesh(boxGeometry, boxMaterial);
-    box.position.set(0, 0, 0);
-    box.castShadow = true;
-    scene.add(box);
-  
-    // Plane erstellen
-    const planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
-    const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
-    plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.rotation.x = -Math.PI / 2;
-    plane.position.set(0, -3, 0);
-    plane.receiveShadow = true;
-    scene.add(plane);
-  
-    // Ambient Light hinzufügen
-    ambientLight = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(ambientLight);
-  
-    // Directional Light hinzufügen
-    directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(0, 2, 0);
-    directionalLight.castShadow = true;
-    scene.add(directionalLight);
-  
-    // Orbit Controls (optional)
-    controls = new OrbitControls(camera, renderer.domElement);
-  
-    // Render-Loop starten
-    animate();
-  }
-  
-  function animate(time = 0) {
-    requestAnimationFrame(animate);
-  
-    // Box-Rotation
-    const delta = time * 0.0000002;
-    if (box) {
-      box.rotation.y += delta;
-      box.rotation.z = delta;
+    const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket();
+
+    const rendererContainer = ref<HTMLDivElement | null>(null);
+    const serverMessage = ref<string>('');
+    let renderer: THREE.WebGLRenderer;
+    let camera: THREE.PerspectiveCamera;
+    let scene: THREE.Scene;
+    let box: THREE.Mesh;
+    let plane: THREE.Mesh;
+    let ambientLight: THREE.AmbientLight;
+    let directionalLight: THREE.DirectionalLight;
+    let controls: OrbitControls | null = null;
+
+    // React to server message (right now only simple movement)
+    const handleServerMessage = (message: string) => {
+      serverMessage.value = message;
+      console.log("Processing server message");
+
+      if(message.startsWith("MOVE")) {
+        let key: string = message.split(":")[1]
+
+        if(key === "KeyD") {
+          box.position.x += 0.2;
+        } else if (key === "KeyA") {
+          box.position.x -= 0.2;
+        } else if (key === "KeyW") {
+          box.position.z -= 0.2;
+        } else if (key === "KeyS") {
+          box.position.z += 0.2;
+        }
+      }
+    };
+
+    // Handle key press und send Event via WebSocket
+    const handleKeyPress = (event: KeyboardEvent) => {
+      sendMessage(`KEY:${event.code}`);
+      console.log(`Key pressed: ${event.key}`);
+    };
+
+    document.addEventListener('keypress', handleKeyPress);
+
+    onMounted(() => {
+      initScene();
+      eventBus.on('serverMessage', handleServerMessage);
+
+      
+      connect();
+
+      window.addEventListener('resize', onWindowResize);
+    });
+
+    onUnmounted(() => {
+      eventBus.off('serverMessage', handleServerMessage);
+
+      closeConnection();
+
+      // Three.js Cleanup
+      controls?.dispose();
+      renderer.dispose();
+      if (rendererContainer.value && renderer.domElement) {
+        rendererContainer.value.removeChild(renderer.domElement);
+      }
+
+      window.removeEventListener('resize', onWindowResize);
+    });
+
+    function initScene() {
+      // Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x111111);
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(5, 7.5, 7.5);
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+
+      if (rendererContainer.value) {
+        rendererContainer.value.appendChild(renderer.domElement);
+      }
+
+      // Dummy Box
+      const boxGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+      const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+      box = new THREE.Mesh(boxGeometry, boxMaterial);
+      box.position.set(0, 0, 0);
+      box.castShadow = true;
+      scene.add(box);
+
+      // Ground Plane
+      const planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
+      const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
+      plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.set(0, -3, 0);
+      plane.receiveShadow = true;
+      scene.add(plane);
+
+      // Ambient Light
+      ambientLight = new THREE.AmbientLight(0xffffff, 1);
+      scene.add(ambientLight);
+
+      // Directional Light
+      directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(0, 2, 0);
+      directionalLight.castShadow = true;
+      scene.add(directionalLight);
+
+      // Orbit Controls
+      controls = new OrbitControls(camera, renderer.domElement);
+
+      // start Render-Loop
+      animate();
     }
-  
-    controls?.update();
-    renderer.render(scene, camera);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls?.update();
+      renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    return {
+      rendererContainer,
+      serverMessage
+    };
   }
-  
-  // Cleanup bei Entfernen der Komponente
-  onBeforeUnmount(() => {
-    controls?.dispose();
-    renderer.dispose();
-    rendererContainer.value?.removeChild(renderer.domElement);
-  });
-  
-  onMounted(() => {
-    initScene();
-  
-    // Resize-Event
-    window.addEventListener('resize', onWindowResize);
-  });
-  
-  function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-  </script>
-  
-  <style scoped>
-  html {
-    margin: 0;
-    padding: 0;
-  }
-  body {
-    margin: 0;
-    padding: 0;
-  }
-  .canvas-container {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-  }
-  </style>
-  
+});
+</script>
+
+<style scoped>
+html, body {
+  margin: 0;
+  padding: 0;
+}
+.canvas-container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+</style>
