@@ -16,7 +16,7 @@ public class MoveEvent extends Event {
         return movementVector;
     }
 
-    public void setMovementVector(int movementVector) {
+    public void setMovementVector(Vector3f movementVector) {
         this.movementVector = movementVector;
     }
 
