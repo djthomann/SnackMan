@@ -12,7 +12,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 export default defineComponent({
   name: 'Scene',
   setup() {
-    
+
     const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket();
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
@@ -25,16 +25,20 @@ export default defineComponent({
     let ambientLight: THREE.AmbientLight;
     let directionalLight: THREE.DirectionalLight;
     let controls: OrbitControls | null = null;
+    let movementVector = new THREE.Vector3();
+
+
+
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
       console.log("Processing server message");
 
-      if(message.startsWith("MOVE")) {
+      if (message.startsWith("MOVE")) {
         let key: string = message.split(":")[1]
 
-        if(key === "KeyD") {
+        if (key === "KeyD") {
           box.position.x += 0.2;
         } else if (key === "KeyA") {
           box.position.x -= 0.2;
@@ -46,19 +50,12 @@ export default defineComponent({
       }
     };
 
-    // Handle key press und send Event via WebSocket
-    const handleKeyPress = (event: KeyboardEvent) => {
-      sendMessage(`KEY:${event.code}`);
-      console.log(`Key pressed: ${event.key}`);
-    };
-
-    document.addEventListener('keypress', handleKeyPress);
 
     onMounted(() => {
       initScene();
       eventBus.on('serverMessage', handleServerMessage);
 
-      
+
       connect();
 
       window.addEventListener('resize', onWindowResize);
@@ -87,6 +84,11 @@ export default defineComponent({
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       camera.position.set(5, 7.5, 7.5);
+
+      // Vectors
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.normalize();
 
       // Renderer
       renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -127,6 +129,18 @@ export default defineComponent({
       // Orbit Controls
       controls = new OrbitControls(camera, renderer.domElement);
 
+      // Handle key press und send Event via WebSocket
+      const handleKeyPress = (event: KeyboardEvent) => {
+        movementVector = calculateMovement(event.key, forward);
+        //TODO: give MovementVector to sendMessage()
+        sendMessage(`KEY:${event.code}`);
+        console.log(`Key pressed: ${event.key}`);
+        console.log(`Movement Vector: ${movementVector}`);
+      };
+
+      document.addEventListener('keypress', handleKeyPress);
+
+
       // start Render-Loop
       animate();
     }
@@ -143,6 +157,28 @@ export default defineComponent({
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
+    function calculateMovement(key: string, forward: THREE.Vector3) {
+      const vector = new THREE.Vector3();
+      const angle = Math.PI / 2;
+      const rotationMatrix = new THREE.Matrix4();
+
+      switch (key) {
+        case 'KeyW':
+          return forward;
+        case 'KeyA':
+          rotationMatrix.makeRotationY(angle);
+          vector.applyMatrix4(rotationMatrix);
+          break;
+        case 'KeyS':
+          return -forward;
+        case 'KeyD':
+          rotationMatrix.makeRotationY(-angle);
+          vector.applyMatrix4(rotationMatrix);
+          break;
+      }
+      return vector.normalize();
+    }
+
     return {
       rendererContainer,
       serverMessage
@@ -152,10 +188,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
+
 .canvas-container {
   width: 100vw;
   height: 100vh;
