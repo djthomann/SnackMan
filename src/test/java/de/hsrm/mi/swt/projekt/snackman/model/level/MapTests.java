@@ -15,11 +15,17 @@ public class MapTests {
         map = new Map(10, 5);
     }
 
+    /**
+     * Testet, ob ein mittleres Tile frei ist
+     */
     @Test
     void testGhostSpawn() {
         Assertions.assertEquals(map.getAllTiles()[h / 2][w / 2].getOccupationType(), OccupationType.FREE);
     }
 
+    /**
+     * Testet, ob alle 4 Ecken-Tiles frei sind
+     */
     @Test
     void testPlayerSpawn() {
         Assertions.assertEquals(map.getAllTiles()[1][1].getOccupationType(), OccupationType.FREE);
@@ -28,12 +34,18 @@ public class MapTests {
         Assertions.assertEquals(map.getAllTiles()[h - 2][w - 2].getOccupationType(), OccupationType.FREE);
     }
 
+    /**
+     * Testet die Map-Größe
+     */
     @Test
     void testDimensions() {
         Assertions.assertEquals(map.getAllTiles().length, h);
         Assertions.assertEquals(map.getAllTiles()[0].length, w);
     }
 
+    /**
+     * Testet, ob die Map von einer Wand umrandet ist
+     */
     @Test
     void testOuterWall() {
         Tile[][] tiles = map.getAllTiles();

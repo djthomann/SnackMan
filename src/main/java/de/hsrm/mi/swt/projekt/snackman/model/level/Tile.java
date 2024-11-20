@@ -8,9 +8,24 @@ public class Tile {
 
     private Object occupation;
 
+
+    /**
+     * Constructor, liefert Tile-Objekt mit gegebenen Daten
+     * @param x x-Koordinate der Tile (final)
+     * @param y y-Koordinate der Tile (final)
+     * @param occupationType OccupationType der Tile
+     */
     public Tile(int x, int y, OccupationType occupationType) {
         this.x = x;
         this.y = y;
+        this.occupationType = occupationType;
+    }
+
+    public OccupationType getOccupationType() {
+        return occupationType;
+    }
+
+    public void setOccupationType(OccupationType occupationType) {
         this.occupationType = occupationType;
     }
 
@@ -22,12 +37,8 @@ public class Tile {
         return y;
     }
 
-    public OccupationType getOccupationType() {
-        return occupationType;
-    }
-
-    public void setOccupationType(OccupationType occupationType) {
-        this.occupationType = occupationType;
+    public Object getOccupation() {
+        return occupation;
     }
 
 }
