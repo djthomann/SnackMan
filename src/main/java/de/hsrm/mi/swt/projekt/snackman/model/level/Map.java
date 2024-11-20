@@ -6,7 +6,9 @@ import java.util.*;
 
 public class Map {
 
-    // All Tiles in Map -> get Tile at column x in row y via allTiles[y][x]
+    // Funktionsweise von Sidewinder (und Simons Hirn) gibt vor:
+    // Tile an stelle (x, y) erreichbar über allTiles[y][x]
+    // für weniger verwirrenden Zugriff getTileAt(x, y) nutzen
     private Tile[][] allTiles;
 
     /**
@@ -120,7 +122,8 @@ public class Map {
         }
     }
 
-    public Tile[][] getAllTiles() {
-        return allTiles;
+    public Tile getTileAt(int x, int y) {
+        return allTiles[y][x];
     }
+
 }

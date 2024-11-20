@@ -41,4 +41,7 @@ public class Tile {
         return occupation;
     }
 
+    public void setOccupation(Object occupation) {
+        this.occupation = occupation;
+    }
 }
