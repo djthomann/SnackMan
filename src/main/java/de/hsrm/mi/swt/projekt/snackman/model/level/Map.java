@@ -18,7 +18,7 @@ public class Map {
     private Tile[][] allTiles;
     private int w;
     private int h;
-    private Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
      * Constructor, liefert ein zufällig generiertes Map-Objekt mit Breite w und Höhe h
@@ -137,10 +137,6 @@ public class Map {
         File file = new File("src/main/resources/savedMaps/map_" + now.format(dateTimeFormatter) + ".csv");
 
         try (FileWriter writer = new FileWriter(file.getPath())) {
-
-            if (!file.createNewFile()) {
-                logger.warning("File " + file.getPath() + " already exists!");
-            }
 
             for (int j = 0; j < h; j++) {
                 for (int i = 0; i < w; i++) {

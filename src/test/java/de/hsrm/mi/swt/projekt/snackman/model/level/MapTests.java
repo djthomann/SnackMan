@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class MapTests {
@@ -28,7 +29,7 @@ public class MapTests {
      */
     @Test
     void testGhostSpawn() {
-        Assertions.assertEquals(map.getAllTiles()[h / 2][w / 2].getOccupationType(), OccupationType.FREE);
+        Assertions.assertEquals(OccupationType.FREE, map.getAllTiles()[h / 2][w / 2].getOccupationType());
     }
 
     /**
@@ -36,10 +37,10 @@ public class MapTests {
      */
     @Test
     void testPlayerSpawn() {
-        Assertions.assertEquals(map.getAllTiles()[1][1].getOccupationType(), OccupationType.FREE);
-        Assertions.assertEquals(map.getAllTiles()[h - 2][1].getOccupationType(), OccupationType.FREE);
-        Assertions.assertEquals(map.getAllTiles()[1][w - 2].getOccupationType(), OccupationType.FREE);
-        Assertions.assertEquals(map.getAllTiles()[h - 2][w - 2].getOccupationType(), OccupationType.FREE);
+        Assertions.assertEquals(OccupationType.FREE, map.getAllTiles()[1][1].getOccupationType());
+        Assertions.assertEquals(OccupationType.FREE, map.getAllTiles()[h - 2][1].getOccupationType());
+        Assertions.assertEquals(OccupationType.FREE, map.getAllTiles()[1][w - 2].getOccupationType());
+        Assertions.assertEquals(OccupationType.FREE, map.getAllTiles()[h - 2][w - 2].getOccupationType());
     }
 
     /**
@@ -47,8 +48,8 @@ public class MapTests {
      */
     @Test
     void testDimensions() {
-        Assertions.assertEquals(map.getAllTiles().length, h);
-        Assertions.assertEquals(map.getAllTiles()[0].length, w);
+        Assertions.assertEquals(h, map.getAllTiles().length);
+        Assertions.assertEquals(w, map.getAllTiles()[0].length);
     }
 
     /**
@@ -59,11 +60,11 @@ public class MapTests {
         Tile[][] tiles = map.getAllTiles();
         for (int row = 0; row < h; row++) {
             if (row > 0 && row < h - 1) {
-                Assertions.assertEquals(tiles[row][0].getOccupationType(), OccupationType.WALL);
-                Assertions.assertEquals(tiles[row][w - 1].getOccupationType(), OccupationType.WALL);
+                Assertions.assertEquals(OccupationType.WALL, tiles[row][0].getOccupationType());
+                Assertions.assertEquals(OccupationType.WALL, tiles[row][w - 1].getOccupationType());
             } else {
                 for (int col = 0; col < w; col++) {
-                    Assertions.assertEquals(tiles[row][col].getOccupationType(), OccupationType.WALL);
+                    Assertions.assertEquals(OccupationType.WALL, tiles[row][col].getOccupationType());
                 }
             }
         }
@@ -73,13 +74,13 @@ public class MapTests {
     void testSaveAsCSVCreatesNewFile() {
         File dir = new File("src/main/resources/savedMaps");
         if (dir.exists() && dir.isDirectory()) {
-            int numFilesBefore = dir.list().length;
+            int numFilesBefore = Objects.requireNonNull(dir.list()).length;
             map.saveAsCSV();
             int numFilesAfter = Objects.requireNonNull(dir.listFiles()).length;
             Assertions.assertEquals(numFilesBefore + 1, numFilesAfter);
 
-            if (!Objects.requireNonNull(Arrays.stream(dir.listFiles())
-                    .max((file1, file2) -> Long.compare(file1.lastModified(), file2.lastModified()))
+            if (!Objects.requireNonNull(Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+                    .max(Comparator.comparingLong(File::lastModified))
                     .orElse(null)).delete()) {
                 fail("file could not be deleted");
             }
@@ -96,8 +97,8 @@ public class MapTests {
         File dir = new File("src/main/resources/savedMaps");
         if (dir.exists() && dir.isDirectory()) {
 
-            File newFile = Arrays.stream(dir.listFiles())
-                    .max((file1, file2) -> Long.compare(file1.lastModified(), file2.lastModified()))
+            File newFile = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+                    .max(Comparator.comparingLong(File::lastModified))
                     .orElse(null);
 
             Assertions.assertNotNull(newFile);
