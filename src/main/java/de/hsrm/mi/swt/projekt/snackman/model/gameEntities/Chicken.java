@@ -50,6 +50,7 @@ public class Chicken implements Moveable, CanEat {
      */
     @Override
     public void eat(Food food) {
+        this.gainedCalories += food.getCalories();
     } 
 
     /**

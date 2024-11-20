@@ -46,12 +46,13 @@ public class SnackMan extends PlayerObject implements CanEat {
     }
 
     /**
-     * method to Consume Food
+     * method to Consume Food and gain Calories.
      *
      * @param food the calorie resource to be consumed by the `SnackMan`. 
      */
     @Override
     public void eat(Food food) {
+        this.gainedCalories += food.getCalories();
     }
 
     /**
