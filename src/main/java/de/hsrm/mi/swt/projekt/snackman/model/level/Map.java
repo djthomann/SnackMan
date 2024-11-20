@@ -134,7 +134,7 @@ public class Map {
     public void saveAsCSV() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
-        File file = new File("src/main/resources/maps/myMap_" + now.format(dateTimeFormatter) + ".csv");
+        File file = new File("src/main/resources/savedMaps/map_" + now.format(dateTimeFormatter) + ".csv");
 
         try (FileWriter writer = new FileWriter(file.getPath())) {
 
@@ -152,7 +152,7 @@ public class Map {
                     }
                     writer.write(token);
                     if (i < w - 1) {
-                        writer.write(";");
+                        writer.write(",");
                     } else {
                         writer.write("\n");
                     }
@@ -171,4 +171,7 @@ public class Map {
         return allTiles[y][x];
     }
 
+    public Tile[][] getAllTiles() {
+        return allTiles;
+    }
 }
