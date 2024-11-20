@@ -14,7 +14,10 @@ public class Chicken implements Moveable, CanEat, Subscribable {
     private float x;
 
     /** The y-coordinate of the Chicken */
-    private float y;
+    private float y;    
+    
+    /** The z-coordinate of the Chicken */
+    private float z;
 
     /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
@@ -25,11 +28,13 @@ public class Chicken implements Moveable, CanEat, Subscribable {
      * @param id       the unique identifier of the Chicken
      * @param x        the initial x-coordinate of the Chicken
      * @param y        the initial y-coordinate of the Chicken       
+     * @param z        the initial z-coordinate of the Chicken       
      */
-    public Chicken(int id,float x, float y) {
+    public Chicken(int id,float x, float y, float z) {
         this.id = id; 
         this.x = x; 
         this.y = y; 
+        this.z = z; 
         this.gainedCalories = 0;
     }
 
@@ -38,10 +43,15 @@ public class Chicken implements Moveable, CanEat, Subscribable {
      * 
      * @param newX the x-coordinate to move the Chicken to
      * @param newY the y-coordinate to move the Chicken to
+     * @param newZ the z-coordinate (remains the same)
      */
     @Override
-    public void move(float newX, float newY) {
+    public void move(float newX, float newY, float newZ) {
+        x = newX; 
+        y = newY; 
+        z = newZ; 
     }
+
     
     /**
      * Consumes the food, make the Chicken gain Calories.
@@ -94,7 +104,16 @@ public class Chicken implements Moveable, CanEat, Subscribable {
      */
     public float getY() {
         return y;
-    }
+    }    
+    
+    /**
+    * Returns the z-coordinate of the Chicken.
+    * 
+    * @return the current z-coordinate
+    */
+   public float getZ() {
+       return z;
+   }
 
     // TODO implement handle, change event type
     @Override

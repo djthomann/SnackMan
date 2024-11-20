@@ -8,24 +8,30 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 public abstract class PlayerObject implements Moveable, Subscribable {
 
     /** The unique identifier for the PlayerObject */
-    private final int id;
+    protected final int id;
     
     /** The x-coordinate of the PlayerObject */
-    private float x;
+    protected float x;
 
     /** The y-coordinate of the PlayerObject */
-    private float y; 
+    protected float y;     
+    
+    /** The z-coordinate of the PlayerObject */
+    protected float z; 
 
+    
     /**
      * Constructs a new `PlayerObject` with the specified starting coordinates.
      * 
      * @param x the initial x-coordinate of the PlayerObject
      * @param y the initial y-coordinate of the PlayerObject
+     * @param z the initial z-coordinate of the PlayerObject
      */
-    public PlayerObject(int id, float x, float y) {
+    public PlayerObject(int id, float x, float y, float z) {
         this.id = id;
         this.x = x; 
         this.y = y;  
+        this.z = z; 
     }
 
     /**
@@ -54,6 +60,15 @@ public abstract class PlayerObject implements Moveable, Subscribable {
      */
     public float getY() {
         return y;
-    }
+    }    
+    
+    /**
+    * Returns the z-coordinate of the PlayerObject.
+    * 
+    * @return the current z-coordinate
+    */
+   public float getZ() {
+       return z;
+   }
     
 }

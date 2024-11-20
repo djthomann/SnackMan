@@ -17,9 +17,10 @@ public class Ghost extends PlayerObject {
      * @param id        the unique identifier of the `Ghost`
      * @param x         the initial x-coordinate of the `Ghost`
      * @param y         the initial y-coordinate of the `Ghost`
+     * @param z         the initial z-coordinate of the `Ghost`
      */
-    public Ghost(int id, float x, float y) {
-        super(id, x, y);
+    public Ghost(int id, float x, float y, float z) {
+        super(id, x, y, z);
     }
 
     /**
@@ -27,9 +28,13 @@ public class Ghost extends PlayerObject {
      * 
      * @param newX the x-coordinate to move the `Ghost` to
      * @param newY the y-coordinate to move the `Ghost` to
+     * @param newZ the z-coordinate (remains the same)
      */
     @Override
-    public void move(float newX, float newY) {
+    public void move(float newX, float newY, float newZ) {
+        x = newX; 
+        y = newY; 
+        z = newZ; 
     }
 
     // TODO implement handle, change event type

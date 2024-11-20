@@ -11,8 +11,9 @@ public interface Moveable {
      *
      * @param x the x-coordinate to move the entity to
      * @param y the y-coordinate to move the entity to
+     * @param z the y-coordinate to move the entity to
      */
-    void move(float x, float y); 
+    void move(float x, float y, float z); 
 
     /**
      * Handles a specified event (e.g. jump event, move event).
