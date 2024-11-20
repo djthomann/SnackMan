@@ -3,6 +3,7 @@ package de.hsrm.mi.swt.projekt.snackman.communication.websocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,6 +13,13 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
+import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.MapData;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
@@ -46,6 +54,43 @@ public class WebSocketHandler extends TextWebSocketHandler {
             returnString += username;
             // inform other clients...
             sendClientInfo();
+        } else if(messageString.startsWith("MAP")) {
+            // Phony Data
+            List<Tile> tiles = new ArrayList<>();
+
+            // Liste für Wände
+            List<Tile> walls = new ArrayList<>();
+
+            // 5x5-Feld erzeugen
+            for (int x = 0; x < 5; x++) {
+                for (int y = 0; y < 5; y++) {
+                    // Wände an den Rändern (erste und letzte Reihe/Spalte)
+                    if (x == 0 || y == 0 || x == 4 || y == 4) {
+                        walls.add(new Tile(x, y, OccupationType.WALL));
+                    } else {
+                        // Freie Tiles in der Mitte
+                        tiles.add(new Tile(x, y, OccupationType.FREE));
+                    }
+                }
+            }
+
+            // Debug-Ausgaben
+            logger.info("Sending" + tiles.size() + "Tiles:"  + tiles.toString());
+            logger.info("Sending" + walls.size() + " Walls:" + walls.toString());
+
+            // Wrapper-Objekt erstellen
+            MapData mapData = new MapData(tiles, walls);
+
+            // JSON-Konvertierung
+            ObjectMapper mapper = new ObjectMapper();
+            returnString = "";
+            try {
+                String json = mapper.writeValueAsString(mapData);
+                returnString = "MAP;" + json;
+                logger.info("Final JSON: " + returnString);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
         session.sendMessage(new TextMessage(returnString));
         returnString = "";

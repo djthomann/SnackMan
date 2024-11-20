@@ -10,7 +10,7 @@ const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket()
 
 const loadMap = () => {
   console.log('loading map')
-  sendMessage('Das ist meine Anfrage')
+  sendMessage('MAP')
 }
 </script>
 
