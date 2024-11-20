@@ -20,10 +20,11 @@ public class SnackMan extends PlayerObject implements CanEat {
      * 
      * @param id       the unique identifier of the `SnackMan`
      * @param x        the initial x-coordinate of the `SnackMan`
-     * @param y        the initial y-coordinate of the `SnackMan`       
+     * @param y        the initial y-coordinate of the `SnackMan` 
+     * @param z        the initial z-coordinate of the `SnackMan` 
      */
-    public SnackMan(int id, float x, float y) {
-        super(id, x, y);
+    public SnackMan(int id, float x, float y, float z) {
+        super(id, x, y, z);
         this.gainedCalories = 0;
     }
 
@@ -40,9 +41,13 @@ public class SnackMan extends PlayerObject implements CanEat {
      * 
      * @param newX the x-coordinate to move the `SnackMan` to
      * @param newY the y-coordinate to move the `SnackMan` to
+     * @param newZ the y-coordinate to move the `SnackMan` to
      */
     @Override
-    public void move(float newX, float newY) {
+    public void move(float newX, float newY, float newZ) {
+        this.x = newX; 
+        this.y = newY; 
+        this.z = newZ; 
     }
 
     /**
