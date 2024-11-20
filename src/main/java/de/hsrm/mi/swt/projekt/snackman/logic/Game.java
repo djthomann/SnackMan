@@ -15,6 +15,7 @@ public class Game {
     //private ArrayList<Food> allFoods; vllt reicht es, wenn man es nur in der Map hat
     private Timer timer;
     //private Map map;
+    private GameEventBus eventBus;
     
 
     public Game(int id, GameConfig gameConfig, ArrayList<Moveable> allMoveables/*, Map map*/) {
@@ -22,8 +23,9 @@ public class Game {
         this.gameConfig = gameConfig;
         this.allMovables = allMoveables;
         this.timer = new Timer();
-        startTimer();
         //this.map = map;
+        this.eventBus = new GameEventBus();
+        startTimer();
     }
 
     private void startTimer() {
@@ -50,7 +52,7 @@ public class Game {
         
     }
 
-    public void receiveEvent(/*Event event*/) {
+    public void receiveEvent(String event, int objectId) {
 
     }
     

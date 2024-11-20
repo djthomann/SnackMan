@@ -63,9 +63,9 @@ public class SnackMan extends PlayerObject implements CanEat {
         return gainedCalories;
     }
 
-    /*
+    // TODO implement handle, change event type
     @Override
-    public void handle(Event event) {}
-    */
-
+    public void handle(String type, int objectId) {
+    }
+    
 }

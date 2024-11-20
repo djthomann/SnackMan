@@ -5,7 +5,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * 
  * 
  */
-public abstract class PlayerObject implements Moveable {
+public abstract class PlayerObject implements Moveable, Subscribable {
 
     /** The unique identifier for the PlayerObject */
     private final int id;

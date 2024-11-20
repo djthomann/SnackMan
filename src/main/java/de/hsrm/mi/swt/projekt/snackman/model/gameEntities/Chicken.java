@@ -5,7 +5,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * 
  * 
  */
-public class Chicken implements Moveable, CanEat {
+public class Chicken implements Moveable, CanEat, Subscribable {
 
     /** The unique identifier for the Chicken */
     private final int id;
@@ -96,8 +96,9 @@ public class Chicken implements Moveable, CanEat {
         return y;
     }
 
-    /*      
+    // TODO implement handle, change event type
     @Override
-    public void handle(Event event) {}
-    */
+    public void handle(String type, int objectId) {
+    }
+
 }

@@ -32,8 +32,9 @@ public class Ghost extends PlayerObject {
     public void move(float newX, float newY) {
     }
 
-    /* 
+    // TODO implement handle, change event type
     @Override
-    public void handle(Event event) {}
-    */
+    public void handle(String type, int objectId) {
+    }
+
 }
