@@ -1,8 +1,12 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.websocket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.WebSocketSession;
 
 public class Client {
+
+    Logger logger = LoggerFactory.getLogger(Client.class);
 
     private String username;
     private WebSocketSession session;
@@ -14,6 +18,7 @@ public class Client {
     public Client(String username, WebSocketSession session) {
         this.username = username;
         this.session = session;
+        logger.info("New Client: Session-"+session+" Username-"+username);
     }
 
     public String getUsername() {
@@ -26,8 +31,7 @@ public class Client {
         return session;
     }
 
-    
-
+ 
     @Override
     public int hashCode() {
         final int prime = 31;

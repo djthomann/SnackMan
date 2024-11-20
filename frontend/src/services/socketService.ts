@@ -8,9 +8,11 @@ import eventBus from './eventBus';
 
 let url = "ws://localhost:8080/ws-endpoint"
 
+const serverResponse = ref<string>('');
+const websocket = ref<WebSocket | null>(null);
+
 export default function useWebSocket() {
-  const serverResponse = ref<string>('');
-  const websocket = ref<WebSocket | null>(null);
+  
 
   const connect = () => {
 
@@ -42,7 +44,7 @@ export default function useWebSocket() {
   };
 
   const sendMessage = (message: string) => {
-    console.log("Trying to send" + message)
+    console.log("Trying to send... " + message)
     if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
         console.log("sending: " + message)
       websocket.value.send(message);

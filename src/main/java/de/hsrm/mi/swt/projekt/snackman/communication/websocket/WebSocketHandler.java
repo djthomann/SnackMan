@@ -1,7 +1,9 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.websocket;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -15,12 +17,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
 
-    Set<Client> clients = new HashSet<>();
+    Map<WebSocketSession,Client> clients = new HashMap<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         logger.info("New WebSocket Connection: " + session.getId());
-        clients.add(new Client(session));
+        clients.put(session,new Client(session));
         sendClientInfo();
     }
 
@@ -29,19 +31,28 @@ public class WebSocketHandler extends TextWebSocketHandler {
         logger.info("Message received: " + message.getPayload());
         
         String messageString = message.getPayload();
-        String returnString = "Server Received: " + message.getPayload();
+        String returnString = "(Default) Server Received: " + message.getPayload();
 
-        // Should be handed to Controller
+        // TODO: Should be handed to Controller
         if(messageString.startsWith("KEY")) {
             String key = messageString.split(":")[1];
             returnString = "MOVE:" + key;
+        } else if (messageString.startsWith("USERNAME")){
+            returnString = "USERNAME:";
+            // Client is assigned their username...
+            logger.info("Session: " + session.getId());
+            String username = messageString.split(":")[1];
+            clients.get(session).setUsername(username);
+            returnString += username;
+            // inform other clients...
+            sendClientInfo();
         }
-
         session.sendMessage(new TextMessage(returnString));
+        returnString = "";
     }
 
     /**
-     * Send information of connected Clients to all Clients --> should be handed to different class
+     * Send information of connected Clients to all Clients --> TODO: should be handed to different class
      * @throws Exception
      */
     public void sendClientInfo() throws Exception {
@@ -52,9 +63,21 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
 
         logger.info("Informing Clients: " + clientsString());
+        String returnString = "";
 
-        for (Client c : clients) {
-            c.getSession().sendMessage(new TextMessage(clients.toString()));
+        for (Client client : clients.values()) {
+
+            // All Clients except themselves
+            for (Client c : clients.values()) {
+                logger.info("User: "+c.getUsername()+" Session: " + c.getSession().getId());
+                if (!c.getSession().equals(client.getSession()) && !c.getUsername().equals("")) {
+                    logger.info("Fügt hinzu: " + client.getUsername() + client.getSession().getId());
+                    returnString += (":"+c.getUsername());
+                } 
+            }
+
+            client.getSession().sendMessage(new TextMessage("OTHERPLAYERINFO:" + returnString));
+            returnString = "";
         }
     }
 
@@ -64,8 +87,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         logger.info("WebSocket Connection closed: " + session.getId());
-        
-        clients.remove(new Client(session));
+        clients.remove(session);
 
         sendClientInfo();
     }

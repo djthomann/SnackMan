@@ -47,7 +47,7 @@ public class WebSocketTests {
 
         webSocketHandler.handleTextMessage(session, message);
 
-        verify(session).sendMessage(new TextMessage("Server Received: Hello Server"));
+        verify(session).sendMessage(new TextMessage("(Default) Server Received: Hello Server"));
     }
 
     /**
