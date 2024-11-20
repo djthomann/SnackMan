@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MapData;
@@ -58,8 +60,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
             // Phony Data
             List<Tile> tiles = new ArrayList<>();
 
-            // Liste für Wände
+            // Liste for walls
             List<Tile> walls = new ArrayList<>();
+
+            // List for food
+            List<Food> foods = new ArrayList<>();
+
+            Random r = new Random();
 
             // 5x5-Feld erzeugen
             for (int x = 0; x < 5; x++) {
@@ -70,6 +77,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     } else {
                         // Freie Tiles in der Mitte
                         tiles.add(new Tile(x, y, OccupationType.FREE));
+                        foods.add(new Food(0, x, y, r.nextInt(100, 500)));
                     }
                 }
             }
@@ -79,7 +87,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             logger.info("Sending" + walls.size() + " Walls:" + walls.toString());
 
             // Wrapper-Objekt erstellen
-            MapData mapData = new MapData(tiles, walls);
+            MapData mapData = new MapData(tiles, walls, foods);
 
             // JSON-Konvertierung
             ObjectMapper mapper = new ObjectMapper();

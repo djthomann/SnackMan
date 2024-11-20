@@ -12,6 +12,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 let scene: THREE.Scene
 let wallsGroup: THREE.Group
 let floorGroup: THREE.Group
+let foodGroup: THREE.Group
+
+let box: THREE.Mesh
+let plane: THREE.Mesh
+let sphere: THREE.Mesh
 
 export default defineComponent({
   name: 'Scene',
@@ -22,8 +27,6 @@ export default defineComponent({
     const serverMessage = ref<string>('')
     let renderer: THREE.WebGLRenderer
     let camera: THREE.PerspectiveCamera
-    let box: THREE.Mesh
-    let plane: THREE.Mesh
     let ambientLight: THREE.AmbientLight
     let directionalLight: THREE.DirectionalLight
     let controls: OrbitControls | null = null
@@ -50,6 +53,7 @@ export default defineComponent({
         console.log('Received mapdata' + mapdata)
         const tiles = mapdata.tiles
         const walls = mapdata.walls
+        const foods = mapdata.foods
 
         for (const tile of tiles) {
           floorGroup.add(createFloorTile(tile.x, tile.y))
@@ -63,8 +67,15 @@ export default defineComponent({
           scene.add(wallsGroup)
         }
 
+        for (const food of foods) {
+          foodGroup.add(createFood(food.x, food.y, food.calories))
+          console.log('adding food')
+          scene.add(foodGroup)
+        }
+
         wallsGroup.position.set(-2, 0, -2)
         floorGroup.position.set(-2, 0, -2)
+        foodGroup.position.set(-2, 0, -2)
       }
     }
 
@@ -107,6 +118,7 @@ export default defineComponent({
 
       wallsGroup = new THREE.Group()
       floorGroup = new THREE.Group()
+      foodGroup = new THREE.Group()
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -176,6 +188,21 @@ export default defineComponent({
       box.castShadow = true
 
       return box
+    }
+
+    function createFood(x: number, y: number, calories: number) {
+      const sphereGeometry = new THREE.SphereGeometry(0.2)
+
+      const colorValue = new THREE.Color()
+      colorValue.setHSL((1 - calories / 500) * 0.4, 1, 0.5)
+
+      const sphereMaterial = new THREE.MeshToonMaterial({ color: colorValue })
+
+      sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
+      sphere.position.set(x, 0, y)
+      // sphere.castShadow = true
+
+      return sphere
     }
 
     function animate() {
