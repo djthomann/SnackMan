@@ -21,10 +21,17 @@ h1 {
 button {
   background-color: black;
   color: white;
-  border: none;
+  border: 2px solid turquoise;
   float: right;
-  margin-top: 20px;
+  padding: 5px;
+  margin-top: 12px;
   margin-right: 20px;
   font-size: 14pt;
+  transition: background-color 200ms;
+}
+button:hover {
+  background-color: white;
+  color: black;
+  cursor: pointer;
 }
 </style>
