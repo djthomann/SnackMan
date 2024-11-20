@@ -122,6 +122,10 @@ public class Map {
         }
     }
 
+    public Tile[][] getAllTiles() {
+        return allTiles;
+    }
+
     public Tile getTileAt(int x, int y) {
         return allTiles[y][x];
     }
