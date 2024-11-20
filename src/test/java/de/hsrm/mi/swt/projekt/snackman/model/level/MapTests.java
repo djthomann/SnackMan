@@ -5,10 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -130,6 +127,37 @@ public class MapTests {
         } else {
             fail("directory not found");
         }
+    }
+
+    @Test
+    void testFileConstructor() {
+
+        File testFile = new File("src/main/resources/savedMaps/testFile.csv");
+        /*
+        try (FileWriter writer = new FileWriter(testFile.getPath())) {
+
+            for (int i = 0; i < h; i++) {
+                for (int j = 0; j < w; j++) {
+                    if (i == 0 || j == 0 || i == h - 1 || j == w - 1) {
+                        writer.write("-1");
+                    } else {
+                        if ((j + i) % 2 == 0) {
+                            writer.write("0");
+                        } else {
+                            writer.write("-1");
+                        }
+                    }
+                    writer.write(",");
+                }
+                writer.write("\n");
+            }
+
+        } catch (IOException e) {
+            fail("Something went wrong: " + e.getMessage());
+        }
+
+         */
+
     }
 
 }
