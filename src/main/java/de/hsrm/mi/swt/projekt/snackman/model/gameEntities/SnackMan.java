@@ -1,5 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+
 /**
  * The `SnackMan` class represents a player character in the game who has an
  * initial position on a plane and has a calorie count.
@@ -68,9 +70,8 @@ public class SnackMan extends PlayerObject implements CanEat {
         return gainedCalories;
     }
 
-    // TODO implement handle, change event type
     @Override
-    public void handle(String type, int objectId) {
+    public void handle(Event event) {
     }
-    
+
 }

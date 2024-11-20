@@ -1,5 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+
 public interface Subscribable {
 
     /**
@@ -7,6 +9,6 @@ public interface Subscribable {
      * @param type
      * @param objectId
      */
-    void handle(String type, int objectId);
+    void handle(Event event);
     
 }

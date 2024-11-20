@@ -1,5 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+
 /**
  * The `Chicken` class represents a NPC in the game.
  * 
@@ -115,9 +117,8 @@ public class Chicken implements Moveable, CanEat, Subscribable {
        return z;
    }
 
-    // TODO implement handle, change event type
     @Override
-    public void handle(String type, int objectId) {
+    public void handle(Event event) {
     }
 
 }

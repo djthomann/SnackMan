@@ -1,5 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+
 /**
  * The `Ghost` class represents a player character in the game with
  * an initial position on a plane.
@@ -37,9 +39,8 @@ public class Ghost extends PlayerObject {
         z = newZ; 
     }
 
-    // TODO implement handle, change event type
     @Override
-    public void handle(String type, int objectId) {
+    public void handle(Event event) {
     }
 
 }

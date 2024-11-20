@@ -2,14 +2,15 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 
 public class GameEventBus {
 
-    ArrayList<Subscribable> subscribers;
+    private ArrayList<Subscribable> subscribers;
 
-    public GameEventBus() {
-        this.subscribers = new ArrayList<Subscribable>();
+    public GameEventBus(ArrayList<Subscribable> subscribers) {
+        this.subscribers = subscribers;
     }
 
     /**
@@ -28,10 +29,10 @@ public class GameEventBus {
      * @param type
      * @param objectId
      */
-    public void sendEventToSubscribers(String type, int objectId) {
+    public void sendEventToSubscribers(Event event) {
 
         for (Subscribable currentSubscribable : subscribers) {
-            currentSubscribable.handle(type, objectId);
+            currentSubscribable.handle(event);
         }
     }
     
