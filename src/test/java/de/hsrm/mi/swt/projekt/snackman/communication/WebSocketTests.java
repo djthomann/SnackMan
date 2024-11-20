@@ -5,6 +5,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -13,6 +16,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 
 @SpringBootTest
@@ -47,7 +51,7 @@ public class WebSocketTests {
 
         webSocketHandler.handleTextMessage(session, message);
 
-        verify(session).sendMessage(new TextMessage("Server Received: Hello Server"));
+        verify(session).sendMessage(new TextMessage("(Default) Server Received: Hello Server"));
     }
 
     /**
@@ -64,6 +68,40 @@ public class WebSocketTests {
         webSocketHandler.handleTextMessage(session, message);
 
         verify(session).sendMessage(new TextMessage("MOVE:KeyD"));
+    }
+
+    /** Tests whether Username is sent correctly 
+     * @throws Exception
+    */
+    @Test
+    void testHandleTextMessage_withUsernameMessage() throws Exception {
+        webSocketHandler.getClients().put(session,new Client(session));
+        String payload = "USERNAME:larissa";
+
+        TextMessage message = new TextMessage(payload);
+        when(session.isOpen()).thenReturn(true);
+        webSocketHandler.handleTextMessage(session, message);
+        verify(session).sendMessage(new TextMessage("USERNAME:larissa"));
+    }
+
+    /** Tests whether clients are extracted and their information being sent
+     * @throws Exception
+     */
+    @Test
+    void testSendClientInfo () throws Exception {
+         WebSocketSession sessionLarissa = Mockito.mock(WebSocketSession.class);
+         WebSocketSession sessionAtta = Mockito.mock(WebSocketSession.class); 
+         WebSocketSession sessionDavid= Mockito.mock(WebSocketSession.class); 
+         webSocketHandler.getClients().put(sessionAtta,new Client("Atta",sessionAtta));
+         webSocketHandler.getClients().put(sessionLarissa,new Client("Larissa",sessionLarissa));
+         webSocketHandler.getClients().put(sessionDavid,new Client("David",sessionDavid));
+
+         when(session.isOpen()).thenReturn(true);
+         webSocketHandler.sendClientInfo();
+
+         verify(sessionAtta).sendMessage(new TextMessage("OTHERPLAYERINFO:Larissa:David"));
+         verify(sessionLarissa).sendMessage(new TextMessage("OTHERPLAYERINFO:Atta:David"));
+         verify(sessionDavid).sendMessage(new TextMessage("OTHERPLAYERINFO:Atta:Larissa"));
     }
 
     /**
