@@ -2,7 +2,13 @@ package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class Map {
 
@@ -10,6 +16,9 @@ public class Map {
     // Tile an stelle (x, y) erreichbar über allTiles[y][x]
     // für weniger verwirrenden Zugriff getTileAt(x, y) nutzen
     private Tile[][] allTiles;
+    private int w;
+    private int h;
+    private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
      * Constructor, liefert ein zufällig generiertes Map-Objekt mit Breite w und Höhe h
@@ -17,7 +26,9 @@ public class Map {
      * @param h höhe
      */
     public Map(int w, int h) {
-        this.makeBlankMap(w, h);
+        this.w = w;
+        this.h = h;
+        this.makeBlankMap();
         this.sidewinder();
     }
 
@@ -31,10 +42,8 @@ public class Map {
 
     /**
      * instanziiert eine map, die nur außen Wände hat
-     * @param w Breite der Map
-     * @param h Höhe der Map
      */
-    private void makeBlankMap(int w, int h) {
+    private void makeBlankMap() {
         this.allTiles = new Tile[h][w];
 
         for (int y = 0; y < h; y++) {
@@ -122,12 +131,43 @@ public class Map {
         }
     }
 
-    public Tile[][] getAllTiles() {
-        return allTiles;
+    public void saveAsCSV() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+        File file = new File("src/main/resources/savedMaps/map_" + now.format(dateTimeFormatter) + ".csv");
+
+        try (FileWriter writer = new FileWriter(file.getPath())) {
+
+            for (int j = 0; j < h; j++) {
+                for (int i = 0; i < w; i++) {
+                    String token = "";
+                    switch (allTiles[j][i].getOccupationType()) {
+                        case FREE -> token = "0";
+                        case WALL -> token = "-1";
+                        case ITEM -> token = "1";
+                    }
+                    writer.write(token);
+                    if (i < w - 1) {
+                        writer.write(",");
+                    } else {
+                        writer.write("\n");
+                    }
+                }
+            }
+
+            logger.info("saved file " + file.getPath());
+
+        } catch (IOException e) {
+            logger.warning("Something went wrong while saving file");
+            logger.warning(e.getMessage());
+        }
     }
 
     public Tile getTileAt(int x, int y) {
         return allTiles[y][x];
     }
 
+    public Tile[][] getAllTiles() {
+        return allTiles;
+    }
 }
