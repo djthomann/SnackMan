@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import Scene from './components/Scene.vue'
+import Username from './components/Username.vue'
 </script>
 
 <template>
+  <Username />
   <Scene />
 </template>
 
