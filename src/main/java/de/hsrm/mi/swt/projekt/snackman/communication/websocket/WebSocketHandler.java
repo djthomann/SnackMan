@@ -69,14 +69,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
             // All Clients except themselves
             for (Client c : clients.values()) {
-                logger.info("User: "+c.getUsername()+" Session: " + c.getSession().getId());
+                logger.info("User: "+c.getUsername());
                 if (!c.getSession().equals(client.getSession()) && !c.getUsername().equals("")) {
-                    logger.info("Fügt hinzu: " + client.getUsername() + client.getSession().getId());
+                    logger.info("Fügt hinzu: " + client.getUsername());
                     returnString += (":"+c.getUsername());
                 } 
             }
 
-            client.getSession().sendMessage(new TextMessage("OTHERPLAYERINFO:" + returnString));
+            client.getSession().sendMessage(new TextMessage("OTHERPLAYERINFO" + returnString));
             returnString = "";
         }
     }
@@ -94,5 +94,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     public String clientsString() {
         return clients.toString();
+    }
+
+    public Map<WebSocketSession, Client> getClients() {
+        return clients;
     }
 }
