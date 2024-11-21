@@ -32,10 +32,10 @@ public class Map {
 
     /**
      * Constructor, creates Map object on base of given csv file
-     * @param filepath path to file (starting with src/...)
+     * @param filename path to file (only filename needed, no path)
      */
-    public Map(String filepath) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
+    public Map(String filename) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
 
             String line;
             int lines = 0;
@@ -172,12 +172,12 @@ public class Map {
     }
 
     /**
-     * saves map-object to csv-file into src/main/resources/savedMaps
+     * saves map-object to csv-file into path established in MapGenerationConfig
      */
     public void saveAsCSV() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
-        File file = new File("src/main/resources/savedMaps/map_" + now.format(dateTimeFormatter) + ".csv");
+        File file = new File(MapGenerationConfig.SAVED_MAPS_PATH + "map_" + now.format(dateTimeFormatter) + ".csv");
 
         try (FileWriter writer = new FileWriter(file.getPath())) {
 

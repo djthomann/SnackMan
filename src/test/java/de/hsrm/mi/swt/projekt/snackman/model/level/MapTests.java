@@ -1,5 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
+import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,7 @@ public class MapTests {
      */
     @Test
     void testSaveAsCSVCreatesNewFile() {
-        File dir = new File("src/main/resources/savedMaps");
+        File dir = new File(MapGenerationConfig.SAVED_MAPS_PATH);
         if (dir.exists() && dir.isDirectory()) {
             int numFilesBefore = Objects.requireNonNull(dir.list()).length;
             map.saveAsCSV();
@@ -97,7 +98,7 @@ public class MapTests {
     void testSaveAsCSVSavedFileIsCorrect() {
         map.saveAsCSV();
 
-        File dir = new File("src/main/resources/savedMaps");
+        File dir = new File(MapGenerationConfig.SAVED_MAPS_PATH);
         if (dir.exists() && dir.isDirectory()) {
 
             File newFile = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
@@ -140,7 +141,7 @@ public class MapTests {
      */
     @Test
     void testFileConstructor() {
-        map = new Map("src/main/resources/savedMaps/testFile.csv");
+        map = new Map(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
 
         Assertions.assertEquals(15, w);
         Assertions.assertEquals(10, h);
