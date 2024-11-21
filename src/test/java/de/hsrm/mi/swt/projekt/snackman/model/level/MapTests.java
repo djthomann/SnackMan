@@ -131,33 +131,23 @@ public class MapTests {
 
     @Test
     void testFileConstructor() {
+        map = new Map("src/main/resources/savedMaps/testFile.csv");
 
-        File testFile = new File("src/main/resources/savedMaps/testFile.csv");
-        /*
-        try (FileWriter writer = new FileWriter(testFile.getPath())) {
+        Assertions.assertEquals(15, w);
+        Assertions.assertEquals(10, h);
 
-            for (int i = 0; i < h; i++) {
-                for (int j = 0; j < w; j++) {
-                    if (i == 0 || j == 0 || i == h - 1 || j == w - 1) {
-                        writer.write("-1");
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                if (row == 0 || col == 0 || row == h - 1 || col == w - 1) {
+                    Assertions.assertEquals(OccupationType.WALL, map.getTileAt(col, row).getOccupationType());
+                } else {
+                    if ((col + row) % 2 == 0) {
+                        Assertions.assertEquals(OccupationType.FREE, map.getTileAt(col, row).getOccupationType());
                     } else {
-                        if ((j + i) % 2 == 0) {
-                            writer.write("0");
-                        } else {
-                            writer.write("-1");
-                        }
+                        Assertions.assertEquals(OccupationType.ITEM, map.getTileAt(col, row).getOccupationType());
                     }
-                    writer.write(",");
                 }
-                writer.write("\n");
             }
-
-        } catch (IOException e) {
-            fail("Something went wrong: " + e.getMessage());
         }
-
-         */
-
     }
-
 }

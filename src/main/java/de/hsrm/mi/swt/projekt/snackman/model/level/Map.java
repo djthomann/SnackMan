@@ -2,9 +2,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -37,7 +35,48 @@ public class Map {
      * @param filepath Pfad zur map-csv Datei
      */
     public Map(String filepath) {
-        //TODO: implement
+        try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
+
+            String line;
+            int lines = 0;
+            int numTokens = 0;
+            List<Tile[]> allRows = new ArrayList<>();
+
+            while ((line = reader.readLine()) != null) {
+                List<Tile> currentRow = new ArrayList<>();
+                String[] tokens = line.split(",");
+
+                if (numTokens != 0) {
+                    if (numTokens != tokens.length) throw new IOException("changing number of tokens per line");
+                } else {
+                    numTokens = tokens.length;
+                }
+
+                for (int i = 0; i < tokens.length; i++) {
+                    Tile newTile;
+                    switch (tokens[i]) {
+                        case "-1" -> newTile = new Tile(i, lines, OccupationType.WALL);
+                        case "0" -> newTile = new Tile(i, lines, OccupationType.FREE);
+                        case "1" -> newTile = new Tile(i, lines, OccupationType.ITEM);
+                        default -> throw new IOException("Unexpected token while loading file: " + tokens[i]);
+                    }
+
+                    currentRow.add(newTile);
+                }
+
+                allRows.add(currentRow.toArray(Tile[]::new));
+                lines++;
+
+            }
+
+            allTiles = allRows.toArray(Tile[][]::new);
+            h = allTiles.length;
+            w = allTiles[0].length;
+
+        } catch (IOException e) {
+            logger.warning("Something went wrong while loading file:");
+            logger.warning(e.getMessage());
+        }
     }
 
     /**
