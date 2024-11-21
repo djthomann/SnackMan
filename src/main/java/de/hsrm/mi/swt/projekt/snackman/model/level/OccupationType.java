@@ -1,7 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 /**
- * Enum für Backend-Use, zur Kennzeichnung einzelner Tiles
+ * Enum for Backend-Use, to mark tile's occupation
  */
 public enum OccupationType {
 

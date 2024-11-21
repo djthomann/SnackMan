@@ -10,16 +10,16 @@ import java.util.logging.Logger;
 
 public class Map {
 
-    // Funktionsweise von Sidewinder (und Simons Hirn) gibt vor:
-    // Tile an stelle (x, y) erreichbar über allTiles[y][x]
-    // für weniger verwirrenden Zugriff getTileAt(x, y) nutzen
+    // due to sidewinder (and Simon's brain):
+    // Tile at (x, y) can be reached via allTiles[y][x],
+    // or (recommended) getTileAt(x, y)
     private Tile[][] allTiles;
     private int w;
     private int h;
     private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
-     * Constructor, liefert ein zufällig generiertes Map-Objekt mit Breite w und Höhe h
+     * Constructor, creates randomly generated Map object with dimensions width w and height h
      * @param w breite
      * @param h höhe
      */
@@ -31,8 +31,8 @@ public class Map {
     }
 
     /**
-     * Constructor, liefert ein Map-Objekt aus Basis der angegebenen Datei
-     * @param filepath Pfad zur map-csv Datei
+     * Constructor, creates Map object on base of given csv file
+     * @param filepath path to file (starting with src/...)
      */
     public Map(String filepath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
@@ -80,7 +80,7 @@ public class Map {
     }
 
     /**
-     * instanziiert eine map, die nur außen Wände hat
+     * creates new blank map with walls on the outside
      */
     private void makeBlankMap() {
         this.allTiles = new Tile[h][w];
@@ -93,7 +93,8 @@ public class Map {
     }
 
     /**
-     * setzt den sidewinder algorithmus um
+     * implements sidewinder algorithm to generate new map
+     * please be sure to call makeBlankMap() before using sidewinder()
      */
     private void sidewinder() {
         Random r = new Random();
@@ -127,22 +128,22 @@ public class Map {
             }
         }
 
-        // Spiegel obere Hälfte nach unten
+        // mirror upper half downwards
         mirror(h);
 
-        // bei ungerade höhe wird in der Mitte eine freie Reihe gebaut
+        // for odd h: create empty row in the middle
         for (int i = 1; i < w - 1; i++) {
             allTiles[h/2][i].setOccupationType(OccupationType.ITEM);
         }
-        // momentan könnte es vorkommen, dass manche Spieler voneinander und den Geistern abgeschnitten sind,
-        // daher immer 2 horizontale gänge
+
+        // to prevent players from being trapped, create two horizontal paths
         int path = w / 4;
         for (int i = 1; i < h - 1; i++) {
             allTiles[i][path].setOccupationType(OccupationType.ITEM);
             allTiles[i][w - path].setOccupationType(OccupationType.ITEM);
         }
 
-        // schaffe Platz in der Mitte zum Geister-Spawn
+        // create place for ghost-spawn
         int spawnWidth = w / 5;
         int spawnHeight = h / 5;
         int middleW = w / 2;
@@ -153,7 +154,7 @@ public class Map {
             }
         }
 
-        // schaffe in den Ecken Platz zum Spieler-Spawn
+        // create place for player spawn at each corner
         allTiles[1][1].setOccupationType(OccupationType.FREE);
         allTiles[1][w - 2].setOccupationType(OccupationType.FREE);
         allTiles[h - 2][1].setOccupationType(OccupationType.FREE);
@@ -161,8 +162,8 @@ public class Map {
     }
 
     /**
-     * spiegelt die obere auf die untere Hälfte
-     * @param h höhe der map
+     * mirrors upper on lower half
+     * @param h height of map
      */
     private void mirror(int h) {
         for (int i = 0; i < h / 2; i++) {
@@ -170,6 +171,9 @@ public class Map {
         }
     }
 
+    /**
+     * saves map-object to csv-file into src/main/resources/savedMaps
+     */
     public void saveAsCSV() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");

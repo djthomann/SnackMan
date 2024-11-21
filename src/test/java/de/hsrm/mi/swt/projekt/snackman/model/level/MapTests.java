@@ -22,7 +22,7 @@ public class MapTests {
     }
 
     /**
-     * Testet, ob ein mittleres Tile frei ist
+     * tests weather middle tile is free
      */
     @Test
     void testGhostSpawn() {
@@ -30,7 +30,7 @@ public class MapTests {
     }
 
     /**
-     * Testet, ob alle 4 Ecken-Tiles frei sind
+     * tests weather all corner tiles are free
      */
     @Test
     void testPlayerSpawn() {
@@ -41,7 +41,7 @@ public class MapTests {
     }
 
     /**
-     * Testet die Map-Größe
+     * tests map size
      */
     @Test
     void testDimensions() {
@@ -50,7 +50,7 @@ public class MapTests {
     }
 
     /**
-     * Testet, ob die Map von einer Wand umrandet ist
+     * tests weather map is surrounded by wall
      */
     @Test
     void testOuterWall() {
@@ -67,6 +67,9 @@ public class MapTests {
         }
     }
 
+    /**
+     * test weather new file is created and in the correct directory during saving
+     */
     @Test
     void testSaveAsCSVCreatesNewFile() {
         File dir = new File("src/main/resources/savedMaps");
@@ -87,6 +90,9 @@ public class MapTests {
         }
     }
 
+    /**
+     * tests weather saved csv file is correct
+     */
     @Test
     void testSaveAsCSVSavedFileIsCorrect() {
         map.saveAsCSV();
@@ -129,6 +135,9 @@ public class MapTests {
         }
     }
 
+    /**
+     * tests weather map is correctly build based on test file
+     */
     @Test
     void testFileConstructor() {
         map = new Map("src/main/resources/savedMaps/testFile.csv");
