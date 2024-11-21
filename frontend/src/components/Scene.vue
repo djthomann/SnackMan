@@ -135,7 +135,7 @@ export default defineComponent({
         //TODO: give MovementVector to sendMessage()
         sendMessage(`KEY:${event.code}`);
         console.log(`Key pressed: ${event.key}`);
-        console.log(`Movement Vector: ${movementVector}`);
+        console.log('MovementVector:',movementVector);
       };
 
       document.addEventListener('keypress', handleKeyPress);
@@ -160,23 +160,23 @@ export default defineComponent({
     function calculateMovement(key: string, forward: THREE.Vector3) {
       const vector = new THREE.Vector3();
       const angle = Math.PI / 2;
-      const rotationMatrix = new THREE.Matrix4();
+      const rotationAxis = new THREE.Vector3(0,1,0);
+      console.log('Key:', key, 'forward:', forward)
+      
 
       switch (key) {
-        case 'KeyW':
-          return forward;
-        case 'KeyA':
-          rotationMatrix.makeRotationY(angle);
-          vector.applyMatrix4(rotationMatrix);
-          break;
-        case 'KeyS':
-          return -forward;
-        case 'KeyD':
-          rotationMatrix.makeRotationY(-angle);
-          vector.applyMatrix4(rotationMatrix);
+        case 'w':
+          return forward.clone();
+        case 'a':
+          return forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
+          case 's':
+          return forward.clone().negate();
+        case 'd':
+          return forward.clone().applyAxisAngle(rotationAxis, angle).normalize()
           break;
       }
-      return vector.normalize();
+      //TODO: What would a good default return be?
+      return vector;
     }
 
     return {
