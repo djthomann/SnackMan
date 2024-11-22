@@ -2,39 +2,87 @@ package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class Map {
 
-    // Funktionsweise von Sidewinder (und Simons Hirn) gibt vor:
-    // Tile an stelle (x, y) erreichbar über allTiles[y][x]
-    // für weniger verwirrenden Zugriff getTileAt(x, y) nutzen
+    // due to sidewinder (and Simon's brain):
+    // Tile at (x, y) can be reached via allTiles[y][x],
+    // or (recommended) getTileAt(x, y)
     private Tile[][] allTiles;
+    private int w;
+    private int h;
+    private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
-     * Constructor, liefert ein zufällig generiertes Map-Objekt mit Breite w und Höhe h
+     * Constructor, creates randomly generated Map object with dimensions width w and height h
      * @param w breite
      * @param h höhe
      */
     public Map(int w, int h) {
-        this.makeBlankMap(w, h);
+        this.w = w;
+        this.h = h;
+        this.makeBlankMap();
         this.sidewinder();
     }
 
     /**
-     * Constructor, liefert ein Map-Objekt aus Basis der angegebenen Datei
-     * @param filepath Pfad zur map-csv Datei
+     * Constructor, creates Map object on base of given csv file
+     * @param filename path to file (only filename needed, no path)
      */
-    public Map(String filepath) {
-        //TODO: implement
+    public Map(String filename) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+
+            String line;
+            int lines = 0;
+            int numTokens = 0;
+            List<Tile[]> allRows = new ArrayList<>();
+
+            while ((line = reader.readLine()) != null) {
+                List<Tile> currentRow = new ArrayList<>();
+                String[] tokens = line.split(",");
+
+                if (numTokens != 0) {
+                    if (numTokens != tokens.length) throw new IOException("changing number of tokens per line");
+                } else {
+                    numTokens = tokens.length;
+                }
+
+                for (int i = 0; i < tokens.length; i++) {
+                    Tile newTile;
+                    switch (tokens[i]) {
+                        case "-1" -> newTile = new Tile(i, lines, OccupationType.WALL);
+                        case "0" -> newTile = new Tile(i, lines, OccupationType.FREE);
+                        case "1" -> newTile = new Tile(i, lines, OccupationType.ITEM);
+                        default -> throw new IOException("Unexpected token while loading file: " + tokens[i]);
+                    }
+
+                    currentRow.add(newTile);
+                }
+
+                allRows.add(currentRow.toArray(Tile[]::new));
+                lines++;
+
+            }
+
+            allTiles = allRows.toArray(Tile[][]::new);
+            h = allTiles.length;
+            w = allTiles[0].length;
+
+        } catch (IOException e) {
+            logger.warning("Something went wrong while loading file:");
+            logger.warning(e.getMessage());
+        }
     }
 
     /**
-     * instanziiert eine map, die nur außen Wände hat
-     * @param w Breite der Map
-     * @param h Höhe der Map
+     * creates new blank map with walls on the outside
      */
-    private void makeBlankMap(int w, int h) {
+    private void makeBlankMap() {
         this.allTiles = new Tile[h][w];
 
         for (int y = 0; y < h; y++) {
@@ -45,7 +93,8 @@ public class Map {
     }
 
     /**
-     * setzt den sidewinder algorithmus um
+     * implements sidewinder algorithm to generate new map
+     * please be sure to call makeBlankMap() before using sidewinder()
      */
     private void sidewinder() {
         Random r = new Random();
@@ -79,22 +128,22 @@ public class Map {
             }
         }
 
-        // Spiegel obere Hälfte nach unten
+        // mirror upper half downwards
         mirror(h);
 
-        // bei ungerade höhe wird in der Mitte eine freie Reihe gebaut
+        // for odd h: create empty row in the middle
         for (int i = 1; i < w - 1; i++) {
             allTiles[h/2][i].setOccupationType(OccupationType.ITEM);
         }
-        // momentan könnte es vorkommen, dass manche Spieler voneinander und den Geistern abgeschnitten sind,
-        // daher immer 2 horizontale gänge
+
+        // to prevent players from being trapped, create two horizontal paths
         int path = w / 4;
         for (int i = 1; i < h - 1; i++) {
             allTiles[i][path].setOccupationType(OccupationType.ITEM);
             allTiles[i][w - path].setOccupationType(OccupationType.ITEM);
         }
 
-        // schaffe Platz in der Mitte zum Geister-Spawn
+        // create place for ghost-spawn
         int spawnWidth = w / 5;
         int spawnHeight = h / 5;
         int middleW = w / 2;
@@ -105,7 +154,7 @@ public class Map {
             }
         }
 
-        // schaffe in den Ecken Platz zum Spieler-Spawn
+        // create place for player spawn at each corner
         allTiles[1][1].setOccupationType(OccupationType.FREE);
         allTiles[1][w - 2].setOccupationType(OccupationType.FREE);
         allTiles[h - 2][1].setOccupationType(OccupationType.FREE);
@@ -113,8 +162,8 @@ public class Map {
     }
 
     /**
-     * spiegelt die obere auf die untere Hälfte
-     * @param h höhe der map
+     * mirrors upper on lower half
+     * @param h height of map
      */
     private void mirror(int h) {
         for (int i = 0; i < h / 2; i++) {
@@ -122,12 +171,46 @@ public class Map {
         }
     }
 
-    public Tile[][] getAllTiles() {
-        return allTiles;
+    /**
+     * saves map-object to csv-file into path established in MapGenerationConfig
+     */
+    public void saveAsCSV() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+        File file = new File(MapGenerationConfig.SAVED_MAPS_PATH + "map_" + now.format(dateTimeFormatter) + ".csv");
+
+        try (FileWriter writer = new FileWriter(file.getPath())) {
+
+            for (int j = 0; j < h; j++) {
+                for (int i = 0; i < w; i++) {
+                    String token = "";
+                    switch (allTiles[j][i].getOccupationType()) {
+                        case FREE -> token = "0";
+                        case WALL -> token = "-1";
+                        case ITEM -> token = "1";
+                    }
+                    writer.write(token);
+                    if (i < w - 1) {
+                        writer.write(",");
+                    } else {
+                        writer.write("\n");
+                    }
+                }
+            }
+
+            logger.info("saved file " + file.getPath());
+
+        } catch (IOException e) {
+            logger.warning("Something went wrong while saving file");
+            logger.warning(e.getMessage());
+        }
     }
 
     public Tile getTileAt(int x, int y) {
         return allTiles[y][x];
     }
 
+    public Tile[][] getAllTiles() {
+        return allTiles;
+    }
 }
