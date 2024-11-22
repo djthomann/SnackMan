@@ -8,9 +8,16 @@ import useWebSocket from '@/services/socketService'
 
 const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket()
 
+let mapLoaded: Boolean
+
 const loadMap = () => {
-  console.log('loading map')
-  sendMessage('MAP')
+  if (!mapLoaded) {
+    console.log('loading map')
+    sendMessage('MAP')
+    mapLoaded = true
+  } else {
+    console.log('loaded map already')
+  }
 }
 </script>
 
