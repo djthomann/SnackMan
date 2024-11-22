@@ -1,14 +1,12 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
+import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -25,7 +23,7 @@ public class MapTests {
     }
 
     /**
-     * Testet, ob ein mittleres Tile frei ist
+     * tests whether middle tile is free
      */
     @Test
     void testGhostSpawn() {
@@ -33,7 +31,7 @@ public class MapTests {
     }
 
     /**
-     * Testet, ob alle 4 Ecken-Tiles frei sind
+     * tests whether all corner tiles are free
      */
     @Test
     void testPlayerSpawn() {
@@ -44,7 +42,7 @@ public class MapTests {
     }
 
     /**
-     * Testet die Map-Größe
+     * tests map size
      */
     @Test
     void testDimensions() {
@@ -53,7 +51,7 @@ public class MapTests {
     }
 
     /**
-     * Testet, ob die Map von einer Wand umrandet ist
+     * tests whether map is surrounded by wall
      */
     @Test
     void testOuterWall() {
@@ -70,9 +68,12 @@ public class MapTests {
         }
     }
 
+    /**
+     * test whether new file is created and in the correct directory during saving
+     */
     @Test
     void testSaveAsCSVCreatesNewFile() {
-        File dir = new File("src/main/resources/savedMaps");
+        File dir = new File(MapGenerationConfig.SAVED_MAPS_PATH);
         if (dir.exists() && dir.isDirectory()) {
             int numFilesBefore = Objects.requireNonNull(dir.list()).length;
             map.saveAsCSV();
@@ -90,11 +91,14 @@ public class MapTests {
         }
     }
 
+    /**
+     * tests whether saved csv file is correct
+     */
     @Test
     void testSaveAsCSVSavedFileIsCorrect() {
         map.saveAsCSV();
 
-        File dir = new File("src/main/resources/savedMaps");
+        File dir = new File(MapGenerationConfig.SAVED_MAPS_PATH);
         if (dir.exists() && dir.isDirectory()) {
 
             File newFile = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
@@ -132,4 +136,28 @@ public class MapTests {
         }
     }
 
+    /**
+     * tests whether map is correctly build based on test file
+     */
+    @Test
+    void testFileConstructor() {
+        map = new Map(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+
+        Assertions.assertEquals(15, w);
+        Assertions.assertEquals(10, h);
+
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                if (row == 0 || col == 0 || row == h - 1 || col == w - 1) {
+                    Assertions.assertEquals(OccupationType.WALL, map.getTileAt(col, row).getOccupationType());
+                } else {
+                    if ((col + row) % 2 == 0) {
+                        Assertions.assertEquals(OccupationType.FREE, map.getTileAt(col, row).getOccupationType());
+                    } else {
+                        Assertions.assertEquals(OccupationType.ITEM, map.getTileAt(col, row).getOccupationType());
+                    }
+                }
+            }
+        }
+    }
 }
