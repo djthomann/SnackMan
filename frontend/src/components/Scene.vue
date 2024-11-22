@@ -8,11 +8,16 @@ import eventBus from '@/services/eventBus'
 import useWebSocket from '@/services/socketService'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import modelService from '@/services/modelService'
 
 let scene: THREE.Scene
 let wallsGroup: THREE.Group
 let floorGroup: THREE.Group
 let foodGroup: THREE.Group
+
+let bananaModel: THREE.Group
+let appleModel: THREE.Group
+let orangeModel: THREE.Group
 
 let box: THREE.Mesh
 let plane: THREE.Mesh
@@ -87,8 +92,9 @@ export default defineComponent({
 
     document.addEventListener('keypress', handleKeyPress)
 
-    onMounted(() => {
+    onMounted(async () => {
       initScene()
+      loadModels()
       eventBus.on('serverMessage', handleServerMessage)
 
       connect()
@@ -110,6 +116,27 @@ export default defineComponent({
 
       window.removeEventListener('resize', onWindowResize)
     })
+
+    async function loadModels() {
+      try {
+        // Service initialisieren
+        await modelService.initialize()
+
+        // Modelle abrufen
+        bananaModel = modelService.getModel('banana')
+        bananaModel.scale.set(0.05, 0.05, 0.05)
+
+        appleModel = modelService.getModel('apple')
+        appleModel.scale.set(0.2, 0.2, 0.2)
+
+        orangeModel = modelService.getModel('orange')
+        orangeModel.scale.set(0.0025, 0.0025, 0.0025)
+
+        console.log('Models loaded')
+      } catch (error) {
+        console.error('Error initializing or loading model:', error)
+      }
+    }
 
     function initScene() {
       // Scene
@@ -164,6 +191,7 @@ export default defineComponent({
 
       // Orbit Controls
       controls = new OrbitControls(camera, renderer.domElement)
+      // controls.enableZoom = false
 
       // start Render-Loop
       animate()
@@ -191,22 +219,33 @@ export default defineComponent({
     }
 
     function createFood(x: number, y: number, calories: number) {
-      const sphereGeometry = new THREE.SphereGeometry(0.2)
-
-      const colorValue = new THREE.Color()
-      colorValue.setHSL((1 - calories / 500) * 0.4, 1, 0.5)
-
-      const sphereMaterial = new THREE.MeshToonMaterial({ color: colorValue })
-
-      sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-      sphere.position.set(x, 0, y)
-      // sphere.castShadow = true
-
-      return sphere
+      if (calories > 300) {
+        const newBanana = bananaModel.clone()
+        newBanana.position.set(x, 0, y)
+        return newBanana
+      } else if (calories > 200) {
+        const newApple = appleModel.clone()
+        newApple.position.set(x, 0, y)
+        return newApple
+      } else {
+        const newPear = orangeModel.clone()
+        newPear.position.set(x, 0, y)
+        return newPear
+      }
     }
 
     function animate() {
       requestAnimationFrame(animate)
+
+      const time = Date.now() * 0.001
+
+      foodGroup.children.forEach((element, index) => {
+        element.rotation.y += 0.01
+        element.position.y = Math.sin(time * 2 + index) * 0.1
+      })
+
+      // bananaModel.rotation.y += 0.01
+
       controls?.update()
       renderer.render(scene, camera)
     }
