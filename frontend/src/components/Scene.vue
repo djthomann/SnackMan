@@ -12,7 +12,7 @@ import modelService from '@/services/modelService'
 
 let scene: THREE.Scene
 let wallsGroup: THREE.Group
-let floorGroup: THREE.Group
+// let floorGroup: THREE.Group
 let foodGroup: THREE.Group
 
 let bananaModel: THREE.Group
@@ -54,33 +54,8 @@ export default defineComponent({
           box.position.z += 0.2
         }
       } else if (message.startsWith('MAP')) {
-        const mapdata = JSON.parse(message.split(';')[1])
-        console.log('Received mapdata' + mapdata)
-        const tiles = mapdata.tiles
-        const walls = mapdata.walls
-        const foods = mapdata.foods
-
-        for (const tile of tiles) {
-          floorGroup.add(createFloorTile(tile.x, tile.y))
-          console.log('adding tile')
-          scene.add(floorGroup)
-        }
-
-        for (const wall of walls) {
-          wallsGroup.add(createWall(wall.x, wall.y))
-          console.log('adding wall')
-          scene.add(wallsGroup)
-        }
-
-        for (const food of foods) {
-          foodGroup.add(createFood(food.x, food.y, food.calories))
-          console.log('adding food')
-          scene.add(foodGroup)
-        }
-
-        wallsGroup.position.set(-2, 0, -2)
-        floorGroup.position.set(-2, 0, -2)
-        foodGroup.position.set(-2, 0, -2)
+        const map = JSON.parse(message.split(';')[1])
+        loadMap(map)
       }
     }
 
@@ -138,13 +113,42 @@ export default defineComponent({
       }
     }
 
+    function loadMap(map: any) {
+      console.log('Received mapdata' + map)
+      const w = map.w
+      const h = map.h
+      const tiles = map.allTiles
+
+      for (const row of tiles) {
+        for (const tile of row) {
+          const occupationType = tile.occupationType
+          if (occupationType == 'WALL') {
+            // console.log(tile)
+            wallsGroup.add(createWall(tile.x, tile.y))
+          } else if (occupationType == 'ITEM') {
+            foodGroup.add(createFood(tile.x, tile.y, Math.random() * 400 + 100))
+          }
+        }
+      }
+
+      scene.add(wallsGroup)
+      wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5)
+
+      scene.add(foodGroup)
+      foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5)
+
+      const floor = createFloorTile(w, h)
+      console.log('Creating Floor with: ' + w + '|' + h)
+      scene.add(floor)
+    }
+
     function initScene() {
       // Scene
       scene = new THREE.Scene()
       scene.background = new THREE.Color(0x111111)
 
       wallsGroup = new THREE.Group()
-      floorGroup = new THREE.Group()
+      // floorGroup = new THREE.Group()
       foodGroup = new THREE.Group()
 
       // Camera
@@ -198,11 +202,11 @@ export default defineComponent({
     }
 
     function createFloorTile(x: number, y: number) {
-      const planeGeometry = new THREE.PlaneGeometry(1, 1, 1, 1)
+      const planeGeometry = new THREE.PlaneGeometry(x, y, 1, 1)
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 })
       plane = new THREE.Mesh(planeGeometry, planeMaterial)
       plane.rotation.x = -Math.PI / 2
-      plane.position.set(x, -0.5, y)
+      plane.position.set(0, -0.5, 0)
       plane.receiveShadow = true
 
       return plane
