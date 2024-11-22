@@ -226,44 +226,45 @@ export default defineComponent({
           // Interpolation for smooth rotation
           const smoothingFactor = 0.1;
           const currentAngle = cone.rotation.z;
-
+          
+          // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            console.log('Face Forward');
+            //console.log('Face Forward');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
+
+            // Player body facing forward-right
           } else if (forward.z < 0 && angleYCameraDirection < -0.125 && angleYCameraDirection > -0.375) {
-            console.log('Turn Forward Right');
-            //box.rotation.z = -Math.PI/4;
+            //console.log('Turn Forward Right');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
+            // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            console.log('Turn Right');
-            //box.rotation.z = -Math.PI/2;
+            //console.log('Turn Right');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
+            // Player body facing backwards-right
           } else if (forward.z > 0 && angleYCameraDirection < -0.125 && angleYCameraDirection > -0.375) {
-            console.log('Turn Backward Right');
-            //box.rotation.z = -Math.PI/2 - Math.PI/4;
+            //console.log('Turn Backward Right');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2 - Math.PI / 4, smoothingFactor);
 
+            // Player body facing backwards
           } else if (forward.z > 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            console.log('Turn Backwards');
-            //box.rotation.z = Math.PI;
+            //console.log('Turn Backwards');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
+            // Player body facing backwards-left
           } else if (forward.z > 0 && angleYCameraDirection > 0.125 && angleYCameraDirection < 0.375) {
-            console.log('Turn Backward Left');
-            //box.rotation.z = Math.PI/2 + Math.PI/4;
+            //console.log('Turn Backward Left');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2 + Math.PI / 4, smoothingFactor);
 
+            // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            console.log('Turn Left');
-            //box.rotation.z = Math.PI/2;
+            //console.log('Turn Left');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
-            mouseMovement = false;
+            // Player body facing forward-left
           } else if (forward.z < 0 && angleYCameraDirection > 0.125 && angleYCameraDirection < 0.375) {
-            console.log('Turn Forward Left');
-            //box.rotation.z = Math.PI/4;
+            //console.log('Turn Forward Left');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
 
           }
