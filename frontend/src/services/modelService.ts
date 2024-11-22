@@ -68,18 +68,6 @@ class ModelService {
         (gltf) => {
           const scene = gltf.scene
 
-          // Berechne die Bounding Box
-          const box = new THREE.Box3().setFromObject(scene)
-          const center = box.getCenter(new THREE.Vector3())
-
-          // Verschiebe das Modell, um es zu zentrieren
-          scene.position.sub(center)
-
-          // Optional: Aktualisiere die Bounding Box nach der Verschiebung
-          const updatedBox = new THREE.Box3().setFromObject(scene)
-
-          console.log('Updated Bounding Box:', updatedBox)
-
           resolve(scene)
         },
         undefined,
