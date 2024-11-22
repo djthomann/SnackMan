@@ -23,7 +23,7 @@ public class MapTests {
     }
 
     /**
-     * tests weather middle tile is free
+     * tests whether middle tile is free
      */
     @Test
     void testGhostSpawn() {
@@ -31,7 +31,7 @@ public class MapTests {
     }
 
     /**
-     * tests weather all corner tiles are free
+     * tests whether all corner tiles are free
      */
     @Test
     void testPlayerSpawn() {
@@ -51,7 +51,7 @@ public class MapTests {
     }
 
     /**
-     * tests weather map is surrounded by wall
+     * tests whether map is surrounded by wall
      */
     @Test
     void testOuterWall() {
@@ -69,7 +69,7 @@ public class MapTests {
     }
 
     /**
-     * test weather new file is created and in the correct directory during saving
+     * test whether new file is created and in the correct directory during saving
      */
     @Test
     void testSaveAsCSVCreatesNewFile() {
@@ -92,7 +92,7 @@ public class MapTests {
     }
 
     /**
-     * tests weather saved csv file is correct
+     * tests whether saved csv file is correct
      */
     @Test
     void testSaveAsCSVSavedFileIsCorrect() {
@@ -137,7 +137,7 @@ public class MapTests {
     }
 
     /**
-     * tests weather map is correctly build based on test file
+     * tests whether map is correctly build based on test file
      */
     @Test
     void testFileConstructor() {

@@ -1,7 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.configuration;
 
 /**
- * Config to set parameter for sidewinder algorithm and other map related things
+ * Config to set parameters for sidewinder algorithm and other map related things
  */
 public class MapGenerationConfig {
 
