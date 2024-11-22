@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import java.util.Random;
 import java.util.Set;
 
@@ -19,9 +20,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MapData;
+import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
@@ -57,43 +60,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
             // inform other clients...
             sendClientInfo();
         } else if(messageString.startsWith("MAP")) {
-            // Phony Data
-            List<Tile> tiles = new ArrayList<>();
 
-            // Liste for walls
-            List<Tile> walls = new ArrayList<>();
+            SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
 
-            // List for food
-            List<Food> foods = new ArrayList<>();
-
-            Random r = new Random();
-
-            // 5x5-Feld erzeugen
-            for (int x = 0; x < 5; x++) {
-                for (int y = 0; y < 5; y++) {
-                    // Wände an den Rändern (erste und letzte Reihe/Spalte)
-                    if (x == 0 || y == 0 || x == 4 || y == 4) {
-                        walls.add(new Tile(x, y, OccupationType.WALL));
-                    } else {
-                        // Freie Tiles in der Mitte
-                        tiles.add(new Tile(x, y, OccupationType.FREE));
-                        foods.add(new Food(0, x, y, r.nextInt(100, 500)));
-                    }
-                }
-            }
-
-            // Debug-Ausgaben
-            logger.info("Sending" + tiles.size() + "Tiles:"  + tiles.toString());
-            logger.info("Sending" + walls.size() + " Walls:" + walls.toString());
-
-            // Wrapper-Objekt erstellen
-            MapData mapData = new MapData(tiles, walls, foods);
+            logger.info("Phony Data:" + map.toString());
 
             // JSON-Konvertierung
             ObjectMapper mapper = new ObjectMapper();
             returnString = "";
             try {
-                String json = mapper.writeValueAsString(mapData);
+                String json = mapper.writeValueAsString(map);
                 returnString = "MAP;" + json;
                 logger.info("Final JSON: " + returnString);
             } catch (JsonProcessingException e) {
