@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import Scene from './components/Scene.vue'
 import Username from './components/Username.vue'
-import FetchMap from './components/FetchMap.vue';
+import FetchMap from './components/FetchMap.vue'
+import ThreeDModelViewer from './components/ThreeDModelViewer.vue'
 </script>
 
 <template>
+  <!--
+  <ThreeDModelViewer />
+  -->
   <FetchMap />
   <Username />
   <Scene />
