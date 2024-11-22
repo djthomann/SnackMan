@@ -8,14 +8,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class Map {
+public class SnackManMap {
 
     // due to sidewinder (and Simon's brain):
     // Tile at (x, y) can be reached via allTiles[y][x],
     // or (recommended) getTileAt(x, y)
-    private Tile[][] allTiles;
     private int w;
     private int h;
+    private Tile[][] allTiles;
     private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
@@ -23,7 +23,7 @@ public class Map {
      * @param w breite
      * @param h höhe
      */
-    public Map(int w, int h) {
+    public SnackManMap(int w, int h) {
         this.w = w;
         this.h = h;
         this.makeBlankMap();
@@ -34,7 +34,7 @@ public class Map {
      * Constructor, creates Map object on base of given csv file
      * @param filename path to file (only filename needed, no path)
      */
-    public Map(String filename) {
+    public SnackManMap(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
 
             String line;
@@ -213,4 +213,13 @@ public class Map {
     public Tile[][] getAllTiles() {
         return allTiles;
     }
+
+    public int getW() {
+        return w;
+    }
+    
+    public int getH() {
+        return h;
+    }
+
 }
