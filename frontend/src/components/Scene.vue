@@ -28,7 +28,6 @@ export default defineComponent({
     let ambientLight: THREE.AmbientLight;
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
-    let movementVector = new THREE.Vector3();
     let mouseMovement = false;
 
     // React to server message (right now only simple movement)
@@ -157,11 +156,30 @@ export default defineComponent({
 
       // Handle key press und send Event via WebSocket
       const handleKeyPress = (event: KeyboardEvent) => {
-        //movementVector = calculateMovement(event.key, forward);
-        //TODO: give MovementVector to sendMessage()
-        sendMessage(`KEY:${event.code}`);
-        console.log(`Key pressed: ${event.key}`);
-        console.log('MovementVector:',movementVector);
+        if (['w', 'a', 's', 'd'].includes(event.key)) {
+          let vector = new THREE.Vector3();
+          const angle = Math.PI / 2;
+          const rotationAxis = new THREE.Vector3(0, 1, 0);
+
+          // Calculate movement vector
+          switch (event.key) {
+            case 'w':
+              vector = forward.clone();
+              break;
+            case 'a':
+              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
+              break;
+            case 's':
+              vector = forward.clone().negate();
+              break;
+            case 'd':
+              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize()
+              break;
+          }
+          //TODO: give vector to sendMessage()
+          sendMessage(`KEY:${event.code}`);
+          //console.log('MovementVector:', vector);
+        }
       };
 
       document.addEventListener('keypress', handleKeyPress);
@@ -185,27 +203,6 @@ export default defineComponent({
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    function calculateMovement(key: string, forward: THREE.Vector3) {
-      const vector = new THREE.Vector3();
-      const angle = Math.PI / 2;
-      const rotationAxis = new THREE.Vector3(0,1,0);
-      console.log('Key:', key, 'forward:', forward)
-      
-
-      switch (key) {
-        case 'w':
-          return forward.clone();
-        case 'a':
-          return forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
-          case 's':
-          return forward.clone().negate();
-        case 'd':
-          return forward.clone().applyAxisAngle(rotationAxis, angle).normalize()
-          break;
-      }
-      //TODO: What would a good default return be?
-      return vector;
-    }
 
     // Method to turn the player body according to camera forward direction
     function rotateBody() {
@@ -226,7 +223,7 @@ export default defineComponent({
           // Interpolation for smooth rotation
           const smoothingFactor = 0.1;
           const currentAngle = cone.rotation.z;
-          
+
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
             //console.log('Face Forward');
