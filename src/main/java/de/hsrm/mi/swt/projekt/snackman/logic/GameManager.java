@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.level.Map;
 
 /**
  * The GameManager manages all of the current games.
@@ -36,13 +38,37 @@ public class GameManager {
     }
 
     /**
-     * Creates a new game with a unique id
+     *  Creates a new game with a unique id, the specified gameConfig and Moveables,
+     *  and a randomly generated map with the in gameConfig specified width and height for it
+     * 
+     * @param gameConfig
+     * @param allMoveables
      */
-    private void createGame() {
-        
-        Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>());
+    public void createGame(GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables) {
+
+        Map map = new Map(gameConfig.mapWidth, gameConfig.mapHeight);
+        Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>(), map);
         allGames.add(newGame);
 
         nextGameId++;
     }
+
+    /**
+     *  Creates a new game with a unique id, the specified gameConfig and Moveables,
+     *  and creates a map from the given csv file
+     * 
+     * @param gameConfig
+     * @param allMoveables
+     * @param mapFile
+     */
+    public void createGame(GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, String mapFile) {
+
+        Map map = new Map(mapFile);
+
+        Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>(), map);
+        allGames.add(newGame);
+
+        nextGameId++;
+    }
+
 } 

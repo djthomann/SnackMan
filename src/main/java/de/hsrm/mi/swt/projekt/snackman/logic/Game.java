@@ -8,6 +8,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.level.Map;
 
 /**
  * The Game class contains all of the information and logic necessary within an individual game.
@@ -21,18 +22,18 @@ public class Game {
     public int id;
     private GameConfig gameConfig;
     private ArrayList<MovableAndSubscribable> allMovables;
-    //private ArrayList<Food> allFoods; vllt reicht es, wenn man es nur in der Map hat
+    //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
     private Timer timer;
-    //private Map map;
+    private Map map;
     private GameEventBus eventBus;
     
 
-    public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables/*, Map map*/) {
+    public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, Map map) {
         this.id = id;
         this.gameConfig = gameConfig;
         this.allMovables = allMoveables;
         this.timer = new Timer();
-        //this.map = map;
+        this.map = map;
         this.eventBus = new GameEventBus(createSubscriberList());
         startTimer();
     }
