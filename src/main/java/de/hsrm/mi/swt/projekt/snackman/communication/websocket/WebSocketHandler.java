@@ -19,11 +19,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
-import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
-import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.MapData;
 import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 
 public class WebSocketHandler extends TextWebSocketHandler {
