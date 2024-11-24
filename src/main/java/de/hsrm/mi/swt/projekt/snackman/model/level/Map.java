@@ -213,4 +213,31 @@ public class Map {
     public Tile[][] getAllTiles() {
         return allTiles;
     }
+    
+    /**
+     * returns the current environment around the given tile 
+     *
+     * @param tile the tile in the center 
+     * @return 3x3 map with the surrounding tiles, where 'null' stands for outside positions (Prevention of ArrayindexoutofBoundsException)
+     */
+    public Tile[][] getSurroundingTiles(Tile tile) {  
+        
+        Tile[][] surroudings = new Tile [3][3]; 
+
+        for (int offsetY = -1; offsetY <= 1; offsetY++) {
+            for (int offsetX = -1; offsetX <= 1; offsetX++) {
+                int tileX = tile.getX() + offsetX; 
+                int tileY = tile.getY() + offsetY; 
+
+                if (tileX >=0 && tileX <w && tileY >= 0 && tileY < h) {
+                    surroudings[offsetX + 1][offsetY + 1] = allTiles [tileY][tileX]; 
+                } else {
+                    surroudings[offsetX + 1][offsetY + 1] = null; //outside the map
+
+                }
+            }
+        }
+
+        return surroudings; 
+    }
 }
