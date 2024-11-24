@@ -4,34 +4,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.WebSocketSession;
 
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Moveable;
+
 public class Client {
 
     Logger logger = LoggerFactory.getLogger(Client.class);
 
     private String username;
+    private Moveable role;
     private WebSocketSession session;
 
     public Client(WebSocketSession session) {
-        this("", session);
+        this("", null, session);
     }
 
-    public Client(String username, WebSocketSession session) {
+    public Client(String username, Moveable role, WebSocketSession session) {
         this.username = username;
         this.session = session;
-        logger.info("New Client: Session-"+session+" Username-"+username);
+        logger.info("New Client: Session-" + session);
     }
 
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
+
+    public Moveable getRole() {
+        return role;
+    }
+
+    public void setRole(Moveable role) {
+        this.role = role;
+    }
+
     public WebSocketSession getSession() {
         return session;
     }
 
- 
+    public void setSession(WebSocketSession session) {
+        this.session = session;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -60,6 +76,6 @@ public class Client {
     @Override
     public String toString() {
         return "Client [username=" + username + ", session=" + session + "]";
-    }    
+    }
 
 }
