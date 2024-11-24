@@ -56,14 +56,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
             sendClientInfo();
         } else if(messageString.startsWith("MAP")) {
 
+            // Generate or Load a new Map Object, Map it to JSON and send it to frontend
+
             SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-24_19_50_17.csv");
             // SnackManMap map = new SnackManMap(40, 40);
             // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
-            map.saveAsCSV();
+            // map.saveAsCSV();
 
-            logger.info("Phony Data:" + map.toString());
+            logger.info("Map Data:" + map.toString());
 
-            // JSON-Konvertierung
+            // JSON-Conversion
             ObjectMapper mapper = new ObjectMapper();
             returnString = "";
             try {
