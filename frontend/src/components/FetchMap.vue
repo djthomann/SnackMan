@@ -3,22 +3,22 @@
 </template>
 
 <script setup lang="ts">
-import eventBus from '@/services/eventBus'
-import useWebSocket from '@/services/socketService'
+import eventBus from '@/services/eventBus';
+import useWebSocket from '@/services/socketService';
 
-const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket()
+const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket();
 
-let mapLoaded: Boolean
+let mapLoaded: Boolean;
 
 const loadMap = () => {
   if (!mapLoaded) {
-    console.log('loading map')
-    sendMessage('MAP')
-    mapLoaded = true
+    console.log('loading map');
+    sendMessage('MAP');
+    mapLoaded = true;
   } else {
-    console.log('loaded map already')
+    console.log('loaded map already');
   }
-}
+};
 </script>
 
 <style scoped>
