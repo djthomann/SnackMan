@@ -1,5 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.communication;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -16,8 +17,14 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 
 @SpringBootTest
 public class WebSocketTests {
@@ -38,70 +45,20 @@ public class WebSocketTests {
         verify(session, never()).sendMessage(any(TextMessage.class));
     }
 
-    /**
-     * Tests whether messages can be sent and server sends back messages he doesn't know
-     * @throws Exception
-     */
-    @Test
-    void testHandleTextMessage_withRegularMessage() throws Exception {
 
-        String payload = "Hello Server";
-        TextMessage message = new TextMessage(payload);
-        when(session.isOpen()).thenReturn(true);
-
-        webSocketHandler.handleTextMessage(session, message);
-
-        verify(session).sendMessage(new TextMessage("(Default) Server Received: Hello Server"));
-    }
-
-    /**
-     * Tests whether Handler extracts Event from Keyboard Input and sends the corresponding Event
-     * @throws Exception
-     */
-    @Test
-    void testHandleTextMessage_withKeyMessage() throws Exception {
-        
-        String payload = "KEY:KeyD";
-        TextMessage message = new TextMessage(payload);
-        when(session.isOpen()).thenReturn(true);
-
-        webSocketHandler.handleTextMessage(session, message);
-
-        verify(session).sendMessage(new TextMessage("MOVE:KeyD"));
-    }
-
-    /** Tests whether Username is sent correctly 
+    /** Tests whether Json is converted correctly during RegisterUsernameEvent 
      * @throws Exception
     */
     @Test
     void testHandleTextMessage_withUsernameMessage() throws Exception {
-        webSocketHandler.getClients().put(session,new Client(session));
-        String payload = "USERNAME:larissa";
+        Client client = new Client(session);
+        webSocketHandler.getClients().put(session,client);
+        String json = "{ \"type\": \"REGISTERUSERNAME\", \"username\": \"Larissa\" }";
 
-        TextMessage message = new TextMessage(payload);
+        TextMessage message = new TextMessage(json);
         when(session.isOpen()).thenReturn(true);
         webSocketHandler.handleTextMessage(session, message);
-        verify(session).sendMessage(new TextMessage("USERNAME:larissa"));
-    }
-
-    /** Tests whether clients are extracted and their information being sent
-     * @throws Exception
-     */
-    @Test
-    void testSendClientInfo () throws Exception {
-         WebSocketSession sessionLarissa = Mockito.mock(WebSocketSession.class);
-         WebSocketSession sessionAtta = Mockito.mock(WebSocketSession.class); 
-         WebSocketSession sessionDavid= Mockito.mock(WebSocketSession.class); 
-         webSocketHandler.getClients().put(sessionAtta,new Client("Atta",sessionAtta));
-         webSocketHandler.getClients().put(sessionLarissa,new Client("Larissa",sessionLarissa));
-         webSocketHandler.getClients().put(sessionDavid,new Client("David",sessionDavid));
-
-         when(session.isOpen()).thenReturn(true);
-         webSocketHandler.sendClientInfo();
-
-         verify(sessionAtta).sendMessage(new TextMessage("OTHERPLAYERINFO:Larissa:David"));
-         verify(sessionLarissa).sendMessage(new TextMessage("OTHERPLAYERINFO:Atta:David"));
-         verify(sessionDavid).sendMessage(new TextMessage("OTHERPLAYERINFO:Atta:Larissa"));
+        assertTrue(client.getUsername().equals("Larissa"));
     }
 
     /**

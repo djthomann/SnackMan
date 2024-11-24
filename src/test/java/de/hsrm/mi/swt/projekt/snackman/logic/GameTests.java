@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
@@ -41,7 +41,7 @@ public class GameTests {
      */
     @Test
     void testReveiveEvent() {
-        RegisterEvent testEvent = new RegisterEvent("Testname");
+        RegisterSnackmanEvent testEvent = new RegisterSnackmanEvent();
         game.receiveEvent(testEvent);
 
         for (Subscribable actSubscriber : game.getAllSubscribers()) {
