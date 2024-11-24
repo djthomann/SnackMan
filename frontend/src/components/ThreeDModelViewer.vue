@@ -1,4 +1,5 @@
 <script lang="ts">
+// Optional ModelViewer Component that can be used to view a model in the frontend if necessary
 import { defineComponent, onMounted } from 'vue';
 import * as THREE from 'three';
 import modelService from '@/services/modelService';

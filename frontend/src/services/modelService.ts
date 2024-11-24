@@ -22,15 +22,15 @@ class ModelService {
   }
 
   /**
-   * Initialisiert den Service, indem das Modell vorab geladen wird.
-   * @returns Promise<void>
+   * Initialize the service and load model data, store them in cache
+   * 
    */
   public async initialize(): Promise<void> {
     if (this.isInitialized) return // Doppelte Initialisierung vermeiden
 
     const loadPromises = Object.entries(this.models).map(([name, url]) =>
       this.loadModel(url).then((model) => {
-        this.cache.set(name, model) // Modell in den Cache hinzufügen
+        this.cache.set(name, model) // store model in cache
       }),
     )
 
@@ -40,9 +40,8 @@ class ModelService {
   }
 
   /**
-   * Holt ein Modell anhand seines Namens. Stellt sicher, dass es zuvor geladen wurde.
-   * @param name - Der Name des Modells
-   * @returns THREE.Group
+   * Method to retrieve a THREE.Group (Model) from the key string
+   * @returns THREE.Group i.e. model
    */
   public getModel(name: string): THREE.Group {
     if (!this.isInitialized) {
@@ -57,9 +56,7 @@ class ModelService {
   }
 
   /**
-   * Lädt ein Modell von einer gegebenen URL (intern verwendet).
-   * @param url - Die URL des Modells
-   * @returns Promise<THREE.Group>
+   * Tries to load a model from a URL
    */
   private loadModel(url: string): Promise<THREE.Group> {
     return new Promise((resolve, reject) => {
@@ -80,7 +77,7 @@ class ModelService {
   }
 }
 
-// Singleton-Instanz des ModelService
+// Singleton instance
 const modelService = new ModelService()
 modelService.initialize()
 export default modelService
