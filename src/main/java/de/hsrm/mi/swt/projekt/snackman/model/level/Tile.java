@@ -10,10 +10,10 @@ public class Tile {
 
 
     /**
-     * Constructor, liefert Tile-Objekt mit gegebenen Daten
-     * @param x x-Koordinate der Tile (final)
-     * @param y y-Koordinate der Tile (final)
-     * @param occupationType OccupationType der Tile
+     * Constructor, creates Tile with given parameters:
+     * @param x x-coordinate of Tile (final)
+     * @param y y-coordinate of Tile (final)
+     * @param occupationType OccupationType of Tile
      */
     public Tile(int x, int y, OccupationType occupationType) {
         this.x = x;
