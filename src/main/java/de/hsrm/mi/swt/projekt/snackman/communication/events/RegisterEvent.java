@@ -1,14 +1,13 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.events;
 
 /**
- * Event that informs Backend under what username a Player wants to be listed
+ * Event that informs Backend under what username a Player wants to be listed as.
  */
-public class RegisterEvent extends Event {
+public abstract class RegisterEvent extends Event {
     
     private String username;
 
-    public RegisterEvent(String username) {
-        this.username = username;
+    public RegisterEvent() {
     }
 
     public String getUsername() {
