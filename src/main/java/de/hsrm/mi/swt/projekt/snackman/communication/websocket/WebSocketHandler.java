@@ -87,6 +87,28 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                     clients.get(session).setUsername(registerUsernameEvent.getUsername());
                 }
+                case "MAP" -> {
+                    // Generate or Load a new Map Object, Map it to JSON and send it to frontend
+
+                    SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-24_19_50_17.csv");
+                    // SnackManMap map = new SnackManMap(40, 40);
+                    // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+                    // map.saveAsCSV();
+
+                    logger.info("Map Data:" + map.toString());
+
+                    // JSON-Conversion
+                    ObjectMapper mapper = new ObjectMapper();
+                    String returnString = "";
+                    try {
+                        String json = mapper.writeValueAsString(map);
+                        returnString = "MAP;" + json;
+                        logger.info("Final JSON: " + returnString);
+                        session.sendMessage(new TextMessage(returnString));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                }
 
             }
 
@@ -95,6 +117,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
         JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
         
+        }
+
         String messageString = message.getPayload();
         String returnString = "(Default) Server Received: " + message.getPayload();
 
@@ -113,27 +137,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
             sendClientInfo();
         } else if(messageString.startsWith("MAP")) {
 
-            // Generate or Load a new Map Object, Map it to JSON and send it to frontend
-
-            SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-24_19_50_17.csv");
-            // SnackManMap map = new SnackManMap(40, 40);
-            // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
-            // map.saveAsCSV();
-
-            logger.info("Map Data:" + map.toString());
-
-            // JSON-Conversion
-            ObjectMapper mapper = new ObjectMapper();
-            returnString = "";
-            try {
-                String json = mapper.writeValueAsString(map);
-                returnString = "MAP;" + json;
-                logger.info("Final JSON: " + returnString);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+            
         }
-        session.sendMessage(new TextMessage(returnString));
+        // session.sendMessage(new TextMessage(returnString));
         returnString = "";
     }
 

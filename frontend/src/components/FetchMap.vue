@@ -13,7 +13,7 @@ let mapLoaded: Boolean;
 const loadMap = () => {
   if (!mapLoaded) {
     console.log('loading map');
-    sendMessage('MAP');
+    sendMessage('{"type":"MAP"}');
     mapLoaded = true;
   } else {
     console.log('loaded map already');

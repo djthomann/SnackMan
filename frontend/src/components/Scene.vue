@@ -53,23 +53,23 @@ export default defineComponent({
       serverMessage.value = message;
       console.log('Processing server message');
 
-      if (message.startsWith("MOVE")) {
-        let key: string = message.split(":")[1]
       if (message.startsWith('MOVE')) {
         let key: string = message.split(':')[1];
 
-        if (key === "KeyD") {
-          cone.position.x += 0.2;
-        } else if (key === "KeyA") {
-          cone.position.x -= 0.2;
-        } else if (key === "KeyW") {
-          cone.position.z -= 0.2;
-        } else if (key === "KeyS") {
-          cone.position.z += 0.2;
+          if (key === "KeyD") {
+            cone.position.x += 0.2;
+          } else if (key === "KeyA") {
+            cone.position.x -= 0.2;
+          } else if (key === "KeyW") {
+            cone.position.z -= 0.2;
+          } else if (key === "KeyS") {
+            cone.position.z += 0.2;
+        } 
       } else if (message.startsWith('MAP')) {
-        const map = JSON.parse(message.split(';')[1]);
-        loadMap(map);
-      }
+          console.log("processing map")
+          const map = JSON.parse(message.split(';')[1]);
+          loadMap(map);
+        }
     };
 
 
@@ -406,18 +406,17 @@ export default defineComponent({
         }
       }
     }
-
+    
     return {
       rendererContainer,
-      serverMessage,
+      serverMessage
     };
-  },
+
+  }
 });
 </script>
 
 <style scoped>
-html,
-body {
 html,
 body {
   margin: 0;
