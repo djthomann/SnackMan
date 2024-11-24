@@ -89,4 +89,13 @@ public class Game {
         eventBus.sendEventToSubscribers(event);
     }
 
+    /**
+     * Returns the current list of all subscribers from its event bus 
+     * 
+     * @return subscribers from eventBus
+     */
+    public ArrayList<Subscribable> getAllSubscribers() {
+        return eventBus.getSubscribers();
+    }
+
 }

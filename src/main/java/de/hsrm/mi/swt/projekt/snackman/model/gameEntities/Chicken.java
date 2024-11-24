@@ -7,7 +7,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
  * 
  * 
  */
-public class Chicken implements Moveable, CanEat, Subscribable {
+public class Chicken implements CanEat, MovableAndSubscribable {
 
     /** The unique identifier for the Chicken */
     private final int id;

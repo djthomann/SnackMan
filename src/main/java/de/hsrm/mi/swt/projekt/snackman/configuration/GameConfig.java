@@ -20,7 +20,7 @@ public class GameConfig {
         this.snackManSpeed = 1;
         this.ghostSpeed = 1;
         this.chickenSpeed = 1;
-        this.gameTime = 30;
+        this.gameTime = 10;
         this.mapWidth = 10;
         this.mapHeight = 10;
     }

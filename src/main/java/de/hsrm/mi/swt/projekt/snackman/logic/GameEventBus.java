@@ -38,5 +38,14 @@ public class GameEventBus {
             currentSubscribable.handle(event);
         }
     }
+
+    /**
+     * Returns the current list of all subscribers from this event bus
+     * 
+     * @return subscribers
+     */
+    public ArrayList<Subscribable> getSubscribers() {
+        return subscribers;
+    }
     
 }
