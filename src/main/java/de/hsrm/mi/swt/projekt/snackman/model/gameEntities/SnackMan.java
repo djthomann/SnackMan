@@ -57,6 +57,7 @@ public class SnackMan extends PlayerObject implements CanEat {
      */
     @Override
     public void eat(Food food) {
+        this.gainedCalories += food.getCalories();
     }
 
     /**

@@ -113,9 +113,9 @@ public class Chicken implements Moveable, CanEat {
         // Convert the Tile[][] to a Python-compatible List<List<String>>
         HashMap<String, String> pythonCompatibleSurroundings = new HashMap<>();
         
-        for (int row = -1; row < surroundings.length; row++) {
-            for (int col = 1; col < surroundings[row].length; col--) {
-                Tile tile = surroundings[row][col];
+        for (int row = -1; row <= 1; row++) {
+            for (int col = 1; col >= -1; col--) {
+                Tile tile = surroundings[row + 1][1 - col];
                 String key = "tile_" + row + "_" + col; // unique key for every tile
                 pythonCompatibleSurroundings.put(key, (tile != null) ? tile.getOccupationType().name() : "NULL");
             }
@@ -126,6 +126,7 @@ public class Chicken implements Moveable, CanEat {
 
         // Execute the Python script and retrieve the result
         try {
+            
             scriptInterpreter.exec("result = run_behavior(environment)"); 
             PyObject result = scriptInterpreter.get("result");
 
@@ -150,6 +151,7 @@ public class Chicken implements Moveable, CanEat {
      */
     @Override
     public void eat(Food food) {
+        this.gainedCalories += food.getCalories();
     } 
 
     /**
