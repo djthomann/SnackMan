@@ -1,5 +1,12 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import de.hsrm.mi.swt.projekt.snackman.model.level.Map;
+import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
+import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
+
 /**
  * The `Chicken` class represents a NPC in the game.
  * 
@@ -25,17 +32,40 @@ public class Chicken implements Moveable, CanEat {
     /**
      * Constructs a new Chicken with the id, and specified starting Coords.
      * 
-     * @param id       the unique identifier of the Chicken
-     * @param x        the initial x-coordinate of the Chicken
-     * @param y        the initial y-coordinate of the Chicken       
-     * @param z        the initial z-coordinate of the Chicken       
+     * @param id            the unique identifier of the Chicken
+     * @param x             the initial x-coordinate of the Chicken
+     * @param y             the initial y-coordinate of the Chicken       
+     * @param z             the initial z-coordinate of the Chicken    
      */
-    public Chicken(int id,float x, float y, float z) {
+    public Chicken(int id, float x, float y, float z, Map map) { // map should be removed later
         this.id = id; 
-        this.x = x; 
-        this.y = y; 
-        this.z = z; 
+        // this.x = x; 
+        // this.y = y; 
+        // this.z = z; 
         this.gainedCalories = 0;
+
+        // spawn chicken on a random free tile in the map (later in Game-logic)
+        Tile[][] tiles = map.getAllTiles(); 
+        List <Tile> freeTiles = new ArrayList<>(); 
+
+        for (int y_ = 0; y_ < tiles.length; y++) {
+            for (int x_ = 0; x < tiles[y_].length; x++) {
+                if (tiles[y_][x_].getOccupationType() == OccupationType.FREE) {
+                    freeTiles.add(tiles[y_][x_]); 
+                }
+            }
+
+            if(!freeTiles.isEmpty()) {
+                Random random = new Random(); 
+                Tile startTile = freeTiles.get(random.nextInt(freeTiles.size())); 
+                this.x = startTile.getX(); 
+                this.y = startTile.getY(); 
+                this.z = 0; 
+            }
+            else {
+                throw new IllegalStateException("No free tiles available for Chicken"); 
+            }
+        }
     }
 
     /**
@@ -52,7 +82,6 @@ public class Chicken implements Moveable, CanEat {
         z = newZ; 
     }
 
-    
     /**
      * Consumes the food, make the Chicken gain Calories.
      *
