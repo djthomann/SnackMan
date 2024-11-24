@@ -61,9 +61,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
             sendClientInfo();
         } else if(messageString.startsWith("MAP")) {
 
-            // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-23_01:03:14.csv");
+            SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-24_19_50_17.csv");
             // SnackManMap map = new SnackManMap(40, 40);
-            SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+            // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+            map.saveAsCSV();
 
             logger.info("Phony Data:" + map.toString());
 
