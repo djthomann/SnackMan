@@ -7,10 +7,15 @@ import java.util.TimerTask;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Moveable;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 
+/**
+ * The Game class contains all of the information and logic necessary within an individual game.
+ * The game starts as soon as the Game class is instantiated.
+ * Every game has a map and its own game objects. 
+ * It can receive and pass on events to subscribers to its event bus.
+ * 
+ */
 public class Game {
 
     public int id;
@@ -48,7 +53,13 @@ public class Game {
         return allSubscribers;
     }
 
+    /**
+     * Starts the timer as soon as the game starts
+     * If the timer is finished, the game stops
+     * 
+     */
     private void startTimer() {
+
         TimerTask task;
          task = new TimerTask() {
             

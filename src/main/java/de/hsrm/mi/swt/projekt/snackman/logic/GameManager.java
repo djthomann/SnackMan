@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 
+/**
+ * The GameManager manages all of the current games.
+ * It passes on incoming events to the game with the respective id.
+ * 
+ */
 public class GameManager {
     
     public ArrayList<Game> allGames;
@@ -18,8 +23,7 @@ public class GameManager {
     /**
      * Passes on the received event to the game with the matching game id
      * 
-     * @param type
-     * @param gameId
+     * @param event
      */
     public void handleEvent(Event event) {
 

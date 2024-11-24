@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 
+/**
+ * The GameEventBus notifies all of its subscribers about an event that occured.
+ * 
+ */
 public class GameEventBus {
 
     private ArrayList<Subscribable> subscribers;
@@ -26,8 +30,7 @@ public class GameEventBus {
      * Notifies all subscribers about the new event
      * The subscribers handle the event individually
      * 
-     * @param type
-     * @param objectId
+     * @param event
      */
     public void sendEventToSubscribers(Event event) {
 
