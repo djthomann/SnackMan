@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.websocket;
 
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
@@ -149,6 +151,39 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
         // session.sendMessage(new TextMessage(returnString));
         returnString = "";
+    }
+
+    /**
+     * Notifies the frontend about the new game state by sending back a JSON string
+     * Right now, only the new position after a move event is sent back to the frontend
+     * 
+     * @param event
+     */
+    public void notifyFrontend(Event event) {
+
+        // JSON-Conversion
+        ObjectMapper mapper = new ObjectMapper();
+        String returnString = "";
+
+        // TODO This is a temporary solution, clarify to which sessions events are sent back
+        for(WebSocketSession session : this.clients.keySet()) {
+
+            try {
+                String json = mapper.writeValueAsString(event);
+                returnString = "MOVE;" + json;
+                logger.info("Final JSON for move event: " + returnString);
+                session.sendMessage(new TextMessage(returnString));
+
+                logger.info("Move Event was sent back to client " + this.clients.get(session).getUsername());
+    
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
     /**

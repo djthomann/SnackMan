@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
@@ -100,11 +102,17 @@ public class Game {
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
         eventBus.sendEventToSubscribers(event);
+
+        // Create new move event with the new position of the SnackMan that is sent back to the frontend for testing purposes
+        float newX = ((SnackMan)this.allMovables.get(0)).getX();
+        float newY = ((SnackMan)this.allMovables.get(0)).getY();
+        float newZ = ((SnackMan)this.allMovables.get(0)).getZ();
+        MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
+
+        this.gameManager.notifyChange(moveEvent);
     }
 
-    public void notifyChange(Event event) {
-        
-    }
+    
 
     /**
      * Returns the current list of all subscribers from its event bus 

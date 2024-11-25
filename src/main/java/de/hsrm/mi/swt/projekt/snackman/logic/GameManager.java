@@ -64,6 +64,10 @@ public class GameManager {
         }
     }
 
+    public void notifyChange(Event event) {
+        webSocketHandler.notifyFrontend(event);
+    }
+
     /**
      *  Creates a new game with a unique id, the specified gameConfig and Moveables,
      *  and a randomly generated map with the in gameConfig specified width and height for it

@@ -56,6 +56,9 @@ export default defineComponent({
       if (message.startsWith('MOVE')) {
         let key: string = message.split(':')[1];
 
+        // Move the camera
+        moveCamera(JSON.parse(message.split(';')[1]))
+
           if (key === "KeyD") {
             cone.position.x += 0.2;
           } else if (key === "KeyA") {
@@ -139,6 +142,7 @@ export default defineComponent({
         }
       }
 
+
       scene.add(wallsGroup);
       wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
@@ -148,6 +152,20 @@ export default defineComponent({
       const floor = createFloorTile(w, h);
       // console.log('Creating Floor with: ' + w + '|' + h);
       scene.add(floor);
+    }
+
+    /**
+     * The camera is moved to the updated position when the w-key is pressed
+     */
+    function moveCamera(moveInformation: any) {
+
+        const newCameraX = moveInformation.movementVector.x
+        const newCameraY = moveInformation.movementVector.y
+        const newCameraZ = moveInformation.movementVector.z
+
+        console.log(`New camera position after move event was sent back from the server: x = ${newCameraX}, y = ${newCameraY}, z = ${newCameraZ}`)
+
+        camera.position.set(newCameraX, newCameraY, newCameraZ);
     }
 
     function initScene() {
@@ -242,6 +260,7 @@ export default defineComponent({
         startButton.classList.remove('hidden'); // Button anzeigen
       });
 
+      // TODO When entering a user name no move event should be sent to the backend
       // Handle key press und send Event via WebSocket
       const handleKeyPress = (event: KeyboardEvent) => {
         if (['w', 'a', 's', 'd'].includes(event.key)) {
@@ -266,6 +285,7 @@ export default defineComponent({
               vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize()
               break;
           }
+          
           //TODO: give vector to sendMessage()
           const data = JSON.stringify({
           type: "MOVE",

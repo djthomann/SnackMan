@@ -55,7 +55,7 @@ public class SnackMan extends PlayerObject implements CanEat {
     @Override
     public void move(float newX, float newY, float newZ) {
         this.x += newX; 
-        this.y = newY; 
+        this.y += newY; 
         this.z += newZ; 
     }
 
