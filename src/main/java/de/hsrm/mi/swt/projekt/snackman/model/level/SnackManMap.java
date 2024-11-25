@@ -20,12 +20,13 @@ public class SnackManMap {
 
     /**
      * Constructor, creates randomly generated Map object with dimensions width w and height h
+     * to ensure proper map, w and h are made odd, if not already
      * @param w breite
      * @param h höhe
      */
     public SnackManMap(int w, int h) {
-        this.w = w;
-        this.h = h;
+        this.w = (w % 2 == 1) ? w : w + 1;
+        this.h = (h % 2 == 1) ? h : h + 1;
         this.makeBlankMap();
         this.sidewinder();
     }
