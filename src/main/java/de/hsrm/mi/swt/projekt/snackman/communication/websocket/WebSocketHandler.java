@@ -36,7 +36,7 @@ import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 public class WebSocketHandler extends TextWebSocketHandler {
 
     Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
-    GameManager gameManager = new GameManager(this);
+    GameManager gameManager = new GameManager(this, "test");
 
     Map<WebSocketSession, Client> clients = new HashMap<>();
 
@@ -98,7 +98,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
                     // map.saveAsCSV();
 
-                    logger.info("Map Data:" + map.toString());
+                    //logger.info("Map Data:" + map.toString());
 
                     // JSON-Conversion
                     ObjectMapper mapper = new ObjectMapper();

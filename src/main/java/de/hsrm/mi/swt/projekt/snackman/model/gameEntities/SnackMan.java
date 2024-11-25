@@ -1,6 +1,11 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 
 /**
  * The `SnackMan` class represents a player character in the game who has an
@@ -12,6 +17,8 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
  * 
  */
 public class SnackMan extends PlayerObject implements CanEat {
+
+    Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
     /** The calorie count of the SnackMan */
     private int gainedCalories;
@@ -47,9 +54,9 @@ public class SnackMan extends PlayerObject implements CanEat {
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        this.x = newX; 
+        this.x += newX; 
         this.y = newY; 
-        this.z = newZ; 
+        this.z += newZ; 
     }
 
     /**
@@ -72,6 +79,21 @@ public class SnackMan extends PlayerObject implements CanEat {
 
     @Override
     public void handle(Event event) {
+
+        if(event.getObjectID() != this.id) {
+            return;
+        }
+
+        switch(event.getType()) {
+
+            case EventType.MOVE:
+                this.move(((MoveEvent)event).getMovementVector().x,0, ((MoveEvent)event).getMovementVector().z);
+
+                break;
+
+        }
+
+        logger.info("Event arrived at SnackMan");
     }
 
 }

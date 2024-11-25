@@ -245,7 +245,9 @@ export default defineComponent({
       // Handle key press und send Event via WebSocket
       const handleKeyPress = (event: KeyboardEvent) => {
         if (['w', 'a', 's', 'd'].includes(event.key)) {
-          let vector = new THREE.Vector3();
+          let forward = new THREE.Vector3(0, 0, 0);
+          forward = camera.getWorldDirection(forward);
+          let vector;
           const angle = Math.PI / 2;
           const rotationAxis = new THREE.Vector3(0, 1, 0);
 
@@ -267,8 +269,8 @@ export default defineComponent({
           //TODO: give vector to sendMessage()
           const data = JSON.stringify({
           type: "MOVE",
-          gameID: 17,
-          objectID: 17,
+          gameID: 0,
+          objectID: 0,
           movementVector: vector
           });
 
