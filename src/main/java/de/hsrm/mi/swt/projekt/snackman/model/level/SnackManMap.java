@@ -20,12 +20,13 @@ public class SnackManMap {
 
     /**
      * Constructor, creates randomly generated Map object with dimensions width w and height h
+     * to ensure proper map, w and h are made odd, if not already
      * @param w breite
      * @param h höhe
      */
     public SnackManMap(int w, int h) {
-        this.w = w;
-        this.h = h;
+        this.w = (w % 2 == 1) ? w : w + 1;
+        this.h = (h % 2 == 1) ? h : h + 1;
         this.makeBlankMap();
         this.sidewinder();
     }
@@ -80,14 +81,26 @@ public class SnackManMap {
     }
 
     /**
-     * creates new blank map with walls on the outside
+     * creates new map with walls on the outside and grid of walls inside
      */
     private void makeBlankMap() {
         this.allTiles = new Tile[h][w];
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                allTiles[y][x] = new Tile(x, y, OccupationType.WALL);
+                /*
+                if (i == 0 || j == 0 || i == h - 1 || j == w - 1) {
+                    res[i][j] = -1;
+                } else {
+                    res[i][j] = (i == 1 || (i % 2 == 1 && j % 2 == 1)) ? 0 : -1;
+                }
+                 */
+                OccupationType occupationType = OccupationType.WALL;
+
+                if (y != h - 1 && x != 0 && x != w - 1 && (y == 1 || (y % 2 == 1 && x % 2 == 1))) {
+                    occupationType = OccupationType.ITEM;
+                }
+                allTiles[y][x] = new Tile(x, y, occupationType);
             }
         }
     }
