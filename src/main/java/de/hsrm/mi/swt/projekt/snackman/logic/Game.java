@@ -7,8 +7,9 @@ import java.util.TimerTask;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.level.Map;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 /**
  * The Game class contains all of the information and logic necessary within an individual game.
@@ -24,11 +25,11 @@ public class Game {
     private ArrayList<MovableAndSubscribable> allMovables;
     //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
     private Timer timer;
-    private Map map;
+    private SnackManMap map;
     private GameEventBus eventBus;
     
 
-    public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, Map map) {
+    public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, SnackManMap map) {
         this.id = id;
         this.gameConfig = gameConfig;
         this.allMovables = allMoveables;
