@@ -118,7 +118,7 @@ public class MapTests {
                         switch (map.getTileAt(col, lines).getOccupationType()) {
                             case FREE -> Assertions.assertEquals(String.valueOf('\u2591'), tokens[col]);
                             case WALL -> Assertions.assertEquals(String.valueOf('\u2588'), tokens[col]);
-                            case ITEM -> Assertions.assertEquals(String.valueOf('\u2022'), tokens[col]);
+                            case ITEM -> Assertions.assertEquals(String.valueOf('\u25CF'), tokens[col]);
                             default -> fail("unknown OccupationType in map: " + map.getTileAt(col, lines).getOccupationType());
                         }
                     }

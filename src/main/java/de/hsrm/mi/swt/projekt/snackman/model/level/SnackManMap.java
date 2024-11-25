@@ -55,10 +55,10 @@ public class SnackManMap {
 
                 for (int i = 0; i < tokens.length; i++) {
                     Tile newTile;
-                    switch (tokens[i]) {
-                        case "-1" -> newTile = new Tile(i, lines, OccupationType.WALL);
-                        case "0" -> newTile = new Tile(i, lines, OccupationType.FREE);
-                        case "1" -> newTile = new Tile(i, lines, OccupationType.ITEM);
+                    switch (tokens[i].charAt(0)) {
+                        case '\u2588' -> newTile = new Tile(i, lines, OccupationType.WALL);
+                        case '\u2591' -> newTile = new Tile(i, lines, OccupationType.FREE);
+                        case '\u25CF' -> newTile = new Tile(i, lines, OccupationType.ITEM);
                         default -> throw new IOException("Unexpected token while loading file: " + tokens[i]);
                     }
 

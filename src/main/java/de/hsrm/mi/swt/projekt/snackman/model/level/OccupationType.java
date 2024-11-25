@@ -7,7 +7,7 @@ public enum OccupationType {
 
     FREE('\u2591'),
     WALL('\u2588'),
-    ITEM('\u2022');
+    ITEM('\u25CF');
 
     public final char c;
 
