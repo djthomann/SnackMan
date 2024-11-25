@@ -20,5 +20,6 @@ public interface Moveable {
      *
      * @param event the event to handle
      */
-    // void handle(Event event);
+    
+     // Removed method handle and created own interface Subscribable for the handle method
 }

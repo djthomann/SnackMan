@@ -10,6 +10,24 @@ import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import modelService from '@/services/modelService';
+
+let scene: THREE.Scene;
+
+// Groups of different map objects
+let wallsGroup: THREE.Group;
+// let floorGroup: THREE.Group
+let foodGroup: THREE.Group;
+
+// Models from modelService
+let bananaModel: THREE.Group;
+let appleModel: THREE.Group;
+let orangeModel: THREE.Group;
+
+let box: THREE.Mesh;
+let plane: THREE.Mesh;
+let sphere: THREE.Mesh;
 
 export default defineComponent({
   name: 'Scene',
@@ -33,27 +51,33 @@ export default defineComponent({
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
-      console.log("Processing server message");
+      console.log('Processing server message');
 
-      if (message.startsWith("MOVE")) {
-        let key: string = message.split(":")[1]
+      if (message.startsWith('MOVE')) {
+        let key: string = message.split(':')[1];
 
-        if (key === "KeyD") {
-          cone.position.x += 0.2;
-        } else if (key === "KeyA") {
-          cone.position.x -= 0.2;
-        } else if (key === "KeyW") {
-          cone.position.z -= 0.2;
-        } else if (key === "KeyS") {
-          cone.position.z += 0.2;
+          if (key === "KeyD") {
+            cone.position.x += 0.2;
+          } else if (key === "KeyA") {
+            cone.position.x -= 0.2;
+          } else if (key === "KeyW") {
+            cone.position.z -= 0.2;
+          } else if (key === "KeyS") {
+            cone.position.z += 0.2;
+        } 
+      } else if (message.startsWith('MAP')) {
+          console.log("processing map")
+          const map = JSON.parse(message.split(';')[1]);
+          loadMap(map);
         }
-      }
     };
 
 
-    onMounted(() => {
+    onMounted(async () => {
       initScene();
+      loadModels();
       eventBus.on('serverMessage', handleServerMessage);
+
 
 
       connect();
@@ -76,10 +100,64 @@ export default defineComponent({
       window.removeEventListener('resize', onWindowResize);
     });
 
+    async function loadModels() {
+      try {
+        // Service initialisieren
+        await modelService.initialize();
+
+        // Modelle abrufen
+        bananaModel = modelService.getModel('banana');
+        bananaModel.scale.set(0.05, 0.05, 0.05);
+
+        appleModel = modelService.getModel('apple');
+        appleModel.scale.set(0.2, 0.2, 0.2);
+
+        orangeModel = modelService.getModel('orange');
+        orangeModel.scale.set(0.0025, 0.0025, 0.0025);
+
+        console.log('Models loaded');
+      } catch (error) {
+        console.error('Error initializing or loading model:', error);
+      }
+    }
+
+    function loadMap(map: any) {
+      console.log('Received mapdata' + map);
+      const w = map.w;
+      const h = map.h;
+      const tiles = map.allTiles;
+
+      for (const row of tiles) {
+        for (const tile of row) {
+          const occupationType = tile.occupationType;
+          if (occupationType == 'WALL') {
+            // console.log(tile)
+            wallsGroup.add(createWall(tile.x, tile.y));
+          } else if (occupationType == 'ITEM') {
+            foodGroup.add(createFood(tile.x, tile.y, Math.random() * 400 + 100));
+          }
+        }
+      }
+
+      scene.add(wallsGroup);
+      wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+
+      scene.add(foodGroup);
+      foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+
+      const floor = createFloorTile(w, h);
+      // console.log('Creating Floor with: ' + w + '|' + h);
+      scene.add(floor);
+    }
+
     function initScene() {
       // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x111111);
+
+      wallsGroup = new THREE.Group();
+      // floorGroup = new THREE.Group()
+      foodGroup = new THREE.Group();
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -100,14 +178,24 @@ export default defineComponent({
         rendererContainer.value.appendChild(renderer.domElement);
       }
 
+      // Dummy Box
+      /*
+      const boxGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5)
+      const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f })
+      box = new THREE.Mesh(boxGeometry, boxMaterial)
+      box.position.set(0, 0, 0)
+      box.castShadow = true
+      scene.add(box)
+
       // Ground Plane
-      const planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
-      const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
-      plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.rotation.x = -Math.PI / 2;
-      plane.position.set(0, -3, 0);
-      plane.receiveShadow = true;
-      scene.add(plane);
+      const planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20)
+      const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 })
+      plane = new THREE.Mesh(planeGeometry, planeMaterial)
+      plane.rotation.x = -Math.PI / 2
+      plane.position.set(0, -3, 0)
+      plane.receiveShadow = true
+      scene.add(plane)
+      */
 
       // Ambient Light
       ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -191,9 +279,59 @@ export default defineComponent({
       animate();
     }
 
+    // Creates one large plane as the floor
+    function createFloorTile(x: number, y: number) {
+      const planeGeometry = new THREE.PlaneGeometry(x, y, 1, 1);
+      const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
+      plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.set(0, -0.5, 0);
+      plane.receiveShadow = true;
+
+      return plane;
+    }
+
+    // Creates one cube per wall tile
+    function createWall(x: number, y: number) {
+      const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+      box = new THREE.Mesh(boxGeometry, boxMaterial);
+      box.position.set(x, 0, y);
+      box.castShadow = true;
+
+      return box;
+    }
+
+    // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
+    function createFood(x: number, y: number, calories: number) {
+      if (calories > 300) {
+        const newBanana = bananaModel.clone();
+        newBanana.position.set(x, 0, y);
+        return newBanana;
+      } else if (calories > 200) {
+        const newApple = appleModel.clone();
+        newApple.position.set(x, 0, y);
+        return newApple;
+      } else {
+        const newPear = orangeModel.clone();
+        newPear.position.set(x, 0, y);
+        return newPear;
+      }
+    }
+
+    
     function animate() {
       requestAnimationFrame(animate);
       rotateBody();
+
+      const time = Date.now() * 0.001;
+
+      // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks 
+      foodGroup.children.forEach((element, index) => {
+        element.rotation.y += 0.01;
+        element.position.y = Math.sin(time * 2 + index) * 0.1;
+      });
+
       renderer.render(scene, camera);
     }
 
@@ -268,11 +406,12 @@ export default defineComponent({
         }
       }
     }
-
+    
     return {
       rendererContainer,
       serverMessage
     };
+
   }
 });
 </script>

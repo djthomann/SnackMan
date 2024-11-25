@@ -2,7 +2,12 @@ package de.hsrm.mi.swt.projekt.snackman.communication.websocket;
 
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
+import java.util.Random;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +25,11 @@ import com.google.gson.JsonSyntaxException;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
@@ -77,6 +87,28 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                     clients.get(session).setUsername(registerUsernameEvent.getUsername());
                 }
+                case "MAP" -> {
+                    // Generate or Load a new Map Object, Map it to JSON and send it to frontend
+
+                    SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-24_19_50_17.csv");
+                    // SnackManMap map = new SnackManMap(40, 40);
+                    // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+                    // map.saveAsCSV();
+
+                    logger.info("Map Data:" + map.toString());
+
+                    // JSON-Conversion
+                    ObjectMapper mapper = new ObjectMapper();
+                    String returnString = "";
+                    try {
+                        String json = mapper.writeValueAsString(map);
+                        returnString = "MAP;" + json;
+                        logger.info("Final JSON: " + returnString);
+                        session.sendMessage(new TextMessage(returnString));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                }
 
             }
 
@@ -84,6 +116,60 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
+        
+        }
+
+        String messageString = message.getPayload();
+        String returnString = "(Default) Server Received: " + message.getPayload();
+
+        // TODO: Should be handed to Controller
+        if(messageString.startsWith("KEY")) {
+            String key = messageString.split(":")[1];
+            returnString = "MOVE:" + key;
+        } else if (messageString.startsWith("USERNAME")){
+            returnString = "USERNAME:";
+            // Client is assigned their username...
+            logger.info("Session: " + session.getId());
+            String username = messageString.split(":")[1];
+            clients.get(session).setUsername(username);
+            returnString += username;
+            // inform other clients...
+            sendClientInfo();
+        } else if(messageString.startsWith("MAP")) {
+
+            
+        }
+        // session.sendMessage(new TextMessage(returnString));
+        returnString = "";
+    }
+
+    /**
+     * Send information of connected Clients to all Clients --> TODO: should be handed to different class
+     * @throws Exception
+     */
+    public void sendClientInfo() throws Exception {
+
+        if (clients.size() < 2) {
+            logger.info("Less than 2 connections, not informing clients");
+            return;
+        }
+
+        logger.info("Informing Clients: " + clientsString());
+        String returnString = "";
+
+        for (Client client : clients.values()) {
+
+            // All Clients except themselves
+            for (Client c : clients.values()) {
+                logger.info("User: "+c.getUsername());
+                if (!c.getSession().equals(client.getSession()) && !c.getUsername().equals("")) {
+                    logger.info("Fügt hinzu: " + client.getUsername());
+                    returnString += (":"+c.getUsername());
+                } 
+            }
+
+            client.getSession().sendMessage(new TextMessage("OTHERPLAYERINFO" + returnString));
+            returnString = "";
         }
 
     }

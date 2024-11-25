@@ -13,13 +13,13 @@ import java.util.Objects;
 
 public class MapTests {
 
-    Map map;
+    SnackManMap map;
     int w = 15;
     int h = 10;
 
     @BeforeEach
     void setUp() {
-        map = new Map(w, h);
+        map = new SnackManMap(w, h);
     }
 
     /**
@@ -141,7 +141,7 @@ public class MapTests {
      */
     @Test
     void testFileConstructor() {
-        map = new Map(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
 
         Assertions.assertEquals(15, w);
         Assertions.assertEquals(10, h);
