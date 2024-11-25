@@ -176,7 +176,7 @@ public class SnackManMap {
      */
     public void saveAsCSV() {
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss");
         File file = new File(MapGenerationConfig.SAVED_MAPS_PATH + "map_" + now.format(dateTimeFormatter) + ".csv");
 
         try (FileWriter writer = new FileWriter(file.getPath())) {
