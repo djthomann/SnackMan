@@ -4,6 +4,7 @@ public class RegisterUsernameEvent extends RegisterEvent {
 
     public RegisterUsernameEvent() {
         super();
+        type = EventType.REGISTER_GHOST;
     }
 
 }
