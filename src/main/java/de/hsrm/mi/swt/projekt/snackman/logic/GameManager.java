@@ -3,6 +3,7 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 import java.util.ArrayList;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
@@ -16,8 +17,10 @@ public class GameManager {
     
     public ArrayList<Game> allGames;
     private int nextGameId;
+    private WebSocketHandler webSocketHandler;
 
-    public GameManager() {
+    public GameManager(WebSocketHandler webSocketHandler) {
+        this.webSocketHandler = webSocketHandler;
         this.allGames = new ArrayList<Game>();
         this.nextGameId = 0;
     }

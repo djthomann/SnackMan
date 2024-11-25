@@ -265,7 +265,14 @@ export default defineComponent({
               break;
           }
           //TODO: give vector to sendMessage()
-          sendMessage(`KEY:${event.code}`);
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 17,
+          objectID: 17,
+          movementVector: vector
+          });
+
+          sendMessage(data);
           //console.log('MovementVector:', vector);
         }
       };

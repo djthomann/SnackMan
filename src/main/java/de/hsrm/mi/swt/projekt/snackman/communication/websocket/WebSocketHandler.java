@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
@@ -30,10 +31,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
+import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
     Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
+    GameManager gameManager = new GameManager(this);
 
     Map<WebSocketSession, Client> clients = new HashMap<>();
 
@@ -108,6 +111,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
+                }
+                case "MOVE" -> {
+                    MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);
+                    logger.info("GameId: " + moveEvent.getGameID() + "Vector x: " + moveEvent.getMovementVector().x);
+                    gameManager.handleEvent(moveEvent);
                 }
 
             }
