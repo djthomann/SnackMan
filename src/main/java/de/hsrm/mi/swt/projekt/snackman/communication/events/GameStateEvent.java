@@ -14,7 +14,7 @@ public class GameStateEvent extends Event {
     private List<Food> updatesFoods;
 
     public GameStateEvent(List<Moveable> updatesMoveables, List<Food> updatesFoods) {
-        type = EventType.GAME_STATE;
+        this.setType(EventType.GAME_STATE);
         this.updatesMoveables = updatesMoveables;
         this.updatesFoods = updatesFoods;
     }

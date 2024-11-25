@@ -10,7 +10,7 @@ public class MoveEvent extends Event {
 
     // Added setType to constructor
     public MoveEvent(Vector3f movementVector) {
-        type = EventType.MOVE;
+        this.setType(EventType.MOVE);
         this.movementVector = movementVector;
         this.setType(EventType.MOVE);
     }
