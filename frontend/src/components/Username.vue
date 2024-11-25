@@ -76,20 +76,20 @@ function sendSnackmanEvent() {
 document.addEventListener('snackman', sendSnackmanEvent);
 
 onMounted(() => {
-    eventBus.on('serverMessage', handleServerMessage);
-    connect();
+  eventBus.on('serverMessage', handleServerMessage);
+  connect();
 });
 
 onUnmounted(() => {
-    eventBus.off('serverMessage', handleServerMessage);
-    usernamesList.value = [];
-    closeConnection();
+  eventBus.off('serverMessage', handleServerMessage);
+  usernamesList.value = [];
+  closeConnection();
 });
 
 // TODO: Backend Events should arrive here.
 const handleServerMessage = (message: string) => {
-    serverMessage.value = message;
-    console.log("Received server message: " + message);
+  serverMessage.value = message;
+  console.log('Received server message: ' + message);
 
     if (message.startsWith("USERNAME")) {
         playerUsername.value = message.split(":")[1];
