@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.level.Map;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 /**
  * The GameManager manages all of the current games.
@@ -46,7 +46,7 @@ public class GameManager {
      */
     public void createGame(GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables) {
 
-        Map map = new Map(gameConfig.mapWidth, gameConfig.mapHeight);
+        SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
         Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>(), map);
         allGames.add(newGame);
 
@@ -63,7 +63,7 @@ public class GameManager {
      */
     public void createGame(GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, String mapFile) {
 
-        Map map = new Map(mapFile);
+        SnackManMap map = new SnackManMap(mapFile);
 
         Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>(), map);
         allGames.add(newGame);
