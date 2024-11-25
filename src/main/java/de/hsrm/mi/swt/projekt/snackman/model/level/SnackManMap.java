@@ -3,6 +3,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.level;
 import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -179,17 +180,11 @@ public class SnackManMap {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
         File file = new File(MapGenerationConfig.SAVED_MAPS_PATH + "map_" + now.format(dateTimeFormatter) + ".csv");
 
-        try (FileWriter writer = new FileWriter(file.getPath())) {
+        try (FileWriter writer = new FileWriter(file.getPath(), StandardCharsets.UTF_8)) {
 
             for (int j = 0; j < h; j++) {
                 for (int i = 0; i < w; i++) {
-                    String token = "";
-                    switch (allTiles[j][i].getOccupationType()) {
-                        case FREE -> token = "0";
-                        case WALL -> token = "-1";
-                        case ITEM -> token = "1";
-                    }
-                    writer.write(token);
+                    writer.write(allTiles[j][i].getOccupationType().c);
                     if (i < w - 1) {
                         writer.write(",");
                     } else {

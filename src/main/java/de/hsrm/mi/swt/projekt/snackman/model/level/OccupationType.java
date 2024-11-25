@@ -5,8 +5,14 @@ package de.hsrm.mi.swt.projekt.snackman.model.level;
  */
 public enum OccupationType {
 
-    FREE,
-    WALL,
-    ITEM
+    FREE('\u2591'),
+    WALL('\u2588'),
+    ITEM('\u2022');
+
+    public final char c;
+
+    OccupationType(char c){
+        this.c = c;
+    }
 
 }
