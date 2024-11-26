@@ -3,12 +3,11 @@
 </template>
 
 <script setup lang="ts">
-import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 
-const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket();
+const { sendMessage } = useWebSocket();
 
-let mapLoaded: Boolean;
+let mapLoaded: boolean;
 
 const loadMap = () => {
   if (!mapLoaded) {
