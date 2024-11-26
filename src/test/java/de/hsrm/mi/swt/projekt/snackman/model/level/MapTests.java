@@ -4,7 +4,6 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.python.modules._locale._locale;
 
 import static org.junit.jupiter.api.Assertions.fail;
 

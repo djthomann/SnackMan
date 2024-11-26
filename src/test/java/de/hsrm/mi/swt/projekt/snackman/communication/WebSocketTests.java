@@ -6,9 +6,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,14 +14,8 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 
 @SpringBootTest
 public class WebSocketTests {

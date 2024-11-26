@@ -2,13 +2,9 @@
 import Scene from './Scene.vue';
 import Username from './Username.vue';
 import FetchMap from './FetchMap.vue';
-import ThreeDModelViewer from './ThreeDModelViewer.vue';
 </script>
 
 <template>
-  <!--
-  <ThreeDModelViewer />
-  -->
   <FetchMap />
   <Username />
   <Scene />

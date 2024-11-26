@@ -11,7 +11,7 @@ export default defineComponent({
     let scene: THREE.Scene;
     let camera: THREE.PerspectiveCamera;
     let renderer: THREE.WebGLRenderer;
-    let controls: OrbitControls | null = null;
+    let controls: OrbitControls;
 
     onMounted(async () => {
       // Szene initialisieren
