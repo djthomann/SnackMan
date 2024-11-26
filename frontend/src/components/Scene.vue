@@ -10,10 +10,7 @@ import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import modelService from '@/services/modelService';
-
-let scene: THREE.Scene;
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -25,15 +22,18 @@ let bananaModel: THREE.Group;
 let appleModel: THREE.Group;
 let orangeModel: THREE.Group;
 
+// mesh for walls
 let box: THREE.Mesh;
+
+/* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
 let sphere: THREE.Mesh;
+*/
 
 export default defineComponent({
   name: 'Scene',
   setup() {
-
-    const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket();
+    const { connect, sendMessage, closeConnection } = useWebSocket();
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
@@ -59,29 +59,26 @@ export default defineComponent({
         // Move the camera
         moveCamera(JSON.parse(message.split(';')[1]))
 
-          if (key === "KeyD") {
-            cone.position.x += 0.2;
-          } else if (key === "KeyA") {
-            cone.position.x -= 0.2;
-          } else if (key === "KeyW") {
-            cone.position.z -= 0.2;
-          } else if (key === "KeyS") {
-            cone.position.z += 0.2;
-        } 
-      } else if (message.startsWith('MAP')) {
-          console.log("processing map")
-          const map = JSON.parse(message.split(';')[1]);
-          loadMap(map);
+        if (key === 'KeyD') {
+          cone.position.x += 0.2;
+        } else if (key === 'KeyA') {
+          cone.position.x -= 0.2;
+        } else if (key === 'KeyW') {
+          cone.position.z -= 0.2;
+        } else if (key === 'KeyS') {
+          cone.position.z += 0.2;
         }
+      } else if (message.startsWith('MAP')) {
+        console.log('processing map');
+        const map = JSON.parse(message.split(';')[1]);
+        loadMap(map);
+      }
     };
-
 
     onMounted(async () => {
       initScene();
       loadModels();
       eventBus.on('serverMessage', handleServerMessage);
-
-
 
       connect();
 
@@ -181,7 +178,6 @@ export default defineComponent({
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       camera.position.set(0, 1.7, 0);
 
-
       // Vectors
       const forward = new THREE.Vector3();
       camera.getWorldDirection(forward);
@@ -241,15 +237,15 @@ export default defineComponent({
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
-      const startButton = document.getElementById("startButton") as HTMLInputElement;
+      const startButton = document.getElementById('startButton') as HTMLInputElement;
       player.add(controls.object);
       startButton.addEventListener(
         'click',
         function () {
           controls.lock();
         },
-        false
-      )
+        false,
+      );
 
       // Hide and unhide start button
       controls.addEventListener('lock', () => {
@@ -325,7 +321,7 @@ export default defineComponent({
       })
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
-      })
+      });
 
       // start Render-Loop
       animate();
@@ -371,14 +367,13 @@ export default defineComponent({
       }
     }
 
-    
     function animate() {
       requestAnimationFrame(animate);
       rotateBody();
 
       const time = Date.now() * 0.001;
 
-      // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks 
+      // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {
         element.rotation.y += 0.01;
         element.position.y = Math.sin(time * 2 + index) * 0.1;
@@ -393,7 +388,6 @@ export default defineComponent({
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-
     // Method to turn the player body according to camera forward direction
     function rotateBody() {
       const forward = new THREE.Vector3();
@@ -406,8 +400,8 @@ export default defineComponent({
       if (controls.isLocked) {
         if (mouseMovement) {
           const angleYCameraDirection = Math.atan2(
-            (playerForward.x - forward.x),
-            (playerForward.z - forward.z)
+            playerForward.x - forward.x,
+            playerForward.z - forward.z,
           );
 
           // Interpolation for smooth rotation
@@ -420,7 +414,11 @@ export default defineComponent({
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
-          } else if (forward.z < 0 && angleYCameraDirection < -0.125 && angleYCameraDirection > -0.375) {
+          } else if (
+            forward.z < 0 &&
+            angleYCameraDirection < -0.125 &&
+            angleYCameraDirection > -0.375
+          ) {
             //console.log('Turn Forward Right');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
@@ -430,19 +428,39 @@ export default defineComponent({
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
-          } else if (forward.z > 0 && angleYCameraDirection < -0.125 && angleYCameraDirection > -0.375) {
+          } else if (
+            forward.z > 0 &&
+            angleYCameraDirection < -0.125 &&
+            angleYCameraDirection > -0.375
+          ) {
             //console.log('Turn Backward Right');
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2 - Math.PI / 4, smoothingFactor);
+            cone.rotation.z = THREE.MathUtils.lerp(
+              currentAngle,
+              -Math.PI / 2 - Math.PI / 4,
+              smoothingFactor,
+            );
 
             // Player body facing backwards
-          } else if (forward.z > 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
+          } else if (
+            forward.z > 0 &&
+            angleYCameraDirection < 0.125 &&
+            angleYCameraDirection > -0.125
+          ) {
             //console.log('Turn Backwards');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
-          } else if (forward.z > 0 && angleYCameraDirection > 0.125 && angleYCameraDirection < 0.375) {
+          } else if (
+            forward.z > 0 &&
+            angleYCameraDirection > 0.125 &&
+            angleYCameraDirection < 0.375
+          ) {
             //console.log('Turn Backward Left');
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2 + Math.PI / 4, smoothingFactor);
+            cone.rotation.z = THREE.MathUtils.lerp(
+              currentAngle,
+              Math.PI / 2 + Math.PI / 4,
+              smoothingFactor,
+            );
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
@@ -450,21 +468,23 @@ export default defineComponent({
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
-          } else if (forward.z < 0 && angleYCameraDirection > 0.125 && angleYCameraDirection < 0.375) {
+          } else if (
+            forward.z < 0 &&
+            angleYCameraDirection > 0.125 &&
+            angleYCameraDirection < 0.375
+          ) {
             //console.log('Turn Forward Left');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
-
           }
         }
       }
     }
-    
+
     return {
       rendererContainer,
-      serverMessage
+      serverMessage,
     };
-
-  }
+  },
 });
 </script>
 
