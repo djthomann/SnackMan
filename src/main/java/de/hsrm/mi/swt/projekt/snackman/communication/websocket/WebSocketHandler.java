@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.websocket;
 
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,15 +20,20 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.*;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
+import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
     Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
+    GameManager gameManager = new GameManager(this, "test");
 
     Map<WebSocketSession, Client> clients = new HashMap<>();
 
@@ -89,7 +95,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
                     // map.saveAsCSV();
 
-                    logger.info("Map Data:" + map.toString());
+                    //logger.info("Map Data:" + map.toString());
 
                     // JSON-Conversion
                     ObjectMapper mapper = new ObjectMapper();
@@ -103,6 +109,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
                         e.printStackTrace();
                     }
                 }
+                case "MOVE" -> {
+                    MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);
+                    logger.info("GameId: " + moveEvent.getGameID() + "Vector x: " + moveEvent.getMovementVector().x);
+                    gameManager.handleEvent(moveEvent);
+                }
 
             }
 
@@ -112,33 +123,69 @@ public class WebSocketHandler extends TextWebSocketHandler {
             System.out.println("Invalid JSON: " + e.getMessage());
         
         }
+    }
 
-        String messageString = message.getPayload();
-        String returnString = "(Default) Server Received: " + message.getPayload();
+    /** Called by GameManager and converts Event to JSON to send to Frontend */
+    public void sendMessage(Event event) {
 
-        // TODO: Should be handed to Controller
-        if(messageString.startsWith("KEY")) {
-            String key = messageString.split(":")[1];
-            returnString = "MOVE:" + key;
-        } else if (messageString.startsWith("USERNAME")){
-            returnString = "USERNAME:";
-            // Client is assigned their username...
-            logger.info("Session: " + session.getId());
-            String username = messageString.split(":")[1];
-            clients.get(session).setUsername(username);
-            returnString += username;
-            // inform other clients...
-            sendClientInfo();
-        } else if(messageString.startsWith("MAP")) {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        String json;
 
-            
+
+        switch (event.getType()) {
+                    case COLLISION -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
+                    case GAME_END -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
+                    case GAME_START -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
+                    case GAME_STATE -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
+                    case MOVE -> {
+                        json = gson.toJson(event);
+                    }
+                    case REGISTER_GHOST -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
+                    case REGISTER_SNACKMAN -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
+                    case REGISTER_USERNAME -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
+                    case USER_INFO -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
+                    default -> throw new IllegalArgumentException("Unexpected value: " + event.getType()); 
         }
-        // session.sendMessage(new TextMessage(returnString));
-        returnString = "";
+
+        // TODO: Damit wir das Event zurück senden bräuchten wir eine Verwaltung der Clients bzw. GameStateEvent satt move event. 
     }
 
     /**
-     * Send information of connected Clients to all Clients --> TODO: should be handed to different class
+     * Notifies the frontend about the new game state by sending back a JSON string
+     * Right now, only the new position after a move event is sent back to the frontend
+     * 
+     * @param event
+     */
+    public void notifyFrontend(Event event) {
+
+        // JSON-Conversion
+        ObjectMapper mapper = new ObjectMapper();
+        String returnString = "";
+
+        // TODO This is a temporary solution, clarify to which sessions events are sent back
+        for(WebSocketSession session : this.clients.keySet()) {
+
+            try {
+                String json = mapper.writeValueAsString(event);
+                returnString = "MOVE;" + json;
+                logger.info("Final JSON for move event: " + returnString);
+                session.sendMessage(new TextMessage(returnString));
+
+                logger.info("Move Event was sent back to client " + this.clients.get(session).getUsername());
+    
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    /**
+     * Send information of connected Clients to all Clients --> TODO: should be handed to different class (GameStartEvent/LobbyEvent)
      * @throws Exception
      */
     public void sendClientInfo() throws Exception {

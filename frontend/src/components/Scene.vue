@@ -54,7 +54,10 @@ export default defineComponent({
       console.log('Processing server message');
 
       if (message.startsWith('MOVE')) {
-        const key: string = message.split(':')[1];
+        let key: string = message.split(':')[1];
+
+        // Move the camera
+        moveCamera(JSON.parse(message.split(';')[1]))
 
         if (key === 'KeyD') {
           cone.position.x += 0.2;
@@ -136,6 +139,7 @@ export default defineComponent({
         }
       }
 
+
       scene.add(wallsGroup);
       wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
@@ -145,6 +149,20 @@ export default defineComponent({
       const floor = createFloorTile(w, h);
       // console.log('Creating Floor with: ' + w + '|' + h);
       scene.add(floor);
+    }
+
+    /**
+     * The camera is moved to the updated position when the w-key is pressed
+     */
+    function moveCamera(moveInformation: any) {
+
+        const newCameraX = moveInformation.movementVector.x
+        const newCameraY = moveInformation.movementVector.y
+        const newCameraZ = moveInformation.movementVector.z
+
+        console.log(`New camera position after move event was sent back from the server: x = ${newCameraX}, y = ${newCameraY}, z = ${newCameraZ}`)
+
+        camera.position.set(newCameraX, newCameraY, newCameraZ);
     }
 
     function initScene() {
@@ -238,10 +256,15 @@ export default defineComponent({
         startButton.classList.remove('hidden'); // Button anzeigen
       });
 
+      // TODO When entering a user name no move event should be sent to the backend
       // Handle key press und send Event via WebSocket
       const handleKeyPress = (event: KeyboardEvent) => {
         if (['w', 'a', 's', 'd'].includes(event.key)) {
-          let vector = new THREE.Vector3();
+          let forward = new THREE.Vector3(0, 0, 0);
+          forward = camera.getWorldDirection(forward);
+          forward.y = 0;
+          forward.normalize()
+          let vector;
           const angle = Math.PI / 2;
           const rotationAxis = new THREE.Vector3(0, 1, 0);
 
@@ -257,16 +280,45 @@ export default defineComponent({
               vector = forward.clone().negate();
               break;
             case 'd':
-              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
+              vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
               break;
           }
+          
           //TODO: give vector to sendMessage()
-          sendMessage(`KEY:${event.code}`);
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: vector
+          });
+
+          sendMessage(data);
           //console.log('MovementVector:', vector);
+        } else if(event.key === " ") {
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: new THREE.Vector3(0, 1, 0)
+          });
+          sendMessage(data);
         }
       };
 
       document.addEventListener('keypress', handleKeyPress);
+      document.addEventListener('keydown', (event) => {
+
+        if(event.key === "Shift") {
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: new THREE.Vector3(0, -1, 0)
+          });
+          sendMessage(data);
+        }
+        
+      })
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
       });
@@ -289,7 +341,7 @@ export default defineComponent({
 
     // Creates one cube per wall tile
     function createWall(x: number, y: number) {
-      const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const boxGeometry = new THREE.BoxGeometry(1, 3, 1);
       const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       box = new THREE.Mesh(boxGeometry, boxMaterial);
       box.position.set(x, 0, y);

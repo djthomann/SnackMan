@@ -19,6 +19,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 public class GameTests {
 
+    private GameManager gameManager = Mockito.mock(GameManager.class);
     private Game game;
     private GameConfig gameConfig = new GameConfig();
     // ArrayList with Mock-Objects
@@ -33,7 +34,7 @@ public class GameTests {
 
     @BeforeEach
     void setUp() {
-        game = new Game(0, gameConfig, allMovables, map);
+        game = new Game(0, gameConfig, allMovables, map, gameManager);
     }
 
     /**
