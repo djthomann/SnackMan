@@ -8,6 +8,7 @@ public class RegisterSnackmanEvent extends RegisterEvent {
 
     public RegisterSnackmanEvent() {
         super();
+        this.setType(EventType.REGISTER_SNACKMAN);
     }
 
     public SnackMan getRole() {

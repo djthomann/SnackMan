@@ -4,9 +4,15 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.joml.Vector3f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
@@ -19,6 +25,8 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
  */
 public class Game {
 
+    Logger logger = LoggerFactory.getLogger(Game.class);
+
     public int id;
     private GameConfig gameConfig;
     private ArrayList<MovableAndSubscribable> allMovables;
@@ -26,15 +34,18 @@ public class Game {
     private Timer timer;
     private SnackManMap map;
     private GameEventBus eventBus;
+    private GameManager gameManager;
     
 
-    public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, SnackManMap map) {
+    public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, SnackManMap map, GameManager gameManager) {
         this.id = id;
         this.gameConfig = gameConfig;
         this.allMovables = allMoveables;
         this.timer = new Timer();
         this.map = map;
-        this.eventBus = new GameEventBus(createSubscriberList());
+        this.gameManager = gameManager;
+        ArrayList<Subscribable> subscribers = createSubscriberList();
+        this.eventBus = new GameEventBus(subscribers);
         startTimer();
     }
 
@@ -44,6 +55,8 @@ public class Game {
      * @return allSubscribers
      */
     private ArrayList<Subscribable> createSubscriberList() {
+
+        logger.info("Movables in Game: " + this.allMovables.toString() + "\n");
 
         ArrayList<Subscribable> allSubscribers = new ArrayList<>();
 
@@ -86,8 +99,20 @@ public class Game {
      * @param event
      */
     public void receiveEvent(Event event) {
+        logger.info("event received by game\n");
+        logger.info("Subscribers: " + eventBus.getSubscribers().toString());
         eventBus.sendEventToSubscribers(event);
+
+        // Create new move event with the new position of the SnackMan that is sent back to the frontend for testing purposes
+        float newX = ((SnackMan)this.allMovables.get(0)).getX();
+        float newY = ((SnackMan)this.allMovables.get(0)).getY();
+        float newZ = ((SnackMan)this.allMovables.get(0)).getZ();
+        MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
+
+        this.gameManager.notifyChange(moveEvent);
     }
+
+    
 
     /**
      * Returns the current list of all subscribers from its event bus 

@@ -8,6 +8,7 @@ public class RegisterGhostEvent extends RegisterEvent {
 
     public RegisterGhostEvent() {
         super();
+        this.setType(EventType.REGISTER_USERNAME);
     }
 
     public Ghost getRole() {
