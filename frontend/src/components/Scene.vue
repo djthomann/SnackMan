@@ -282,7 +282,7 @@ export default defineComponent({
               vector = forward.clone().negate();
               break;
             case 'd':
-              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize()
+              vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
               break;
           }
           
