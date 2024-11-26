@@ -4,6 +4,8 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.python.modules._locale._locale;
+
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.*;
@@ -15,7 +17,7 @@ public class MapTests {
 
     SnackManMap map;
     int w = 15;
-    int h = 10;
+    int h = 15;
 
     @BeforeEach
     void setUp() {
@@ -86,6 +88,7 @@ public class MapTests {
                 fail("file could not be deleted");
             }
 
+
         } else {
             fail("directory not found");
         }
@@ -144,7 +147,7 @@ public class MapTests {
         map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
 
         Assertions.assertEquals(15, w);
-        Assertions.assertEquals(10, h);
+        Assertions.assertEquals(15, h);
 
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
