@@ -296,10 +296,31 @@ export default defineComponent({
 
           sendMessage(data);
           //console.log('MovementVector:', vector);
+        } else if(event.key === " ") {
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: new THREE.Vector3(0, 1, 0)
+          });
+          sendMessage(data);
         }
       };
 
       document.addEventListener('keypress', handleKeyPress);
+      document.addEventListener('keydown', (event) => {
+
+        if(event.key === "Shift") {
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: new THREE.Vector3(0, -1, 0)
+          });
+          sendMessage(data);
+        }
+        
+      })
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
       })
