@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +22,13 @@ public class GameManager {
 
     Logger logger = LoggerFactory.getLogger(GameManager.class);
     
-    public ArrayList<Game> allGames;
+    public HashMap<Integer, Game> allGames;
     private int nextGameId;
     private WebSocketHandler webSocketHandler;
 
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
-        this.allGames = new ArrayList<Game>();
+        this.allGames = new HashMap<Integer, Game>();
         this.nextGameId = 0;
     }
 
@@ -36,7 +37,7 @@ public class GameManager {
 
         logger.info("Game Manager Constructor \n");
         this.webSocketHandler = webSocketHandler;
-        this.allGames = new ArrayList<Game>();
+        this.allGames = new HashMap<Integer, Game>();
         this.nextGameId = 0;
 
         ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
@@ -55,15 +56,18 @@ public class GameManager {
 
         logger.info("handleEvent\n");
 
-        for (Game currentGame : allGames) {
+        if (allGames.containsKey(event.getGameID())) {
 
-            if(currentGame.id == event.getGameID()) {
-                logger.info("game found with id " + currentGame.id);
-                currentGame.receiveEvent(event);
-            }
+            allGames.get(event.getGameID()).receiveEvent(event);
+
         }
     }
 
+    /**
+     *  Notifies the frontend of the changes in the backend
+     * 
+     * @param event
+     */
     public void notifyChange(Event event) {
         webSocketHandler.notifyFrontend(event);
     }
@@ -81,7 +85,7 @@ public class GameManager {
 
         SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
         Game newGame = new Game(nextGameId, new GameConfig(), allMoveables, map, this);
-        allGames.add(newGame);
+        allGames.put(newGame.id, newGame);
 
         nextGameId++;
     }
@@ -99,7 +103,7 @@ public class GameManager {
         SnackManMap map = new SnackManMap(mapFile);
 
         Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>(), map, this);
-        allGames.add(newGame);
+        allGames.put(newGame.id, newGame);
 
         nextGameId++;
     }
