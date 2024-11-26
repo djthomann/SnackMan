@@ -15,10 +15,11 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.level.Map;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 public class GameTests {
 
+    private GameManager gameManager = Mockito.mock(GameManager.class);
     private Game game;
     private GameConfig gameConfig = new GameConfig();
     // ArrayList with Mock-Objects
@@ -29,11 +30,11 @@ public class GameTests {
         add(Mockito.mock(Chicken.class));
 
     }};
-    private Map map = new Map(gameConfig.mapWidth, gameConfig.mapHeight);
+    private SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
 
     @BeforeEach
     void setUp() {
-        game = new Game(0, gameConfig, allMovables, map);
+        game = new Game(0, gameConfig, allMovables, map, gameManager);
     }
 
     /**
