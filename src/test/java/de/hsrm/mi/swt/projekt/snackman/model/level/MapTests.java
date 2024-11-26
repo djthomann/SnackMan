@@ -9,6 +9,7 @@ import org.python.modules._locale._locale;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -109,7 +110,7 @@ public class MapTests {
                     .orElse(null);
 
             Assertions.assertNotNull(newFile);
-            try (BufferedReader reader = new BufferedReader(new FileReader(newFile.getPath()))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(newFile.getPath(), StandardCharsets.UTF_8))) {
                 String line;
                 int lines = 0;
                 while ((line = reader.readLine()) != null) {
@@ -118,9 +119,9 @@ public class MapTests {
 
                     for (int col = 0; col < w; col++) {
                         switch (map.getTileAt(col, lines).getOccupationType()) {
-                            case FREE -> Assertions.assertEquals("0", tokens[col]);
-                            case WALL -> Assertions.assertEquals("-1", tokens[col]);
-                            case ITEM -> Assertions.assertEquals("1", tokens[col]);
+                            case FREE -> Assertions.assertEquals(String.valueOf('\u2591'), tokens[col]);
+                            case WALL -> Assertions.assertEquals(String.valueOf('\u2588'), tokens[col]);
+                            case ITEM -> Assertions.assertEquals(String.valueOf('\u25CF'), tokens[col]);
                             default -> fail("unknown OccupationType in map: " + map.getTileAt(col, lines).getOccupationType());
                         }
                     }
