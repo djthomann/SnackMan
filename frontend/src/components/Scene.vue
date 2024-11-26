@@ -266,6 +266,8 @@ export default defineComponent({
         if (['w', 'a', 's', 'd'].includes(event.key)) {
           let forward = new THREE.Vector3(0, 0, 0);
           forward = camera.getWorldDirection(forward);
+          forward.y = 0;
+          forward.normalize()
           let vector;
           const angle = Math.PI / 2;
           const rotationAxis = new THREE.Vector3(0, 1, 0);
@@ -343,7 +345,7 @@ export default defineComponent({
 
     // Creates one cube per wall tile
     function createWall(x: number, y: number) {
-      const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const boxGeometry = new THREE.BoxGeometry(1, 3, 1);
       const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       box = new THREE.Mesh(boxGeometry, boxMaterial);
       box.position.set(x, 0, y);

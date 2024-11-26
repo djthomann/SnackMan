@@ -1,5 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +87,11 @@ public class SnackMan extends PlayerObject implements CanEat {
 
         switch(event.getType()) {
 
-            case EventType.MOVE:
-                this.move(((MoveEvent)event).getMovementVector().x,0, ((MoveEvent)event).getMovementVector().z);
+            case MOVE:
+
+                Vector3f vector = ((MoveEvent)event).getMovementVector();
+
+                this.move(vector.x * 0.2f,vector.y * 0.2f, vector.z * 0.2f);
 
                 break;
 

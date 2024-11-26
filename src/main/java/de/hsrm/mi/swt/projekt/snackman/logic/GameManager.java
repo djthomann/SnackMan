@@ -40,7 +40,7 @@ public class GameManager {
         this.nextGameId = 0;
 
         ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
-        allMoveables.add(new SnackMan(0, 0, 0, 0));
+        allMoveables.add(new SnackMan(0, 0f, 1.1f, 0f));
 
         createGame(new GameConfig(), allMoveables);
     }
