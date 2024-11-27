@@ -20,13 +20,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.*;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
-import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 

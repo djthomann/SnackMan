@@ -1,6 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
-import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -75,9 +75,23 @@ public class SnackManMap {
             h = allTiles.length;
             w = allTiles[0].length;
 
+            createFood();
+
         } catch (IOException e) {
             logger.warning("Something went wrong while loading file:");
             logger.warning(e.getMessage());
+        }
+    }
+
+    private void createFood() {
+        Random r = new Random();
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                if (allTiles[row][col].getOccupationType() == OccupationType.ITEM) {
+                    int calories = r.nextInt(MapGenerationConfig.MAX_CALORIES - MapGenerationConfig.MIN_CALORIES + 1) + MapGenerationConfig.MIN_CALORIES;
+                    allTiles[row][col].setOccupation(new Food(System.currentTimeMillis(), col, row, calories));
+                }
+            }
         }
     }
 
@@ -173,6 +187,8 @@ public class SnackManMap {
         allTiles[1][w - 2].setOccupationType(OccupationType.FREE);
         allTiles[h - 2][1].setOccupationType(OccupationType.FREE);
         allTiles[h - 2][w - 2].setOccupationType(OccupationType.FREE);
+
+        createFood();
     }
 
     /**

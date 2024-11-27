@@ -8,7 +8,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 public class Food {
 
     /** The unique identifier for the Food */
-    private final int id;
+    private final long id;
 
     /** The x-coordinate of the Food */
     private float x;
@@ -28,7 +28,7 @@ public class Food {
      * @param y         the initial y-coordinate of the Food       
      * @param calories  the initial number of calories of the Food
      */
-    public Food(int id, float x, float y, int calories) {
+    public Food(long id, float x, float y, int calories) {
         this.id = id;
         this.x = x; 
         this.y = y; 
@@ -40,7 +40,7 @@ public class Food {
      * 
      * @return the `id` of the Food
      */
-    public int getId() {
+    public long getId() {
         return id;
     }
 
