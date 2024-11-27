@@ -162,7 +162,7 @@ export default defineComponent({
 
         console.log(`New camera position after move event was sent back from the server: x = ${newCameraX}, y = ${newCameraY}, z = ${newCameraZ}`)
 
-        camera.position.set(newCameraX, newCameraY, newCameraZ);
+        player.position.set(newCameraX, newCameraY, newCameraZ);
     }
 
     function initScene() {
@@ -176,7 +176,7 @@ export default defineComponent({
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 1.7, 0);
+      camera.position.set(0, 0.4, 0);
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -221,19 +221,19 @@ export default defineComponent({
       directionalLight.castShadow = true;
       scene.add(directionalLight);
 
+      // Player Body
+      const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 32);
+      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+      cone = new THREE.Mesh(coneGeometry, coneMaterial);
+      cone.position.set(0, 0, 0);
+      cone.rotation.x = -Math.PI / 2;
+      cone.castShadow = true;
+      scene.add(cone);
+
       // Player Object
       scene.add(player);
       player.add(camera);
       player.add(cone);
-
-      // Player Body
-      const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32);
-      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
-      cone = new THREE.Mesh(coneGeometry, coneMaterial);
-      cone.position.set(0, 0.5, 0);
-      cone.rotation.x = -Math.PI / 2;
-      cone.castShadow = true;
-      scene.add(cone);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
