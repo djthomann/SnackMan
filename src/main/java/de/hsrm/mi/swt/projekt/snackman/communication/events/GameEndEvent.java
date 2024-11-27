@@ -11,6 +11,7 @@ public class GameEndEvent extends Event {
     private Map<Integer, Integer> scores;
 
     public GameEndEvent(int winner, Map<Integer, Integer> scores) {
+        this.setType(EventType.GAME_END);
         this.winner = winner;
         this.scores = scores;
     }

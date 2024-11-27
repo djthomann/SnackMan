@@ -1,5 +1,5 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
-
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.Random;
 import org.python.core.PyObject;
 import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
-import de.hsrm.mi.swt.projekt.snackman.model.level.Map;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
@@ -16,7 +16,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
  * 
  * 
  */
-public class Chicken implements Moveable, CanEat {
+public class Chicken implements CanEat, MovableAndSubscribable {
 
     /** The unique identifier for the Chicken */
     private final int id;
@@ -49,7 +49,7 @@ public class Chicken implements Moveable, CanEat {
      * @param z             the initial z-coordinate of the Chicken    
      * @param scriptPath    the path of the associated behavior script    
      */
-    public Chicken(int id, float x, float y, float z, String scriptPath, Map map) { // map should be removed later
+    public Chicken(int id, float x, float y, float z, String scriptPath, SnackManMap map) { // map should be removed later
         this.id = id; 
         // this.x = x; 
         // this.y = y; 
@@ -102,7 +102,7 @@ public class Chicken implements Moveable, CanEat {
      * 
      * @param map the map, on which the chicken navigates 
      */
-    public void executeScript(Map map) {
+    public void executeScript(SnackManMap map) {
 
         // TODO the associated tile should be here calculated from the position of chicken
         Tile positionTile = map.getTileAt((int) x, (int) y); 
@@ -207,8 +207,8 @@ public class Chicken implements Moveable, CanEat {
        return z;
    }
 
-    /*      
     @Override
-    public void handle(Event event) {}
-    */
+    public void handle(Event event) {
+    }
+
 }

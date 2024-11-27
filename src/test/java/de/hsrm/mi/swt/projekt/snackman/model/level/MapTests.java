@@ -5,24 +5,23 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 
 public class MapTests {
 
-    Map map;
+    SnackManMap map;
     int w = 15;
-    int h = 10;
+    int h = 15;
 
     @BeforeEach
     void setUp() {
-        map = new Map(w, h);
+        map = new SnackManMap(w, h);
     }
 
     /**
@@ -89,6 +88,7 @@ public class MapTests {
                 fail("file could not be deleted");
             }
 
+
         } else {
             fail("directory not found");
         }
@@ -109,7 +109,7 @@ public class MapTests {
                     .orElse(null);
 
             Assertions.assertNotNull(newFile);
-            try (BufferedReader reader = new BufferedReader(new FileReader(newFile.getPath()))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(newFile.getPath(), StandardCharsets.UTF_8))) {
                 String line;
                 int lines = 0;
                 while ((line = reader.readLine()) != null) {
@@ -118,9 +118,9 @@ public class MapTests {
 
                     for (int col = 0; col < w; col++) {
                         switch (map.getTileAt(col, lines).getOccupationType()) {
-                            case FREE -> Assertions.assertEquals("0", tokens[col]);
-                            case WALL -> Assertions.assertEquals("-1", tokens[col]);
-                            case ITEM -> Assertions.assertEquals("1", tokens[col]);
+                            case FREE -> Assertions.assertEquals(String.valueOf('\u2591'), tokens[col]);
+                            case WALL -> Assertions.assertEquals(String.valueOf('\u2588'), tokens[col]);
+                            case ITEM -> Assertions.assertEquals(String.valueOf('\u25CF'), tokens[col]);
                             default -> fail("unknown OccupationType in map: " + map.getTileAt(col, lines).getOccupationType());
                         }
                     }
@@ -144,10 +144,10 @@ public class MapTests {
      */
     @Test
     void testFileConstructor() {
-        map = new Map(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
 
         Assertions.assertEquals(15, w);
-        Assertions.assertEquals(10, h);
+        Assertions.assertEquals(15, h);
 
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {

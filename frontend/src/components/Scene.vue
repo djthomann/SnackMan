@@ -1,5 +1,7 @@
 <template>
-  <div ref="rendererContainer" class="canvas-container"></div>
+  <div ref="rendererContainer" class="canvas-container">
+    <button id="startButton">Start</button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -7,58 +9,77 @@ import { defineComponent, onUnmounted, ref, onMounted } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PointerLockControls } from 'three/examples/jsm/Addons.js';
+import modelService from '@/services/modelService';
+
+// Groups of different map objects
+let wallsGroup: THREE.Group;
+// let floorGroup: THREE.Group
+let foodGroup: THREE.Group;
+
+// Models from modelService
+let bananaModel: THREE.Group;
+let appleModel: THREE.Group;
+let orangeModel: THREE.Group;
+
+// mesh for walls
+let box: THREE.Mesh;
+
+/* for fallback purposes if no model is loaded
+let plane: THREE.Mesh;
+let sphere: THREE.Mesh;
+*/
 
 export default defineComponent({
   name: 'Scene',
   setup() {
-    
-    const { serverResponse, connect, sendMessage, closeConnection } = useWebSocket();
+    const { connect, sendMessage, closeConnection } = useWebSocket();
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
+    const player = new THREE.Mesh();
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
-    let box: THREE.Mesh;
+    let cone: THREE.Mesh;
     let plane: THREE.Mesh;
     let ambientLight: THREE.AmbientLight;
     let directionalLight: THREE.DirectionalLight;
-    let controls: OrbitControls | null = null;
+    let controls: PointerLockControls;
+    let mouseMovement = false;
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
-      console.log("Processing server message");
+      console.log('Processing server message');
 
-      if(message.startsWith("MOVE")) {
-        let key: string = message.split(":")[1]
+      if (message.startsWith('MOVE')) {
+        let key: string = message.split(':')[1];
 
-        if(key === "KeyD") {
-          box.position.x += 0.2;
-        } else if (key === "KeyA") {
-          box.position.x -= 0.2;
-        } else if (key === "KeyW") {
-          box.position.z -= 0.2;
-        } else if (key === "KeyS") {
-          box.position.z += 0.2;
+        // Move the camera
+        moveCamera(JSON.parse(message.split(';')[1]))
+
+        if (key === 'KeyD') {
+          cone.position.x += 0.2;
+        } else if (key === 'KeyA') {
+          cone.position.x -= 0.2;
+        } else if (key === 'KeyW') {
+          cone.position.z -= 0.2;
+        } else if (key === 'KeyS') {
+          cone.position.z += 0.2;
         }
+      } else if (message.startsWith('MAP')) {
+        console.log('processing map');
+        const map = JSON.parse(message.split(';')[1]);
+        loadMap(map);
       }
     };
 
-    // Handle key press und send Event via WebSocket
-    const handleKeyPress = (event: KeyboardEvent) => {
-      sendMessage(`KEY:${event.code}`);
-      console.log(`Key pressed: ${event.key}`);
-    };
-
-    document.addEventListener('keypress', handleKeyPress);
-
-    onMounted(() => {
+    onMounted(async () => {
       initScene();
+      loadModels();
       eventBus.on('serverMessage', handleServerMessage);
 
-      
       connect();
 
       window.addEventListener('resize', onWindowResize);
@@ -79,14 +100,88 @@ export default defineComponent({
       window.removeEventListener('resize', onWindowResize);
     });
 
+    async function loadModels() {
+      try {
+        // Service initialisieren
+        await modelService.initialize();
+
+        // Modelle abrufen
+        bananaModel = modelService.getModel('banana');
+        bananaModel.scale.set(0.05, 0.05, 0.05);
+
+        appleModel = modelService.getModel('apple');
+        appleModel.scale.set(0.2, 0.2, 0.2);
+
+        orangeModel = modelService.getModel('orange');
+        orangeModel.scale.set(0.0025, 0.0025, 0.0025);
+
+        console.log('Models loaded');
+      } catch (error) {
+        console.error('Error initializing or loading model:', error);
+      }
+    }
+
+    function loadMap(map: any) {
+      console.log('Received mapdata' + map);
+      const w = map.w;
+      const h = map.h;
+      const tiles = map.allTiles;
+
+      for (const row of tiles) {
+        for (const tile of row) {
+          const occupationType = tile.occupationType;
+          if (occupationType == 'WALL') {
+            // console.log(tile)
+            wallsGroup.add(createWall(tile.x, tile.y));
+          } else if (occupationType == 'ITEM') {
+            foodGroup.add(createFood(tile.x, tile.y, Math.random() * 400 + 100));
+          }
+        }
+      }
+
+
+      scene.add(wallsGroup);
+      wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+
+      scene.add(foodGroup);
+      foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+
+      const floor = createFloorTile(w, h);
+      // console.log('Creating Floor with: ' + w + '|' + h);
+      scene.add(floor);
+    }
+
+    /**
+     * The camera is moved to the updated position when the w-key is pressed
+     */
+    function moveCamera(moveInformation: any) {
+
+        const newCameraX = moveInformation.movementVector.x
+        const newCameraY = moveInformation.movementVector.y
+        const newCameraZ = moveInformation.movementVector.z
+
+        console.log(`New camera position after move event was sent back from the server: x = ${newCameraX}, y = ${newCameraY}, z = ${newCameraZ}`)
+
+        camera.position.set(newCameraX, newCameraY, newCameraZ);
+    }
+
     function initScene() {
       // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x111111);
 
+      wallsGroup = new THREE.Group();
+      // floorGroup = new THREE.Group()
+      foodGroup = new THREE.Group();
+
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(5, 7.5, 7.5);
+      camera.position.set(0, 1.7, 0);
+
+      // Vectors
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.normalize();
 
       // Renderer
       renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -98,21 +193,23 @@ export default defineComponent({
       }
 
       // Dummy Box
-      const boxGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-      const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
-      box = new THREE.Mesh(boxGeometry, boxMaterial);
-      box.position.set(0, 0, 0);
-      box.castShadow = true;
-      scene.add(box);
+      /*
+      const boxGeometry = new THREE.BoxGeometry(1.5, 1.5, 1.5)
+      const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f })
+      box = new THREE.Mesh(boxGeometry, boxMaterial)
+      box.position.set(0, 0, 0)
+      box.castShadow = true
+      scene.add(box)
 
       // Ground Plane
-      const planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
-      const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
-      plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.rotation.x = -Math.PI / 2;
-      plane.position.set(0, -3, 0);
-      plane.receiveShadow = true;
-      scene.add(plane);
+      const planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20)
+      const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 })
+      plane = new THREE.Mesh(planeGeometry, planeMaterial)
+      plane.rotation.x = -Math.PI / 2
+      plane.position.set(0, -3, 0)
+      plane.receiveShadow = true
+      scene.add(plane)
+      */
 
       // Ambient Light
       ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -124,16 +221,164 @@ export default defineComponent({
       directionalLight.castShadow = true;
       scene.add(directionalLight);
 
-      // Orbit Controls
-      controls = new OrbitControls(camera, renderer.domElement);
+      // Player Object
+      scene.add(player);
+      player.add(camera);
+      player.add(cone);
+
+      // Player Body
+      const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32);
+      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+      cone = new THREE.Mesh(coneGeometry, coneMaterial);
+      cone.position.set(0, 0.5, 0);
+      cone.rotation.x = -Math.PI / 2;
+      cone.castShadow = true;
+      scene.add(cone);
+
+      // PointerLock Controls
+      controls = new PointerLockControls(camera, renderer.domElement);
+      const startButton = document.getElementById('startButton') as HTMLInputElement;
+      player.add(controls.object);
+      startButton.addEventListener(
+        'click',
+        function () {
+          controls.lock();
+        },
+        false,
+      );
+
+      // Hide and unhide start button
+      controls.addEventListener('lock', () => {
+        startButton.classList.add('hidden'); // Button verstecken
+      });
+
+      controls.addEventListener('unlock', () => {
+        startButton.classList.remove('hidden'); // Button anzeigen
+      });
+
+      // TODO When entering a user name no move event should be sent to the backend
+      // Handle key press und send Event via WebSocket
+      const handleKeyPress = (event: KeyboardEvent) => {
+        if (['w', 'a', 's', 'd'].includes(event.key)) {
+          let forward = new THREE.Vector3(0, 0, 0);
+          forward = camera.getWorldDirection(forward);
+          forward.y = 0;
+          forward.normalize()
+          let vector;
+          const angle = Math.PI / 2;
+          const rotationAxis = new THREE.Vector3(0, 1, 0);
+
+          // Calculate movement vector
+          switch (event.key) {
+            case 'w':
+              vector = forward.clone();
+              break;
+            case 'a':
+              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
+              break;
+            case 's':
+              vector = forward.clone().negate();
+              break;
+            case 'd':
+              vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
+              break;
+          }
+          
+          //TODO: give vector to sendMessage()
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: vector
+          });
+
+          sendMessage(data);
+          //console.log('MovementVector:', vector);
+        } else if(event.key === " ") {
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: new THREE.Vector3(0, 1, 0)
+          });
+          sendMessage(data);
+        }
+      };
+
+      document.addEventListener('keypress', handleKeyPress);
+      document.addEventListener('keydown', (event) => {
+
+        if(event.key === "Shift") {
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: new THREE.Vector3(0, -1, 0)
+          });
+          sendMessage(data);
+        }
+        
+      })
+      document.addEventListener('mousemove', () => {
+        mouseMovement = true;
+      });
 
       // start Render-Loop
       animate();
     }
 
+    // Creates one large plane as the floor
+    function createFloorTile(x: number, y: number) {
+      const planeGeometry = new THREE.PlaneGeometry(x, y, 1, 1);
+      const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
+      plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.set(0, -0.5, 0);
+      plane.receiveShadow = true;
+
+      return plane;
+    }
+
+    // Creates one cube per wall tile
+    function createWall(x: number, y: number) {
+      const boxGeometry = new THREE.BoxGeometry(1, 3, 1);
+      const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+      box = new THREE.Mesh(boxGeometry, boxMaterial);
+      box.position.set(x, 0, y);
+      box.castShadow = true;
+
+      return box;
+    }
+
+    // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
+    function createFood(x: number, y: number, calories: number) {
+      if (calories > 300) {
+        const newBanana = bananaModel.clone();
+        newBanana.position.set(x, 0, y);
+        return newBanana;
+      } else if (calories > 200) {
+        const newApple = appleModel.clone();
+        newApple.position.set(x, 0, y);
+        return newApple;
+      } else {
+        const newPear = orangeModel.clone();
+        newPear.position.set(x, 0, y);
+        return newPear;
+      }
+    }
+
     function animate() {
       requestAnimationFrame(animate);
-      controls?.update();
+      rotateBody();
+
+      const time = Date.now() * 0.001;
+
+      // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
+      foodGroup.children.forEach((element, index) => {
+        element.rotation.y += 0.01;
+        element.position.y = Math.sin(time * 2 + index) * 0.1;
+      });
+
       renderer.render(scene, camera);
     }
 
@@ -143,22 +388,137 @@ export default defineComponent({
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
+    // Method to turn the player body according to camera forward direction
+    function rotateBody() {
+      const forward = new THREE.Vector3();
+      const playerForward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      player.getWorldDirection(playerForward);
+      forward.normalize();
+      playerForward.normalize();
+
+      if (controls.isLocked) {
+        if (mouseMovement) {
+          const angleYCameraDirection = Math.atan2(
+            playerForward.x - forward.x,
+            playerForward.z - forward.z,
+          );
+
+          // Interpolation for smooth rotation
+          const smoothingFactor = 0.1;
+          const currentAngle = cone.rotation.z;
+
+          // Player body facing forward
+          if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
+            //console.log('Face Forward');
+            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
+
+            // Player body facing forward-right
+          } else if (
+            forward.z < 0 &&
+            angleYCameraDirection < -0.125 &&
+            angleYCameraDirection > -0.375
+          ) {
+            //console.log('Turn Forward Right');
+            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
+
+            // Player body facing right
+          } else if (angleYCameraDirection < -0.375) {
+            //console.log('Turn Right');
+            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
+
+            // Player body facing backwards-right
+          } else if (
+            forward.z > 0 &&
+            angleYCameraDirection < -0.125 &&
+            angleYCameraDirection > -0.375
+          ) {
+            //console.log('Turn Backward Right');
+            cone.rotation.z = THREE.MathUtils.lerp(
+              currentAngle,
+              -Math.PI / 2 - Math.PI / 4,
+              smoothingFactor,
+            );
+
+            // Player body facing backwards
+          } else if (
+            forward.z > 0 &&
+            angleYCameraDirection < 0.125 &&
+            angleYCameraDirection > -0.125
+          ) {
+            //console.log('Turn Backwards');
+            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
+
+            // Player body facing backwards-left
+          } else if (
+            forward.z > 0 &&
+            angleYCameraDirection > 0.125 &&
+            angleYCameraDirection < 0.375
+          ) {
+            //console.log('Turn Backward Left');
+            cone.rotation.z = THREE.MathUtils.lerp(
+              currentAngle,
+              Math.PI / 2 + Math.PI / 4,
+              smoothingFactor,
+            );
+
+            // Player body facing left
+          } else if (angleYCameraDirection > 0.375) {
+            //console.log('Turn Left');
+            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
+
+            // Player body facing forward-left
+          } else if (
+            forward.z < 0 &&
+            angleYCameraDirection > 0.125 &&
+            angleYCameraDirection < 0.375
+          ) {
+            //console.log('Turn Forward Left');
+            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
+          }
+        }
+      }
+    }
+
     return {
       rendererContainer,
-      serverMessage
+      serverMessage,
     };
-  }
+  },
 });
 </script>
 
 <style scoped>
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
+
 .canvas-container {
+  position: relative;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+}
+
+#startButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10;
+  display: block;
+}
+
+#startButton.hidden {
+  display: none;
 }
 </style>

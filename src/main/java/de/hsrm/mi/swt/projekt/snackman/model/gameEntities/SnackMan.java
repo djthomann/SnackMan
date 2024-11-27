@@ -1,5 +1,13 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import org.joml.Vector3f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
+
 /**
  * The `SnackMan` class represents a player character in the game who has an
  * initial position on a plane and has a calorie count.
@@ -10,6 +18,8 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * 
  */
 public class SnackMan extends PlayerObject implements CanEat {
+
+    Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
     /** The calorie count of the SnackMan */
     private int gainedCalories;
@@ -45,9 +55,9 @@ public class SnackMan extends PlayerObject implements CanEat {
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        this.x = newX; 
-        this.y = newY; 
-        this.z = newZ; 
+        this.x += newX; 
+        this.y += newY; 
+        this.z += newZ; 
     }
 
     /**
@@ -69,9 +79,26 @@ public class SnackMan extends PlayerObject implements CanEat {
         return gainedCalories;
     }
 
-    /*
     @Override
-    public void handle(Event event) {}
-    */
+    public void handle(Event event) {
+
+        if(event.getObjectID() != this.id) {
+            return;
+        }
+
+        switch(event.getType()) {
+
+            case MOVE:
+
+                Vector3f vector = ((MoveEvent)event).getMovementVector();
+
+                this.move(vector.x * 0.2f,vector.y * 0.2f, vector.z * 0.2f);
+
+                break;
+
+        }
+
+        logger.info("Event arrived at SnackMan");
+    }
 
 }

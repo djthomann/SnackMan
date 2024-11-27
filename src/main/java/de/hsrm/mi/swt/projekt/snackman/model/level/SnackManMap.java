@@ -3,29 +3,31 @@ package de.hsrm.mi.swt.projekt.snackman.model.level;
 import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class Map {
+public class SnackManMap {
 
     // due to sidewinder (and Simon's brain):
     // Tile at (x, y) can be reached via allTiles[y][x],
     // or (recommended) getTileAt(x, y)
-    private Tile[][] allTiles;
     private int w;
     private int h;
+    private Tile[][] allTiles;
     private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
      * Constructor, creates randomly generated Map object with dimensions width w and height h
+     * to ensure proper map, w and h are made odd, if not already
      * @param w breite
      * @param h höhe
      */
-    public Map(int w, int h) {
-        this.w = w;
-        this.h = h;
+    public SnackManMap(int w, int h) {
+        this.w = (w % 2 == 1) ? w : w + 1;
+        this.h = (h % 2 == 1) ? h : h + 1;
         this.makeBlankMap();
         this.sidewinder();
     }
@@ -34,7 +36,7 @@ public class Map {
      * Constructor, creates Map object on base of given csv file
      * @param filename path to file (only filename needed, no path)
      */
-    public Map(String filename) {
+    public SnackManMap(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
 
             String line;
@@ -54,10 +56,10 @@ public class Map {
 
                 for (int i = 0; i < tokens.length; i++) {
                     Tile newTile;
-                    switch (tokens[i]) {
-                        case "-1" -> newTile = new Tile(i, lines, OccupationType.WALL);
-                        case "0" -> newTile = new Tile(i, lines, OccupationType.FREE);
-                        case "1" -> newTile = new Tile(i, lines, OccupationType.ITEM);
+                    switch (tokens[i].charAt(0)) {
+                        case '\u2588' -> newTile = new Tile(i, lines, OccupationType.WALL);
+                        case '\u2591' -> newTile = new Tile(i, lines, OccupationType.FREE);
+                        case '\u25CF' -> newTile = new Tile(i, lines, OccupationType.ITEM);
                         default -> throw new IOException("Unexpected token while loading file: " + tokens[i]);
                     }
 
@@ -80,14 +82,26 @@ public class Map {
     }
 
     /**
-     * creates new blank map with walls on the outside
+     * creates new map with walls on the outside and grid of walls inside
      */
     private void makeBlankMap() {
         this.allTiles = new Tile[h][w];
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                allTiles[y][x] = new Tile(x, y, OccupationType.WALL);
+                /*
+                if (i == 0 || j == 0 || i == h - 1 || j == w - 1) {
+                    res[i][j] = -1;
+                } else {
+                    res[i][j] = (i == 1 || (i % 2 == 1 && j % 2 == 1)) ? 0 : -1;
+                }
+                 */
+                OccupationType occupationType = OccupationType.WALL;
+
+                if (y != h - 1 && x != 0 && x != w - 1 && (y == 1 || (y % 2 == 1 && x % 2 == 1))) {
+                    occupationType = OccupationType.ITEM;
+                }
+                allTiles[y][x] = new Tile(x, y, occupationType);
             }
         }
     }
@@ -176,20 +190,14 @@ public class Map {
      */
     public void saveAsCSV() {
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm_ss");
         File file = new File(MapGenerationConfig.SAVED_MAPS_PATH + "map_" + now.format(dateTimeFormatter) + ".csv");
 
-        try (FileWriter writer = new FileWriter(file.getPath())) {
+        try (FileWriter writer = new FileWriter(file.getPath(), StandardCharsets.UTF_8)) {
 
             for (int j = 0; j < h; j++) {
                 for (int i = 0; i < w; i++) {
-                    String token = "";
-                    switch (allTiles[j][i].getOccupationType()) {
-                        case FREE -> token = "0";
-                        case WALL -> token = "-1";
-                        case ITEM -> token = "1";
-                    }
-                    writer.write(token);
+                    writer.write(allTiles[j][i].getOccupationType().c);
                     if (i < w - 1) {
                         writer.write(",");
                     } else {
@@ -240,4 +248,13 @@ public class Map {
 
         return surroudings; 
     }
+
+    public int getW() {
+        return w;
+    }
+    
+    public int getH() {
+        return h;
+    }
+
 }
