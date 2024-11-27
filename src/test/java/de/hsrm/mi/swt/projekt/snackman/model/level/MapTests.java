@@ -4,6 +4,9 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.*;
@@ -159,5 +162,22 @@ public class MapTests {
                 }
             }
         }
+    }
+
+    /**
+     * tests whether a 3x3-map is formed around a given tile
+     */
+    @Test
+    void testSurroindingTiles(){
+        Tile centerTile = map.getTileAt(2, 2); 
+        Tile[][] surroundings = map.getSurroundingTiles(centerTile);
+
+        Assertions.assertNotNull(surroundings); 
+        Assertions.assertEquals(3, surroundings.length); 
+        Assertions.assertEquals(3, surroundings[0].length); 
+        Assertions.assertEquals(centerTile, surroundings[1][1]);
+
+        Assertions.assertEquals(map.getTileAt(1, 1), surroundings[0][0]); // Top-left
+        Assertions.assertEquals(map.getTileAt(3, 3), surroundings[2][2]); // Bottom-Right
     }
 }
