@@ -1,8 +1,5 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-
 /**
  * The `Food` class represents a NP Object in the game.
  * 
@@ -10,10 +7,10 @@ import jakarta.persistence.GeneratedValue;
  */
 public class Food {
 
+    private IDGenerator idGenerator = IDGenerator.getInstance();
+
     /** The unique identifier for the Food */
-    @Id
-    @GeneratedValue
-    private long id;
+    private long id = idGenerator.getUniqueID();
 
     /** The x-coordinate of the Food */
     private float x;
