@@ -1,14 +1,11 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
-import org.glassfish.jaxb.core.v2.model.core.ID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
 
 public class Lobby {
     
