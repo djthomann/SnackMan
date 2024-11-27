@@ -26,6 +26,4 @@ public class EatEvent extends Event {
         this.calories = calories;
     }
 
-
-    
 }

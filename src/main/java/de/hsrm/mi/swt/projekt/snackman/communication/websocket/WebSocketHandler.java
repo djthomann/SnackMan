@@ -125,32 +125,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    /** Called by GameManager and converts Event to JSON to send to Frontend */
-    public void sendMessage(Event event) {
-
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
-        String json;
-
-
-        switch (event.getType()) {
-                    case COLLISION -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
-                    case GAME_END -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
-                    case GAME_START -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
-                    case GAME_STATE -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
-                    case MOVE -> {
-                        json = gson.toJson(event);
-                    }
-                    case REGISTER_GHOST -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
-                    case REGISTER_SNACKMAN -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
-                    case REGISTER_USERNAME -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
-                    case USER_INFO -> throw new UnsupportedOperationException("Unimplemented case: " + event.getType());
-                    default -> throw new IllegalArgumentException("Unexpected value: " + event.getType()); 
-        }
-
-        // TODO: Damit wir das Event zurück senden bräuchten wir eine Verwaltung der Clients bzw. GameStateEvent satt move event. 
-    }
-
     /**
      * Notifies the frontend about the new game state by sending back a JSON string
      * Right now, only the new position after a move event is sent back to the frontend
@@ -160,28 +134,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void notifyFrontend(Event event) {
 
         // JSON-Conversion
-        ObjectMapper mapper = new ObjectMapper();
-        String returnString = "";
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        String json;
 
         // TODO This is a temporary solution, clarify to which sessions events are sent back
         for(WebSocketSession session : this.clients.keySet()) {
-
             try {
-                String json = mapper.writeValueAsString(event);
-                returnString = "MOVE;" + json;
-                logger.info("Final JSON for move event: " + returnString);
-                session.sendMessage(new TextMessage(returnString));
-
-                logger.info("Move Event was sent back to client " + this.clients.get(session).getUsername());
-    
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            json = gson.toJson(event);
+            logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
+            session.sendMessage(new TextMessage(event.getType().toString()+";"+json));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
     }
 
     /**
