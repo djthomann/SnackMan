@@ -44,6 +44,7 @@ public class MapTests {
 
     @Test
     void testFoodCreation() {
+        // für generierte Maps
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
                 if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
@@ -51,6 +52,17 @@ public class MapTests {
                 }
             }
         }
+
+        // für maps aus Dateien
+        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
+                    Assertions.assertNotNull(map.getTileAt(col, row).getOccupation(), "occupation on tile with occupation type 'ITEM' should not be null");
+                }
+            }
+        }
+
     }
 
     /**
