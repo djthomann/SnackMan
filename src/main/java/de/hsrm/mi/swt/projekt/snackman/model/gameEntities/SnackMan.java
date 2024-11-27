@@ -49,9 +49,9 @@ public class SnackMan extends PlayerObject implements CanEat {
     /**
      * moves SnackMan to new coords
      * 
-     * @param newX the x-coordinate to move the `SnackMan` to
-     * @param newY the y-coordinate to move the `SnackMan` to
-     * @param newZ the y-coordinate to move the `SnackMan` to
+     * @param newX the x-coordinate to move the `SnackMan`
+     * @param newY the y-coordinate to move the `SnackMan`
+     * @param newZ the y-coordinate to move the `SnackMan`
      */
     @Override
     public void move(float newX, float newY, float newZ) {

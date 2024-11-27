@@ -86,15 +86,15 @@ public class Chicken implements CanEat, MovableAndSubscribable {
     /**
      * Moves chicken to new coords
      * 
-     * @param newX the x-coordinate to move the Chicken to
-     * @param newY the y-coordinate to move the Chicken to
-     * @param newZ the z-coordinate (remains the same)
+     * @param newX the x-coordinate to move the Chicken
+     * @param newY the y-coordinate to move the Chicken
+     * @param newZ the z-coordinate to move the Chicken
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        x = newX; 
-        y = newY; 
-        z = newZ; 
+        this.x += newX; 
+        this.y += newY; 
+        this.z += newZ; 
     }
 
     /**
@@ -137,7 +137,7 @@ public class Chicken implements CanEat, MovableAndSubscribable {
                 float movementX = (float) tuple.get(0);
                 float movementY = (float) tuple.get(1);
                 float movementZ = (float) tuple.get(2);
-                move((x + movementX), (y + movementY), (z + movementZ)); 
+                move((movementX), (movementY), (movementZ)); 
             }
         } catch (Exception e) {
             e.printStackTrace();
