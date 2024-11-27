@@ -1,5 +1,8 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+
 /**
  * The `Food` class represents a NP Object in the game.
  * 
@@ -8,7 +11,9 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 public class Food {
 
     /** The unique identifier for the Food */
-    private final long id;
+    @Id
+    @GeneratedValue
+    private long id;
 
     /** The x-coordinate of the Food */
     private float x;
@@ -18,21 +23,21 @@ public class Food {
 
     /** The calorie count contained in the Food */
     private int calories;
+    private FoodType foodType;
 
     /**
      * Constructs a new Food with the specified position and
      * initial calorie count.
-     * 
-     * @param id        the unique identifier of the Food
+     *
      * @param x         the initial x-coordinate of the Food
      * @param y         the initial y-coordinate of the Food       
-     * @param calories  the initial number of calories of the Food
+     * @param foodType  the initial type of the Food
      */
-    public Food(long id, float x, float y, int calories) {
-        this.id = id;
+    public Food(float x, float y, FoodType foodType) {
         this.x = x; 
-        this.y = y; 
-        this.calories = calories;
+        this.y = y;
+        this.foodType = foodType;
+        this.calories = foodType.getCalories();
     }       
     
     /**

@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -88,8 +89,15 @@ public class SnackManMap {
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
                 if (allTiles[row][col].getOccupationType() == OccupationType.ITEM) {
-                    int calories = r.nextInt(MapGenerationConfig.MAX_CALORIES - MapGenerationConfig.MIN_CALORIES + 1) + MapGenerationConfig.MIN_CALORIES;
-                    allTiles[row][col].setOccupation(new Food(System.currentTimeMillis(), col, row, calories));
+                    FoodType foodType = FoodType.OKAY;
+                    if (r.nextBoolean()) {
+                        if (r.nextBoolean()) {
+                            foodType = FoodType.HEALTHY;
+                        } else {
+                            foodType = FoodType.UNHEALTHY;
+                        }
+                    }
+                    allTiles[row][col].setOccupation(new Food(col, row, foodType));
                 }
             }
         }
