@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
 /**
  * The `SnackMan` class represents a player character in the game who has an
@@ -21,6 +22,8 @@ public class SnackMan extends PlayerObject implements CanEat {
 
     Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
+    final float JUMP_HEIGHT = 5.0F;
+    GameManager gameManger;
     /** The calorie count of the SnackMan */
     private int gainedCalories;
 
@@ -33,9 +36,10 @@ public class SnackMan extends PlayerObject implements CanEat {
      * @param y        the initial y-coordinate of the `SnackMan` 
      * @param z        the initial z-coordinate of the `SnackMan` 
      */
-    public SnackMan(int id, float x, float y, float z) {
+    public SnackMan(int id, float x, float y, float z, GameManager gameManager) {
         super(id, x, y, z);
         this.gainedCalories = 0;
+        this.gameManger = gameManager;
     }
 
     /**
@@ -58,6 +62,46 @@ public class SnackMan extends PlayerObject implements CanEat {
         this.x += newX; 
         this.y += newY; 
         this.z += newZ; 
+    }
+
+    /**
+     * Method to implement jumping
+     */
+    public void jump() {
+
+        for(int i = 0; i < 5; i++) {
+            this.move(0, JUMP_HEIGHT/5, 0);
+
+            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+            gameManger.notifyChange(moveEvent);
+
+            logger.info("One fifth up");
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            
+        }
+
+        for(int i = 0; i < 5; i++) {
+            this.move(0, -JUMP_HEIGHT/5, 0);
+
+            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+            gameManger.notifyChange(moveEvent);
+
+            logger.info("One fifth down");
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            
+        }
+        
+
     }
 
     /**
@@ -90,8 +134,20 @@ public class SnackMan extends PlayerObject implements CanEat {
             case MOVE:
 
                 Vector3f vector = ((MoveEvent)event).getMovementVector();
+                logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
 
-                this.move(vector.x * 0.2f,vector.y * 0.2f, vector.z * 0.2f);
+                //checks if the movementVector is from a jump action or not
+                if(vector.y != 0.0) {
+                    
+                    //TODO while jumping no other key presses are possible
+                    this.jump();
+
+                    logger.info("SNACKMAN JUMPT");
+                }
+
+                else {
+                    this.move(vector.x * 0.2f,vector.y * 0.2f, vector.z * 0.2f);
+                }
 
                 break;
 
