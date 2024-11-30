@@ -1,5 +1,10 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +27,24 @@ public class SnackMan extends PlayerObject implements CanEat {
 
     Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
-    final float JUMP_HEIGHT = 5.0F;
+    // Jumping constants
+    final float GRAVITY = -9.81f; // Gravity constant for physically realistic jumping
+    final float INITIAL_VELOCITY = 8.0f; // Initial velocity at the start of the jump
+    final float JUMP_BOOST = 5.0f; // Boost applied to the current jump if the SnackMan is already jumping and the jump-method is called again
+    final int MAX_BOOSTS = 2; // Maximum number of velocity boosts that is possible to reach during one jump
+
+    // Jumping variables
+    private float currentVelocity;
+    private boolean jumping;
+    private float initialY;
+    private float heightGain;
+    private int boosts;
+
+    private ScheduledExecutorService jumpExecutor = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> jumpTaskFuture;
+
+    //final float JUMP_HEIGHT = 5.0F;
+
     GameManager gameManger;
     /** The calorie count of the SnackMan */
     private int gainedCalories;
@@ -64,11 +86,130 @@ public class SnackMan extends PlayerObject implements CanEat {
         this.z += newZ; 
     }
 
-    /**
+     /**
      * Method to implement jumping
      */
     public void jump() {
 
+        // If we are not jumping, start new jump
+        if(!jumping) {
+
+            this.initialY = this.y;
+            this.currentVelocity = INITIAL_VELOCITY;
+            this.jumping = true;
+            this.boosts = 0;
+            float deltaTime = 0.1f;
+ 
+            Runnable jumpTask = new Runnable() {
+
+                @Override
+                public void run() {
+                
+                        /**
+                         * The gravity (a negative constant) is applied to the SnackMan's velocity
+                         * The velocity starts at a positive value
+                         * It is 0 when the SnackMan is at its highest position
+                         * It is negative during the falling phase
+                         * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between position updates and G the gravity constant
+                         */
+                        currentVelocity += deltaTime * GRAVITY;
+            
+                        /**
+                         * Updating the SnackMan's position by applying the velocity to the current position
+                         * Formula: y = y + deltaT * v where y is the position, deltaT the time between position updates and v the SnackMan's current velocity
+                         */
+                        heightGain = deltaTime * currentVelocity;
+            
+                        move(0, heightGain, 0);
+            
+                        /**
+                         * Check if the SnackMan has landed at its initial y-position
+                         * If so, the jump is done
+                         */
+                        if (y < initialY ) {
+                            y = initialY;
+                            jumping = false;
+                        }
+            
+                        MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                        gameManger.notifyChange(moveEvent);
+            
+                        // If the jump is done, the task is not repeated anymore
+                        if (!jumping) {
+                            boosts = 0;
+                            jumpTaskFuture.cancel(false);
+                        }
+                }
+                
+            };
+
+            // Repeat task every time the specified time period has passed until cancelled
+            jumpTaskFuture = jumpExecutor.scheduleAtFixedRate(jumpTask, 0, (long) (deltaTime * 300), TimeUnit.MILLISECONDS);
+        
+
+        /**
+         * If we are already jumping and have not reached the maximum possible number of boosts,
+         * apply boost to current velocity, so that we jump higher
+         */
+        } else if (this.boosts < MAX_BOOSTS) {
+            this.currentVelocity += JUMP_BOOST;
+            this.boosts++;
+        }
+    }
+
+    /**
+     * Method to implement jumping
+     */
+    /*public void jump() {
+
+
+        float currentVelocity = INITIAL_VELOCITY;
+        float deltaTime = 0.1f;
+        float initialY = this.y;
+        float heightGain;
+        boolean jumping = true;
+
+        while(jumping) {*/
+
+            /**
+             * The gravity (a negative constant) is applied to the SnackMan's velocity
+             * The velocity starts at a positive value
+             * It is 0 when the SnackMan is at its highest position
+             * It is negative during the falling phase
+             * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between position updates and G the gravity constant
+             */
+            //currentVelocity += deltaTime * GRAVITY;
+
+            /**
+             * Updating the SnackMan's position by applying the velocity to the current position
+             * Formula: y = y + deltaT * v where y is the position, deltaT the time between position updates and v the SnackMan's current velocity
+             */
+            /* heightGain = deltaTime * currentVelocity;
+
+            this.move(0, heightGain, 0); */
+
+            /**
+             * Check if the SnackMan has landed at its initial y-position
+             * If so, the jump is done
+             */
+            /* if(this.y < initialY) {
+                this.y = initialY;
+                jumping = false;
+            }
+
+            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+            gameManger.notifyChange(moveEvent);
+
+            try {
+                Thread.sleep((long) (deltaTime * 300));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+         */
+        
+/* 
         for(int i = 0; i < 5; i++) {
             this.move(0, JUMP_HEIGHT/5, 0);
 
@@ -97,12 +238,12 @@ public class SnackMan extends PlayerObject implements CanEat {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+            } 
             
         }
         
 
-    }
+    }*/
 
     /**
      * method to Consume Food
