@@ -56,10 +56,10 @@ export default defineComponent({
       if (message.startsWith('MOVE')) {
         let key: string = message.split(':')[1];
 
-        // Move the camera
-        moveCamera(JSON.parse(message.split(';')[1]))
+        // Move the player
+        movePlayer(JSON.parse(message.split(';')[1]))
 
-        if (key === 'KeyD') {
+      /*  if (key === 'KeyD') {
           cone.position.x += 0.2;
         } else if (key === 'KeyA') {
           cone.position.x -= 0.2;
@@ -68,6 +68,7 @@ export default defineComponent({
         } else if (key === 'KeyS') {
           cone.position.z += 0.2;
         }
+          */
       } else if (message.startsWith('MAP')) {
         console.log('processing map');
         const map = JSON.parse(message.split(';')[1]);
@@ -154,15 +155,15 @@ export default defineComponent({
     /**
      * The camera is moved to the updated position when the w-key is pressed
      */
-    function moveCamera(moveInformation: any) {
+    function movePlayer(moveInformation: any) {
 
-        const newCameraX = moveInformation.movementVector.x
-        const newCameraY = moveInformation.movementVector.y
-        const newCameraZ = moveInformation.movementVector.z
+        const newPlayerPositionX = moveInformation.movementVector.x;
+        const newPlayerPositionY = moveInformation.movementVector.y;
+        const newPlayerPositionZ = moveInformation.movementVector.z;
 
-        console.log(`New camera position after move event was sent back from the server: x = ${newCameraX}, y = ${newCameraY}, z = ${newCameraZ}`)
+        console.log(`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`)
 
-        camera.position.set(newCameraX, newCameraY, newCameraZ);
+        player.position.set(newPlayerPositionX, newPlayerPositionY, newPlayerPositionZ);
     }
 
     function initScene() {
@@ -176,7 +177,7 @@ export default defineComponent({
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 1.7, 0);
+      camera.position.set(0, 0.5, 0);
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -221,19 +222,19 @@ export default defineComponent({
       directionalLight.castShadow = true;
       scene.add(directionalLight);
 
+      // Player Body
+      const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 32);
+      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+      cone = new THREE.Mesh(coneGeometry, coneMaterial);
+      cone.position.set(0, 0, 0);
+      cone.rotation.x = -Math.PI / 2;
+      cone.castShadow = true;
+      scene.add(cone);
+
       // Player Object
       scene.add(player);
       player.add(camera);
       player.add(cone);
-
-      // Player Body
-      const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32);
-      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
-      cone = new THREE.Mesh(coneGeometry, coneMaterial);
-      cone.position.set(0, 0.5, 0);
-      cone.rotation.x = -Math.PI / 2;
-      cone.castShadow = true;
-      scene.add(cone);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
