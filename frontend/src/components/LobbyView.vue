@@ -1,47 +1,92 @@
 <template>
   <h1>Lobby {{ lobbyCode }}</h1>
-  <form id="gameConfig" action="/api/game-config" method="POST">
+  <form @submit.prevent="submitForm" id="gameConfig" :action="`/lobby/${lobbyCode}`" method="POST">
     <label for="scoreToWin">Score to Win:</label><br>
-    <input type="number" id="scoreToWin" name="scoreToWin" required><br><br>
+    <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" required><br><br>
 
     <label for="speedModifier">Movement-Speed:</label><br>
-    <input type="number" id="speedModifier" name="speedModifier" step="0.01" required><br><br>
+    <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" required><br><br>
 
     <label for="snackmanSpeed">Snackman Speed:</label><br>
-    <input type="number" id="snackmanSpeed" name="snackmanSpeed" required><br><br>
+    <input type="number" id="snackmanSpeed" v-model="gameConfig.snackManSpeed" required><br><br>
 
     <label for="ghostSpeed">Ghost Speed:</label><br>
-    <input type="number" id="ghostSpeed" name="ghostSpeed" required><br><br>
+    <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" required><br><br>
 
     <label for="chickenSpeed">Chicken Speed:</label><br>
-    <input type="number" id="chickenSpeed" name="chickenSpeed" required><br><br>
+    <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" required><br><br>
 
     <label for="mapWidth">Map Width in tiles:</label><br>
-    <input type="number" id="mapWidth" name="mapWidth" required><br><br>
+    <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" required><br><br>
 
     <label for="mapHeight">Map Height in tiles:</label><br>
-    <input type="number" id="mapHeight" name="mapHeight" required><br><br>
+    <input type="number" id="mapHeight" v-model="gameConfig.mapHeight" required><br><br>
 
     <label for="gameTime">Game Time in seconds:</label><br>
-    <input type="number" id="gameTime" name="gameTime" required><br><br>
+    <input type="number" id="gameTime" v-model="gameConfig.gameTime" required><br><br>
 
     <label for="chickenCount">Number of Chicken:</label><br>
-    <input type="number" id="chickenCount" name="chickenCount" required><br><br>
+    <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" required><br><br>
 
     <label for="jumpCalories">Calories Burned on Jump:</label><br>
-    <input type="number" id="jumpCalories" name="jumpCalories" required><br><br>
+    <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" required><br><br>
 
-    <button type="submit" @click="startGame">Start Game</button>
+    <button type="submit">Apply</button>
+    <button @click="startGame">Start Game</button>
   </form>
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { computed } from 'vue';
+import { ref } from 'vue';
+
+interface GameConfig {
+  scoreToWin: number | null,
+  speedModifier: number | null,
+  snackManSpeed: number | null,
+  ghostSpeed: number | null,
+  chickenSpeed: number | null,
+  mapWidth: number | null,
+  mapHeight: number | null,
+  gameTime: number | null,
+  chickenCount: number | null,
+  jumpCalories: number | null,
+}
 
 const route = useRoute();
 const router = useRouter();
-const lobbyCode = computed(() => route.params.code);
+const lobbyCode = ref(route.params.code as string);
+
+const gameConfig = ref<GameConfig>({
+  scoreToWin: null,
+  speedModifier: null,
+  snackManSpeed: null,
+  ghostSpeed: null,
+  chickenSpeed: null,
+  mapWidth: null,
+  mapHeight: null,
+  gameTime: null,
+  chickenCount: null,
+  jumpCalories: null,
+});
+const submitForm = async () => {
+  try {
+    const response = await fetch(`/lobby/${lobbyCode.value}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(gameConfig.value),
+    });
+
+    if (response.ok) {
+      alert("GameConfig successfully updated.")
+    } else {
+      throw new Error("Error saving GameConfig.");
+    }
+  } catch (error) {
+    console.error("Failed to submit GameConfig: ", error);
+    alert("Error while updating GameConfig.");
+  }
+};
 
 const startGame = () => {
   router.push('/game/' + lobbyCode.value);
