@@ -40,6 +40,7 @@
 import { useRoute, useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
 
+// Type definition of GameConfig interface
 interface GameConfig {
   scoreToWin: number | null;
   speedModifier: number | null;
@@ -52,11 +53,7 @@ interface GameConfig {
   chickenCount: number | null;
   jumpCalories: number | null;
 }
-
-const route = useRoute();
-const router = useRouter();
-const lobbyCode = ref(Number(route.params.code));
-
+// Reactive variable to store game config
 const gameConfig = ref<GameConfig>({
   scoreToWin: null,
   speedModifier: null,
@@ -69,6 +66,14 @@ const gameConfig = ref<GameConfig>({
   chickenCount: null,
   jumpCalories: null,
 });
+
+const route = useRoute();
+const router = useRouter();
+const lobbyCode = ref(Number(route.params.code));
+
+// BE Communication may be temporary due to missing Event-Type for GameConfigs
+
+// Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
   try {
     const response = await fetch(`http://localhost:8080/lobby/${lobbyCode.value}`, {
@@ -88,6 +93,7 @@ const submitForm = async () => {
   }
 };
 
+// Method, to fetch GameConfig and fill form with recieved configurations
 const fetchGameConfig = async () => {
   try {
     const response = await fetch(`http://localhost:8080/lobby/${lobbyCode.value}`, {
@@ -109,10 +115,12 @@ const fetchGameConfig = async () => {
   }
 };
 
+// Automatic call on load
 onMounted(() => {
   fetchGameConfig();
 });
 
+// Method, to start the game
 const startGame = () => {
   router.push('/game/' + lobbyCode.value);
 };

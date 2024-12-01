@@ -24,6 +24,7 @@ public class GameConfigController {
 
     private final Map<Long, GameConfig> gameConfigs = new HashMap<>();
 
+    // POST to create GameConfig object
     @CrossOrigin(origins = "http://localhost:5173/")
     @PostMapping("/{n}")
     public ResponseEntity<String> updateGameConfig( 
@@ -36,6 +37,7 @@ public class GameConfigController {
         return ResponseEntity.ok("GameConfig for Lobby " + lobbyID + " successfully updated.");
     }
 
+    // GET to send GameConfig corresponding to LobbyID to FE
     @CrossOrigin(origins = "http://localhost:5173/")
     @GetMapping("/{n}")
     public ResponseEntity<GameConfig> getGameConfig(@PathVariable("n") Long lobbyID) {
