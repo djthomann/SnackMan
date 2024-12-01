@@ -130,7 +130,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * 
      * @param event
      */
-    public synchronized void notifyFrontend(Event event) {
+    public void notifyFrontend(Event event) {
 
         // JSON-Conversion
         GsonBuilder builder = new GsonBuilder();
