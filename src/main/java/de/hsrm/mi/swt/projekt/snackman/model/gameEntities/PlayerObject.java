@@ -19,6 +19,8 @@ public abstract class PlayerObject implements MovableAndSubscribable {
     /** The z-coordinate of the PlayerObject */
     protected float z; 
 
+    /** The radius of the PlayerObject */
+    protected float radius;
     
     /**
      * Constructs a new `PlayerObject` with the specified starting coordinates.
@@ -27,11 +29,12 @@ public abstract class PlayerObject implements MovableAndSubscribable {
      * @param y the initial y-coordinate of the PlayerObject
      * @param z the initial z-coordinate of the PlayerObject
      */
-    public PlayerObject(int id, float x, float y, float z) {
+    public PlayerObject(int id, float x, float y, float z,float radius) {
         this.id = id;
         this.x = x; 
         this.y = y;  
         this.z = z; 
+        this.radius = radius;
     }
 
     /**

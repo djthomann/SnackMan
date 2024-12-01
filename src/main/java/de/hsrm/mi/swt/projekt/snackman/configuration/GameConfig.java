@@ -9,6 +9,12 @@ public class GameConfig {
     public int chickenSpeed;
     public int mapWidth;
     public int mapHeight;
+    public float snackManRadius;
+    public float ghostRadius;
+    public float chickenMinRadius;
+    public float chickenMaxRadius;
+    public float foodRadius;
+
     
     // In seconds
     public int gameTime;
@@ -23,6 +29,11 @@ public class GameConfig {
         this.gameTime = 10;
         this.mapWidth = 10;
         this.mapHeight = 10;
+        this.snackManRadius = 0.35f;
+        this.ghostRadius = 0.35f;
+        this.chickenMinRadius = 0.1f;
+        this.chickenMaxRadius = 0.5f;
+        this.foodRadius = 0.2f;
     }
     
 }

@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 
 /**
@@ -32,9 +31,10 @@ public class SnackMan extends PlayerObject implements CanEat {
      * @param x        the initial x-coordinate of the `SnackMan`
      * @param y        the initial y-coordinate of the `SnackMan` 
      * @param z        the initial z-coordinate of the `SnackMan` 
+     * @param radius   the radius of the `SnackMan`
      */
-    public SnackMan(int id, float x, float y, float z) {
-        super(id, x, y, z);
+    public SnackMan(int id, float x, float y, float z, float radius) {
+        super(id, x, y, z, radius);
         this.gainedCalories = 0;
     }
 
@@ -79,6 +79,11 @@ public class SnackMan extends PlayerObject implements CanEat {
         return gainedCalories;
     }
 
+    /**
+     * Handles an incoming event and reacts accordingly.
+
+     * @param event the event to be handled
+     */
     @Override
     public void handle(Event event) {
 
@@ -91,9 +96,10 @@ public class SnackMan extends PlayerObject implements CanEat {
             case MOVE:
 
                 Vector3f vector = ((MoveEvent)event).getMovementVector();
-
                 this.move(vector.x * 0.2f,vector.y * 0.2f, vector.z * 0.2f);
+                break;
 
+            default:
                 break;
 
         }

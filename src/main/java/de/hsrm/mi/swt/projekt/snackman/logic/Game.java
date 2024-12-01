@@ -35,6 +35,7 @@ public class Game {
     private SnackManMap map;
     private GameEventBus eventBus;
     private GameManager gameManager;
+    private CollisionManager collisionManager;
     
 
     public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, SnackManMap map, GameManager gameManager) {
@@ -46,6 +47,7 @@ public class Game {
         this.gameManager = gameManager;
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
+        this.collisionManager = new CollisionManager(this.map, this.allMovables);
         startTimer();
     }
 
@@ -101,7 +103,13 @@ public class Game {
     public void receiveEvent(Event event) {
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
+        String problem = collisionManager.checkCollision(event); //check for colision
+        if(!problem.equals("none")) {
+            event = collisionManager.resolveCollision(event,problem);
+            problem ="none";
+        }
         eventBus.sendEventToSubscribers(event);
+        
 
         // Create new move event with the new position of the SnackMan that is sent back to the frontend for testing purposes
         float newX = ((SnackMan)this.allMovables.get(0)).getX();
