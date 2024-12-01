@@ -142,7 +142,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
             try {
             json = gson.toJson(event);
             logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
-            session.sendMessage(new TextMessage(event.getType().toString()+";"+json));
+
+            // Synchronize this block to avoid sending messages during invalid states (e.g. enables moving while jumping)
+            synchronized(session) {
+               session.sendMessage(new TextMessage(event.getType().toString()+";"+json)); 
+            }
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         } catch (IOException e) {

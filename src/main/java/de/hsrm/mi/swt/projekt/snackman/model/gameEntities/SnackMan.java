@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
@@ -280,7 +279,6 @@ public class SnackMan extends PlayerObject implements CanEat {
                 //checks if the movementVector is from a jump action or not
                 if(vector.y != 0.0) {
                     
-                    //TODO while jumping no other key presses are possible
                     this.jump();
 
                     logger.info("SNACKMAN JUMPT");
