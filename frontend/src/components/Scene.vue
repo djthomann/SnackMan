@@ -33,7 +33,7 @@ let sphere: THREE.Mesh;
 export default defineComponent({
   name: 'Scene',
   setup() {
-    const { connect, sendMessage, closeConnection } = useWebSocket();
+    const { sendMessage } = useWebSocket();
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
@@ -81,15 +81,11 @@ export default defineComponent({
       loadModels();
       eventBus.on('serverMessage', handleServerMessage);
 
-      connect();
-
       window.addEventListener('resize', onWindowResize);
     });
 
     onUnmounted(() => {
       eventBus.off('serverMessage', handleServerMessage);
-
-      closeConnection();
 
       // Three.js Cleanup
       controls?.dispose();
