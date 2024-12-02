@@ -254,58 +254,10 @@ export default defineComponent({
       });
 
       // TODO When entering a user name no move event should be sent to the backend
-      // Handle key press und send Event via WebSocket
-      /*const handleKeyPress = (event: KeyboardEvent) => {
-        if (['w', 'a', 's', 'd'].includes(event.key)) {
-          let forward = new THREE.Vector3(0, 0, 0);
-          forward = camera.getWorldDirection(forward);
-          forward.y = 0;
-          forward.normalize()
-          let vector;
-          const angle = Math.PI / 2;
-          const rotationAxis = new THREE.Vector3(0, 1, 0);*/
-
-          // Calculate movement vector
-          /*switch (event.key) {
-            case 'w':
-              vector = forward.clone();
-              break;
-            case 'a':
-              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
-              break;
-            case 's':
-              vector = forward.clone().negate();
-              break;
-            case 'd':
-              vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
-              break;
-          }*/
-          
-          //TODO: give vector to sendMessage()
-          /*const data = JSON.stringify({
-          type: "MOVE",
-          gameID: 0,
-          objectID: 0,
-          movementVector: vector
-          });
-
-          sendMessage(data);*/
-          //console.log('MovementVector:', vector);
-        /*} else if(event.key === " ") {
-          const data = JSON.stringify({
-          type: "MOVE",
-          gameID: 0,
-          objectID: 0,
-          movementVector: new THREE.Vector3(0, 1, 0)
-          });
-          sendMessage(data);
-        }
-      };
-
-      document.addEventListener('keypress', handleKeyPress);*/
 
       let keyPressedArray: string[] = []
 
+      /* Adds keys to the keyPressedArray when one of the specific movement keys is pressed */
       document.addEventListener('keydown', (event) => {
 
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
@@ -313,11 +265,11 @@ export default defineComponent({
             keyPressedArray.push(event.key)
           }
 
-          handleMovement(); 
         }
 
       })
 
+      /* Removes movement key from the keyPressedArray when key is let go */
       document.addEventListener('keyup', (event) => {
 
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
@@ -325,13 +277,12 @@ export default defineComponent({
             const index = keyPressedArray.indexOf(event.key);
             if (index > -1) {
               keyPressedArray.splice(index, 1);
-            }
-
-          handleMovement(); 
+            }  
         }
 
       })
 
+      /* Calculates movementVector depending on the pressed keys (= keys in the keyPressedArray) */
       function handleMovement() {
 
           let forward = new THREE.Vector3(0, 0, 0);
@@ -362,28 +313,6 @@ export default defineComponent({
             vector = vector.add(new THREE.Vector3(0, 1, 0))
           }
           
-
-
-          // Calculate movement vector
-          /*switch (event.key) {
-            case 'w':
-              vector = forward.clone();
-              break;
-            case 'a':
-              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
-              break;
-            case 's':
-              vector = forward.clone().negate();
-              break;
-            case 'd':
-              vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
-              break;
-            case ' ':
-              vector = new THREE.Vector3(0, 1, 0);
-              break;
-          }*/
-          
-          //TODO: give vector to sendMessage()
           const data = JSON.stringify({
           type: "MOVE",
           gameID: 0,
@@ -392,18 +321,11 @@ export default defineComponent({
           });
 
           sendMessage(data);
-
-        /*if(event.key === "Shift") {
-          const data = JSON.stringify({
-          type: "MOVE",
-          gameID: 0,
-          objectID: 0,
-          movementVector: new THREE.Vector3(0, -1, 0)
-          });
-          sendMessage(data);
-        }*/
         
       }
+
+      // Calls the handleMovement function in a specified time interval
+      setInterval(handleMovement, 50);
 
 
       document.addEventListener('mousemove', () => {
