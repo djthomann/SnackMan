@@ -255,7 +255,7 @@ export default defineComponent({
 
       // TODO When entering a user name no move event should be sent to the backend
       // Handle key press und send Event via WebSocket
-      const handleKeyPress = (event: KeyboardEvent) => {
+      /*const handleKeyPress = (event: KeyboardEvent) => {
         if (['w', 'a', 's', 'd'].includes(event.key)) {
           let forward = new THREE.Vector3(0, 0, 0);
           forward = camera.getWorldDirection(forward);
@@ -263,10 +263,10 @@ export default defineComponent({
           forward.normalize()
           let vector;
           const angle = Math.PI / 2;
-          const rotationAxis = new THREE.Vector3(0, 1, 0);
+          const rotationAxis = new THREE.Vector3(0, 1, 0);*/
 
           // Calculate movement vector
-          switch (event.key) {
+          /*switch (event.key) {
             case 'w':
               vector = forward.clone();
               break;
@@ -279,19 +279,19 @@ export default defineComponent({
             case 'd':
               vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
               break;
-          }
+          }*/
           
           //TODO: give vector to sendMessage()
-          const data = JSON.stringify({
+          /*const data = JSON.stringify({
           type: "MOVE",
           gameID: 0,
           objectID: 0,
           movementVector: vector
           });
 
-          sendMessage(data);
+          sendMessage(data);*/
           //console.log('MovementVector:', vector);
-        } else if(event.key === " ") {
+        /*} else if(event.key === " ") {
           const data = JSON.stringify({
           type: "MOVE",
           gameID: 0,
@@ -302,10 +302,98 @@ export default defineComponent({
         }
       };
 
-      document.addEventListener('keypress', handleKeyPress);
+      document.addEventListener('keypress', handleKeyPress);*/
+
+      let keyPressedArray: string[] = []
+
       document.addEventListener('keydown', (event) => {
 
-        if(event.key === "Shift") {
+        if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
+          if (keyPressedArray.indexOf(event.key) === -1) {
+            keyPressedArray.push(event.key)
+          }
+
+          handleMovement(); 
+        }
+
+      })
+
+      document.addEventListener('keyup', (event) => {
+
+        if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
+
+            const index = keyPressedArray.indexOf(event.key);
+            if (index > -1) {
+              keyPressedArray.splice(index, 1);
+            }
+
+          handleMovement(); 
+        }
+
+      })
+
+      function handleMovement() {
+
+          let forward = new THREE.Vector3(0, 0, 0);
+          forward = camera.getWorldDirection(forward);
+          forward.y = 0;
+          forward.normalize()
+          let vector = new THREE.Vector3(0, 0, 0);
+          const angle = Math.PI / 2;
+          const rotationAxis = new THREE.Vector3(0, 1, 0);
+
+          if(keyPressedArray.includes('w')) {
+            vector = vector.add(forward.clone())
+          }
+
+          if(keyPressedArray.includes('a')) {
+            vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, angle).normalize())
+          }
+
+          if(keyPressedArray.includes('s')) {
+            vector = vector.add(forward.clone().negate())
+          }
+
+          if(keyPressedArray.includes('d')) {
+            vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize())
+          }
+
+          if(keyPressedArray.includes(' ')) {
+            vector = vector.add(new THREE.Vector3(0, 1, 0))
+          }
+          
+
+
+          // Calculate movement vector
+          /*switch (event.key) {
+            case 'w':
+              vector = forward.clone();
+              break;
+            case 'a':
+              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
+              break;
+            case 's':
+              vector = forward.clone().negate();
+              break;
+            case 'd':
+              vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
+              break;
+            case ' ':
+              vector = new THREE.Vector3(0, 1, 0);
+              break;
+          }*/
+          
+          //TODO: give vector to sendMessage()
+          const data = JSON.stringify({
+          type: "MOVE",
+          gameID: 0,
+          objectID: 0,
+          movementVector: vector
+          });
+
+          sendMessage(data);
+
+        /*if(event.key === "Shift") {
           const data = JSON.stringify({
           type: "MOVE",
           gameID: 0,
@@ -313,9 +401,11 @@ export default defineComponent({
           movementVector: new THREE.Vector3(0, -1, 0)
           });
           sendMessage(data);
-        }
+        }*/
         
-      })
+      }
+
+
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
       });

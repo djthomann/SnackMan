@@ -276,16 +276,14 @@ public class SnackMan extends PlayerObject implements CanEat {
                 Vector3f vector = ((MoveEvent)event).getMovementVector();
                 logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
 
+                this.move(vector.x * 0.2f,0, vector.z * 0.2f);
+
                 //checks if the movementVector is from a jump action or not
                 if(vector.y != 0.0) {
                     
                     this.jump();
 
                     logger.info("SNACKMAN JUMPT");
-                }
-
-                else {
-                    this.move(vector.x * 0.2f,vector.y * 0.2f, vector.z * 0.2f);
                 }
 
                 break;
