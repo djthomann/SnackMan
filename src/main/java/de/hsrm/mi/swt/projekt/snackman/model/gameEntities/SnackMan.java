@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
 /**
@@ -27,10 +28,10 @@ public class SnackMan extends PlayerObject implements CanEat {
     Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
     // Jumping constants
-    final float GRAVITY = -9.81f; // Gravity constant for physically realistic jumping
-    final float INITIAL_VELOCITY = 8.0f; // Initial velocity at the start of the jump
-    final float JUMP_BOOST = 5.0f; // Boost applied to the current jump if the SnackMan is already jumping and the jump-method is called again
-    final int MAX_BOOSTS = 2; // Maximum number of velocity boosts that is possible to reach during one jump
+    private final float GRAVITY = -9.81f; // Gravity constant for physically realistic jumping
+    private final float INITIAL_VELOCITY = 8.0f; // Initial velocity at the start of the jump
+    private final float JUMP_BOOST = 5.0f; // Boost applied to the current jump if the SnackMan is already jumping and the jump-method is called again
+    private final int MAX_BOOSTS = 2; // Maximum number of velocity boosts that is possible to reach during one jump
 
     // Jumping variables
     private float currentVelocity;
@@ -42,9 +43,9 @@ public class SnackMan extends PlayerObject implements CanEat {
     private ScheduledExecutorService jumpExecutor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> jumpTaskFuture;
 
-    //final float JUMP_HEIGHT = 5.0F;
+    private GameManager gameManger;
+    private GameConfig gameConfig;
 
-    GameManager gameManger;
     /** The calorie count of the SnackMan */
     private int gainedCalories;
 
@@ -57,10 +58,13 @@ public class SnackMan extends PlayerObject implements CanEat {
      * @param y        the initial y-coordinate of the `SnackMan` 
      * @param z        the initial z-coordinate of the `SnackMan` 
      */
-    public SnackMan(int id, float x, float y, float z, GameManager gameManager) {
+    public SnackMan(int id, float x, float y, float z, GameManager gameManager, GameConfig gameConfig) {
         super(id, x, y, z);
-        this.gainedCalories = 0;
+
+        // TODO Initial calories to make jumping possible, change back to 0 later
+        this.gainedCalories = 1000; 
         this.gameManger = gameManager;
+        this.gameConfig = gameConfig;
     }
 
     /**
@@ -90,8 +94,11 @@ public class SnackMan extends PlayerObject implements CanEat {
      */
     public void jump() {
 
-        // If we are not jumping, start new jump
-        if(!jumping) {
+        // If we are not jumping and have enough calories, start new jump
+        if(!jumping && gainedCalories >= this.gameConfig.jumpCalories) {
+
+            // Jumping results in loss of calories
+            this.gainedCalories -= this.gameConfig.jumpCalories;
 
             this.initialY = this.y;
             this.currentVelocity = INITIAL_VELOCITY;
@@ -147,12 +154,13 @@ public class SnackMan extends PlayerObject implements CanEat {
         
 
         /**
-         * If we are already jumping and have not reached the maximum possible number of boosts,
+         * If we are already jumping, have not reached the maximum possible number of boosts and have enough calories,
          * apply boost to current velocity, so that we jump higher
          */
-        } else if (this.boosts < MAX_BOOSTS) {
+        } else if (this.boosts < MAX_BOOSTS && this.gainedCalories >= this.gameConfig.jumpCalories) {
             this.currentVelocity += JUMP_BOOST;
             this.boosts++;
+            this.gainedCalories -= this.gameConfig.jumpCalories;
         }
     }
 
