@@ -11,6 +11,9 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
+import type { Snackman, Ghost, Food, Tile } from '@/types/SceneTypes';
+import { useEntityStore } from '@/stores/entityStore';
+import { storeToRefs } from 'pinia';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -47,6 +50,15 @@ export default defineComponent({
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
+
+
+    //GameStart
+    const entityStore = useEntityStore();
+    const { snackmen, ghosts } = storeToRefs(entityStore);
+
+
+    console.log('Snackman Names:', snackmen.value.map((item: Snackman) => item.username));
+
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
