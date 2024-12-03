@@ -12,6 +12,8 @@ public class GameConfig {
     
     // In seconds
     public int gameTime;
+    public int chickenCount;
+    public int jumpCalories;
 
     public GameConfig() {
         // Placeholder default values for the beginning -> change later to reasonable default values
@@ -23,6 +25,8 @@ public class GameConfig {
         this.gameTime = 10;
         this.mapWidth = 10;
         this.mapHeight = 10;
+        this.chickenCount = 4;
+        this.jumpCalories = 100;
     }
     
 }
