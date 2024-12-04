@@ -23,7 +23,7 @@ import { onUnmounted, ref, onMounted } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 
-const { connect, sendMessage, closeConnection } = useWebSocket();
+const { sendMessage } = useWebSocket();
 
 const serverMessage = ref<string>('');
 const usernameInputField = ref<string>('');
@@ -82,13 +82,11 @@ document.addEventListener('snackman', sendSnackmanEvent);
 
 onMounted(() => {
   eventBus.on('serverMessage', handleServerMessage);
-  connect();
 });
 
 onUnmounted(() => {
   eventBus.off('serverMessage', handleServerMessage);
   usernamesList.value = [];
-  closeConnection();
 });
 
 // TODO: Backend Events should arrive here.

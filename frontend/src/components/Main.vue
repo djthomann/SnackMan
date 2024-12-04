@@ -5,6 +5,7 @@ import FetchMap from './FetchMap.vue';
 </script>
 
 <template>
+  <RouterLink to="/title">To The Title Screen </RouterLink>
   <FetchMap />
   <Username />
   <Scene />

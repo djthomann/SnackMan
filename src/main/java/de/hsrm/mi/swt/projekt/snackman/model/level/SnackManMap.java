@@ -111,13 +111,6 @@ public class SnackManMap {
 
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                /*
-                if (i == 0 || j == 0 || i == h - 1 || j == w - 1) {
-                    res[i][j] = -1;
-                } else {
-                    res[i][j] = (i == 1 || (i % 2 == 1 && j % 2 == 1)) ? 0 : -1;
-                }
-                 */
                 OccupationType occupationType = OccupationType.WALL;
 
                 if (y != h - 1 && x != 0 && x != w - 1 && (y == 1 || (y % 2 == 1 && x % 2 == 1))) {
@@ -205,7 +198,9 @@ public class SnackManMap {
      */
     private void mirror(int h) {
         for (int i = 0; i < h / 2; i++) {
-            allTiles[(h - 1) - i] = allTiles[i].clone();
+            for (int x = 0; x < w; x++) {
+                allTiles[(h-1) - i][x].setOccupationType(allTiles[i][x].getOccupationType());
+            }
         }
     }
 

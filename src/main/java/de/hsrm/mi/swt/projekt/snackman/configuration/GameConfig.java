@@ -18,6 +18,8 @@ public class GameConfig {
     
     // In seconds
     public int gameTime;
+    public int chickenCount;
+    public int jumpCalories;
 
     public GameConfig() {
         // Placeholder default values for the beginning -> change later to reasonable default values
@@ -34,6 +36,8 @@ public class GameConfig {
         this.chickenMinRadius = 0.1f;
         this.chickenMaxRadius = 0.5f;
         this.foodRadius = 0.2f;
+        this.chickenCount = 4;
+        this.jumpCalories = 100;
     }
     
 }

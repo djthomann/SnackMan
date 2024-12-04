@@ -40,9 +40,10 @@ public class GameManager {
         this.allGames = new HashMap<Integer, Game>();
         this.nextGameId = 0;
 
-        ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
         GameConfig gameConfig = new GameConfig();
-        allMoveables.add(new SnackMan(0, 0f, 1.1f, 0f, gameConfig.snackManRadius));
+
+        ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
+        allMoveables.add(new SnackMan(0, 0f, 1.1f, 0f, this, gameConfig));
 
         createGame(gameConfig, allMoveables);
     }
