@@ -49,7 +49,7 @@ public class CollisionManager {
                             Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedY);
                             if(wishedTile.getX() != tile.getX() || wishedTile.getY() != tile.getY()) {
                                 if(wishedTile.getOccupationType() == OccupationType.WALL) {
-                                    logger.info("snackman and wall Collision!");
+                                    logger.info("snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getY()+" ." );
                                     return "snackman:wall";}
                                 else return "none";
                                 }
