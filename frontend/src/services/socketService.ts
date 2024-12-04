@@ -5,8 +5,10 @@ import eventBus from './eventBus';
  * Service that establishes a socket connection with backend, sends messages
  * to eventBus and allows to send messages to backend
  */
+let prefix = window.location.protocol === "https:" ? "wss" : "ws"
 
-const url = 'ws://localhost:8080/ws-endpoint';
+const url =  `${prefix}://${window.location.hostname}:${window.location.port}/ws-endpoint`;
+console.log(url)
 
 const serverResponse = ref<string>('');
 const websocket = ref<WebSocket | null>(null);

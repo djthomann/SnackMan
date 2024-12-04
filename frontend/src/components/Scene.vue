@@ -143,9 +143,9 @@ export default defineComponent({
           const occupationType = tile.occupationType;
           if (occupationType == 'WALL') {
             // console.log(tile)
-            wallsGroup.add(createWall(tile.x, tile.y));
+            wallsGroup.add(createWall(tile.x, tile.z));
           } else if (occupationType == 'ITEM') {
-            foodGroup.add(createFood(tile.x, tile.y, Math.random() * 400 + 100));
+            foodGroup.add(createFood(tile.x, tile.z, Math.random() * 400 + 100));
           }
         }
       }
@@ -283,10 +283,11 @@ export default defineComponent({
       /* Removes movement key from the keyPressedArray when key is let go */
       document.addEventListener('keyup', (event) => {
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
-          const index = keyPressedArray.indexOf(event.key);
-          if (index > -1) {
-            keyPressedArray.splice(index, 1);
-          }
+
+            const index = keyPressedArray.indexOf(event.key);
+            if (index > -1) {
+              keyPressedArray.splice(index, 1);
+            }
         }
       });
 
@@ -321,18 +322,19 @@ export default defineComponent({
           vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
         }
 
-        if (keyPressedArray.includes(' ')) {
-          vector = vector.add(new THREE.Vector3(0, 1, 0));
-        }
+          if(keyPressedArray.includes(' ')) {
+            vector = vector.add(new THREE.Vector3(0, 1, 0))
+          }
 
-        const data = JSON.stringify({
-          type: 'MOVE',
+          const data = JSON.stringify({
+          type: "MOVE",
           gameID: 0,
           objectID: 0,
           movementVector: vector,
         });
 
-        sendMessage(data);
+          sendMessage(data);
+
       }
 
       // Calls the handleMovement function in a specified time interval
@@ -347,8 +349,8 @@ export default defineComponent({
     }
 
     // Creates one large plane as the floor
-    function createFloorTile(x: number, y: number) {
-      const planeGeometry = new THREE.PlaneGeometry(x, y, 1, 1);
+    function createFloorTile(x: number, z: number) {
+      const planeGeometry = new THREE.PlaneGeometry(x, z, 1, 1);
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
       plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
@@ -359,18 +361,18 @@ export default defineComponent({
     }
 
     // Creates one cube per wall tile
-    function createWall(x: number, y: number) {
+    function createWall(x: number, z: number) {
       const boxGeometry = new THREE.BoxGeometry(1 * mapScale, 3, 1 * mapScale);
       const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       box = new THREE.Mesh(boxGeometry, boxMaterial);
-      box.position.set(x * mapScale, 0, y * mapScale);
+      box.position.set(x * mapScale, 0, z * mapScale);
       box.castShadow = true;
 
       return box;
     }
 
     // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
-    function createFood(x: number, y: number, calories: number) {
+    function createFood(x: number, z: number, calories: number) {
       let newModel;
       if (calories > 300) {
         newModel = bananaModel.clone();
@@ -379,8 +381,8 @@ export default defineComponent({
       } else {
         newModel = orangeModel.clone();
       }
-      newModel.position.set(x * mapScale, 0, y * mapScale);
-      return newModel;
+      newModel.position.set(x * mapScale, 0, z * mapScale)
+      return newModel
     }
 
     function animate() {
