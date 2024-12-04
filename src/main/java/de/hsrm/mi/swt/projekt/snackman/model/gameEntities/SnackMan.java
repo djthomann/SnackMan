@@ -226,13 +226,17 @@ public class SnackMan extends PlayerObject implements CanEat {
                 float wishedX = this.getX() + (vector.x * gameConfig.snackManStep);
                 float wishedZ = this.getZ() + (vector.z * gameConfig.snackManStep);
                 if ((int) wishedX != (int) this.getX() || (int) wishedZ != (int) this.getZ()) {
-                    collision = collisionManager.checkCollision(wishedX, wishedZ);
-                    if (collision.equals("wall")) {
-                        vector.x = 0;
-                        vector.z = 0;
-                    } else if (collision.equals("item")) {
-                        // TODO: Add eating-logic
+
+                    if(this.getY() < gameConfig.wallHeight) {
+                        collision = collisionManager.checkCollision(wishedX, wishedZ);
+                        if (collision.equals("wall")) {
+                            vector.x = 0;
+                            vector.z = 0;
+                        } else if (collision.equals("item")) {
+                            // TODO: Add eating-logic
+                        }
                     }
+
                 }
 
                 this.move(vector.x * gameConfig.snackManStep, 0, vector.z * gameConfig.snackManStep);
