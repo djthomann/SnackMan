@@ -292,19 +292,18 @@ export default defineComponent({
 
       /* Calculates movementVector depending on the pressed keys (= keys in the keyPressedArray) */
       function handleMovement() {
+        // If no keys are pressed, no event is sent to the backend
+        if (keyPressedArray.length === 0) {
+          return;
+        }
 
-          // If no keys are pressed, no event is sent to the backend
-          if(keyPressedArray.length === 0) {
-            return;
-          }
-
-          let forward = new THREE.Vector3(0, 0, 0);
-          forward = camera.getWorldDirection(forward);
-          forward.y = 0;
-          forward.normalize()
-          let vector = new THREE.Vector3(0, 0, 0);
-          const angle = Math.PI / 2;
-          const rotationAxis = new THREE.Vector3(0, 1, 0);
+        let forward = new THREE.Vector3(0, 0, 0);
+        forward = camera.getWorldDirection(forward);
+        forward.y = 0;
+        forward.normalize();
+        let vector = new THREE.Vector3(0, 0, 0);
+        const angle = Math.PI / 2;
+        const rotationAxis = new THREE.Vector3(0, 1, 0);
 
         if (keyPressedArray.includes('w')) {
           vector = vector.add(forward.clone());
@@ -337,7 +336,7 @@ export default defineComponent({
       }
 
       // Calls the handleMovement function in a specified time interval
-      // setInterval(handleMovement, 50);
+      setInterval(handleMovement, 50);
 
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
