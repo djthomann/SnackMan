@@ -43,7 +43,7 @@ public class GameManager {
         GameConfig gameConfig = new GameConfig();
 
         ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
-        allMoveables.add(new SnackMan(0, 0f, 1.1f, 0f, this, gameConfig));
+        allMoveables.add(new SnackMan(0, 20.0f, 1.1f, 20.0f, this, gameConfig));
 
         createGame(gameConfig, allMoveables);
     }

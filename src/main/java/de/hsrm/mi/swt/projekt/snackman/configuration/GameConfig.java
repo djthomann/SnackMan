@@ -29,8 +29,8 @@ public class GameConfig {
         this.ghostSpeed = 1;
         this.chickenSpeed = 1;
         this.gameTime = 10;
-        this.mapWidth = 10;
-        this.mapHeight = 10;
+        this.mapWidth = 40;
+        this.mapHeight = 40;
         this.snackManRadius = 0.35f;
         this.ghostRadius = 0.35f;
         this.chickenMinRadius = 0.1f;

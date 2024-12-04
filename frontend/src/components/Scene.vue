@@ -152,10 +152,10 @@ export default defineComponent({
 
 
       scene.add(wallsGroup);
-      wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+      //wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
       scene.add(foodGroup);
-      foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+      //foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
       const floor = createFloorTile(w, h);
       // console.log('Creating Floor with: ' + w + '|' + h);
@@ -326,6 +326,9 @@ export default defineComponent({
           if(keyPressedArray.includes(' ')) {
             vector = vector.add(new THREE.Vector3(0, 1, 0))
           }
+
+          vector?.normalize();
+          console.log('Vector:', vector)
           
           const data = JSON.stringify({
           type: "MOVE",
@@ -356,7 +359,7 @@ export default defineComponent({
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
       plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
-      plane.position.set(0, -0.5, 0);
+      plane.position.set(20, -0.5, 20);
       plane.receiveShadow = true;
 
       return plane;

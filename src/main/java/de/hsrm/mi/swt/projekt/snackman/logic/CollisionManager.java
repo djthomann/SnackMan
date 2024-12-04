@@ -42,15 +42,16 @@ public class CollisionManager {
                 for (MovableAndSubscribable movable : allMovables) {
                     if (movable.getId() == objectID) {
                         if (movable instanceof SnackMan) {
-                            Tile tile= snackManMap.getTileAt((int) movable.getX(), (int) movable.getY());
+                            Tile tile= snackManMap.getTileAt((int) movable.getX(), (int) movable.getZ());
                             Vector3f movementVector = ((MoveEvent) event).getMovementVector();
                             float wishedX = movable.getX() + (movementVector.x * 0.2f);
-                            float wishedY = movable.getY() + (movementVector.y * 0.2f);
+                            float wishedY = movable.getZ() + (movementVector.z * 0.2f);
                             Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedY);
                             if(wishedTile.getX() != tile.getX() || wishedTile.getY() != tile.getY()) {
-                                if(wishedTile.getOccupationType() == OccupationType.WALL) 
-                                //logger.info("snackman and wall Collision!");
-                                    return "snackman:wall";
+                                if(wishedTile.getOccupationType() == OccupationType.WALL) {
+                                    logger.info("snackman and wall Collision!");
+                                    return "snackman:wall";}
+                                else return "none";
                                 }
                         } else if (movable instanceof Ghost) {
                         // Handle Ghost collision
@@ -75,7 +76,7 @@ public class CollisionManager {
     public Event resolveCollision(Event event, String problem) {
         switch (problem) {
             case "snackman:wall":
-                event = new MoveEvent(new Vector3f(0, 0, 0));
+                event = new MoveEvent(new Vector3f(0.0f, 0.0f, 0.0f));
                 break;  
         }       
         return event;
