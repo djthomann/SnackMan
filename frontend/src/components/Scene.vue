@@ -28,7 +28,7 @@ let orangeModel: THREE.Group;
 // mesh for walls
 let box: THREE.Mesh;
 
-const mapScale = 3
+const mapScale = 3;
 
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
@@ -53,14 +53,14 @@ export default defineComponent({
     let controls: PointerLockControls;
     let mouseMovement = false;
 
-
     //GameStart
     const entityStore = useEntityStore();
     const { snackmen, ghosts } = storeToRefs(entityStore);
 
-
-    console.log('Snackman Names:', snackmen.value.map((item: Snackman) => item.username));
-
+    console.log(
+      'Snackman Names:',
+      snackmen.value.map((item: Snackman) => item.username),
+    );
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
@@ -71,9 +71,9 @@ export default defineComponent({
         let key: string = message.split(':')[1];
 
         // Move the player
-        movePlayer(JSON.parse(message.split(';')[1]))
+        movePlayer(JSON.parse(message.split(';')[1]));
 
-      /*  if (key === 'KeyD') {
+        /*  if (key === 'KeyD') {
           cone.position.x += 0.2;
         } else if (key === 'KeyA') {
           cone.position.x -= 0.2;
@@ -150,7 +150,6 @@ export default defineComponent({
         }
       }
 
-
       scene.add(wallsGroup);
       wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
@@ -166,14 +165,15 @@ export default defineComponent({
      * The camera is moved to the updated position when the w-key is pressed
      */
     function movePlayer(moveInformation: any) {
+      const newPlayerPositionX = moveInformation.movementVector.x;
+      const newPlayerPositionY = moveInformation.movementVector.y;
+      const newPlayerPositionZ = moveInformation.movementVector.z;
 
-        const newPlayerPositionX = moveInformation.movementVector.x;
-        const newPlayerPositionY = moveInformation.movementVector.y;
-        const newPlayerPositionZ = moveInformation.movementVector.z;
+      console.log(
+        `New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`,
+      );
 
-        console.log(`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`)
-
-        player.position.set(newPlayerPositionX, newPlayerPositionY, newPlayerPositionZ);
+      player.position.set(newPlayerPositionX, newPlayerPositionY, newPlayerPositionZ);
     }
 
     function initScene() {
@@ -269,23 +269,19 @@ export default defineComponent({
 
       // TODO When entering a user name no move event should be sent to the backend
 
-      let keyPressedArray: string[] = []
+      let keyPressedArray: string[] = [];
 
       /* Adds keys to the keyPressedArray when one of the specific movement keys is pressed */
       document.addEventListener('keydown', (event) => {
-
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
           if (keyPressedArray.indexOf(event.key) === -1) {
-            keyPressedArray.push(event.key)
+            keyPressedArray.push(event.key);
           }
-
         }
-
-      })
+      });
 
       /* Removes movement key from the keyPressedArray when key is let go */
       document.addEventListener('keyup', (event) => {
-
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
 
             const index = keyPressedArray.indexOf(event.key);
@@ -293,40 +289,38 @@ export default defineComponent({
               keyPressedArray.splice(index, 1);
             }
         }
-
-      })
+      });
 
       /* Calculates movementVector depending on the pressed keys (= keys in the keyPressedArray) */
       function handleMovement() {
+        // If no keys are pressed, no event is sent to the backend
+        if (keyPressedArray.length === 0) {
+          return;
+        }
 
-          // If no keys are pressed, no event is sent to the backend
-          if(keyPressedArray.length === 0) {
-            return;
-          }
+        let forward = new THREE.Vector3(0, 0, 0);
+        forward = camera.getWorldDirection(forward);
+        forward.y = 0;
+        forward.normalize();
+        let vector = new THREE.Vector3(0, 0, 0);
+        const angle = Math.PI / 2;
+        const rotationAxis = new THREE.Vector3(0, 1, 0);
 
-          let forward = new THREE.Vector3(0, 0, 0);
-          forward = camera.getWorldDirection(forward);
-          forward.y = 0;
-          forward.normalize()
-          let vector = new THREE.Vector3(0, 0, 0);
-          const angle = Math.PI / 2;
-          const rotationAxis = new THREE.Vector3(0, 1, 0);
+        if (keyPressedArray.includes('w')) {
+          vector = vector.add(forward.clone());
+        }
 
-          if(keyPressedArray.includes('w')) {
-            vector = vector.add(forward.clone())
-          }
+        if (keyPressedArray.includes('a')) {
+          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, angle).normalize());
+        }
 
-          if(keyPressedArray.includes('a')) {
-            vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, angle).normalize())
-          }
+        if (keyPressedArray.includes('s')) {
+          vector = vector.add(forward.clone().negate());
+        }
 
-          if(keyPressedArray.includes('s')) {
-            vector = vector.add(forward.clone().negate())
-          }
-
-          if(keyPressedArray.includes('d')) {
-            vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize())
-          }
+        if (keyPressedArray.includes('d')) {
+          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
+        }
 
           if(keyPressedArray.includes(' ')) {
             vector = vector.add(new THREE.Vector3(0, 1, 0))
@@ -336,8 +330,8 @@ export default defineComponent({
           type: "MOVE",
           gameID: 0,
           objectID: 0,
-          movementVector: vector
-          });
+          movementVector: vector,
+        });
 
           sendMessage(data);
 
@@ -345,7 +339,6 @@ export default defineComponent({
 
       // Calls the handleMovement function in a specified time interval
       setInterval(handleMovement, 50);
-
 
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
@@ -382,7 +375,7 @@ export default defineComponent({
     function createFood(x: number, z: number, calories: number) {
       let newModel;
       if (calories > 300) {
-        newModel= bananaModel.clone();
+        newModel = bananaModel.clone();
       } else if (calories > 200) {
         newModel = appleModel.clone();
       } else {
