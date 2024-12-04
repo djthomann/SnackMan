@@ -89,8 +89,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "MAP" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
-                    SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-26_19_17_39.csv");
-                    // SnackManMap map = new SnackManMap(40, 40);
+                    // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-26_19_17_39.csv");
+                    SnackManMap map = new SnackManMap(40, 40);
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
                     // map.saveAsCSV();
 

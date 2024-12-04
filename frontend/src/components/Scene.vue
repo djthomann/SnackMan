@@ -28,6 +28,8 @@ let orangeModel: THREE.Group;
 // mesh for walls
 let box: THREE.Mesh;
 
+const mapScale = 3
+
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
 let sphere: THREE.Mesh;
@@ -132,8 +134,8 @@ export default defineComponent({
 
     function loadMap(map: any) {
       console.log('Received mapdata' + map);
-      const w = map.w;
-      const h = map.h;
+      const w = map.w * mapScale;
+      const h = map.h * mapScale;
       const tiles = map.allTiles;
 
       for (const row of tiles) {
@@ -185,7 +187,6 @@ export default defineComponent({
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 0.5, 0);
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -234,7 +235,8 @@ export default defineComponent({
       const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 32);
       const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       cone = new THREE.Mesh(coneGeometry, coneMaterial);
-      cone.position.set(0, 0, 0);
+      cone.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
       cone.rotation.x = -Math.PI / 2;
       cone.castShadow = true;
       scene.add(cone);
@@ -362,10 +364,10 @@ export default defineComponent({
 
     // Creates one cube per wall tile
     function createWall(x: number, y: number) {
-      const boxGeometry = new THREE.BoxGeometry(1, 3, 1);
+      const boxGeometry = new THREE.BoxGeometry(1 * mapScale, 3, 1 * mapScale);
       const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       box = new THREE.Mesh(boxGeometry, boxMaterial);
-      box.position.set(x, 0, y);
+      box.position.set(x * mapScale, 0, y * mapScale);
       box.castShadow = true;
 
       return box;
@@ -373,19 +375,16 @@ export default defineComponent({
 
     // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
     function createFood(x: number, y: number, calories: number) {
+      let newModel;
       if (calories > 300) {
-        const newBanana = bananaModel.clone();
-        newBanana.position.set(x, 0, y);
-        return newBanana;
+        newModel= bananaModel.clone();
       } else if (calories > 200) {
-        const newApple = appleModel.clone();
-        newApple.position.set(x, 0, y);
-        return newApple;
+        newModel = appleModel.clone();
       } else {
-        const newPear = orangeModel.clone();
-        newPear.position.set(x, 0, y);
-        return newPear;
+        newModel = orangeModel.clone();
       }
+      newModel.position.set(x * mapScale, 0, y * mapScale)
+      return newModel
     }
 
     function animate() {
