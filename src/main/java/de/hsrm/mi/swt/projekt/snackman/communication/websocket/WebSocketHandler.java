@@ -21,11 +21,11 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
-import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
@@ -86,7 +86,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                     clients.get(session).setUsername(registerUsernameEvent.getUsername());
                 }
-                case "MAP" -> {
+                case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
                     SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-26_19_17_39.csv", true);
@@ -108,19 +108,48 @@ public class WebSocketHandler extends TextWebSocketHandler {
                         e.printStackTrace();
                     }
                 }
+                case "MAPUPLOAD" -> {
+
+                    SnackManMap map = new SnackManMap(jsonObject.get("content").getAsString(), false);
+
+                    ObjectMapper mapper = new ObjectMapper();
+                    String returnString = "";
+                    try {
+                        String json = mapper.writeValueAsString(map);
+                        returnString = "MAP;" + json;
+                        logger.info("Final JSON: " + returnString);
+                        session.sendMessage(new TextMessage(returnString));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+
+                }
                 case "MOVE" -> {
                     MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);
                     logger.info("GameId: " + moveEvent.getGameID() + "Vector x: " + moveEvent.getMovementVector().x);
                     gameManager.handleEvent(moveEvent);
                 }
+                case "GAME_CONFIG" -> {
+                    // Set GameConfig from event as GameConfig object in gameManager
+                    GameConfigEvent gameConfigEvent = gson.fromJson(jsonString, GameConfigEvent.class);
+                    logger.info("GameId: " + gameConfigEvent.getGameID() + ": " + gameConfigEvent.getGameConfig());
+                    gameManager.setGameConfig(gameConfigEvent.getGameConfig());
 
+                    // Send GameConfig from manager back to frontend as JSON
+                    ObjectMapper mapper = new ObjectMapper();
+                    String returnString = "";
+                    try {
+                        String json = mapper.writeValueAsString(gameManager.getGameConfig());
+                        returnString = "GAME_CONFIG;" + json;
+                        logger.info("Final JSON: " + returnString);
+                        session.sendMessage(new TextMessage(returnString));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-
-        } catch (
-
-        JsonSyntaxException e) {
+        } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
-        
         }
     }
 
@@ -145,7 +174,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
             // Synchronize this block to avoid sending messages during invalid states (e.g. enables moving while jumping)
             synchronized(session) {
-               session.sendMessage(new TextMessage(event.getType().toString()+";"+json)); 
+                session.sendMessage(new TextMessage(event.getType().toString()+";"+json)); 
             }
 
         } catch (JsonProcessingException e) {

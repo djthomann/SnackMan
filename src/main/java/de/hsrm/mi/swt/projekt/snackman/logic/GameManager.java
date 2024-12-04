@@ -25,6 +25,7 @@ public class GameManager {
     public HashMap<Integer, Game> allGames;
     private int nextGameId;
     private WebSocketHandler webSocketHandler;
+    private GameConfig gameConfig = new GameConfig();
 
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
@@ -108,6 +109,14 @@ public class GameManager {
         allGames.put(newGame.id, newGame);
 
         nextGameId++;
+    }
+
+    public void setGameConfig(GameConfig gameConfig) {
+        this.gameConfig = gameConfig;
+    }
+
+    public GameConfig getGameConfig(){
+        return this.gameConfig;
     }
 
 } 

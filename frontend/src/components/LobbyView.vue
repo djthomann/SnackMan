@@ -39,6 +39,9 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
+import useWebSocket from '@/services/socketService';
+import eventBus from '@/services/eventBus';
+
 
 // Type definition of GameConfig interface
 interface GameConfig {
@@ -67,58 +70,37 @@ const gameConfig = ref<GameConfig>({
   jumpCalories: null,
 });
 
+const { sendMessage } = useWebSocket();
 const route = useRoute();
 const router = useRouter();
 const lobbyCode = ref(Number(route.params.code));
+const serverMessage = ref<string>('');
 
-// BE Communication may be temporary due to missing Event-Type for GameConfigs
+// Method, to get GameConfig from BE
+const handleServerMessage = (message: string) => {
+  serverMessage.value = message;
+  console.log('Processing server message');
+
+  if(message.startsWith('GAME_CONFIG')) {
+    gameConfig.value = JSON.parse(message.split(';')[1]);
+  }
+}
 
 // Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
-  try {
-    const response = await fetch(`http://localhost:8080/lobby/${lobbyCode.value}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(gameConfig.value),
-    });
-
-    if (response.ok) {
-      console.log('GameConfig successfully updated.');
-    } else {
-      throw new Error('Error saving GameConfig.');
-    }
-  } catch (error) {
-    console.error('Failed to submit GameConfig: ', error);
-    alert('Could not apply game-settings.');
-  }
-};
-
-// Method, to fetch GameConfig and fill form with recieved configurations
-const fetchGameConfig = async () => {
-  try {
-    const response = await fetch(`http://localhost:8080/lobby/${lobbyCode.value}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (response.ok) {
-      const config = await response.json();
-      gameConfig.value = config;
-    } else if (response.status === 404) {
-      console.warn('No GameConfig found for this lobby.');
-    } else {
-      throw new Error('Error fetching GameConfig.');
-    }
-  } catch (error) {
-    console.error('Failed to submit GameConfig: ', error);
-    alert('Could not get game-settings.');
-  }
+  const data = JSON.stringify({
+    type: "GAME_CONFIG",
+    gameID: lobbyCode.value,
+    objectID: 0,
+    gameConfig: gameConfig.value
+  });
+  sendMessage(data);
 };
 
 // Automatic call on load
-onMounted(() => {
-  fetchGameConfig();
-});
+onMounted(async () => {
+      eventBus.on('serverMessage', handleServerMessage);
+    });
 
 // Method, to start the game
 const startGame = () => {

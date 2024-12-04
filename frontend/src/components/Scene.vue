@@ -14,6 +14,7 @@ import modelService from '@/services/modelService';
 import type { Snackman, Ghost, Food, Tile } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
+import NameTag from '@/services/nameTagService';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -28,8 +29,12 @@ let orangeModel: THREE.Group;
 // mesh for walls
 let box: THREE.Mesh;
 
+<<<<<<< HEAD
 const mapScale = 1;
 const wallHeight = 3;
+=======
+const mapScale = 3;
+>>>>>>> DEVELOPMENT
 
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
@@ -53,6 +58,8 @@ export default defineComponent({
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
+    let nameTag: NameTag;
+    const nameTags: NameTag[] = [];
 
     //GameStart
     const entityStore = useEntityStore();
@@ -66,7 +73,7 @@ export default defineComponent({
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
-      console.log('Processing server message');
+      //console.log('Processing server message');
 
       if (message.startsWith('MOVE')) {
         let key: string = message.split(':')[1];
@@ -134,7 +141,7 @@ export default defineComponent({
     }
 
     function loadMap(map: any) {
-      console.log('Received mapdata' + map);
+      //console.log('Received mapdata' + map);
       const w = map.w * mapScale;
       const h = map.h * mapScale;
       const tiles = map.allTiles;
@@ -247,6 +254,23 @@ export default defineComponent({
       player.add(camera);
       player.add(cone);
 
+      // Test Body for Username Test
+      const testObj = new THREE.Mesh(coneGeometry, coneMaterial);
+      testObj.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      testObj.rotation.x = -Math.PI / 2;
+      testObj.castShadow = true;
+      scene.add(testObj);
+
+      // Test Player for Username Test
+      const testPlayer = new THREE.Mesh();
+      testPlayer.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      scene.add(testPlayer);
+      testPlayer.add(testObj);
+
+      // Create NameTag
+       nameTag = new NameTag('Snacko', testPlayer, scene);
+      nameTags.push(nameTag);
+
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
       const startButton = document.getElementById('startButton') as HTMLInputElement;
@@ -321,10 +345,13 @@ export default defineComponent({
         if (keyPressedArray.includes('d')) {
           vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
         }
+<<<<<<< HEAD
 
         if (keyPressedArray.includes(' ')) {
           vector = vector.add(new THREE.Vector3(0, 1, 0));
         }
+=======
+>>>>>>> DEVELOPMENT
 
         const data = JSON.stringify({
           type: 'MOVE',
@@ -332,12 +359,21 @@ export default defineComponent({
           objectID: 0,
           movementVector: vector,
         });
+<<<<<<< HEAD
+=======
+
+          sendMessage(data);
+>>>>>>> DEVELOPMENT
 
         sendMessage(data);
       }
 
       // Calls the handleMovement function in a specified time interval
+<<<<<<< HEAD
       setInterval(handleMovement, 20);
+=======
+      setInterval(handleMovement, 50);
+>>>>>>> DEVELOPMENT
 
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
@@ -387,8 +423,14 @@ export default defineComponent({
     function animate() {
       requestAnimationFrame(animate);
       rotateBody();
-
       const time = Date.now() * 0.001;
+
+      // Update NameTag Orientation
+      nameTags.forEach((nameTag) => {
+        nameTag.update(player);
+      })
+
+
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {

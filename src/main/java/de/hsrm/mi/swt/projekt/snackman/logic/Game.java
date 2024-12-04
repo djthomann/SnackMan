@@ -93,7 +93,7 @@ public class Game {
         };
 
         // Multiply by 1000 to get the needed milliseconds for timer.schedule
-        long delay = gameConfig.gameTime * 1000;
+        long delay = gameConfig.getGameTime() * 1000;
 
         timer.schedule(task, delay);
     }
