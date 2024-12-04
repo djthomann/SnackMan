@@ -46,6 +46,8 @@ public class GameManager {
         createGame(new GameConfig(), allMoveables);
     }
 
+    
+
 
     /**
      * Passes on the received event to the game with the matching game id

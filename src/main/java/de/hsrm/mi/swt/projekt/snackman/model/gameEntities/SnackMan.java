@@ -3,10 +3,12 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.*;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 
 /**
  * The `SnackMan` class represents a player character in the game who has an
@@ -19,7 +21,11 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
  */
 public class SnackMan extends PlayerObject implements CanEat {
 
-    Logger logger = LoggerFactory.getLogger(SnackMan.class);
+    private Logger logger = LoggerFactory.getLogger(SnackMan.class);
+
+    /** Publisher to publish the internal move and eat event. */
+     @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     /** The calorie count of the SnackMan */
     private int gainedCalories;
@@ -58,6 +64,7 @@ public class SnackMan extends PlayerObject implements CanEat {
         this.x += newX; 
         this.y += newY; 
         this.z += newZ; 
+
     }
 
     /**
@@ -67,6 +74,7 @@ public class SnackMan extends PlayerObject implements CanEat {
      */
     @Override
     public void eat(Food food) {
+
     }
 
     /**

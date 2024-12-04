@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
@@ -111,6 +111,12 @@ public class Game {
 
         this.gameManager.notifyChange(moveEvent);
     }
+
+    /* game schickt gamestateevent, gamestate besteht aus map und moveables */
+
+
+
+
 
     
 
