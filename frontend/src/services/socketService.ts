@@ -6,7 +6,7 @@ import eventBus from './eventBus';
  * to eventBus and allows to send messages to backend
  */
 
-const url = 'ws://localhost:8080/ws-endpoint';
+const url = `ws://${window.location.hostname}:8080/ws-endpoint`;
 
 const serverResponse = ref<string>('');
 const websocket = ref<WebSocket | null>(null);
