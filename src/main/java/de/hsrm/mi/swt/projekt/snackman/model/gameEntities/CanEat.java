@@ -9,7 +9,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 public interface CanEat {
 
     /**
-     * Consumes the food, potentially affecting the state & attributes of the entity
+     * Consumes the food, potentially affecting the state and the attributes of the entity
      *
      * @param food the calorie resource to be consumed by the entity
      */
