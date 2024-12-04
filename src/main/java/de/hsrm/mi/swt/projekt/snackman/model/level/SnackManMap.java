@@ -35,53 +35,57 @@ public class SnackManMap {
 
     /**
      * Constructor, creates Map object on base of given csv file
-     * @param filename path to file (only filename needed, no path)
+     * @param input path to file (only filename needed, no path), or contents of csv-file
+     * @param isPath true, if given String is path to map-file, otherwise would be regarded as file-content
      */
-    public SnackManMap(String filename) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-
-            String line;
-            int lines = 0;
-            int numTokens = 0;
-            List<Tile[]> allRows = new ArrayList<>();
-
-            while ((line = reader.readLine()) != null) {
-                List<Tile> currentRow = new ArrayList<>();
-                String[] tokens = line.split(",");
-
-                if (numTokens != 0) {
-                    if (numTokens != tokens.length) throw new IOException("changing number of tokens per line");
-                } else {
-                    numTokens = tokens.length;
-                }
-
-                for (int i = 0; i < tokens.length; i++) {
-                    Tile newTile;
-                    switch (tokens[i].charAt(0)) {
-                        case '\u2588' -> newTile = new Tile(i, lines, OccupationType.WALL);
-                        case '\u2591' -> newTile = new Tile(i, lines, OccupationType.FREE);
-                        case '\u25CF' -> newTile = new Tile(i, lines, OccupationType.ITEM);
-                        default -> throw new IOException("Unexpected token while loading file: " + tokens[i]);
-                    }
-
-                    currentRow.add(newTile);
-                }
-
-                allRows.add(currentRow.toArray(Tile[]::new));
-                lines++;
-
-            }
-
-            allTiles = allRows.toArray(Tile[][]::new);
-            h = allTiles.length;
-            w = allTiles[0].length;
-
-            createFood();
-
+    public SnackManMap(String input, boolean isPath) {
+        try (BufferedReader reader = (isPath) ? new BufferedReader(new FileReader(input)) : new BufferedReader(new StringReader(input))){
+            parseFileContent(reader);
         } catch (IOException e) {
             logger.warning("Something went wrong while loading file:");
             logger.warning(e.getMessage());
         }
+    }
+
+    private void parseFileContent(BufferedReader reader) throws IOException {
+        String line;
+
+        int lines = 0;
+        int numTokens = 0;
+        List<Tile[]> allRows = new ArrayList<>();
+
+        while ((line = reader.readLine()) != null) {
+            List<Tile> currentRow = new ArrayList<>();
+            String[] tokens = line.split(",");
+
+            if (numTokens != 0) {
+                if (numTokens != tokens.length) throw new IOException("changing number of tokens per line");
+            } else {
+                numTokens = tokens.length;
+            }
+
+            for (int i = 0; i < tokens.length; i++) {
+                Tile newTile;
+                switch (tokens[i].charAt(0)) {
+                    case '\u2588' -> newTile = new Tile(i, lines, OccupationType.WALL);
+                    case '\u2591' -> newTile = new Tile(i, lines, OccupationType.FREE);
+                    case '\u25CF' -> newTile = new Tile(i, lines, OccupationType.ITEM);
+                    default -> throw new IOException("Unexpected token while loading file: " + tokens[i]);
+                }
+
+                currentRow.add(newTile);
+            }
+
+            allRows.add(currentRow.toArray(Tile[]::new));
+            lines++;
+
+        }
+
+        allTiles = allRows.toArray(Tile[][]::new);
+        h = allTiles.length;
+        w = allTiles[0].length;
+
+        createFood();
     }
 
     private void createFood() {
