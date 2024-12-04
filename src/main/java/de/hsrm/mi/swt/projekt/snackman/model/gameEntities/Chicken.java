@@ -74,7 +74,7 @@ public class Chicken implements CanEat, MovableAndSubscribable {
                 Random random = new Random(); 
                 Tile startTile = freeTiles.get(random.nextInt(freeTiles.size())); 
                 this.x = startTile.getX(); 
-                this.y = startTile.getY(); 
+                this.y = startTile.getZ(); 
                 this.z = 0; 
             }
             else {
@@ -105,7 +105,7 @@ public class Chicken implements CanEat, MovableAndSubscribable {
     public void executeScript(SnackManMap map) {
 
         // TODO the associated tile should be here calculated from the position of chicken
-        Tile positionTile = map.getTileAt((int) x, (int) y); 
+        Tile positionTile = map.getTileAt((int) x, (int) z); 
 
         // Retrieve the surrounding tiles as a 3x3 grid
         Tile[][] surroundings = map.getSurroundingTiles(positionTile);

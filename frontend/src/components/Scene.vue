@@ -153,11 +153,9 @@ export default defineComponent({
 
       scene.add(wallsGroup);
       //wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
-      //wallsGroup.position.set(-20, 0, -20);
 
       scene.add(foodGroup);
       //foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
-      //foodGroup.position.set(-20, 0, -20);
 
       const floor = createFloorTile(w, h);
       // console.log('Creating Floor with: ' + w + '|' + h);
@@ -363,7 +361,7 @@ export default defineComponent({
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
       plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
-      plane.position.set(x / 2, -0.5, y / 2);
+      plane.position.set(x / 2, -0.5, z / 2);
       plane.receiveShadow = true;
 
       return plane;

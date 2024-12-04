@@ -45,11 +45,11 @@ public class CollisionManager {
                             Tile tile= snackManMap.getTileAt((int) movable.getX(), (int) movable.getZ());
                             Vector3f movementVector = ((MoveEvent) event).getMovementVector();
                             float wishedX = movable.getX() + (movementVector.x * 0.2f);
-                            float wishedY = movable.getZ() + (movementVector.z * 0.2f);
-                            Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedY);
-                            if(wishedTile.getX() != tile.getX() || wishedTile.getY() != tile.getY()) {
+                            float wishedZ = movable.getZ() + (movementVector.z * 0.2f);
+                            Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
+                            if(wishedTile.getX() != tile.getX() || wishedTile.getZ() != tile.getZ()) {
                                 if(wishedTile.getOccupationType() == OccupationType.WALL) {
-                                    logger.info("snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getY()+" ." );
+                                    logger.info("snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ()+" ." );
                                     return "snackman:wall";}
                                 else return "none";
                                 }
