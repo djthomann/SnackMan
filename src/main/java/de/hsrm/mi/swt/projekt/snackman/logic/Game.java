@@ -27,7 +27,7 @@ public class Game {
 
     Logger logger = LoggerFactory.getLogger(Game.class);
 
-    public int id;
+    public long id;
     private GameConfig gameConfig;
     private ArrayList<MovableAndSubscribable> allMovables;
     //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
@@ -35,9 +35,10 @@ public class Game {
     private SnackManMap map;
     private GameEventBus eventBus;
     private GameManager gameManager;
+    private GameState gameState;
     
 
-    public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, SnackManMap map, GameManager gameManager) {
+    public Game(long id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, SnackManMap map, GameManager gameManager) {
         this.id = id;
         this.gameConfig = gameConfig;
         this.allMovables = allMoveables;
@@ -47,6 +48,7 @@ public class Game {
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
         startTimer();
+        gameState = new GameState();
     }
 
     /**
@@ -112,14 +114,6 @@ public class Game {
         this.gameManager.notifyChange(moveEvent);
     }
 
-    /* game schickt gamestateevent, gamestate besteht aus map und moveables */
-
-
-
-
-
-    
-
     /**
      * Returns the current list of all subscribers from its event bus 
      * 
@@ -127,6 +121,10 @@ public class Game {
      */
     public ArrayList<Subscribable> getAllSubscribers() {
         return eventBus.getSubscribers();
+    }
+
+    public GameState getGameState() {
+        return gameState;
     }
 
 }

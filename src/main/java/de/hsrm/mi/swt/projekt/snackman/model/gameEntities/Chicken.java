@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 
 /**
  * The `Chicken` class represents a NPC in the game.
@@ -60,6 +61,7 @@ public class Chicken implements CanEat, MovableAndSubscribable {
         x = newX; 
         y = newY; 
         z = newZ; 
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this));
     }
 
     
