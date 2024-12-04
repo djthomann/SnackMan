@@ -34,7 +34,7 @@ public class GameTests {
 
     @BeforeEach
     void setUp() {
-        game = new Game(0, gameConfig, allMovables, map, gameManager);
+        //game = new Game(0, gameConfig, allMovables, map, gameManager);
     }
 
     /**

@@ -29,7 +29,7 @@ public class Game {
 
     public int id;
     private GameConfig gameConfig;
-    private ArrayList<MovableAndSubscribable> allMovables;
+    private ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
     //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
     private Timer timer;
     private SnackManMap map;
@@ -38,22 +38,29 @@ public class Game {
     private CollisionManager collisionManager;
     
 
-    public Game(int id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, SnackManMap map, GameManager gameManager) {
+    public Game(int id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
         this.gameConfig = gameConfig;
-        this.allMovables = allMoveables;
-        this.timer = new Timer();
         this.map = map;
         this.gameManager = gameManager;
-        ArrayList<Subscribable> subscribers = createSubscriberList();
-        this.eventBus = new GameEventBus(subscribers);
-        this.collisionManager = new CollisionManager(this.map, this.allMovables);
+        this.collisionManager = new CollisionManager(map,allMovables);
+        this.timer = new Timer();   
         startTimer();
     }
 
     /**
+     * Initializes the game by adding the first player entity to the game object list.
+     * This method is called right after the game object is created.
+     * TODO: This method will be expanded to create all game objects and add them to the game object list.
+     */
+    public void init() {
+        allMovables.add(new SnackMan(0, 20.0f, 1.1f, 20.0f, gameManager, gameConfig,collisionManager));
+        ArrayList<Subscribable> subscribers = createSubscriberList();
+        this.eventBus = new GameEventBus(subscribers);
+    }
+
+    /**
      * Creates a copy of allMovables casting the game objects to Subscribable for the event bus
-     * 
      * @return allSubscribers
      */
     private ArrayList<Subscribable> createSubscriberList() {
@@ -103,21 +110,16 @@ public class Game {
     public void receiveEvent(Event event) {
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
-        String problem = collisionManager.checkCollision(event); //check for colision
-        if(!problem.equals("none")) {
-            event = collisionManager.resolveCollision(event,problem);
-            problem ="none";
-        }
         eventBus.sendEventToSubscribers(event);
         
 
-        // Create new move event with the new position of the SnackMan that is sent back to the frontend for testing purposes
-        float newX = ((SnackMan)this.allMovables.get(0)).getX();
+        //Create new move event with the new position of the SnackMan that is sent back to the frontend for testing purposes
+        /*float newX = ((SnackMan)this.allMovables.get(0)).getX();
         float newY = ((SnackMan)this.allMovables.get(0)).getY();
         float newZ = ((SnackMan)this.allMovables.get(0)).getZ();
         MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
 
-        this.gameManager.notifyChange(moveEvent);
+        this.gameManager.notifyChange(moveEvent);*/
     }
 
     

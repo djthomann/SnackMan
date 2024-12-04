@@ -10,7 +10,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 /**
@@ -32,7 +31,7 @@ public class GameManager {
         this.nextGameId = 0;
     }
 
-    // Constructor for testing purposes with fake game and fake Movables list, to be deleted later
+    // TODO: To Be Deleted , Constructor for testing purposes with fake game
     public GameManager(WebSocketHandler webSocketHandler, String test) {
 
         logger.info("Game Manager Constructor \n");
@@ -42,10 +41,7 @@ public class GameManager {
 
         GameConfig gameConfig = new GameConfig();
 
-        ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
-        allMoveables.add(new SnackMan(0, 20.0f, 1.1f, 20.0f, this, gameConfig));
-
-        createGame(gameConfig, allMoveables);
+        createGame(gameConfig);
     }
 
 
@@ -81,12 +77,13 @@ public class GameManager {
      * @param gameConfig
      * @param allMoveables
      */
-    public void createGame(GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables) {
+    public void createGame(GameConfig gameConfig) {
 
-        logger.info("Create Game \n");
-
-        SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
-        Game newGame = new Game(nextGameId, new GameConfig(), allMoveables, map, this);
+        logger.info("Create Game \n");  
+        
+        SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight); 
+        Game newGame = new Game(nextGameId, new GameConfig(), map, this);
+        newGame.init(); // Add Snackman 
         allGames.put(newGame.id, newGame);
 
         nextGameId++;
@@ -104,7 +101,7 @@ public class GameManager {
 
         SnackManMap map = new SnackManMap(mapFile, true);
 
-        Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>(), map, this);
+        Game newGame = new Game(nextGameId, new GameConfig(), map, this);
         allGames.put(newGame.id, newGame);
 
         nextGameId++;
