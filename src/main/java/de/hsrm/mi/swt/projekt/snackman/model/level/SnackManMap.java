@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 public class SnackManMap {
 
     // due to sidewinder (and Simon's brain):
-    // Tile at (x, y) can be reached via allTiles[y][x],
-    // or (recommended) getTileAt(x, y)
+    // Tile at (x, z) (y is always at 0, we view the map as 2D) can be reached via allTiles[z][x],
+    // or (recommended) getTileAt(x, z)
     private int w;
     private int h;
     private Tile[][] allTiles;
@@ -113,14 +113,14 @@ public class SnackManMap {
     private void makeBlankMap() {
         this.allTiles = new Tile[h][w];
 
-        for (int y = 0; y < h; y++) {
+        for (int z = 0; z < h; z++) {
             for (int x = 0; x < w; x++) {
                 OccupationType occupationType = OccupationType.WALL;
 
-                if (y != h - 1 && x != 0 && x != w - 1 && (y == 1 || (y % 2 == 1 && x % 2 == 1))) {
+                if (z != h - 1 && x != 0 && x != w - 1 && (z == 1 || (z % 2 == 1 && x % 2 == 1))) {
                     occupationType = OccupationType.ITEM;
                 }
-                allTiles[y][x] = new Tile(x, y, occupationType);
+                allTiles[z][x] = new Tile(x, z, occupationType);
             }
         }
     }
@@ -237,8 +237,8 @@ public class SnackManMap {
         }
     }
 
-    public Tile getTileAt(int x, int y) {
-        return allTiles[y][x];
+    public Tile getTileAt(int x, int z) {
+        return allTiles[z][x];
     }
 
     public Tile[][] getAllTiles() {

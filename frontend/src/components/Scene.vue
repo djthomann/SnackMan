@@ -29,7 +29,7 @@ let orangeModel: THREE.Group;
 // mesh for walls
 let box: THREE.Mesh;
 
-const mapScale = 3
+const mapScale = 3;
 
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
@@ -61,9 +61,10 @@ export default defineComponent({
     const entityStore = useEntityStore();
     const { snackmen, ghosts } = storeToRefs(entityStore);
 
-
-    console.log('Snackman Names:', snackmen.value.map((item: Snackman) => item.username));
-
+    console.log(
+      'Snackman Names:',
+      snackmen.value.map((item: Snackman) => item.username),
+    );
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
@@ -74,18 +75,18 @@ export default defineComponent({
         let key: string = message.split(':')[1];
 
         // Move the player
-        movePlayer(JSON.parse(message.split(';')[1]))
+        movePlayer(JSON.parse(message.split(';')[1]));
 
         /*  if (key === 'KeyD') {
-            cone.position.x += 0.2;
-          } else if (key === 'KeyA') {
-            cone.position.x -= 0.2;
-          } else if (key === 'KeyW') {
-            cone.position.z -= 0.2;
-          } else if (key === 'KeyS') {
-            cone.position.z += 0.2;
-          }
-            */
+          cone.position.x += 0.2;
+        } else if (key === 'KeyA') {
+          cone.position.x -= 0.2;
+        } else if (key === 'KeyW') {
+          cone.position.z -= 0.2;
+        } else if (key === 'KeyS') {
+          cone.position.z += 0.2;
+        }
+          */
       } else if (message.startsWith('MAP')) {
         console.log('processing map');
         const map = JSON.parse(message.split(';')[1]);
@@ -146,13 +147,12 @@ export default defineComponent({
           const occupationType = tile.occupationType;
           if (occupationType == 'WALL') {
             // console.log(tile)
-            wallsGroup.add(createWall(tile.x, tile.y));
+            wallsGroup.add(createWall(tile.x, tile.z));
           } else if (occupationType == 'ITEM') {
-            foodGroup.add(createFood(tile.x, tile.y, Math.random() * 400 + 100));
+            foodGroup.add(createFood(tile.x, tile.z, Math.random() * 400 + 100));
           }
         }
       }
-
 
       scene.add(wallsGroup);
       wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
@@ -169,12 +169,13 @@ export default defineComponent({
      * The camera is moved to the updated position when the w-key is pressed
      */
     function movePlayer(moveInformation: any) {
-
       const newPlayerPositionX = moveInformation.movementVector.x;
       const newPlayerPositionY = moveInformation.movementVector.y;
       const newPlayerPositionZ = moveInformation.movementVector.z;
 
-      //console.log(`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`)
+      console.log(
+        `New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`,
+      );
 
       player.position.set(newPlayerPositionX, newPlayerPositionY, newPlayerPositionZ);
     }
@@ -289,36 +290,30 @@ export default defineComponent({
 
       // TODO When entering a user name no move event should be sent to the backend
 
-      let keyPressedArray: string[] = []
+      let keyPressedArray: string[] = [];
 
       /* Adds keys to the keyPressedArray when one of the specific movement keys is pressed */
       document.addEventListener('keydown', (event) => {
-
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
           if (keyPressedArray.indexOf(event.key) === -1) {
-            keyPressedArray.push(event.key)
+            keyPressedArray.push(event.key);
           }
-
         }
-
-      })
+      });
 
       /* Removes movement key from the keyPressedArray when key is let go */
       document.addEventListener('keyup', (event) => {
-
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
 
-          const index = keyPressedArray.indexOf(event.key);
-          if (index > -1) {
-            keyPressedArray.splice(index, 1);
-          }
+            const index = keyPressedArray.indexOf(event.key);
+            if (index > -1) {
+              keyPressedArray.splice(index, 1);
+            }
         }
-
-      })
+      });
 
       /* Calculates movementVector depending on the pressed keys (= keys in the keyPressedArray) */
       function handleMovement() {
-
         // If no keys are pressed, no event is sent to the backend
         if (keyPressedArray.length === 0) {
           return;
@@ -327,45 +322,44 @@ export default defineComponent({
         let forward = new THREE.Vector3(0, 0, 0);
         forward = camera.getWorldDirection(forward);
         forward.y = 0;
-        forward.normalize()
+        forward.normalize();
         let vector = new THREE.Vector3(0, 0, 0);
         const angle = Math.PI / 2;
         const rotationAxis = new THREE.Vector3(0, 1, 0);
 
         if (keyPressedArray.includes('w')) {
-          vector = vector.add(forward.clone())
+          vector = vector.add(forward.clone());
         }
 
         if (keyPressedArray.includes('a')) {
-          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, angle).normalize())
+          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, angle).normalize());
         }
 
         if (keyPressedArray.includes('s')) {
-          vector = vector.add(forward.clone().negate())
+          vector = vector.add(forward.clone().negate());
         }
 
         if (keyPressedArray.includes('d')) {
-          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize())
+          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
         }
 
-        if (keyPressedArray.includes(' ')) {
-          vector = vector.add(new THREE.Vector3(0, 1, 0))
-        }
+          if(keyPressedArray.includes(' ')) {
+            vector = vector.add(new THREE.Vector3(0, 1, 0))
+          }
 
-        const data = JSON.stringify({
+          const data = JSON.stringify({
           type: "MOVE",
           gameID: 0,
           objectID: 0,
-          movementVector: vector
+          movementVector: vector,
         });
 
-        sendMessage(data);
+          sendMessage(data);
 
       }
 
       // Calls the handleMovement function in a specified time interval
       setInterval(handleMovement, 50);
-
 
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
@@ -376,8 +370,8 @@ export default defineComponent({
     }
 
     // Creates one large plane as the floor
-    function createFloorTile(x: number, y: number) {
-      const planeGeometry = new THREE.PlaneGeometry(x, y, 1, 1);
+    function createFloorTile(x: number, z: number) {
+      const planeGeometry = new THREE.PlaneGeometry(x, z, 1, 1);
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
       plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
@@ -388,18 +382,18 @@ export default defineComponent({
     }
 
     // Creates one cube per wall tile
-    function createWall(x: number, y: number) {
+    function createWall(x: number, z: number) {
       const boxGeometry = new THREE.BoxGeometry(1 * mapScale, 3, 1 * mapScale);
       const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       box = new THREE.Mesh(boxGeometry, boxMaterial);
-      box.position.set(x * mapScale, 0, y * mapScale);
+      box.position.set(x * mapScale, 0, z * mapScale);
       box.castShadow = true;
 
       return box;
     }
 
     // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
-    function createFood(x: number, y: number, calories: number) {
+    function createFood(x: number, z: number, calories: number) {
       let newModel;
       if (calories > 300) {
         newModel = bananaModel.clone();
@@ -408,7 +402,7 @@ export default defineComponent({
       } else {
         newModel = orangeModel.clone();
       }
-      newModel.position.set(x * mapScale, 0, y * mapScale)
+      newModel.position.set(x * mapScale, 0, z * mapScale)
       return newModel
     }
 

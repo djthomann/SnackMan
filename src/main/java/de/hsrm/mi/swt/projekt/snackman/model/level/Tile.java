@@ -3,7 +3,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.level;
 public class Tile {
 
     private final int x;
-    private final int y;
+    private final int z;
     private OccupationType occupationType;
 
     private Object occupation;
@@ -12,12 +12,12 @@ public class Tile {
     /**
      * Constructor, creates Tile with given parameters:
      * @param x x-coordinate of Tile (final)
-     * @param y y-coordinate of Tile (final)
+     * @param z z-coordinate of Tile (final)
      * @param occupationType OccupationType of Tile
      */
-    public Tile(int x, int y, OccupationType occupationType) {
+    public Tile(int x, int z, OccupationType occupationType) {
         this.x = x;
-        this.y = y;
+        this.z = z;
         this.occupationType = occupationType;
     }
 
@@ -33,8 +33,8 @@ public class Tile {
         return x;
     }
 
-    public int getY() {
-        return y;
+    public int getZ() {
+        return z;
     }
 
     public Object getOccupation() {
