@@ -10,6 +10,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 /**
@@ -81,7 +82,9 @@ public class GameManager {
 
         logger.info("Create Game \n");  
         
-        SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight); 
+        // SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight); 
+        SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-26_19_17_39.csv", true);
+        // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
         Game newGame = new Game(nextGameId, new GameConfig(), map, this);
         newGame.init(); // Add Snackman 
         allGames.put(newGame.id, newGame);
