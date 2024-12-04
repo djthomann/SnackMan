@@ -11,6 +11,9 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
+import type { Snackman, Ghost, Food, Tile } from '@/types/SceneTypes';
+import { useEntityStore } from '@/stores/entityStore';
+import { storeToRefs } from 'pinia';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -25,6 +28,8 @@ let orangeModel: THREE.Group;
 // mesh for walls
 let box: THREE.Mesh;
 
+const mapScale = 3
+
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
 let sphere: THREE.Mesh;
@@ -33,7 +38,7 @@ let sphere: THREE.Mesh;
 export default defineComponent({
   name: 'Scene',
   setup() {
-    const { connect, sendMessage, closeConnection } = useWebSocket();
+    const { sendMessage } = useWebSocket();
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
@@ -47,6 +52,15 @@ export default defineComponent({
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
+
+
+    //GameStart
+    const entityStore = useEntityStore();
+    const { snackmen, ghosts } = storeToRefs(entityStore);
+
+
+    console.log('Snackman Names:', snackmen.value.map((item: Snackman) => item.username));
+
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
@@ -81,15 +95,11 @@ export default defineComponent({
       loadModels();
       eventBus.on('serverMessage', handleServerMessage);
 
-      connect();
-
       window.addEventListener('resize', onWindowResize);
     });
 
     onUnmounted(() => {
       eventBus.off('serverMessage', handleServerMessage);
-
-      closeConnection();
 
       // Three.js Cleanup
       controls?.dispose();
@@ -124,8 +134,8 @@ export default defineComponent({
 
     function loadMap(map: any) {
       console.log('Received mapdata' + map);
-      const w = map.w;
-      const h = map.h;
+      const w = map.w * mapScale;
+      const h = map.h * mapScale;
       const tiles = map.allTiles;
 
       for (const row of tiles) {
@@ -177,7 +187,6 @@ export default defineComponent({
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 0.5, 0);
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -226,7 +235,8 @@ export default defineComponent({
       const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 32);
       const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       cone = new THREE.Mesh(coneGeometry, coneMaterial);
-      cone.position.set(0, 0, 0);
+      cone.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
       cone.rotation.x = -Math.PI / 2;
       cone.castShadow = true;
       scene.add(cone);
@@ -258,34 +268,65 @@ export default defineComponent({
       });
 
       // TODO When entering a user name no move event should be sent to the backend
-      // Handle key press und send Event via WebSocket
-      const handleKeyPress = (event: KeyboardEvent) => {
-        if (['w', 'a', 's', 'd'].includes(event.key)) {
+
+      let keyPressedArray: string[] = []
+
+      /* Adds keys to the keyPressedArray when one of the specific movement keys is pressed */
+      document.addEventListener('keydown', (event) => {
+
+        if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
+          if (keyPressedArray.indexOf(event.key) === -1) {
+            keyPressedArray.push(event.key)
+          }
+
+        }
+
+      })
+
+      /* Removes movement key from the keyPressedArray when key is let go */
+      document.addEventListener('keyup', (event) => {
+
+        if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
+
+            const index = keyPressedArray.indexOf(event.key);
+            if (index > -1) {
+              keyPressedArray.splice(index, 1);
+            }  
+        }
+
+      })
+
+      /* Calculates movementVector depending on the pressed keys (= keys in the keyPressedArray) */
+      function handleMovement() {
+
           let forward = new THREE.Vector3(0, 0, 0);
           forward = camera.getWorldDirection(forward);
           forward.y = 0;
           forward.normalize()
-          let vector;
+          let vector = new THREE.Vector3(0, 0, 0);
           const angle = Math.PI / 2;
           const rotationAxis = new THREE.Vector3(0, 1, 0);
 
-          // Calculate movement vector
-          switch (event.key) {
-            case 'w':
-              vector = forward.clone();
-              break;
-            case 'a':
-              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
-              break;
-            case 's':
-              vector = forward.clone().negate();
-              break;
-            case 'd':
-              vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
-              break;
+          if(keyPressedArray.includes('w')) {
+            vector = vector.add(forward.clone())
+          }
+
+          if(keyPressedArray.includes('a')) {
+            vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, angle).normalize())
+          }
+
+          if(keyPressedArray.includes('s')) {
+            vector = vector.add(forward.clone().negate())
+          }
+
+          if(keyPressedArray.includes('d')) {
+            vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize())
+          }
+
+          if(keyPressedArray.includes(' ')) {
+            vector = vector.add(new THREE.Vector3(0, 1, 0))
           }
           
-          //TODO: give vector to sendMessage()
           const data = JSON.stringify({
           type: "MOVE",
           gameID: 0,
@@ -294,32 +335,13 @@ export default defineComponent({
           });
 
           sendMessage(data);
-          //console.log('MovementVector:', vector);
-        } else if(event.key === " ") {
-          const data = JSON.stringify({
-          type: "MOVE",
-          gameID: 0,
-          objectID: 0,
-          movementVector: new THREE.Vector3(0, 1, 0)
-          });
-          sendMessage(data);
-        }
-      };
-
-      document.addEventListener('keypress', handleKeyPress);
-      document.addEventListener('keydown', (event) => {
-
-        if(event.key === "Shift") {
-          const data = JSON.stringify({
-          type: "MOVE",
-          gameID: 0,
-          objectID: 0,
-          movementVector: new THREE.Vector3(0, -1, 0)
-          });
-          sendMessage(data);
-        }
         
-      })
+      }
+
+      // Calls the handleMovement function in a specified time interval
+      setInterval(handleMovement, 50);
+
+
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
       });
@@ -342,10 +364,10 @@ export default defineComponent({
 
     // Creates one cube per wall tile
     function createWall(x: number, y: number) {
-      const boxGeometry = new THREE.BoxGeometry(1, 3, 1);
+      const boxGeometry = new THREE.BoxGeometry(1 * mapScale, 3, 1 * mapScale);
       const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       box = new THREE.Mesh(boxGeometry, boxMaterial);
-      box.position.set(x, 0, y);
+      box.position.set(x * mapScale, 0, y * mapScale);
       box.castShadow = true;
 
       return box;
@@ -353,19 +375,16 @@ export default defineComponent({
 
     // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
     function createFood(x: number, y: number, calories: number) {
+      let newModel;
       if (calories > 300) {
-        const newBanana = bananaModel.clone();
-        newBanana.position.set(x, 0, y);
-        return newBanana;
+        newModel= bananaModel.clone();
       } else if (calories > 200) {
-        const newApple = appleModel.clone();
-        newApple.position.set(x, 0, y);
-        return newApple;
+        newModel = appleModel.clone();
       } else {
-        const newPear = orangeModel.clone();
-        newPear.position.set(x, 0, y);
-        return newPear;
+        newModel = orangeModel.clone();
       }
+      newModel.position.set(x * mapScale, 0, y * mapScale)
+      return newModel
     }
 
     function animate() {
