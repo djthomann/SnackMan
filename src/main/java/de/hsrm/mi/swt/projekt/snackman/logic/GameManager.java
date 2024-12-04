@@ -101,7 +101,7 @@ public class GameManager {
      */
     public void createGame(GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, String mapFile) {
 
-        SnackManMap map = new SnackManMap(mapFile);
+        SnackManMap map = new SnackManMap(mapFile, true);
 
         Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>(), map, this);
         allGames.put(newGame.id, newGame);

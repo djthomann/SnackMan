@@ -86,7 +86,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                     clients.get(session).setUsername(registerUsernameEvent.getUsername());
                 }
-                case "MAP" -> {
+                case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-26_19_17_39.csv");
@@ -107,6 +107,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
+                }
+                case "MAPUPLOAD" -> {
+
+                    SnackManMap map = new SnackManMap(jsonObject.get("content").getAsString(), false);
+
+                    ObjectMapper mapper = new ObjectMapper();
+                    String returnString = "";
+                    try {
+                        String json = mapper.writeValueAsString(map);
+                        returnString = "MAP;" + json;
+                        logger.info("Final JSON: " + returnString);
+                        session.sendMessage(new TextMessage(returnString));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+
                 }
                 case "MOVE" -> {
                     MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);

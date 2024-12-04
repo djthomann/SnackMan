@@ -54,7 +54,7 @@ public class MapTests {
         }
 
         // für maps aus Dateien
-        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
                 if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
@@ -166,7 +166,7 @@ public class MapTests {
      */
     @Test
     void testFileConstructor() {
-        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
 
         Assertions.assertEquals(15, w);
         Assertions.assertEquals(15, h);

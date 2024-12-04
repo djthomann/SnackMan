@@ -32,6 +32,7 @@ public class SnackMan extends PlayerObject implements CanEat {
     private final float INITIAL_VELOCITY = 8.0f; // Initial velocity at the start of the jump
     private final float JUMP_BOOST = 5.0f; // Boost applied to the current jump if the SnackMan is already jumping and the jump-method is called again
     private final int MAX_BOOSTS = 2; // Maximum number of velocity boosts that is possible to reach during one jump
+    private final long BOOST_PUFFER_TIME = 100; // Time that has to be passed since last space bar press to enable boost
 
     // Jumping variables
     private float currentVelocity;
@@ -39,6 +40,8 @@ public class SnackMan extends PlayerObject implements CanEat {
     private float initialY;
     private float heightGain;
     private int boosts;
+    private long jumpStartTime;
+    private long jumpEndTime;
 
     private ScheduledExecutorService jumpExecutor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> jumpTaskFuture;
@@ -62,7 +65,7 @@ public class SnackMan extends PlayerObject implements CanEat {
         super(id, x, y, z);
 
         // TODO Initial calories to make jumping possible, change back to 0 later
-        this.gainedCalories = 1000; 
+        this.gainedCalories = 1000000; 
         this.gameManger = gameManager;
         this.gameConfig = gameConfig;
     }
@@ -96,6 +99,8 @@ public class SnackMan extends PlayerObject implements CanEat {
 
         // If we are not jumping and have enough calories, start new jump
         if(!jumping && gainedCalories >= this.gameConfig.getJumpCalories()) {
+
+            this.jumpStartTime = System.currentTimeMillis();
 
             // Jumping results in loss of calories
             this.gainedCalories -= this.gameConfig.getJumpCalories();
@@ -158,9 +163,21 @@ public class SnackMan extends PlayerObject implements CanEat {
          * apply boost to current velocity, so that we jump higher
          */
         } else if (this.boosts < MAX_BOOSTS && this.gainedCalories >= this.gameConfig.getJumpCalories()) {
-            this.currentVelocity += JUMP_BOOST;
-            this.boosts++;
-            this.gainedCalories -= this.gameConfig.getJumpCalories();
+
+            this.jumpEndTime = System.currentTimeMillis();
+
+            // Time that has passed since pressing the space bar
+            float timeDifference = this.jumpEndTime - this.jumpStartTime;
+
+            /**
+             * Boosts are only possible when enough time has passed since pressing the space bar
+             * so that they are not applied immediately
+             */
+            if(timeDifference > this.BOOST_PUFFER_TIME) {
+                this.currentVelocity += JUMP_BOOST;
+                this.boosts++;
+                this.gainedCalories -= this.gameConfig.getJumpCalories();
+            }
         }
     }
 
