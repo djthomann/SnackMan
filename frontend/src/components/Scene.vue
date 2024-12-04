@@ -299,6 +299,11 @@ export default defineComponent({
       /* Calculates movementVector depending on the pressed keys (= keys in the keyPressedArray) */
       function handleMovement() {
 
+          // If no keys are pressed, no event is sent to the backend
+          if(keyPressedArray.length === 0) {
+            return;
+          }
+
           let forward = new THREE.Vector3(0, 0, 0);
           forward = camera.getWorldDirection(forward);
           forward.y = 0;
