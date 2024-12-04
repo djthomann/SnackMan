@@ -29,12 +29,8 @@ let orangeModel: THREE.Group;
 // mesh for walls
 let box: THREE.Mesh;
 
-<<<<<<< HEAD
 const mapScale = 1;
 const wallHeight = 3;
-=======
-const mapScale = 3;
->>>>>>> DEVELOPMENT
 
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
@@ -268,7 +264,7 @@ export default defineComponent({
       testPlayer.add(testObj);
 
       // Create NameTag
-       nameTag = new NameTag('Snacko', testPlayer, scene);
+      nameTag = new NameTag('Snacko', testPlayer, scene);
       nameTags.push(nameTag);
 
       // PointerLock Controls
@@ -345,13 +341,10 @@ export default defineComponent({
         if (keyPressedArray.includes('d')) {
           vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
         }
-<<<<<<< HEAD
 
         if (keyPressedArray.includes(' ')) {
           vector = vector.add(new THREE.Vector3(0, 1, 0));
         }
-=======
->>>>>>> DEVELOPMENT
 
         const data = JSON.stringify({
           type: 'MOVE',
@@ -359,21 +352,12 @@ export default defineComponent({
           objectID: 0,
           movementVector: vector,
         });
-<<<<<<< HEAD
-=======
-
-          sendMessage(data);
->>>>>>> DEVELOPMENT
 
         sendMessage(data);
       }
 
       // Calls the handleMovement function in a specified time interval
-<<<<<<< HEAD
       setInterval(handleMovement, 20);
-=======
-      setInterval(handleMovement, 50);
->>>>>>> DEVELOPMENT
 
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
@@ -428,9 +412,7 @@ export default defineComponent({
       // Update NameTag Orientation
       nameTags.forEach((nameTag) => {
         nameTag.update(player);
-      })
-
-
+      });
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {

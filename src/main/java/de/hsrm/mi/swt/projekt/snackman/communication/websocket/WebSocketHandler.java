@@ -26,6 +26,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
+import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 

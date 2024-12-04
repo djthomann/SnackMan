@@ -65,7 +65,7 @@ public class SnackMan extends PlayerObject implements CanEat {
      * @param radius the radius of the `SnackMan`
      */
     public SnackMan(int id, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
-        super(id, x, y, z, gameConfig.snackManRadius);
+        super(id, x, y, z, gameConfig.getSnackManRadius());
         this.collisionManager = collisionManager;
 
         // TODO Initial calories to make jumping possible, change back to 0 later
@@ -223,11 +223,11 @@ public class SnackMan extends PlayerObject implements CanEat {
                 Vector3f vector = ((MoveEvent) event).getMovementVector();
                 logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
                 String collision = "none";
-                float wishedX = this.getX() + (vector.x * gameConfig.snackManStep);
-                float wishedZ = this.getZ() + (vector.z * gameConfig.snackManStep);
+                float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
+                float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
                 if ((int) wishedX != (int) this.getX() || (int) wishedZ != (int) this.getZ()) {
 
-                    if(this.getY() < gameConfig.wallHeight) {
+                    if(this.getY() < gameConfig.getWallHeight()) {
                         collision = collisionManager.checkCollision(wishedX, wishedZ);
                         if (collision.equals("wall")) {
                             vector.x = 0;
@@ -239,7 +239,7 @@ public class SnackMan extends PlayerObject implements CanEat {
 
                 }
 
-                this.move(vector.x * gameConfig.snackManStep, 0, vector.z * gameConfig.snackManStep);
+                this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
                 gameManger.notifyChange(moveEvent);
 
