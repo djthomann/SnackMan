@@ -95,10 +95,10 @@ public class SnackMan extends PlayerObject implements CanEat {
     public void jump() {
 
         // If we are not jumping and have enough calories, start new jump
-        if(!jumping && gainedCalories >= this.gameConfig.jumpCalories) {
+        if(!jumping && gainedCalories >= this.gameConfig.getJumpCalories()) {
 
             // Jumping results in loss of calories
-            this.gainedCalories -= this.gameConfig.jumpCalories;
+            this.gainedCalories -= this.gameConfig.getJumpCalories();
 
             this.initialY = this.y;
             this.currentVelocity = INITIAL_VELOCITY;
@@ -157,10 +157,10 @@ public class SnackMan extends PlayerObject implements CanEat {
          * If we are already jumping, have not reached the maximum possible number of boosts and have enough calories,
          * apply boost to current velocity, so that we jump higher
          */
-        } else if (this.boosts < MAX_BOOSTS && this.gainedCalories >= this.gameConfig.jumpCalories) {
+        } else if (this.boosts < MAX_BOOSTS && this.gainedCalories >= this.gameConfig.getJumpCalories()) {
             this.currentVelocity += JUMP_BOOST;
             this.boosts++;
-            this.gainedCalories -= this.gameConfig.jumpCalories;
+            this.gainedCalories -= this.gameConfig.getJumpCalories();
         }
     }
 

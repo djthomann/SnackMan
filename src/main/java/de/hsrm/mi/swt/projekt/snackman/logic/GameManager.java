@@ -25,6 +25,7 @@ public class GameManager {
     public HashMap<Integer, Game> allGames;
     private int nextGameId;
     private WebSocketHandler webSocketHandler;
+    private GameConfig gameConfig = new GameConfig();
 
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
@@ -39,8 +40,6 @@ public class GameManager {
         this.webSocketHandler = webSocketHandler;
         this.allGames = new HashMap<Integer, Game>();
         this.nextGameId = 0;
-
-        GameConfig gameConfig = new GameConfig();
 
         ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
         allMoveables.add(new SnackMan(0, 0f, 1.1f, 0f, this, gameConfig));
@@ -85,7 +84,7 @@ public class GameManager {
 
         logger.info("Create Game \n");
 
-        SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
+        SnackManMap map = new SnackManMap(gameConfig.getMapWidth(), gameConfig.getMapHeight());
         Game newGame = new Game(nextGameId, new GameConfig(), allMoveables, map, this);
         allGames.put(newGame.id, newGame);
 
@@ -108,6 +107,14 @@ public class GameManager {
         allGames.put(newGame.id, newGame);
 
         nextGameId++;
+    }
+
+    public void setGameConfig(GameConfig gameConfig) {
+        this.gameConfig = gameConfig;
+    }
+
+    public GameConfig getGameConfig(){
+        return this.gameConfig;
     }
 
 } 
