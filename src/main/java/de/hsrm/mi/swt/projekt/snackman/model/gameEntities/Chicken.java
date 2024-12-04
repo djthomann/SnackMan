@@ -1,6 +1,10 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 
 /**
  * The `Chicken` class represents a NPC in the game.
@@ -8,6 +12,10 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
  * 
  */
 public class Chicken implements CanEat, MovableAndSubscribable {
+
+        /** Publisher to publish the internal backend event. */
+     @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     /** The unique identifier for the Chicken */
     private final int id;
@@ -62,6 +70,7 @@ public class Chicken implements CanEat, MovableAndSubscribable {
      */
     @Override
     public void eat(Food food) {
+        applicationEventPublisher.publishEvent(new EatEvent(this, food));
     } 
 
     /**

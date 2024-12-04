@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.*;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 
@@ -23,7 +24,7 @@ public class SnackMan extends PlayerObject implements CanEat {
 
     private Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
-    /** Publisher to publish the internal move and eat event. */
+    /** Publisher to publish the internal backend event. */
      @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
@@ -64,17 +65,18 @@ public class SnackMan extends PlayerObject implements CanEat {
         this.x += newX; 
         this.y += newY; 
         this.z += newZ; 
-
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this));
     }
 
     /**
      * method to Consume Food
+     * publishes an eat event to be progressed by the GameState
      *
      * @param food the calorie resource to be consumed by the `SnackMan`. 
      */
     @Override
     public void eat(Food food) {
-
+        applicationEventPublisher.publishEvent(new EatEvent(this, food));
     }
 
     /**

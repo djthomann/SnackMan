@@ -1,6 +1,10 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 
 /**
  * The `Ghost` class represents a player character in the game with
@@ -12,6 +16,10 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
  * 
  */
 public class Ghost extends PlayerObject {
+
+        /** Publisher to publish the internal backend event. */
+     @Autowired
+     private ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Constructs a new `Ghost` with the specified starting position.
@@ -37,6 +45,7 @@ public class Ghost extends PlayerObject {
         x = newX; 
         y = newY; 
         z = newZ; 
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this));
     }
 
     @Override
