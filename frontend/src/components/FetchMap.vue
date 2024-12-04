@@ -83,6 +83,14 @@ h1 {
 button {
   margin-top: 12px;
   margin-right: 20px;
+  font-size: 12pt;
+}
+h1 {
+  color: blue;
+}
+button {
+  margin-top: 12px;
+  margin-right: 20px;
   font-size: 14pt;
   transition: background-color 200ms;
 }
