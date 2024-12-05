@@ -67,6 +67,8 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
         this.gainedCalories = 1000000; 
         this.gameManger = gameManager;
         this.gameConfig = gameConfig;
+
+        logger.info("Snack Man erstellt mit ID: " + id);
     }
 
     /**
