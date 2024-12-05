@@ -39,7 +39,7 @@ public class SnackManMap {
      * @param isPath true, if given String is path to map-file, otherwise would be regarded as file-content
      */
     public SnackManMap(String input, boolean isPath) {
-        try (BufferedReader reader = (isPath) ? new BufferedReader(new FileReader(input)) : new BufferedReader(new StringReader(input))){
+        try (BufferedReader reader = (isPath) ? new BufferedReader(new FileReader(MapGenerationConfig.SAVED_MAPS_PATH + input)) : new BufferedReader(new StringReader(input))){
             parseFileContent(reader);
         } catch (IOException e) {
             logger.warning("Something went wrong while loading file:");
@@ -251,6 +251,21 @@ public class SnackManMap {
     
     public int getH() {
         return h;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (! (o instanceof SnackManMap other)) {
+            return false;
+        }
+
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                if (this.allTiles[row][col].getOccupationType() != other.allTiles[row][col].getOccupationType()) return false;
+            }
+        }
+
+        return true;
     }
 
 }
