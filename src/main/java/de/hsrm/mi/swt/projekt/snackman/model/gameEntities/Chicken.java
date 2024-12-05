@@ -18,6 +18,9 @@ public class Chicken implements CanEat, MovableAndSubscribable {
      @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+    /** id of game the chicken belongs to */
+    private final long gameId;
+
     /** The unique identifier for the Chicken */
     private final int id;
 
@@ -41,7 +44,8 @@ public class Chicken implements CanEat, MovableAndSubscribable {
      * @param y        the initial y-coordinate of the Chicken       
      * @param z        the initial z-coordinate of the Chicken       
      */
-    public Chicken(int id,float x, float y, float z) {
+    public Chicken(long gameId, int id,float x, float y, float z) {
+        this.gameId = gameId;
         this.id = id; 
         this.x = x; 
         this.y = y; 
@@ -61,7 +65,7 @@ public class Chicken implements CanEat, MovableAndSubscribable {
         x = newX; 
         y = newY; 
         z = newZ; 
-        applicationEventPublisher.publishEvent(new InternalMoveEvent(this));
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
     }
 
     
@@ -72,7 +76,7 @@ public class Chicken implements CanEat, MovableAndSubscribable {
      */
     @Override
     public void eat(Food food) {
-        applicationEventPublisher.publishEvent(new EatEvent(this, food));
+        applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
     } 
 
     /**

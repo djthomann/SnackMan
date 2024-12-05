@@ -28,6 +28,9 @@ public class SnackMan extends PlayerObject implements CanEat {
      @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+        /** id of game the chicken belongs to */
+        private final long gameId;
+
     /** The calorie count of the SnackMan */
     private int gainedCalories;
 
@@ -40,9 +43,10 @@ public class SnackMan extends PlayerObject implements CanEat {
      * @param y        the initial y-coordinate of the `SnackMan` 
      * @param z        the initial z-coordinate of the `SnackMan` 
      */
-    public SnackMan(int id, float x, float y, float z) {
+    public SnackMan(int id, float x, float y, float z, long gameId) {
         super(id, x, y, z);
         this.gainedCalories = 0;
+        this.gameId = gameId;
     }
 
     /**
@@ -65,7 +69,7 @@ public class SnackMan extends PlayerObject implements CanEat {
         this.x += newX; 
         this.y += newY; 
         this.z += newZ; 
-        applicationEventPublisher.publishEvent(new InternalMoveEvent(this));
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
     }
 
     /**
@@ -76,7 +80,7 @@ public class SnackMan extends PlayerObject implements CanEat {
      */
     @Override
     public void eat(Food food) {
-        applicationEventPublisher.publishEvent(new EatEvent(this, food));
+        applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
     }
 
     /**

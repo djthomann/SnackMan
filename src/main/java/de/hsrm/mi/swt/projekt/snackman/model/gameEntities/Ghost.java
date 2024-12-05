@@ -21,6 +21,9 @@ public class Ghost extends PlayerObject {
      @Autowired
      private ApplicationEventPublisher applicationEventPublisher;
 
+        /** id of game the ghost belongs to */
+        private final long gameId;
+
     /**
      * Constructs a new `Ghost` with the specified starting position.
      * 
@@ -29,8 +32,9 @@ public class Ghost extends PlayerObject {
      * @param y         the initial y-coordinate of the `Ghost`
      * @param z         the initial z-coordinate of the `Ghost`
      */
-    public Ghost(int id, float x, float y, float z) {
+    public Ghost(int id, float x, float y, float z, long gameId) {
         super(id, x, y, z);
+        this.gameId = gameId;
     }
 
     /**
@@ -45,7 +49,7 @@ public class Ghost extends PlayerObject {
         x = newX; 
         y = newY; 
         z = newZ; 
-        applicationEventPublisher.publishEvent(new InternalMoveEvent(this));
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
     }
 
     @Override
