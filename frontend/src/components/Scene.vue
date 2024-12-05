@@ -25,6 +25,7 @@ let foodGroup: THREE.Group;
 let bananaModel: THREE.Group;
 let appleModel: THREE.Group;
 let orangeModel: THREE.Group;
+let cakeModel: THREE.Group;
 
 // mesh for walls
 let box: THREE.Mesh;
@@ -129,6 +130,9 @@ export default defineComponent({
 
         orangeModel = modelService.getModel('orange');
         orangeModel.scale.set(0.0025, 0.0025, 0.0025);
+
+        cakeModel = modelService.getModel('cake');
+        cakeModel.scale.set(0.4, 0.4, 0.4);
 
         console.log('Models loaded');
       } catch (error) {
@@ -398,7 +402,8 @@ export default defineComponent({
       } else if (calories > 200) {
         newModel = appleModel.clone();
       } else {
-        newModel = orangeModel.clone();
+        newModel = cakeModel.clone();
+        //newModel = orangeModel.clone();
       }
       newModel.position.set(x * mapScale, 0, z * mapScale);
       return newModel;
