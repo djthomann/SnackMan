@@ -26,6 +26,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
+import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
@@ -89,8 +90,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
-                    // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-26_19_17_39.csv");
-                    SnackManMap map = new SnackManMap(40, 40);
+                    SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "map_2024-11-26_19_17_39.csv", true);
+                    // SnackManMap map = new SnackManMap(40, 40);
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
                     // map.saveAsCSV();
 

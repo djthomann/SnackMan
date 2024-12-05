@@ -29,7 +29,8 @@ let orangeModel: THREE.Group;
 // mesh for walls
 let box: THREE.Mesh;
 
-const mapScale = 3;
+const mapScale = 1;
+const wallHeight = 3;
 
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
@@ -55,7 +56,6 @@ export default defineComponent({
     let mouseMovement = false;
     let nameTag: NameTag;
     const nameTags: NameTag[] = [];
-
 
     //GameStart
     const entityStore = useEntityStore();
@@ -155,10 +155,10 @@ export default defineComponent({
       }
 
       scene.add(wallsGroup);
-      wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+      //wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
       scene.add(foodGroup);
-      foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+      //foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
       const floor = createFloorTile(w, h);
       // console.log('Creating Floor with: ' + w + '|' + h);
@@ -262,9 +262,9 @@ export default defineComponent({
       testPlayer.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
       scene.add(testPlayer);
       testPlayer.add(testObj);
-      
+
       // Create NameTag
-       nameTag = new NameTag('Snacko', testPlayer, scene);
+      nameTag = new NameTag('Snacko', testPlayer, scene);
       nameTags.push(nameTag);
 
       // PointerLock Controls
@@ -304,11 +304,10 @@ export default defineComponent({
       /* Removes movement key from the keyPressedArray when key is let go */
       document.addEventListener('keyup', (event) => {
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
-
-            const index = keyPressedArray.indexOf(event.key);
-            if (index > -1) {
-              keyPressedArray.splice(index, 1);
-            }
+          const index = keyPressedArray.indexOf(event.key);
+          if (index > -1) {
+            keyPressedArray.splice(index, 1);
+          }
         }
       });
 
@@ -343,23 +342,22 @@ export default defineComponent({
           vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
         }
 
-          if(keyPressedArray.includes(' ')) {
-            vector = vector.add(new THREE.Vector3(0, 1, 0))
-          }
+        if (keyPressedArray.includes(' ')) {
+          vector = vector.add(new THREE.Vector3(0, 1, 0));
+        }
 
-          const data = JSON.stringify({
-          type: "MOVE",
+        const data = JSON.stringify({
+          type: 'MOVE',
           gameID: 0,
           objectID: 0,
           movementVector: vector,
         });
 
-          sendMessage(data);
-
+        sendMessage(data);
       }
 
       // Calls the handleMovement function in a specified time interval
-      setInterval(handleMovement, 50);
+      setInterval(handleMovement, 20);
 
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
@@ -375,7 +373,7 @@ export default defineComponent({
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
       plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
-      plane.position.set(0, -0.5, 0);
+      plane.position.set(x / 2, -0.5, z / 2);
       plane.receiveShadow = true;
 
       return plane;
@@ -402,8 +400,8 @@ export default defineComponent({
       } else {
         newModel = orangeModel.clone();
       }
-      newModel.position.set(x * mapScale, 0, z * mapScale)
-      return newModel
+      newModel.position.set(x * mapScale, 0, z * mapScale);
+      return newModel;
     }
 
     function animate() {
@@ -414,9 +412,7 @@ export default defineComponent({
       // Update NameTag Orientation
       nameTags.forEach((nameTag) => {
         nameTag.update(player);
-      })
-        
-
+      });
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {
