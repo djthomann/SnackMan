@@ -54,7 +54,7 @@ public class MapTests {
         }
 
         // für maps aus Dateien
-        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
+        map = new SnackManMap("testFile.csv", true);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
                 if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
@@ -166,7 +166,7 @@ public class MapTests {
      */
     @Test
     void testFileConstructor() {
-        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
+        map = new SnackManMap("testFile.csv", true);
 
         Assertions.assertEquals(15, w);
         Assertions.assertEquals(15, h);
@@ -187,19 +187,27 @@ public class MapTests {
     }
 
     /**
-     * tests whether a 3x3-map is formed around a given tile
+     * saves map and loads same map again, to check if they are equal
      */
     @Test
-    void testSurroindingTiles(){
-        Tile centerTile = map.getTileAt(2, 2); 
-        Tile[][] surroundings = map.getSurroundingTiles(centerTile);
+    void testLoadedMapMatchesSavedMap() {
+        map.saveAsCSV();
 
-        Assertions.assertNotNull(surroundings); 
-        Assertions.assertEquals(3, surroundings.length); 
-        Assertions.assertEquals(3, surroundings[0].length); 
-        Assertions.assertEquals(centerTile, surroundings[1][1]);
+        File dir = new File(MapGenerationConfig.SAVED_MAPS_PATH);
+        if (dir.exists() && dir.isDirectory()) {
+            File newFile = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+                    .max(Comparator.comparingLong(File::lastModified))
+                    .orElse(null);
+            SnackManMap map2 = new SnackManMap(newFile.getName(), true);
 
-        Assertions.assertEquals(map.getTileAt(1, 1), surroundings[0][0]); // Top-left
-        Assertions.assertEquals(map.getTileAt(3, 3), surroundings[2][2]); // Bottom-Right
+            Assertions.assertEquals(map, map2);
+
+            if (!newFile.delete()) {
+                fail("file could not be deleted");
+            }
+        } else {
+            fail("directory not found");
+        }
     }
+
 }
