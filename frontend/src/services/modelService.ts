@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import bananaModelUrl from '@/assets/models/banana.glb'
 import appleModelUrl from '@/assets/models/apple.glb'
 import orangeModelUrl from '@/assets/models/orange.glb'
+import cakeModelUrl from '@/assets/models/cake.glb'
 
 class ModelService {
   private loader: GLTFLoader
@@ -16,6 +17,7 @@ class ModelService {
       banana: bananaModelUrl,
       apple: appleModelUrl,
       orange: orangeModelUrl,
+      cake: cakeModelUrl,
     }
     this.cache = new Map()
     this.isInitialized = false
