@@ -12,19 +12,18 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
  * 
  * 
  */
-public class Ghost extends PlayerObject {
+public class Ghost extends GameObject implements MovableAndSubscribable {
 
     /**
      * Constructs a new `Ghost` with the specified starting position.
-     * 
-     * @param id        the unique identifier of the `Ghost`
+     *
      * @param x         the initial x-coordinate of the `Ghost`
      * @param y         the initial y-coordinate of the `Ghost`
      * @param z         the initial z-coordinate of the `Ghost`
      * @param radius    the radius of the `Ghost`
      */
-    public Ghost(int id, float x, float y, float z, float radius) {
-        super(id, x, y, z, radius);
+    public Ghost(float x, float y, float z, float radius) {
+        super(x, y, z);
     }
 
     /**

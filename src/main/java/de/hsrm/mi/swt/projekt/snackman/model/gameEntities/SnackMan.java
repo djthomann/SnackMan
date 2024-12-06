@@ -24,7 +24,7 @@ import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
  * 
  * 
  */
-public class SnackMan extends PlayerObject implements CanEat {
+public class SnackMan extends GameObject implements CanEat, MovableAndSubscribable {
 
     Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
@@ -57,21 +57,21 @@ public class SnackMan extends PlayerObject implements CanEat {
     /**
      * Constructs a new `SnackMan` with the specified starting position and
      * initial calorie count.
-     * 
-     * @param id     the unique identifier of the `SnackMan`
+     *
      * @param x      the initial x-coordinate of the `SnackMan`
      * @param y      the initial y-coordinate of the `SnackMan`
      * @param z      the initial z-coordinate of the `SnackMan`
-     * @param radius the radius of the `SnackMan`
      */
-    public SnackMan(int id, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
-        super(id, x, y, z, gameConfig.getSnackManRadius());
+    public SnackMan(float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
+        super(x, y, z);
         this.collisionManager = collisionManager;
 
         // TODO Initial calories to make jumping possible, change back to 0 later
         this.gainedCalories = 1000000;
         this.gameManger = gameManager;
         this.gameConfig = gameConfig;
+
+        logger.info("Snack Man erstellt mit ID: " + id);
     }
 
     /**
@@ -206,7 +206,7 @@ public class SnackMan extends PlayerObject implements CanEat {
 
     /**
      * Handles an incoming event and reacts accordingly.
-     * 
+     *
      * @param event the event to be handled
      */
     @Override
