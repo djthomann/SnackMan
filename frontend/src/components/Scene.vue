@@ -30,8 +30,8 @@ let cakeModel: THREE.Group;
 // mesh for walls
 let box: THREE.Mesh;
 
-const mapScale = 1;
-const wallHeight = 3;
+const mapScale = 5;
+const wallHeight = 1.5 * mapScale;
 
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
@@ -123,16 +123,16 @@ export default defineComponent({
 
         // Modelle abrufen
         bananaModel = modelService.getModel('banana');
-        bananaModel.scale.set(0.05, 0.05, 0.05);
+        bananaModel.scale.set(0.075, 0.075, 0.075);
 
         appleModel = modelService.getModel('apple');
-        appleModel.scale.set(0.2, 0.2, 0.2);
+        appleModel.scale.set(0.4, 0.4, 0.4);
 
         orangeModel = modelService.getModel('orange');
         orangeModel.scale.set(0.0025, 0.0025, 0.0025);
 
         cakeModel = modelService.getModel('cake');
-        cakeModel.scale.set(0.4, 0.4, 0.4);
+        cakeModel.scale.set(0.5, 0.5, 0.5);
 
         console.log('Models loaded');
       } catch (error) {
@@ -181,7 +181,7 @@ export default defineComponent({
         `New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`,
       );
 
-      player.position.set(newPlayerPositionX, newPlayerPositionY, newPlayerPositionZ);
+      player.position.set(newPlayerPositionX * mapScale, newPlayerPositionY, newPlayerPositionZ * mapScale);
     }
 
     function initScene() {
@@ -350,6 +350,8 @@ export default defineComponent({
           vector = vector.add(new THREE.Vector3(0, 1, 0));
         }
 
+        vector.normalize()
+
         const data = JSON.stringify({
           type: 'MOVE',
           gameID: 0,
@@ -361,7 +363,7 @@ export default defineComponent({
       }
 
       // Calls the handleMovement function in a specified time interval
-      setInterval(handleMovement, 20);
+      setInterval(handleMovement, 25);
 
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
@@ -377,7 +379,7 @@ export default defineComponent({
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
       plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
-      plane.position.set(x / 2, -0.5, z / 2);
+      plane.position.set(x / 2 - mapScale / 2, -0.5, z / 2 - mapScale / 2);
       plane.receiveShadow = true;
 
       return plane;
@@ -385,7 +387,7 @@ export default defineComponent({
 
     // Creates one cube per wall tile
     function createWall(x: number, z: number) {
-      const boxGeometry = new THREE.BoxGeometry(1 * mapScale, 3, 1 * mapScale);
+      const boxGeometry = new THREE.BoxGeometry(1 * mapScale, wallHeight, 1 * mapScale);
       const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       box = new THREE.Mesh(boxGeometry, boxMaterial);
       box.position.set(x * mapScale, 0, z * mapScale);
@@ -405,7 +407,7 @@ export default defineComponent({
         newModel = cakeModel.clone();
         //newModel = orangeModel.clone();
       }
-      newModel.position.set(x * mapScale, 0, z * mapScale);
+      newModel.position.set(x * mapScale, 10, z * mapScale);
       return newModel;
     }
 
