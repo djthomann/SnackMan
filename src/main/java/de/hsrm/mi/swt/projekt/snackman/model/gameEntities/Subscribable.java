@@ -10,11 +10,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
  */
 public interface Subscribable {
 
-    /**
-     * The subscriber receives the event from the event bus and handles the event accordingly
-     * 
-     * @param event
-     */
     void handle(Event event);
     
 }

@@ -11,6 +11,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
+import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import jnr.ffi.Struct.id_t;
 
@@ -36,17 +37,16 @@ public class GameManager {
         this.nextGameId = 0;
     }
 
-    // Constructor for testing purposes with fake game and fake Movables list, to be
-    // deleted later
+    // TODO: To Be Deleted , Constructor for testing purposes with fake game
     public GameManager(WebSocketHandler webSocketHandler, String test) {
 
         logger.info("Game Manager Constructor \n");
         this.webSocketHandler = webSocketHandler;
         this.allGames = new HashMap<Integer, Game>();
         this.nextGameId = 0;
-        allMoveables.add(new SnackMan(0, 0f, 1.1f, 0f, this, gameConfig));
+        allMoveables.add(new SnackMan(0f, 1.1f, 0f, this, gameConfig));
 
-        createGame(gameConfig, allMoveables);
+        createGame(gameConfig);
     }
 
     /**
@@ -82,12 +82,15 @@ public class GameManager {
      * @param gameConfig
      * @param allMoveables
      */
-    public void createGame(GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables) {
+    public void createGame(GameConfig gameConfig) {
 
-        logger.info("Create Game \n");
-
-        SnackManMap map = new SnackManMap(gameConfig.getMapWidth(), gameConfig.getMapHeight());
-        Game newGame = new Game(nextGameId, new GameConfig(), allMoveables, map, this);
+        logger.info("Create Game \n");  
+        
+        // SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight); 
+        SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
+        // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
+        Game newGame = new Game(nextGameId, new GameConfig(), map, this);
+        newGame.init(); // Add Snackman 
         allGames.put(newGame.id, newGame);
 
         nextGameId++;
@@ -105,7 +108,7 @@ public class GameManager {
 
         SnackManMap map = new SnackManMap(mapFile, true);
 
-        Game newGame = new Game(nextGameId, new GameConfig(), new ArrayList<>(), map, this);
+        Game newGame = new Game(nextGameId, new GameConfig(), map, this);
         allGames.put(newGame.id, newGame);
 
         nextGameId++;

@@ -6,20 +6,10 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * 
  */
 public interface Moveable {
-    /**
-     * Moves the entity to a specified position.
-     *
-     * @param x the x-coordinate to move the entity to
-     * @param y the y-coordinate to move the entity to
-     * @param z the y-coordinate to move the entity to
-     */
+   
+    int getId();
     void move(float x, float y, float z); 
-
-    /**
-     * Handles a specified event (e.g. jump event, move event).
-     *
-     * @param event the event to handle
-     */
-    
-     // Removed method handle and created own interface Subscribable for the handle method
+    float getX();
+    float getY();
+    float getZ();
 }

@@ -14,6 +14,7 @@ import modelService from '@/services/modelService';
 import type { Snackman, Ghost, Food, Tile } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
+import NameTag from '@/services/nameTagService';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -24,11 +25,13 @@ let foodGroup: THREE.Group;
 let bananaModel: THREE.Group;
 let appleModel: THREE.Group;
 let orangeModel: THREE.Group;
+let cakeModel: THREE.Group;
 
 // mesh for walls
 let box: THREE.Mesh;
 
-const mapScale = 3;
+const mapScale = 1;
+const wallHeight = 3;
 
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
@@ -52,6 +55,8 @@ export default defineComponent({
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
+    let nameTag: NameTag;
+    const nameTags: NameTag[] = [];
 
     //GameStart
     const entityStore = useEntityStore();
@@ -65,7 +70,7 @@ export default defineComponent({
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
-      console.log('Processing server message');
+      //console.log('Processing server message');
 
       if (message.startsWith('MOVE')) {
         let key: string = message.split(':')[1];
@@ -126,6 +131,9 @@ export default defineComponent({
         orangeModel = modelService.getModel('orange');
         orangeModel.scale.set(0.0025, 0.0025, 0.0025);
 
+        cakeModel = modelService.getModel('cake');
+        cakeModel.scale.set(0.4, 0.4, 0.4);
+
         console.log('Models loaded');
       } catch (error) {
         console.error('Error initializing or loading model:', error);
@@ -133,7 +141,7 @@ export default defineComponent({
     }
 
     function loadMap(map: any) {
-      console.log('Received mapdata' + map);
+      //console.log('Received mapdata' + map);
       const w = map.w * mapScale;
       const h = map.h * mapScale;
       const tiles = map.allTiles;
@@ -151,10 +159,10 @@ export default defineComponent({
       }
 
       scene.add(wallsGroup);
-      wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+      //wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
       scene.add(foodGroup);
-      foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+      //foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
       const floor = createFloorTile(w, h);
       // console.log('Creating Floor with: ' + w + '|' + h);
@@ -246,6 +254,23 @@ export default defineComponent({
       player.add(camera);
       player.add(cone);
 
+      // Test Body for Username Test
+      const testObj = new THREE.Mesh(coneGeometry, coneMaterial);
+      testObj.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      testObj.rotation.x = -Math.PI / 2;
+      testObj.castShadow = true;
+      scene.add(testObj);
+
+      // Test Player for Username Test
+      const testPlayer = new THREE.Mesh();
+      testPlayer.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      scene.add(testPlayer);
+      testPlayer.add(testObj);
+
+      // Create NameTag
+      nameTag = new NameTag('Snacko', testPlayer, scene);
+      nameTags.push(nameTag);
+
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
       const startButton = document.getElementById('startButton') as HTMLInputElement;
@@ -283,11 +308,10 @@ export default defineComponent({
       /* Removes movement key from the keyPressedArray when key is let go */
       document.addEventListener('keyup', (event) => {
         if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
-
-            const index = keyPressedArray.indexOf(event.key);
-            if (index > -1) {
-              keyPressedArray.splice(index, 1);
-            }
+          const index = keyPressedArray.indexOf(event.key);
+          if (index > -1) {
+            keyPressedArray.splice(index, 1);
+          }
         }
       });
 
@@ -322,23 +346,22 @@ export default defineComponent({
           vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
         }
 
-          if(keyPressedArray.includes(' ')) {
-            vector = vector.add(new THREE.Vector3(0, 1, 0))
-          }
+        if (keyPressedArray.includes(' ')) {
+          vector = vector.add(new THREE.Vector3(0, 1, 0));
+        }
 
-          const data = JSON.stringify({
-          type: "MOVE",
+        const data = JSON.stringify({
+          type: 'MOVE',
           gameID: 0,
           objectID: 0,
           movementVector: vector,
         });
 
-          sendMessage(data);
-
+        sendMessage(data);
       }
 
       // Calls the handleMovement function in a specified time interval
-      setInterval(handleMovement, 50);
+      setInterval(handleMovement, 20);
 
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
@@ -354,7 +377,7 @@ export default defineComponent({
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
       plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
-      plane.position.set(0, -0.5, 0);
+      plane.position.set(x / 2, -0.5, z / 2);
       plane.receiveShadow = true;
 
       return plane;
@@ -379,17 +402,22 @@ export default defineComponent({
       } else if (calories > 200) {
         newModel = appleModel.clone();
       } else {
-        newModel = orangeModel.clone();
+        newModel = cakeModel.clone();
+        //newModel = orangeModel.clone();
       }
-      newModel.position.set(x * mapScale, 0, z * mapScale)
-      return newModel
+      newModel.position.set(x * mapScale, 0, z * mapScale);
+      return newModel;
     }
 
     function animate() {
       requestAnimationFrame(animate);
       rotateBody();
-
       const time = Date.now() * 0.001;
+
+      // Update NameTag Orientation
+      nameTags.forEach((nameTag) => {
+        nameTag.update(player);
+      });
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {
