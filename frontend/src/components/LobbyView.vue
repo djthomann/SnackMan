@@ -2,34 +2,34 @@
   <h1>Lobby {{ lobbyCode }}</h1>
   <form @submit.prevent="submitForm" id="gameConfig" :action="`/lobby/${lobbyCode}`" method="POST">
     <label for="scoreToWin">Score to Win:</label><br />
-    <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" required /><br /><br />
+    <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" /><br /><br />
 
     <label for="speedModifier">Movement-Speed:</label><br />
-    <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" required /><br /><br />
+    <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" /><br /><br />
 
     <label for="snackmanSpeed">Snackman Speed:</label><br />
-    <input type="number" id="snackmanSpeed"  v-model="gameConfig.snackManSpeed" required /><br /><br />
+    <input type="number" id="snackmanSpeed" v-model="gameConfig.snackManSpeed" /><br /><br />
 
     <label for="ghostSpeed">Ghost Speed:</label><br />
-    <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" required /><br /><br />
+    <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" /><br /><br />
 
     <label for="chickenSpeed">Chicken Speed:</label><br />
-    <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" required /><br /><br />
+    <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" /><br /><br />
 
     <label for="mapWidth">Map Width in tiles:</label><br />
-    <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" required /><br /><br />
+    <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" /><br /><br />
 
     <label for="mapHeight">Map Height in tiles:</label><br />
-    <input type="number" id="mapHeight" v-model="gameConfig.mapHeight" required /><br /><br />
+    <input type="number" id="mapHeight" v-model="gameConfig.mapHeight" /><br /><br />
 
     <label for="gameTime">Game Time in seconds:</label><br />
-    <input type="number" id="gameTime" v-model="gameConfig.gameTime" required /><br /><br />
+    <input type="number" id="gameTime" v-model="gameConfig.gameTime" /><br /><br />
 
     <label for="chickenCount">Number of Chicken:</label><br />
-    <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" required /><br /><br />
+    <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" /><br /><br />
 
     <label for="jumpCalories">Calories Burned on Jump:</label><br />
-    <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" required /><br /><br />
+    <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" /><br /><br />
 
     <button type="submit">Apply</button>
     <button @click="startGame">Start Game</button>
@@ -42,6 +42,11 @@ import { onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 
+const { sendMessage } = useWebSocket();
+const route = useRoute();
+const router = useRouter();
+const lobbyCode = ref(Number(route.params.code));
+const serverMessage = ref<string>('');
 
 // Type definition of GameConfig interface
 interface GameConfig {
@@ -70,18 +75,10 @@ const gameConfig = ref<GameConfig>({
   jumpCalories: null,
 });
 
-const { sendMessage } = useWebSocket();
-const route = useRoute();
-const router = useRouter();
-const lobbyCode = ref(Number(route.params.code));
-const serverMessage = ref<string>('');
-
 // Method, to get GameConfig from BE
 const handleServerMessage = (message: string) => {
   serverMessage.value = message;
-  console.log('Processing server message');
-
-  if(message.startsWith('GAME_CONFIG')) {
+  if (message.startsWith('GAME_CONFIG')) {
     gameConfig.value = JSON.parse(message.split(';')[1]);
   }
 }
@@ -89,7 +86,7 @@ const handleServerMessage = (message: string) => {
 // Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
   const data = JSON.stringify({
-    type: "GAME_CONFIG",
+    type: "SET_GAME_CONFIG",
     gameID: lobbyCode.value,
     objectID: 0,
     gameConfig: gameConfig.value
@@ -99,8 +96,32 @@ const submitForm = async () => {
 
 // Automatic call on load
 onMounted(async () => {
-      eventBus.on('serverMessage', handleServerMessage);
+
+  // Method, to wait until Connection is established
+  const awaitConnection = () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve("Connected");
+      }, 1000);
     });
+  };
+
+  // Registration of EventBus
+  eventBus.on('serverMessage', handleServerMessage);
+
+  // Sending request for GameConfig to BE
+  try {
+    await awaitConnection();
+    const requestData = JSON.stringify({
+      type: "GET_GAME_CONFIG",
+      gameID: lobbyCode.value,
+    });
+    console.log("Sending on load")
+    sendMessage(requestData);
+  } catch (e) {
+    console.log("Failed to fetch Data on load: ", e);
+  }
+});
 
 // Method, to start the game
 const startGame = () => {

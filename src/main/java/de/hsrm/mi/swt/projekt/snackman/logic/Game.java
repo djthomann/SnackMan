@@ -123,4 +123,12 @@ public class Game {
         return eventBus.getSubscribers();
     }
 
+    public GameConfig getGameConfig() {
+        return gameConfig;
+    }
+
+    public void setGameConfig(GameConfig gameConfig) {
+        this.gameConfig = gameConfig;
+    }
+
 }

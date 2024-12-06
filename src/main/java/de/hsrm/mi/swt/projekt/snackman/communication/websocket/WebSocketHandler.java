@@ -26,6 +26,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
+import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
@@ -109,7 +110,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     }
                 }
                 case "MAPUPLOAD" -> {
-
                     SnackManMap map = new SnackManMap(jsonObject.get("content").getAsString(), false);
 
                     ObjectMapper mapper = new ObjectMapper();
@@ -122,30 +122,42 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
-
                 }
                 case "MOVE" -> {
                     MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);
                     logger.info("GameId: " + moveEvent.getGameID() + "Vector x: " + moveEvent.getMovementVector().x);
                     gameManager.handleEvent(moveEvent);
                 }
-                case "GAME_CONFIG" -> {
+                case "SET_GAME_CONFIG" -> {
                     // Set GameConfig from event as GameConfig object in gameManager
                     GameConfigEvent gameConfigEvent = gson.fromJson(jsonString, GameConfigEvent.class);
-                    logger.info("GameId: " + gameConfigEvent.getGameID() + ": " + gameConfigEvent.getGameConfig());
-                    gameManager.setGameConfig(gameConfigEvent.getGameConfig());
-
-                    // Send GameConfig from manager back to frontend as JSON
+                    logger.info("GameId: " + gameConfigEvent.getGameID() + ": " + gameConfigEvent.getGameConfig().getChickenCount());
+                    gameManager.setGameConfig(gameConfigEvent.getGameConfig(), gameConfigEvent.getGameID());
+                }
+                case "GET_GAME_CONFIG" -> {
+                    GameConfigEvent gameConfigEvent = gson.fromJson(jsonString, GameConfigEvent.class);
+                    GameConfig existingConfig = gameManager.getGameConfig(gameConfigEvent.getGameID());
                     ObjectMapper mapper = new ObjectMapper();
                     String returnString = "";
-                    try {
-                        String json = mapper.writeValueAsString(gameManager.getGameConfig());
-                        returnString = "GAME_CONFIG;" + json;
-                        logger.info("Final JSON: " + returnString);
-                        session.sendMessage(new TextMessage(returnString));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+
+                    if (existingConfig == null){
+                        try {
+                            String json = mapper.writeValueAsString(new GameConfig());
+                            returnString = "GAME_CONFIG;" + json;
+                            logger.info("Final JSON: " + returnString);
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        try {
+                            String json = mapper.writeValueAsString(existingConfig);
+                            returnString = "GAME_CONFIG;" + json;
+                            logger.info("Final JSON: " + returnString);
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
                     }
+                    session.sendMessage(new TextMessage(returnString));
                 }
             }
         } catch (JsonSyntaxException e) {

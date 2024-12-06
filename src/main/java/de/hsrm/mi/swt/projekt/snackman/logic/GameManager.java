@@ -12,6 +12,7 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
+import jnr.ffi.Struct.id_t;
 
 /**
  * The GameManager manages all of the current games.
@@ -21,11 +22,13 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 public class GameManager {
 
     Logger logger = LoggerFactory.getLogger(GameManager.class);
-    
+
     public HashMap<Integer, Game> allGames;
     private int nextGameId;
     private WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
+    private ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
+
 
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
@@ -33,20 +36,18 @@ public class GameManager {
         this.nextGameId = 0;
     }
 
-    // Constructor for testing purposes with fake game and fake Movables list, to be deleted later
+    // Constructor for testing purposes with fake game and fake Movables list, to be
+    // deleted later
     public GameManager(WebSocketHandler webSocketHandler, String test) {
 
         logger.info("Game Manager Constructor \n");
         this.webSocketHandler = webSocketHandler;
         this.allGames = new HashMap<Integer, Game>();
         this.nextGameId = 0;
-
-        ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
         allMoveables.add(new SnackMan(0, 0f, 1.1f, 0f, this, gameConfig));
 
         createGame(gameConfig, allMoveables);
     }
-
 
     /**
      * Passes on the received event to the game with the matching game id
@@ -65,7 +66,7 @@ public class GameManager {
     }
 
     /**
-     *  Notifies the frontend of the changes in the backend
+     * Notifies the frontend of the changes in the backend
      * 
      * @param event
      */
@@ -74,8 +75,9 @@ public class GameManager {
     }
 
     /**
-     *  Creates a new game with a unique id, the specified gameConfig and Moveables,
-     *  and a randomly generated map with the in gameConfig specified width and height for it
+     * Creates a new game with a unique id, the specified gameConfig and Moveables,
+     * and a randomly generated map with the in gameConfig specified width and
+     * height for it
      * 
      * @param gameConfig
      * @param allMoveables
@@ -92,8 +94,8 @@ public class GameManager {
     }
 
     /**
-     *  Creates a new game with a unique id, the specified gameConfig and Moveables,
-     *  and creates a map from the given csv file
+     * Creates a new game with a unique id, the specified gameConfig and Moveables,
+     * and creates a map from the given csv file
      * 
      * @param gameConfig
      * @param allMoveables
@@ -109,12 +111,16 @@ public class GameManager {
         nextGameId++;
     }
 
-    public void setGameConfig(GameConfig gameConfig) {
-        this.gameConfig = gameConfig;
+    public void setGameConfig(GameConfig gameConfig, int gameID) {
+        // TODO: Funktioniert nur mit id: 0, solange LobbyID nicht mit GameID verknüpft ist
+        allGames.get(gameID).setGameConfig(gameConfig);
     }
 
-    public GameConfig getGameConfig(){
-        return this.gameConfig;
+    public GameConfig getGameConfig(int gameID) {
+        if (allGames.get(gameID) == null) {
+            return this.gameConfig;
+        }
+        return allGames.get(gameID).getGameConfig(); 
     }
 
-} 
+}
