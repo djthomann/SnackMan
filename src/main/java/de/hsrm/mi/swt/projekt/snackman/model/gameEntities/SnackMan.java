@@ -61,7 +61,6 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      * @param x      the initial x-coordinate of the `SnackMan`
      * @param y      the initial y-coordinate of the `SnackMan`
      * @param z      the initial z-coordinate of the `SnackMan`
-     * @param radius the radius of the `SnackMan`
      */
     public SnackMan(float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
         super(x, y, z);

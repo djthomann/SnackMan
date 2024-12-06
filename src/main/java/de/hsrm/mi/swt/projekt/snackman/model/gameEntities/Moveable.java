@@ -6,10 +6,5 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * 
  */
 public interface Moveable {
-   
-    int getId();
-    void move(float x, float y, float z); 
-    float getX();
-    float getY();
-    float getZ();
+    void move(float x, float y, float z);
 }
