@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 
 /**
  * The `Ghost` class represents a player character in the game with
@@ -19,8 +20,9 @@ public class Ghost extends GameObject implements MovableAndSubscribable {
      * @param x         the initial x-coordinate of the `Ghost`
      * @param y         the initial y-coordinate of the `Ghost`
      * @param z         the initial z-coordinate of the `Ghost`
+     * @param radius    the radius of the `Ghost`
      */
-    public Ghost(float x, float y, float z) {
+    public Ghost(float x, float y, float z, float radius) {
         super(x, y, z);
     }
 

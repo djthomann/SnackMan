@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 
 /**
@@ -48,6 +49,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
 
     private GameManager gameManger;
     private GameConfig gameConfig;
+    private CollisionManager collisionManager;
 
     /** The calorie count of the SnackMan */
     private int gainedCalories;
@@ -56,15 +58,17 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      * Constructs a new `SnackMan` with the specified starting position and
      * initial calorie count.
      *
-     * @param x        the initial x-coordinate of the `SnackMan`
-     * @param y        the initial y-coordinate of the `SnackMan` 
-     * @param z        the initial z-coordinate of the `SnackMan` 
+     * @param x      the initial x-coordinate of the `SnackMan`
+     * @param y      the initial y-coordinate of the `SnackMan`
+     * @param z      the initial z-coordinate of the `SnackMan`
+     * @param radius the radius of the `SnackMan`
      */
-    public SnackMan(float x, float y, float z, GameManager gameManager, GameConfig gameConfig) {
+    public SnackMan(float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
         super(x, y, z);
+        this.collisionManager = collisionManager;
 
         // TODO Initial calories to make jumping possible, change back to 0 later
-        this.gainedCalories = 1000000; 
+        this.gainedCalories = 1000000;
         this.gameManger = gameManager;
         this.gameConfig = gameConfig;
 
@@ -78,22 +82,22 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     public void resetGainedCalories() {
         this.gainedCalories = 0;
     }
-    
+
     /**
      * moves SnackMan to new coords
      * 
-     * @param newX the x-coordinate to move the `SnackMan` to
-     * @param newY the y-coordinate to move the `SnackMan` to
-     * @param newZ the y-coordinate to move the `SnackMan` to
+     * @param newX the x-coordinate to move the `SnackMan`
+     * @param newY the y-coordinate to move the `SnackMan`
+     * @param newZ the y-coordinate to move the `SnackMan`
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        this.x += newX; 
-        this.y += newY; 
-        this.z += newZ; 
+        this.x += newX;
+        this.y += newY;
+        this.z += newZ;
     }
 
-     /**
+    /**
      * Method to implement jumping
      */
     public void jump() {
@@ -111,53 +115,53 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
             this.jumping = true;
             this.boosts = 0;
             float deltaTime = 0.1f;
- 
+
             Runnable jumpTask = new Runnable() {
 
                 @Override
                 public void run() {
-                
-                        /**
-                         * The gravity (a negative constant) is applied to the SnackMan's velocity
-                         * The velocity starts at a positive value
-                         * It is 0 when the SnackMan is at its highest position
-                         * It is negative during the falling phase
-                         * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between position updates and G the gravity constant
-                         */
-                        currentVelocity += deltaTime * GRAVITY;
-            
-                        /**
-                         * Updating the SnackMan's position by applying the velocity to the current position
-                         * Formula: y = y + deltaT * v where y is the position, deltaT the time between position updates and v the SnackMan's current velocity
-                         */
-                        heightGain = deltaTime * currentVelocity;
-            
-                        move(0, heightGain, 0);
-            
-                        /**
-                         * Check if the SnackMan has landed at its initial y-position
-                         * If so, the jump is done
-                         */
-                        if (y < initialY ) {
-                            y = initialY;
-                            jumping = false;
-                        }
-            
-                        MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                        gameManger.notifyChange(moveEvent);
-            
-                        // If the jump is done, the task is not repeated anymore
-                        if (!jumping) {
-                            boosts = 0;
-                            jumpTaskFuture.cancel(false);
-                        }
+
+                    /**
+                     * The gravity (a negative constant) is applied to the SnackMan's velocity
+                     * The velocity starts at a positive value
+                     * It is 0 when the SnackMan is at its highest position
+                     * It is negative during the falling phase
+                     * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between position updates and G the gravity constant
+                     */
+                    currentVelocity += deltaTime * GRAVITY;
+
+                    /**
+                     * Updating the SnackMan's position by applying the velocity to the current position
+                     * Formula: y = y + deltaT * v where y is the position, deltaT the time between position updates and v the SnackMan's current velocity
+                     */
+                    heightGain = deltaTime * currentVelocity;
+
+                    move(0, heightGain, 0);
+
+                    /**
+                     * Check if the SnackMan has landed at its initial y-position
+                     * If so, the jump is done
+                     */
+                    if (y < initialY ) {
+                        y = initialY;
+                        jumping = false;
+                    }
+
+                    MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                    gameManger.notifyChange(moveEvent);
+
+                    // If the jump is done, the task is not repeated anymore
+                    if (!jumping) {
+                        boosts = 0;
+                        jumpTaskFuture.cancel(false);
+                    }
                 }
-                
+
             };
 
             // Repeat task every time the specified time period has passed until cancelled
             jumpTaskFuture = jumpExecutor.scheduleAtFixedRate(jumpTask, 0, (long) (deltaTime * 300), TimeUnit.MILLISECONDS);
-        
+
 
         /**
          * If we are already jumping, have not reached the maximum possible number of boosts and have enough calories,
@@ -185,10 +189,11 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     /**
      * method to Consume Food
      *
-     * @param food the calorie resource to be consumed by the `SnackMan`. 
+     * @param food the calorie resource to be consumed by the `SnackMan`.
      */
     @Override
     public void eat(Food food) {
+        this.gainedCalories += food.getCalories();
     }
 
     /**
@@ -200,30 +205,54 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
         return gainedCalories;
     }
 
+    /**
+     * Handles an incoming event and reacts accordingly.
+     *
+     * @param event the event to be handled
+     */
     @Override
     public void handle(Event event) {
 
-        if(event.getObjectID() != this.id) {
+        if (event.getObjectID() != this.id) {
             return;
         }
 
-        switch(event.getType()) {
+        switch (event.getType()) {
 
             case MOVE:
 
-                Vector3f vector = ((MoveEvent)event).getMovementVector();
+                Vector3f vector = ((MoveEvent) event).getMovementVector();
                 logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
+                String collision = "none";
+                float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
+                float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
+                if ((int) wishedX != (int) this.getX() || (int) wishedZ != (int) this.getZ()) {
 
-                this.move(vector.x * 0.2f,0, vector.z * 0.2f);
+                    if(this.getY() < gameConfig.getWallHeight()) {
+                        collision = collisionManager.checkCollision(wishedX, wishedZ);
+                        if (collision.equals("wall")) {
+                            vector.x = 0;
+                            vector.z = 0;
+                        } else if (collision.equals("item")) {
+                            // TODO: Add eating-logic
+                        }
+                    }
 
-                //checks if the movementVector is from a jump action or not
-                if(vector.y != 0.0) {
-                    
+                }
+
+                this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
+                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                gameManger.notifyChange(moveEvent);
+
+                // checks if the movementVector is from a jump action or not
+                if (vector.y != 0.0) {
+
                     this.jump();
 
                     logger.info("SNACKMAN JUMPT");
                 }
 
+            default:
                 break;
 
         }
