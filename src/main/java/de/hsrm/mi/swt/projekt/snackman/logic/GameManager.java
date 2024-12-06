@@ -84,13 +84,13 @@ public class GameManager {
      */
     public void createGame(GameConfig gameConfig) {
 
-        logger.info("Create Game \n");  
-        
-        // SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight); 
+        logger.info("Create Game \n");
+
+        // SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
         SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
         // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
         Game newGame = new Game(nextGameId, new GameConfig(), map, this);
-        newGame.init(); // Add Snackman 
+        newGame.init(); // Add Snackman
         allGames.put(newGame.id, newGame);
 
         nextGameId++;

@@ -54,7 +54,7 @@ public class Game {
      * TODO: This method will be expanded to create all game objects and add them to the game object list.
      */
     public void init() {
-        allMovables.add(new SnackMan(0, 20.0f, 1.1f, 20.0f, gameManager, gameConfig,collisionManager));
+        allMovables.add(new SnackMan(20.0f, 1.1f, 20.0f, gameManager, gameConfig,collisionManager));
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
     }
