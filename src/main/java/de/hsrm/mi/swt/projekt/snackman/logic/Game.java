@@ -35,6 +35,7 @@ public class Game {
     private SnackManMap map;
     private GameEventBus eventBus;
     private GameManager gameManager;
+
     private GameState gameState;
     
 
@@ -48,7 +49,7 @@ public class Game {
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
         startTimer();
-        gameState = new GameState();
+        gameState = new GameState(this);
     }
 
     /**
@@ -125,6 +126,10 @@ public class Game {
 
     public GameState getGameState() {
         return gameState;
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 
 }
