@@ -28,13 +28,11 @@ public class GameManager {
     private int nextGameId;
     private WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
-    private ArrayList<MovableAndSubscribable> allMoveables = new ArrayList<>();
-
 
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
         this.allGames = new HashMap<Integer, Game>();
-        this.nextGameId = 0;
+        this.nextGameId = 1;
     }
 
     // TODO: To Be Deleted , Constructor for testing purposes with fake game
@@ -43,8 +41,7 @@ public class GameManager {
         logger.info("Game Manager Constructor \n");
         this.webSocketHandler = webSocketHandler;
         this.allGames = new HashMap<Integer, Game>();
-        this.nextGameId = 0;
-        allMoveables.add(new SnackMan(0f, 1.1f, 0f, this, gameConfig));
+        this.nextGameId = 1;
 
         createGame(gameConfig);
     }
@@ -115,7 +112,7 @@ public class GameManager {
     }
 
     public void setGameConfig(GameConfig gameConfig, int gameID) {
-        // TODO: Funktioniert nur mit id: 0, solange LobbyID nicht mit GameID verknüpft ist
+        // TODO: Only works with id: 1, as long as LobbyID and GameID aren't connected and there aren't more Games
         allGames.get(gameID).setGameConfig(gameConfig);
     }
 

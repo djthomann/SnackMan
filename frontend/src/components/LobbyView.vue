@@ -32,7 +32,8 @@
     <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" /><br /><br />
 
     <button type="submit">Apply</button>
-    <button @click="startGame">Start Game</button>
+    <button type="button" @click="resetForm">Reset</button>
+    <button type="button" @click="startGame">Start Game</button>
   </form>
 </template>
 
@@ -94,6 +95,15 @@ const submitForm = async () => {
   sendMessage(data);
 };
 
+// On Reset-Button press, send message to BE with gameID: 0, to signify default value request
+const resetForm = async () => {
+  const reset = JSON.stringify({
+    type: "GET_GAME_CONFIG",
+    gameID: 0,
+  })
+  sendMessage(reset);
+}
+
 // Automatic call on load
 onMounted(async () => {
 
@@ -116,7 +126,6 @@ onMounted(async () => {
       type: "GET_GAME_CONFIG",
       gameID: lobbyCode.value,
     });
-    console.log("Sending on load")
     sendMessage(requestData);
   } catch (e) {
     console.log("Failed to fetch Data on load: ", e);
