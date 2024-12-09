@@ -101,7 +101,7 @@ public class SnackManMap {
                             foodType = FoodType.UNHEALTHY;
                         }
                     }
-                    allTiles[row][col].setOccupation(new Food(col, row, foodType));
+                    allTiles[row][col].setOccupation(new Food(0,col, row, foodType));
                 }
             }
         }

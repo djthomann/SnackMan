@@ -6,7 +6,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Moveable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 
 /**
