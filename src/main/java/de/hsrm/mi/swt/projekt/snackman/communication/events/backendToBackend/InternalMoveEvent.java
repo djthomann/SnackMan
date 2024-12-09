@@ -7,7 +7,7 @@ public class InternalMoveEvent extends ApplicationEvent {
     private long gameId;
 
     /**
-     * Event that is called upon when a ghost collides with a snackman.
+     * Event that is called upon when an object moves.
      * @param source the object on which the event occurrs => the object that moves.
      * * @param gameId id of the game the event belongs to.
      */
