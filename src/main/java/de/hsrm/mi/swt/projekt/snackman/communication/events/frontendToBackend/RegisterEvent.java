@@ -1,4 +1,6 @@
-package de.hsrm.mi.swt.projekt.snackman.communication.events;
+package de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend;
+
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 
 /**
  * Event that informs Backend under what username a Player wants to be listed as.

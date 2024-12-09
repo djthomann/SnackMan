@@ -19,8 +19,8 @@ public class Food extends GameObject {
      * @param z         the initial y-coordinate of the Food
      * @param foodType  the initial type of the Food
      */
-    public Food(float x, float z, FoodType foodType) {
-        super(x, 0.5f, z);
+    public Food(long gameId, float x, float z, FoodType foodType) {
+        super(gameId, x, 0.5f, z);
         this.foodType = foodType;
         this.calories = foodType.getCalories();
     }

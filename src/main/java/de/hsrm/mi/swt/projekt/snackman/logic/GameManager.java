@@ -10,7 +10,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 /**
@@ -22,14 +21,14 @@ public class GameManager {
 
     Logger logger = LoggerFactory.getLogger(GameManager.class);
     
-    public HashMap<Integer, Game> allGames;
-    private int nextGameId;
+    public HashMap<Long, Game> allGames;
+    private long nextGameId;
     private WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
 
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
-        this.allGames = new HashMap<Integer, Game>();
+        this.allGames = new HashMap<Long, Game>();
         this.nextGameId = 0;
     }
 
@@ -38,7 +37,7 @@ public class GameManager {
 
         logger.info("Game Manager Constructor \n");
         this.webSocketHandler = webSocketHandler;
-        this.allGames = new HashMap<Integer, Game>();
+        this.allGames = new HashMap<Long, Game>();
         this.nextGameId = 0;
 
         GameConfig gameConfig = new GameConfig();
@@ -46,6 +45,13 @@ public class GameManager {
         createGame(gameConfig);
     }
 
+    public Game getGameById(Long id) {
+        if (allGames.containsKey(id)) {
+            return allGames.get(id);
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Passes on the received event to the game with the matching game id

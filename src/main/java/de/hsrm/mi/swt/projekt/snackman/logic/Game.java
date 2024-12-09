@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
@@ -27,7 +25,7 @@ public class Game {
 
     Logger logger = LoggerFactory.getLogger(Game.class);
 
-    public int id;
+    public long id;
     private GameConfig gameConfig;
     private ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
     //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
@@ -36,9 +34,11 @@ public class Game {
     private GameEventBus eventBus;
     private GameManager gameManager;
     private CollisionManager collisionManager;
+    private GameState gameState;
+    
     
 
-    public Game(int id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
+    public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
         this.gameConfig = gameConfig;
         this.map = map;
@@ -46,6 +46,7 @@ public class Game {
         this.collisionManager = new CollisionManager(map,allMovables);
         this.timer = new Timer();   
         startTimer();
+        gameState = new GameState(this);
     }
 
     /**
@@ -54,7 +55,7 @@ public class Game {
      * TODO: This method will be expanded to create all game objects and add them to the game object list.
      */
     public void init() {
-        allMovables.add(new SnackMan(20.0f, 1.1f, 20.0f, gameManager, gameConfig,collisionManager));
+        allMovables.add(new SnackMan(id,20.0f, 1.1f, 20.0f, gameManager, gameConfig,collisionManager));
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
     }
@@ -122,8 +123,6 @@ public class Game {
         this.gameManager.notifyChange(moveEvent);*/
     }
 
-    
-
     /**
      * Returns the current list of all subscribers from its event bus 
      * 
@@ -131,6 +130,14 @@ public class Game {
      */
     public ArrayList<Subscribable> getAllSubscribers() {
         return eventBus.getSubscribers();
+    }
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 
 }

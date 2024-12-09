@@ -1,7 +1,12 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+
 
 /**
  * The `Ghost` class represents a player character in the game with
@@ -14,6 +19,10 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
  */
 public class Ghost extends GameObject implements MovableAndSubscribable {
 
+        /** Publisher to publish the internal backend event. */
+     @Autowired
+     private ApplicationEventPublisher applicationEventPublisher;
+
     /**
      * Constructs a new `Ghost` with the specified starting position.
      *
@@ -22,8 +31,8 @@ public class Ghost extends GameObject implements MovableAndSubscribable {
      * @param z         the initial z-coordinate of the `Ghost`
      * @param radius    the radius of the `Ghost`
      */
-    public Ghost(float x, float y, float z, float radius) {
-        super(x, y, z);
+    public Ghost(long gameId, float x, float y, float z, float radius) {
+        super(gameId, x, y, z);
     }
 
     /**
@@ -38,6 +47,7 @@ public class Ghost extends GameObject implements MovableAndSubscribable {
         x = newX; 
         y = newY; 
         z = newZ; 
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
     }
 
     @Override

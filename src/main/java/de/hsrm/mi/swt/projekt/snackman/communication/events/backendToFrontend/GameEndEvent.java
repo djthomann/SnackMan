@@ -1,6 +1,9 @@
-package de.hsrm.mi.swt.projekt.snackman.communication.events;
+package de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend;
 
 import java.util.Map;
+
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 
 /**
  * Event that informs Frontend about End of a Game, who won and the scores of the players
