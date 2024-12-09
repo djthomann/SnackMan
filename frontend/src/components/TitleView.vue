@@ -8,11 +8,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import useWebSocket from '@/services/socketService';
 
 const usernameInputField = ref('');
 const router = useRouter();
+const { sendMessage } = useWebSocket();
 
 const submitForm = () => {
+  const message = JSON.stringify({ event: 'RegisterEvent', username: usernameInputField.value });
+  sendMessage(message);
   router.push({ path: '/home', query: { name: usernameInputField.value } });
 };
 </script>

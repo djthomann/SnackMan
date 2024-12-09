@@ -1,4 +1,17 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue';
+import useWebSocket from '@/services/socketService';
+
+const { connect, closeConnection } = useWebSocket();
+
+onMounted(() => {
+  connect();
+});
+
+onUnmounted(() => {
+  closeConnection();
+});
+</script>
 
 <template>
   <router-view></router-view>

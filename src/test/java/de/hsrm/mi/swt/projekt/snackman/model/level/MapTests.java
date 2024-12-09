@@ -54,7 +54,7 @@ public class MapTests {
         }
 
         // für maps aus Dateien
-        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+        map = new SnackManMap("testFile.csv", true);
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
                 if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
@@ -166,7 +166,7 @@ public class MapTests {
      */
     @Test
     void testFileConstructor() {
-        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+        map = new SnackManMap("testFile.csv", true);
 
         Assertions.assertEquals(15, w);
         Assertions.assertEquals(15, h);
@@ -185,4 +185,29 @@ public class MapTests {
             }
         }
     }
+
+    /**
+     * saves map and loads same map again, to check if they are equal
+     */
+    @Test
+    void testLoadedMapMatchesSavedMap() {
+        map.saveAsCSV();
+
+        File dir = new File(MapGenerationConfig.SAVED_MAPS_PATH);
+        if (dir.exists() && dir.isDirectory()) {
+            File newFile = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+                    .max(Comparator.comparingLong(File::lastModified))
+                    .orElse(null);
+            SnackManMap map2 = new SnackManMap(newFile.getName(), true);
+
+            Assertions.assertEquals(map, map2);
+
+            if (!newFile.delete()) {
+                fail("file could not be deleted");
+            }
+        } else {
+            fail("directory not found");
+        }
+    }
+
 }

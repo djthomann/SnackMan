@@ -30,11 +30,11 @@ public class GameTests {
         add(Mockito.mock(Chicken.class));
 
     }};
-    private SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
+    private SnackManMap map = new SnackManMap(gameConfig.getMapWidth(), gameConfig.getMapHeight());
 
     @BeforeEach
     void setUp() {
-        game = new Game(0, gameConfig, allMovables, map, gameManager);
+        //game = new Game(0, gameConfig, allMovables, map, gameManager);
     }
 
     /**

@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 public class SnackManMap {
 
     // due to sidewinder (and Simon's brain):
-    // Tile at (x, y) can be reached via allTiles[y][x],
-    // or (recommended) getTileAt(x, y)
+    // Tile at (x, z) (y is always at 0, we view the map as 2D) can be reached via allTiles[z][x],
+    // or (recommended) getTileAt(x, z)
     private int w;
     private int h;
     private Tile[][] allTiles;
@@ -35,53 +35,57 @@ public class SnackManMap {
 
     /**
      * Constructor, creates Map object on base of given csv file
-     * @param filename path to file (only filename needed, no path)
+     * @param input path to file (only filename needed, no path), or contents of csv-file
+     * @param isPath true, if given String is path to map-file, otherwise would be regarded as file-content
      */
-    public SnackManMap(String filename) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-
-            String line;
-            int lines = 0;
-            int numTokens = 0;
-            List<Tile[]> allRows = new ArrayList<>();
-
-            while ((line = reader.readLine()) != null) {
-                List<Tile> currentRow = new ArrayList<>();
-                String[] tokens = line.split(",");
-
-                if (numTokens != 0) {
-                    if (numTokens != tokens.length) throw new IOException("changing number of tokens per line");
-                } else {
-                    numTokens = tokens.length;
-                }
-
-                for (int i = 0; i < tokens.length; i++) {
-                    Tile newTile;
-                    switch (tokens[i].charAt(0)) {
-                        case '\u2588' -> newTile = new Tile(i, lines, OccupationType.WALL);
-                        case '\u2591' -> newTile = new Tile(i, lines, OccupationType.FREE);
-                        case '\u25CF' -> newTile = new Tile(i, lines, OccupationType.ITEM);
-                        default -> throw new IOException("Unexpected token while loading file: " + tokens[i]);
-                    }
-
-                    currentRow.add(newTile);
-                }
-
-                allRows.add(currentRow.toArray(Tile[]::new));
-                lines++;
-
-            }
-
-            allTiles = allRows.toArray(Tile[][]::new);
-            h = allTiles.length;
-            w = allTiles[0].length;
-
-            createFood();
-
+    public SnackManMap(String input, boolean isPath) {
+        try (BufferedReader reader = (isPath) ? new BufferedReader(new FileReader(MapGenerationConfig.SAVED_MAPS_PATH + input)) : new BufferedReader(new StringReader(input))){
+            parseFileContent(reader);
         } catch (IOException e) {
             logger.warning("Something went wrong while loading file:");
             logger.warning(e.getMessage());
         }
+    }
+
+    private void parseFileContent(BufferedReader reader) throws IOException {
+        String line;
+
+        int lines = 0;
+        int numTokens = 0;
+        List<Tile[]> allRows = new ArrayList<>();
+
+        while ((line = reader.readLine()) != null) {
+            List<Tile> currentRow = new ArrayList<>();
+            String[] tokens = line.split(",");
+
+            if (numTokens != 0) {
+                if (numTokens != tokens.length) throw new IOException("changing number of tokens per line");
+            } else {
+                numTokens = tokens.length;
+            }
+
+            for (int i = 0; i < tokens.length; i++) {
+                Tile newTile;
+                switch (tokens[i].charAt(0)) {
+                    case '\u2588' -> newTile = new Tile(i, lines, OccupationType.WALL);
+                    case '\u2591' -> newTile = new Tile(i, lines, OccupationType.FREE);
+                    case '\u25CF' -> newTile = new Tile(i, lines, OccupationType.ITEM);
+                    default -> throw new IOException("Unexpected token while loading file: " + tokens[i]);
+                }
+
+                currentRow.add(newTile);
+            }
+
+            allRows.add(currentRow.toArray(Tile[]::new));
+            lines++;
+
+        }
+
+        allTiles = allRows.toArray(Tile[][]::new);
+        h = allTiles.length;
+        w = allTiles[0].length;
+
+        createFood();
     }
 
     private void createFood() {
@@ -109,21 +113,14 @@ public class SnackManMap {
     private void makeBlankMap() {
         this.allTiles = new Tile[h][w];
 
-        for (int y = 0; y < h; y++) {
+        for (int z = 0; z < h; z++) {
             for (int x = 0; x < w; x++) {
-                /*
-                if (i == 0 || j == 0 || i == h - 1 || j == w - 1) {
-                    res[i][j] = -1;
-                } else {
-                    res[i][j] = (i == 1 || (i % 2 == 1 && j % 2 == 1)) ? 0 : -1;
-                }
-                 */
                 OccupationType occupationType = OccupationType.WALL;
 
-                if (y != h - 1 && x != 0 && x != w - 1 && (y == 1 || (y % 2 == 1 && x % 2 == 1))) {
+                if (z != h - 1 && x != 0 && x != w - 1 && (z == 1 || (z % 2 == 1 && x % 2 == 1))) {
                     occupationType = OccupationType.ITEM;
                 }
-                allTiles[y][x] = new Tile(x, y, occupationType);
+                allTiles[z][x] = new Tile(x, z, occupationType);
             }
         }
     }
@@ -205,7 +202,9 @@ public class SnackManMap {
      */
     private void mirror(int h) {
         for (int i = 0; i < h / 2; i++) {
-            allTiles[(h - 1) - i] = allTiles[i].clone();
+            for (int x = 0; x < w; x++) {
+                allTiles[(h-1) - i][x].setOccupationType(allTiles[i][x].getOccupationType());
+            }
         }
     }
 
@@ -238,12 +237,39 @@ public class SnackManMap {
         }
     }
 
-    public Tile getTileAt(int x, int y) {
-        return allTiles[y][x];
+    public Tile getTileAt(int x, int z) {
+        return allTiles[z][x];
     }
 
     public Tile[][] getAllTiles() {
         return allTiles;
+    }
+    
+    /**
+     * returns the current environment around the given tile 
+     *
+     * @param tile the tile in the center 
+     * @return 3x3 map with the surrounding tiles, where 'null' stands for outside positions (Prevention of ArrayindexoutofBoundsException)
+     */
+    public Tile[][] getSurroundingTiles(Tile tile) {  
+        
+        Tile[][] surroudings = new Tile [3][3]; 
+
+        for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
+            for (int offsetX = -1; offsetX <= 1; offsetX++) {
+                int tileX = tile.getX() + offsetX; 
+                int tileY = tile.getZ() + offsetZ; 
+
+                if (tileX >=0 && tileX <w && tileY >= 0 && tileY < h) {
+                    surroudings[offsetX + 1][offsetZ + 1] = allTiles [tileY][tileX]; 
+                } else {
+                    surroudings[offsetX + 1][offsetZ + 1] = null; //outside the map
+
+                }
+            }
+        }
+
+        return surroudings; 
     }
 
     public int getW() {
@@ -252,6 +278,21 @@ public class SnackManMap {
     
     public int getH() {
         return h;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (! (o instanceof SnackManMap other)) {
+            return false;
+        }
+
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                if (this.allTiles[row][col].getOccupationType() != other.allTiles[row][col].getOccupationType()) return false;
+            }
+        }
+
+        return true;
     }
 
 }

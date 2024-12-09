@@ -5,6 +5,8 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+
 
 /**
  * The `Ghost` class represents a player character in the game with
@@ -15,26 +17,22 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Int
  * 
  * 
  */
-public class Ghost extends PlayerObject {
+public class Ghost extends GameObject implements MovableAndSubscribable {
 
         /** Publisher to publish the internal backend event. */
      @Autowired
      private ApplicationEventPublisher applicationEventPublisher;
 
-        /** id of game the ghost belongs to */
-        private final long gameId;
-
     /**
      * Constructs a new `Ghost` with the specified starting position.
-     * 
-     * @param id        the unique identifier of the `Ghost`
+     *
      * @param x         the initial x-coordinate of the `Ghost`
      * @param y         the initial y-coordinate of the `Ghost`
      * @param z         the initial z-coordinate of the `Ghost`
+     * @param radius    the radius of the `Ghost`
      */
-    public Ghost(int id, float x, float y, float z, long gameId) {
-        super(id, x, y, z);
-        this.gameId = gameId;
+    public Ghost(long gameId, float x, float y, float z, float radius) {
+        super(gameId, x, y, z);
     }
 
     /**

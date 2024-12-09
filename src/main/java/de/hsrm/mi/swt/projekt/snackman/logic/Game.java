@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
@@ -29,32 +27,41 @@ public class Game {
 
     public long id;
     private GameConfig gameConfig;
-    private ArrayList<MovableAndSubscribable> allMovables;
+    private ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
     //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
     private Timer timer;
     private SnackManMap map;
     private GameEventBus eventBus;
     private GameManager gameManager;
-
+    private CollisionManager collisionManager;
     private GameState gameState;
     
+    
 
-    public Game(long id, GameConfig gameConfig, ArrayList<MovableAndSubscribable> allMoveables, SnackManMap map, GameManager gameManager) {
+    public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
         this.gameConfig = gameConfig;
-        this.allMovables = allMoveables;
-        this.timer = new Timer();
         this.map = map;
         this.gameManager = gameManager;
-        ArrayList<Subscribable> subscribers = createSubscriberList();
-        this.eventBus = new GameEventBus(subscribers);
+        this.collisionManager = new CollisionManager(map,allMovables);
+        this.timer = new Timer();   
         startTimer();
         gameState = new GameState(this);
     }
 
     /**
+     * Initializes the game by adding the first player entity to the game object list.
+     * This method is called right after the game object is created.
+     * TODO: This method will be expanded to create all game objects and add them to the game object list.
+     */
+    public void init() {
+        allMovables.add(new SnackMan(20.0f, 1.1f, 20.0f, gameManager, gameConfig,collisionManager));
+        ArrayList<Subscribable> subscribers = createSubscriberList();
+        this.eventBus = new GameEventBus(subscribers);
+    }
+
+    /**
      * Creates a copy of allMovables casting the game objects to Subscribable for the event bus
-     * 
      * @return allSubscribers
      */
     private ArrayList<Subscribable> createSubscriberList() {
@@ -87,7 +94,7 @@ public class Game {
         };
 
         // Multiply by 1000 to get the needed milliseconds for timer.schedule
-        long delay = gameConfig.gameTime * 1000;
+        long delay = gameConfig.getGameTime() * 1000;
 
         timer.schedule(task, delay);
     }
@@ -105,14 +112,15 @@ public class Game {
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
         eventBus.sendEventToSubscribers(event);
+        
 
-        // Create new move event with the new position of the SnackMan that is sent back to the frontend for testing purposes
-        float newX = ((SnackMan)this.allMovables.get(0)).getX();
+        //Create new move event with the new position of the SnackMan that is sent back to the frontend for testing purposes
+        /*float newX = ((SnackMan)this.allMovables.get(0)).getX();
         float newY = ((SnackMan)this.allMovables.get(0)).getY();
         float newZ = ((SnackMan)this.allMovables.get(0)).getZ();
         MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
 
-        this.gameManager.notifyChange(moveEvent);
+        this.gameManager.notifyChange(moveEvent);*/
     }
 
     /**
