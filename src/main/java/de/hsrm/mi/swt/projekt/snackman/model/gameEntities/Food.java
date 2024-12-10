@@ -5,18 +5,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
  * 
  * 
  */
-public class Food {
-
-    private IDGenerator idGenerator = IDGenerator.getInstance();
-
-    /** The unique identifier for the Food */
-    private long id = idGenerator.getUniqueID();
-
-    /** The x-coordinate of the Food */
-    private float x;
-
-    /** The y-coordinate of the Food */
-    private float y;
+public class Food extends GameObject {
 
     /** The calorie count contained in the Food */
     private int calories;
@@ -27,41 +16,13 @@ public class Food {
      * initial calorie count.
      *
      * @param x         the initial x-coordinate of the Food
-     * @param y         the initial y-coordinate of the Food       
+     * @param z         the initial y-coordinate of the Food
      * @param foodType  the initial type of the Food
      */
-    public Food(float x, float y, FoodType foodType) {
-        this.x = x; 
-        this.y = y;
+    public Food(long gameId, float x, float z, FoodType foodType) {
+        super(gameId, x, 0.5f, z);
         this.foodType = foodType;
         this.calories = foodType.getCalories();
-    }       
-    
-    /**
-     * Returns the unique identifier of the Food.
-     * 
-     * @return the `id` of the Food
-     */
-    public long getId() {
-        return id;
-    }
-
-    /**
-     * Returns the x-coordinate of the Food.
-     * 
-     * @return the current x-coordinate
-     */
-    public float getX() {
-        return x;
-    }
-
-    /**
-     * Returns the y-coordinate of the Food.
-     * 
-     * @return the current y-coordinate
-     */
-    public float getY() {
-        return y;
     }
 
     /**
