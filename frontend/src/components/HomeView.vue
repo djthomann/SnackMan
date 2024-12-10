@@ -39,9 +39,8 @@ const lobbies = ref([
 const lobbyCode = ref('');
 
 const createLobby = () => {
-  const message = JSON.stringify({ type: 'LobbyCreateEvent', id: 0 });
+  const message = JSON.stringify({ type: 'LOBBY_CREATE_EVENT', id: 0 });
   sendMessage(message);
-  console.log('Creating a new lobby');
 
   // How do I attain the new lobby id
   const newLobbyCode = 'NEW759';

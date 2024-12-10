@@ -40,6 +40,7 @@ public class GameManager {
         logger.info("Game Manager Constructor \n");
         this.webSocketHandler = webSocketHandler;
         this.allGames = new HashMap<Long, Game>();
+        this.allLobbies = new HashMap<Long, Lobby>();
         this.nextGameId = 1;
 
         GameConfig gameConfig = new GameConfig();

@@ -15,7 +15,7 @@ const router = useRouter();
 const { sendMessage } = useWebSocket();
 
 const submitForm = () => {
-  const message = JSON.stringify({ event: 'RegisterEvent', username: usernameInputField.value });
+  const message = JSON.stringify({ type: 'REGISTERUSERNAME', username: usernameInputField.value });
   sendMessage(message);
   router.push({ path: '/home', query: { name: usernameInputField.value } });
 };

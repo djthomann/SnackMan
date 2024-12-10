@@ -160,14 +160,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     }
                     session.sendMessage(new TextMessage(returnString));
                 }
-                case "LOBBYCREATEEVENT" -> {
+                case "LOBBY_CREATE_EVENT" -> {
                     LobbyCreateEvent lobbyCreateEvent = gson.fromJson(jsonString, LobbyCreateEvent.class);
                     Lobby newLobby = null;
 
-                    if (lobbyCreateEvent.getId() == 0) newLobby = gameManager.createLobby();
-
+                    if (lobbyCreateEvent.getId() == 0) { newLobby = gameManager.createLobby(); }
                     logger.info("Lobby with ID: "+newLobby.getId()+"created");
-                    gameManager.handleEvent(lobbyCreateEvent);
                 }
             }
         } catch (JsonSyntaxException e) {
