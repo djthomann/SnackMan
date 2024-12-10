@@ -2,6 +2,7 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,5 +138,9 @@ public class GameManager {
         Lobby lobby = new Lobby();
         allLobbies.put(lobby.getId(), lobby);
         return lobby;
+    }
+
+    public List<Lobby> getAllLobbies() {
+        return new ArrayList<>(allLobbies.values());
     }
 }

@@ -167,6 +167,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     if (lobbyCreateEvent.getId() == 0) { newLobby = gameManager.createLobby(); }
                     logger.info("Lobby with ID: "+newLobby.getId()+"created");
                 }
+                case "LOBBY_SHOW_EVENT" -> {
+                    ObjectMapper mapper = new ObjectMapper();
+                    String json = mapper.writeValueAsString(gameManager.getAllLobbies());
+                    String returnString = "ALL_LOBBIES;" + json;
+                    logger.info("Show all Lobbies: "+returnString);
+                    session.sendMessage(new TextMessage(returnString));
+                }
             }
         } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
