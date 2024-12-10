@@ -11,7 +11,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
-import jnr.ffi.Struct.id_t;
 
 /**
  * The GameManager manages all of the current games.

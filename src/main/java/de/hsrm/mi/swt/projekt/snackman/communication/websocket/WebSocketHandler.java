@@ -26,7 +26,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.Re
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
-import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;

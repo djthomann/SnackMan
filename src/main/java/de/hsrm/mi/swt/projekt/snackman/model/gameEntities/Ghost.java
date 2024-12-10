@@ -5,7 +5,6 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
-import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 
 
 /**
