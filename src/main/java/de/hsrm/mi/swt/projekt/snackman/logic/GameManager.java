@@ -120,12 +120,12 @@ public class GameManager {
         nextGameId++;
     }
 
-    public void setGameConfig(GameConfig gameConfig, int gameID) {
+    public void setGameConfig(GameConfig gameConfig, long gameID) {
         // TODO: Funktioniert nur mit id: 0, solange LobbyID nicht mit GameID verknüpft ist
         allGames.get(gameID).setGameConfig(gameConfig);
     }
 
-    public GameConfig getGameConfig(int gameID) {
+    public GameConfig getGameConfig(long gameID) {
         if (allGames.get(gameID) == null) {
             return this.gameConfig;
         }
