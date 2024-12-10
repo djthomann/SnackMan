@@ -23,16 +23,17 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
 
 const { sendMessage, onMessage } = useWebSocket();
-const route = useRoute();
 const router = useRouter();
 const lobbyCode = ref('');
 const serverMessage = ref<string>('');
-const name = computed(() => route.query.name || 'Guest');
+const name = computed(() => userStore.username || 'Guest');
 const maxPlayers = 8;
+const userStore = useUserStore();
 
 interface Lobby {
   id: number | null;
