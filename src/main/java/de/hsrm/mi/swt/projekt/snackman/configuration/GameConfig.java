@@ -1,23 +1,43 @@
 package de.hsrm.mi.swt.projekt.snackman.configuration;
 
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
 public class GameConfig {
 
+    @Positive
     private int scoreToWin;
+    @Positive
     private float speedModifier;
+    @Positive
     private int snackManSpeed;
+    @Positive
     private int ghostSpeed;
+    @Positive
     private int chickenSpeed;
+    @Positive
     private int mapWidth;
+    @Positive
     private int mapHeight;
+    @Positive
     private int gameTime;
+    @PositiveOrZero
     private int chickenCount;
+    @Positive
     private int jumpCalories;
+    @Positive
     private int wallHeight;
+    @Positive
     private float snackManRadius;
+    @Positive
     private float snackManStep;
+    @Positive
     private float ghostRadius;
+    @Positive
     private float chickenMinRadius;
+    @Positive
     private float chickenMaxRadius;
+    @Positive
     private float foodRadius;
 
     public GameConfig() {

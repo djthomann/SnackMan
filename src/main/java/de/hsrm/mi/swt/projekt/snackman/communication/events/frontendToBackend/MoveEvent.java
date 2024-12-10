@@ -15,7 +15,6 @@ public class MoveEvent extends Event {
     public MoveEvent(Vector3f movementVector) {
         this.setType(EventType.MOVE);
         this.movementVector = movementVector;
-        this.setType(EventType.MOVE);
     }
 
     public Vector3f getMovementVector() {

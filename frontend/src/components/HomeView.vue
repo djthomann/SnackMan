@@ -5,14 +5,15 @@
 
     <h2>Lobbies</h2>
     <ul>
-      <li v-for="lobby in lobbies" :key="lobby.code">
-        <p>Lobby Code: {{ lobby.code }}</p>
-        <p>{{ lobby.players }}/{{ maxPlayers }} Players</p>
-        <button @click="joinLobby(lobby.code)">Enter Lobby</button>
+      <li v-for="lobby in lobbies" :key="lobby.id ?? 'default-key'">
+        <p>Lobby Code: {{ lobby.id }}</p>
+        <p>0/{{ maxPlayers }} Players</p>
+        <button @click="joinLobby(lobby.id?.toString() ?? '')">Enter Lobby</button>
       </li>
     </ul>
 
     <button @click="createLobby">Create Lobby</button>
+    <button @click="fetchLobbies">Refresh Lobbies</button>
 
     <h2>Enter Lobby Code</h2>
     <input type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
@@ -22,29 +23,51 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
+import useWebSocket from '@/services/socketService';
 
-const route = useRoute();
+const { sendMessage, onMessage } = useWebSocket();
 const router = useRouter();
-const name = computed(() => route.query.name || 'Guest');
-const maxPlayers = 8;
-
-const lobbies = ref([
-  { code: 'D8FXKA', players: 5 }, // TODO: generate random lobby codes 1#
-  { code: '065LOM', players: 3 },
-]);
-
 const lobbyCode = ref('');
+const serverMessage = ref<string>('');
+const name = computed(() => userStore.username || 'Guest');
+const maxPlayers = 8;
+const userStore = useUserStore();
+
+interface Lobby {
+  id: number | null;
+}
+
+const lobbies = ref<Lobby[]>([]);
+
+const handleServerMessage = (message: string) => {
+  serverMessage.value = message;
+  if (message.startsWith('ALL_LOBBIES')) {
+    lobbies.value = JSON.parse(message.split(';')[1]);
+    console.log("ALL LOBIES"+lobbies.value);
+  }
+};
+
+onMessage(handleServerMessage);
 
 const createLobby = () => {
-  console.log('Creating a new lobby');
-  const newLobbyCode = 'NEW759'; // TODO: generate random lobby codes #2
-  router.push({ path: `/lobby/${newLobbyCode}` });
+  const message = JSON.stringify({ type: 'LOBBY_CREATE_EVENT', id: 0 });
+  sendMessage(message);
+
+  /* How do I attain the new lobby id
+  const newLobbyCode = 'NEW759';
+  router.push({ path: `/lobby/${newLobbyCode}` }); */
 };
 
 const joinLobby = (code: string) => {
   console.log(`Joining lobby with code: ${code}`);
   router.push({ path: `/lobby/${code}` });
+};
+
+const fetchLobbies = () => {
+  const message = JSON.stringify({ type: 'LOBBY_SHOW_EVENT' });
+  sendMessage(message);
 };
 </script>
 
