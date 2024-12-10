@@ -354,7 +354,7 @@ export default defineComponent({
 
         const data = JSON.stringify({
           type: 'MOVE',
-          gameID: 0,
+          gameID: 1,
           objectID: 831,
           movementVector: vector,
         });
