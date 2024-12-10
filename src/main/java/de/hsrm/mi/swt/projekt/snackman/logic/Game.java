@@ -140,4 +140,12 @@ public class Game {
         return gameManager;
     }
 
+    public GameConfig getGameConfig() {
+        return gameConfig;
+    }
+
+    public void setGameConfig(GameConfig gameConfig) {
+        this.gameConfig = gameConfig;
+    }
+
 }

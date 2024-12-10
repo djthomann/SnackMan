@@ -12,6 +12,7 @@ console.log(url)
 
 const serverResponse = ref<string>('');
 const websocket = ref<WebSocket | null>(null);
+const messageCallbacks = ref<((message: string) => void)[]>([]);
 
 export default function useWebSocket() {
   const connect = () => {
@@ -29,6 +30,7 @@ export default function useWebSocket() {
       console.log('Received message from server:', event.data);
       serverResponse.value = event.data;
       eventBus.emit('serverMessage', event.data);
+      messageCallbacks.value.forEach(callback => callback(event.data));
     };
 
     websocket.value.onclose = () => {
@@ -56,11 +58,16 @@ export default function useWebSocket() {
     }
   };
 
+  const onMessage = (callback: (message: string) => void) => {
+    messageCallbacks.value.push(callback);
+  };
+
   return {
     serverResponse,
     connect,
     sendTestMessage,
     sendMessage,
     closeConnection,
+    onMessage,
   };
 }
