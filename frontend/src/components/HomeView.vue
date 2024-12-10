@@ -23,11 +23,13 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import useWebSocket from '@/services/socketService';
 
 const route = useRoute();
 const router = useRouter();
 const name = computed(() => route.query.name || 'Guest');
 const maxPlayers = 8;
+const { sendMessage } = useWebSocket();
 
 const lobbies = ref([
   { code: 'D8FXKA', players: 5 }, // TODO: generate random lobby codes 1#
@@ -37,8 +39,12 @@ const lobbies = ref([
 const lobbyCode = ref('');
 
 const createLobby = () => {
+  const message = JSON.stringify({ type: 'LobbyCreateEvent', id: 0 });
+  sendMessage(message);
   console.log('Creating a new lobby');
-  const newLobbyCode = 'NEW759'; // TODO: generate random lobby codes #2
+
+  // How do I attain the new lobby id
+  const newLobbyCode = 'NEW759';
   router.push({ path: `/lobby/${newLobbyCode}` });
 };
 

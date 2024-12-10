@@ -22,6 +22,7 @@ public class GameManager {
     Logger logger = LoggerFactory.getLogger(GameManager.class);
     
     public HashMap<Long, Game> allGames;
+    public HashMap<Long, Lobby> allLobbies;
     private long nextGameId;
     private WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
@@ -31,6 +32,7 @@ public class GameManager {
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
         this.allGames = new HashMap<Long, Game>();
+        this.allLobbies = new HashMap<Long, Lobby>();
         this.nextGameId = 0;
     }
 
@@ -132,4 +134,9 @@ public class GameManager {
         return allGames.get(gameID).getGameConfig(); 
     }
 
+    public Lobby createLobby(){
+        Lobby lobby = new Lobby();
+        allLobbies.put(lobby.getId(), lobby);
+        return lobby;
+    }
 }
