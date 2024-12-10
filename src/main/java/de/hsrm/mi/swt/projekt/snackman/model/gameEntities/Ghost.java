@@ -2,6 +2,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
@@ -17,10 +18,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Int
  * 
  */
 public class Ghost extends GameObject implements MovableAndSubscribable {
-
-        /** Publisher to publish the internal backend event. */
-     @Autowired
-     private ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Constructs a new `Ghost` with the specified starting position.
@@ -46,7 +43,7 @@ public class Ghost extends GameObject implements MovableAndSubscribable {
         x = newX; 
         y = newY; 
         z = newZ; 
-        applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
     }
 
     @Override
