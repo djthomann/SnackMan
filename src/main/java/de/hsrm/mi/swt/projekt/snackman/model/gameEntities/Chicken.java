@@ -1,22 +1,36 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
 import org.python.core.PyObject;
 import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
-import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
+
 
 /**
  * The `Chicken` class represents a NPC in the game.
  * 
  * 
  */
+
 public class Chicken extends GameObject implements CanEat, MovableAndSubscribable {
+
+     /** Publisher to publish the internal backend event. */
+     @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
@@ -36,8 +50,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * @param z             the initial z-coordinate of the Chicken
      * @param scriptPath    the path of the associated behavior script
      */
-    public Chicken(float x, float y, float z, String scriptPath, SnackManMap map) {
-        super(x, y, z);
+
+    public Chicken(long gameId, float x, float y, float z, String scriptPath, SnackManMap map) {
+        super(gameId, x, y, z);
         this.behaviorScript = scriptPath;
         this.gainedCalories = 0;
         this.scriptInterpreter = new PythonInterpreter();
@@ -79,6 +94,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.x += newX;
         this.y += newY;
         this.z += newZ;
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
     }
 
     /**
@@ -136,7 +152,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     @Override
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
+        applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
     }
+
 
     /**
      * Resets the gainedCalories for the Chicken to 0.

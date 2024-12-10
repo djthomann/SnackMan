@@ -1,7 +1,8 @@
-package de.hsrm.mi.swt.projekt.snackman.communication.events;
+package de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend;
 
 import java.util.List;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;

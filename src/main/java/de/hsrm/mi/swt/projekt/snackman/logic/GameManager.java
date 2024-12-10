@@ -10,10 +10,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
-import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
-import jnr.ffi.Struct.id_t;
 
 /**
  * The GameManager manages all of the current games.
@@ -23,15 +20,17 @@ import jnr.ffi.Struct.id_t;
 public class GameManager {
 
     Logger logger = LoggerFactory.getLogger(GameManager.class);
-
-    public HashMap<Integer, Game> allGames;
-    private int nextGameId;
+    
+    public HashMap<Long, Game> allGames;
+    public HashMap<Long, Lobby> allLobbies;
+    private long nextGameId;
     private WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
 
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
-        this.allGames = new HashMap<Integer, Game>();
+        this.allGames = new HashMap<Long, Game>();
+        this.allLobbies = new HashMap<Long, Lobby>();
         this.nextGameId = 1;
     }
 
@@ -40,10 +39,20 @@ public class GameManager {
 
         logger.info("Game Manager Constructor \n");
         this.webSocketHandler = webSocketHandler;
-        this.allGames = new HashMap<Integer, Game>();
+        this.allGames = new HashMap<Long, Game>();
         this.nextGameId = 1;
 
+        GameConfig gameConfig = new GameConfig();
+
         createGame(gameConfig);
+    }
+
+    public Game getGameById(Long id) {
+        if (allGames.containsKey(id)) {
+            return allGames.get(id);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -111,16 +120,21 @@ public class GameManager {
         nextGameId++;
     }
 
-    public void setGameConfig(GameConfig gameConfig, int gameID) {
+    public void setGameConfig(GameConfig gameConfig, long gameID) {
         // TODO: Only works with id: 1, as long as LobbyID and GameID aren't connected and there aren't more Games
         allGames.get(gameID).setGameConfig(gameConfig);
     }
 
-    public GameConfig getGameConfig(int gameID) {
+    public GameConfig getGameConfig(long gameID) {
         if (allGames.get(gameID) == null) {
             return this.gameConfig;
         }
         return allGames.get(gameID).getGameConfig(); 
     }
 
+    public Lobby createLobby(){
+        Lobby lobby = new Lobby();
+        allLobbies.put(lobby.getId(), lobby);
+        return lobby;
+    }
 }

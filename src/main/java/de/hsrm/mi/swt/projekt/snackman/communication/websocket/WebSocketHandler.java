@@ -20,15 +20,20 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterGhostEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterSnackmanEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
-import de.hsrm.mi.swt.projekt.snackman.model.level.MapGenerationConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
+import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
@@ -158,6 +163,15 @@ public class WebSocketHandler extends TextWebSocketHandler {
                         }
                     }
                     session.sendMessage(new TextMessage(returnString));
+                }
+                case "LOBBYCREATEEVENT" -> {
+                    LobbyCreateEvent lobbyCreateEvent = gson.fromJson(jsonString, LobbyCreateEvent.class);
+                    Lobby newLobby = null;
+
+                    if (lobbyCreateEvent.getId() == 0) newLobby = gameManager.createLobby();
+
+                    logger.info("Lobby with ID: "+newLobby.getId()+"created");
+                    gameManager.handleEvent(lobbyCreateEvent);
                 }
             }
         } catch (JsonSyntaxException e) {
