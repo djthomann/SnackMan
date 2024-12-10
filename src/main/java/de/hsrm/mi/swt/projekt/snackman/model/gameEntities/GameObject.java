@@ -7,8 +7,10 @@ public class GameObject {
     protected float x;
     protected float y;
     protected float z;
+    protected float radius; 
 
-    public GameObject(long gameId, float x, float y, float z) {
+
+    public GameObject(long gameId, float x, float y, float z, float radius) {
         this.gameId = gameId;
         this.x = x;
         this.y = y;
@@ -30,6 +32,10 @@ public class GameObject {
 
     public float getZ() {
         return z;
+    }
+
+    public float getRadius() {
+        return radius;
     }
 
 }

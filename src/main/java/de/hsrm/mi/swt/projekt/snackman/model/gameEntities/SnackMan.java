@@ -33,13 +33,14 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     private Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
     /** Publisher to publish the internal backend event. */
-     @Autowired
+    @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
     // Jumping constants
     private final float GRAVITY = -9.81f; // Gravity constant for physically realistic jumping
     private final float INITIAL_VELOCITY = 8.0f; // Initial velocity at the start of the jump
-    private final float JUMP_BOOST = 5.0f; // Boost applied to the current jump if the SnackMan is already jumping and the jump-method is called again
+    private final float JUMP_BOOST = 5.0f; // Boost applied to the current jump if the SnackMan is already jumping and
+                                           // the jump-method is called again
     private final int MAX_BOOSTS = 2; // Maximum number of velocity boosts that is possible to reach during one jump
     private final long BOOST_PUFFER_TIME = 100; // Time that has to be passed since last space bar press to enable boost
 
@@ -66,13 +67,14 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      * Constructs a new `SnackMan` with the specified starting position and
      * initial calorie count.
      *
-     * @param x      the initial x-coordinate of the `SnackMan`
-     * @param y      the initial y-coordinate of the `SnackMan`
-     * @param z      the initial z-coordinate of the `SnackMan`
+     * @param x the initial x-coordinate of the `SnackMan`
+     * @param y the initial y-coordinate of the `SnackMan`
+     * @param z the initial z-coordinate of the `SnackMan`
      */
 
-    public SnackMan(long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
-        super(gameId, x, y, z);
+    public SnackMan(long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
+            CollisionManager collisionManager) {
+        super(gameId, gameId, x, y, z);
         this.collisionManager = collisionManager;
 
         // TODO Initial calories to make jumping possible, change back to 0 later
@@ -100,10 +102,10 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        this.x += newX; 
-        this.y += newY; 
-        this.z += newZ; 
-        applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
+        this.x += newX;
+        this.y += newY;
+        this.z += newZ;
+        applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
     }
 
     /**
@@ -112,7 +114,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     public void jump() {
 
         // If we are not jumping and have enough calories, start new jump
-        if(!jumping && gainedCalories >= this.gameConfig.getJumpCalories()) {
+        if (!jumping && gainedCalories >= this.gameConfig.getJumpCalories()) {
 
             this.jumpStartTime = System.currentTimeMillis();
 
@@ -135,13 +137,16 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
                      * The velocity starts at a positive value
                      * It is 0 when the SnackMan is at its highest position
                      * It is negative during the falling phase
-                     * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between position updates and G the gravity constant
+                     * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between
+                     * position updates and G the gravity constant
                      */
                     currentVelocity += deltaTime * GRAVITY;
 
                     /**
-                     * Updating the SnackMan's position by applying the velocity to the current position
-                     * Formula: y = y + deltaT * v where y is the position, deltaT the time between position updates and v the SnackMan's current velocity
+                     * Updating the SnackMan's position by applying the velocity to the current
+                     * position
+                     * Formula: y = y + deltaT * v where y is the position, deltaT the time between
+                     * position updates and v the SnackMan's current velocity
                      */
                     heightGain = deltaTime * currentVelocity;
 
@@ -151,7 +156,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
                      * Check if the SnackMan has landed at its initial y-position
                      * If so, the jump is done
                      */
-                    if (y < initialY ) {
+                    if (y < initialY) {
                         y = initialY;
                         jumping = false;
                     }
@@ -169,13 +174,14 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
             };
 
             // Repeat task every time the specified time period has passed until cancelled
-            jumpTaskFuture = jumpExecutor.scheduleAtFixedRate(jumpTask, 0, (long) (deltaTime * 300), TimeUnit.MILLISECONDS);
+            jumpTaskFuture = jumpExecutor.scheduleAtFixedRate(jumpTask, 0, (long) (deltaTime * 300),
+                    TimeUnit.MILLISECONDS);
 
-
-        /**
-         * If we are already jumping, have not reached the maximum possible number of boosts and have enough calories,
-         * apply boost to current velocity, so that we jump higher
-         */
+            /**
+             * If we are already jumping, have not reached the maximum possible number of
+             * boosts and have enough calories,
+             * apply boost to current velocity, so that we jump higher
+             */
         } else if (this.boosts < MAX_BOOSTS && this.gainedCalories >= this.gameConfig.getJumpCalories()) {
 
             this.jumpEndTime = System.currentTimeMillis();
@@ -184,10 +190,11 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
             float timeDifference = this.jumpEndTime - this.jumpStartTime;
 
             /**
-             * Boosts are only possible when enough time has passed since pressing the space bar
+             * Boosts are only possible when enough time has passed since pressing the space
+             * bar
              * so that they are not applied immediately
              */
-            if(timeDifference > this.BOOST_PUFFER_TIME) {
+            if (timeDifference > this.BOOST_PUFFER_TIME) {
                 this.currentVelocity += JUMP_BOOST;
                 this.boosts++;
                 this.gainedCalories -= this.gameConfig.getJumpCalories();
@@ -205,7 +212,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     @Override
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
-        applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
+        applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
     }
 
     /**
@@ -240,13 +247,13 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
                 float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
                 if ((int) wishedX != (int) this.getX() || (int) wishedZ != (int) this.getZ()) {
 
-                    if(this.getY() < gameConfig.getWallHeight()) {
-                        collision = collisionManager.checkCollision(wishedX, wishedZ);
+                    if (this.getY() < gameConfig.getWallHeight()) {
+                        collision = collisionManager.checkCollision(wishedX, wishedZ, this);
                         if (collision.equals("wall")) {
                             vector.x = 0;
                             vector.z = 0;
                         } else if (collision.equals("item")) {
-                            // TODO: Add eating-logic
+                            logger.info("MMMMMM delicious ");
                         }
                     }
 

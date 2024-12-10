@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
@@ -49,10 +50,12 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * @param y             the initial y-coordinate of the Chicken
      * @param z             the initial z-coordinate of the Chicken
      * @param scriptPath    the path of the associated behavior script
+     * @param map           the game map 
+     * @param gameConfig    the configuration of the game
      */
 
-    public Chicken(long gameId, float x, float y, float z, String scriptPath, SnackManMap map) {
-        super(gameId, x, y, z);
+    public Chicken(long gameId, float x, float y, float z, String scriptPath, SnackManMap map, GameConfig gameConfig) {
+        super(gameId, x, y, z, gameConfig.getChickenMinRadius());
         this.behaviorScript = scriptPath;
         this.gainedCalories = 0;
         this.scriptInterpreter = new PythonInterpreter();

@@ -5,7 +5,12 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
+import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
@@ -30,7 +35,7 @@ public class CollisionManager {
      * @return String of The type of entity/object collided with, or "none" if no
      *         collision is detected.
      */
-    public String checkCollision(float wishedX, float wishedZ) {
+    public String checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
 
         Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
 
@@ -42,10 +47,31 @@ public class CollisionManager {
             case ITEM:
                 logger.info(
                         "snackman and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
+                if (collisionPartner instanceof SnackMan) {
+                    // currently food gets exact the same coord as tile
+                    float foodPosX = (float) (nearbyFood.getX() + 0.1);
+                    float foodPosZ = (float) (nearbyFood.getZ() + 0.1);
+                    float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
+
+                    if (distance <= (collisionPartner.getRadius() + nearbyFood.getRadius())) {
+                        ((SnackMan) collisionPartner).eat(nearbyFood);
+                        wishedTile.setOccupationType(OccupationType.FREE);
+                        return "item";
+                    }
+
+                } else {
+                    return "none";
+                }
+
                 return "item";
             default:
                 return "none";
         }
 
+    }
+
+    private float calculateDistance(float x1, float x2, float z1, float z2) {
+        return (float) Math.sqrt((x2 - x1) * (x2 - x1) + (z2 - z1) * (z2 - z1));
     }
 }
