@@ -26,10 +26,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.Re
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.MoveEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterGhostEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
@@ -147,7 +143,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                     // if there is no GameConfig for the Lobby or the Reset-Button has been pressed,
                     // the form should recieve default values
-                    if (existingConfig == null || Integer.valueOf(gameConfigEvent.getGameID()) == 0) {
+                    if (existingConfig == null || gameConfigEvent.getGameID() == 0) {
                         try {
                             String json = mapper.writeValueAsString(new GameConfig());
                             returnString = "GAME_CONFIG;" + json;
