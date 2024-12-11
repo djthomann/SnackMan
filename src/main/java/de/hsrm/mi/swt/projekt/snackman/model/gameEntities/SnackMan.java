@@ -11,6 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.stereotype.Component;
+
+import de.hsrm.mi.swt.projekt.snackman.communication.events.*;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
@@ -28,13 +33,9 @@ import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
  * 
  * 
  */
-public class SnackMan extends GameObject implements CanEat, MovableAndSubscribable {
+public class SnackMan extends GameObject implements CanEat, MovableAndSubscribable{
 
     private Logger logger = LoggerFactory.getLogger(SnackMan.class);
-
-    /** Publisher to publish the internal backend event. */
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
 
     // Jumping constants
     private final float GRAVITY = -9.81f; // Gravity constant for physically realistic jumping
@@ -71,10 +72,8 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      * @param y the initial y-coordinate of the `SnackMan`
      * @param z the initial z-coordinate of the `SnackMan`
      */
-
-    public SnackMan(long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
-            CollisionManager collisionManager) {
-        super(gameId, gameId, x, y, z);
+    public SnackMan(long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
+        super(gameId, x, y, z);
         this.collisionManager = collisionManager;
 
         // TODO Initial calories to make jumping possible, change back to 0 later
@@ -102,10 +101,10 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        this.x += newX;
-        this.y += newY;
-        this.z += newZ;
-        applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
+        this.x += newX; 
+        this.y += newY; 
+        this.z += newZ; 
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
     }
 
     /**
@@ -212,7 +211,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     @Override
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
-        applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
     }
 
     /**

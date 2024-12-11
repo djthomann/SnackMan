@@ -11,6 +11,7 @@ import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
@@ -28,10 +29,6 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
  */
 
 public class Chicken extends GameObject implements CanEat, MovableAndSubscribable {
-
-     /** Publisher to publish the internal backend event. */
-     @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
 
     /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
@@ -97,7 +94,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.x += newX;
         this.y += newY;
         this.z += newZ;
-        applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
     }
 
     /**
@@ -155,7 +152,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     @Override
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
-        applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
     }
 
 
@@ -179,5 +176,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     @Override
     public void handle(Event event) {
     }
+
 
 }
