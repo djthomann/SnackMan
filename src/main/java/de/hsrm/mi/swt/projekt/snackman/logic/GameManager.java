@@ -58,7 +58,7 @@ public class GameManager {
     }
 
     /**
-     * Passes on the received event to the game with the matching game id
+     * Passes on the received event to the game with the matching game objectId
      * 
      * @param event
      */
@@ -83,7 +83,7 @@ public class GameManager {
     }
 
     /**
-     * Creates a new game with a unique id, the specified gameConfig and Moveables,
+     * Creates a new game with a unique objectId, the specified gameConfig and Moveables,
      * and a randomly generated map with the in gameConfig specified width and
      * height for it
      * 
@@ -105,7 +105,7 @@ public class GameManager {
     }
 
     /**
-     * Creates a new game with a unique id, the specified gameConfig and Moveables,
+     * Creates a new game with a unique objectId, the specified gameConfig and Moveables,
      * and creates a map from the given csv file
      * 
      * @param gameConfig
@@ -123,7 +123,7 @@ public class GameManager {
     }
 
     public void setGameConfig(GameConfig gameConfig, long gameID) {
-        // TODO: Only works with id: 1, as long as LobbyID and GameID aren't connected and there aren't more Games
+        // TODO: Only works with objectId: 1, as long as LobbyID and GameID aren't connected and there aren't more Games
         allGames.get(gameID).setGameConfig(gameConfig);
     }
 
