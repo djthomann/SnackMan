@@ -191,6 +191,9 @@ export default defineComponent({
       const floor = createFloorTile(w, h);
       // console.log('Creating Floor with: ' + w + '|' + h);
       scene.add(floor);
+
+      player.position.set(w / 2, mapScale, h / 2);
+
     }
 
     /**
@@ -379,7 +382,7 @@ export default defineComponent({
 
         const data = JSON.stringify({
           type: 'MOVE',
-          gameID: 0,
+          gameID: 1,
           objectID: 831,
           movementVector: vector,
         });
