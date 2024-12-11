@@ -9,7 +9,7 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
  * an initial position on a plane.
  * 
  * This class extends `PlayerObject` and inherits its properties for
- * the id, and coordinates management.
+ * the objectId, and coordinates management.
  * 
  * 
  */
@@ -25,8 +25,8 @@ public class Ghost extends GameObject implements MovableAndSubscribable {
      * @param gameConfig the configuation of the game
      * 
      */
-    public Ghost(long gameId, float x, float y, float z, GameConfig gameConfig) {
-        super(gameId, x, y, z, gameConfig.getGhostRadius());
+    public Ghost(long id, long gameId, float x, float y, float z, GameConfig gameConfig) {
+        super(id, gameId, x, y, z, gameConfig.getGhostRadius());
     }
 
     /**

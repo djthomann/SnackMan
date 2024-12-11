@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,7 @@ public class Game {
      */
     public void init() {
         createFood(); 
-        allMovables.add(new SnackMan(id,20.0f, 1.1f, 20.0f, gameManager, gameConfig, collisionManager));
+        allMovables.add(new SnackMan(IDGenerator.getInstance().getUniqueID(), id,20.0f, 1.1f, 20.0f, gameManager, gameConfig, collisionManager));
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
     }

@@ -65,9 +65,9 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      * @param y the initial y-coordinate of the `SnackMan`
      * @param z the initial z-coordinate of the `SnackMan`
      */
-    public SnackMan(long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
+    public SnackMan(long id, long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
             CollisionManager collisionManager) {
-        super(gameId, x, y, z, gameConfig.getSnackManRadius());
+        super(id, gameId, x, y, z, gameConfig.getSnackManRadius());
         this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
 
@@ -225,7 +225,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     @Override
     public void handle(Event event) {
 
-        if (event.getObjectID() != this.id) {
+        if (event.getObjectID() != this.objectId) {
             return;
         }
 
