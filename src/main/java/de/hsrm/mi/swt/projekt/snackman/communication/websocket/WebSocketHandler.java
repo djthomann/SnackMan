@@ -26,6 +26,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.Re
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
@@ -80,12 +81,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     clients.get(session).setUsername(registerGhostEvent.getUsername());
                     clients.get(session).setRole(registerGhostEvent.getRole());
                 }
-                // User registered without Role
+                /** User registers without Role, sets Unsername and sends back Client ID for later use...*/
                 case "REGISTERUSERNAME" -> {
                     RegisterUsernameEvent registerUsernameEvent = gson.fromJson(jsonString,
                             RegisterUsernameEvent.class);
 
                     clients.get(session).setUsername(registerUsernameEvent.getUsername());
+                    ClientIdEvent event = new ClientIdEvent(clients.get(session).getClientId());
+                    String json = gson.toJson(event);
+                    logger.info("Final JSON for event" + event.getType().toString() + "; " + json);
+                    session.sendMessage(new TextMessage(event.getType().toString() + ";" + json));
                 }
                 case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
