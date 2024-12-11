@@ -40,7 +40,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
 
     /**
-     * Constructs a new Chicken with the id, and specified starting Coords.
+     * Constructs a new Chicken with the objectId, and specified starting Coords.
      *
      * @param x             the initial x-coordinate of the Chicken
      * @param y             the initial y-coordinate of the Chicken
