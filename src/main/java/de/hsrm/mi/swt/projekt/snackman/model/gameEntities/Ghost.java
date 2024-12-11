@@ -13,7 +13,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Int
  * an initial position on a plane.
  * 
  * This class extends `PlayerObject` and inherits its properties for
- * the id, and coordinates management.
+ * the objectId, and coordinates management.
  * 
  * 
  */
@@ -27,8 +27,8 @@ public class Ghost extends GameObject implements MovableAndSubscribable {
      * @param z         the initial z-coordinate of the `Ghost`
      * @param radius    the radius of the `Ghost`
      */
-    public Ghost(long gameId, float x, float y, float z, float radius) {
-        super(gameId, x, y, z);
+    public Ghost(long id, long gameId, float x, float y, float z, float radius) {
+        super(id, gameId, x, y, z);
     }
 
     /**

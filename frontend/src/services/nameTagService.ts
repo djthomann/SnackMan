@@ -3,8 +3,7 @@ import * as THREE from 'three';
 
 class NameTag{
 
-    private nameTagObj: THREE.Mesh;
-    private parentObject: THREE.Mesh;
+    private nameTagObj: THREE.Mesh | undefined = undefined;
 
     constructor(name: string, parentObject: THREE.Mesh, scene: THREE.Scene){
         
@@ -51,11 +50,10 @@ class NameTag{
 
         // Save reference for updates
         this.nameTagObj = nameTagObj;
-        this.parentObject = parentObject;
     }
 
     update(player: THREE.Mesh){
-        this.nameTagObj.lookAt(player.position);
+        this.nameTagObj?.lookAt(player.position);
     }
 
     

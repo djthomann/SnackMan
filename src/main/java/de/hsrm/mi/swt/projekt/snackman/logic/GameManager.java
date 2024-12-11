@@ -11,7 +11,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 /**
@@ -56,7 +55,7 @@ public class GameManager {
     }
 
     /**
-     * Passes on the received event to the game with the matching game id
+     * Passes on the received event to the game with the matching game objectId
      * 
      * @param event
      */
@@ -81,12 +80,12 @@ public class GameManager {
     }
 
     /**
-     * Creates a new game with a unique id, the specified gameConfig and Moveables,
+     * Creates a new game with a unique objectId, the specified gameConfig and Moveables,
      * and a randomly generated map with the in gameConfig specified width and
      * height for it
      * 
      * @param gameConfig
-     * @param allMoveables
+     * @param id
      */
     public void createGame(GameConfig gameConfig, long id) {
 
@@ -101,10 +100,11 @@ public class GameManager {
     }
 
     /**
-     * Creates a new game with a unique id, the specified gameConfig and Moveables,
+     * Creates a new game with a unique objectId, the specified gameConfig and Moveables,
      * and creates a map from the given csv file
      * 
      * @param gameConfig
+     * @param id
      * @param mapFile
      */
     public void createGame(GameConfig gameConfig, long id, String mapFile) {
