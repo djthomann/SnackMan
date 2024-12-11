@@ -1,5 +1,8 @@
-package de.hsrm.mi.swt.projekt.snackman.communication.events;
+package de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend;
 import org.joml.Vector3f;
+
+import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 
 /**
  * Event that informs backend that a Player wants to move and in what direction
@@ -12,7 +15,6 @@ public class MoveEvent extends Event {
     public MoveEvent(Vector3f movementVector) {
         this.setType(EventType.MOVE);
         this.movementVector = movementVector;
-        this.setType(EventType.MOVE);
     }
 
     public Vector3f getMovementVector() {

@@ -1,5 +1,6 @@
-package de.hsrm.mi.swt.projekt.snackman.communication.events;
+package de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 
 public class RegisterGhostEvent extends RegisterEvent {
@@ -7,7 +8,6 @@ public class RegisterGhostEvent extends RegisterEvent {
     private Ghost role;
 
     public RegisterGhostEvent() {
-        super();
         this.setType(EventType.REGISTER_USERNAME);
     }
 

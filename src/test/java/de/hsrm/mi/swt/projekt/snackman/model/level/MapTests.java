@@ -1,6 +1,5 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
-import de.hsrm.mi.swt.projekt.snackman.configuration.MapGenerationConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +40,29 @@ public class MapTests {
         Assertions.assertEquals(OccupationType.FREE, map.getAllTiles()[h - 2][1].getOccupationType());
         Assertions.assertEquals(OccupationType.FREE, map.getAllTiles()[1][w - 2].getOccupationType());
         Assertions.assertEquals(OccupationType.FREE, map.getAllTiles()[h - 2][w - 2].getOccupationType());
+    }
+
+    @Test
+    void testFoodCreation() {
+        // für generierte Maps
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
+                    Assertions.assertNotNull(map.getTileAt(col, row).getOccupation(), "occupation on tile with occupation type 'ITEM' should not be null");
+                }
+            }
+        }
+
+        // für maps aus Dateien
+        map = new SnackManMap("testFile.csv", true);
+        for (int row = 0; row < h; row++) {
+            for (int col = 0; col < w; col++) {
+                if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
+                    Assertions.assertNotNull(map.getTileAt(col, row).getOccupation(), "occupation on tile with occupation type 'ITEM' should not be null");
+                }
+            }
+        }
+
     }
 
     /**
@@ -144,7 +166,7 @@ public class MapTests {
      */
     @Test
     void testFileConstructor() {
-        map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv");
+        map = new SnackManMap("testFile.csv", true);
 
         Assertions.assertEquals(15, w);
         Assertions.assertEquals(15, h);
@@ -163,4 +185,29 @@ public class MapTests {
             }
         }
     }
+
+    /**
+     * saves map and loads same map again, to check if they are equal
+     */
+    @Test
+    void testLoadedMapMatchesSavedMap() {
+        map.saveAsCSV();
+
+        File dir = new File(MapGenerationConfig.SAVED_MAPS_PATH);
+        if (dir.exists() && dir.isDirectory()) {
+            File newFile = Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+                    .max(Comparator.comparingLong(File::lastModified))
+                    .orElse(null);
+            SnackManMap map2 = new SnackManMap(newFile.getName(), true);
+
+            Assertions.assertEquals(map, map2);
+
+            if (!newFile.delete()) {
+                fail("file could not be deleted");
+            }
+        } else {
+            fail("directory not found");
+        }
+    }
+
 }

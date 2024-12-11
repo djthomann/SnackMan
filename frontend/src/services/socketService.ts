@@ -5,11 +5,14 @@ import eventBus from './eventBus';
  * Service that establishes a socket connection with backend, sends messages
  * to eventBus and allows to send messages to backend
  */
+let prefix = window.location.protocol === "https:" ? "wss" : "ws"
 
-const url = 'ws://localhost:8080/ws-endpoint';
+const url =  `${prefix}://${window.location.hostname}:${window.location.port}/ws-endpoint`;
+console.log(url)
 
 const serverResponse = ref<string>('');
 const websocket = ref<WebSocket | null>(null);
+const messageCallbacks = ref<((message: string) => void)[]>([]);
 
 export default function useWebSocket() {
   const connect = () => {
@@ -27,6 +30,7 @@ export default function useWebSocket() {
       console.log('Received message from server:', event.data);
       serverResponse.value = event.data;
       eventBus.emit('serverMessage', event.data);
+      messageCallbacks.value.forEach(callback => callback(event.data));
     };
 
     websocket.value.onclose = () => {
@@ -54,11 +58,16 @@ export default function useWebSocket() {
     }
   };
 
+  const onMessage = (callback: (message: string) => void) => {
+    messageCallbacks.value.push(callback);
+  };
+
   return {
     serverResponse,
     connect,
     sendTestMessage,
     sendMessage,
     closeConnection,
+    onMessage,
   };
 }

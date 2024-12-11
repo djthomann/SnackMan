@@ -9,8 +9,12 @@ import { defineComponent, onUnmounted, ref, onMounted } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
-import { PointerLockControls } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader, PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
+import type { Snackman, Ghost, Food, Tile } from '@/types/SceneTypes';
+import { useEntityStore } from '@/stores/entityStore';
+import { storeToRefs } from 'pinia';
+import NameTag from '@/services/nameTagService';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -21,9 +25,14 @@ let foodGroup: THREE.Group;
 let bananaModel: THREE.Group;
 let appleModel: THREE.Group;
 let orangeModel: THREE.Group;
+let cakeModel: THREE.Group;
+let chickenModel: THREE.Group;
 
 // mesh for walls
 let box: THREE.Mesh;
+
+const mapScale = 5;
+const wallHeight = 1.5 * mapScale;
 
 /* for fallback purposes if no model is loaded
 let plane: THREE.Mesh;
@@ -33,7 +42,7 @@ let sphere: THREE.Mesh;
 export default defineComponent({
   name: 'Scene',
   setup() {
-    const { connect, sendMessage, closeConnection } = useWebSocket();
+    const { sendMessage } = useWebSocket();
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
@@ -47,19 +56,31 @@ export default defineComponent({
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
+    let nameTag: NameTag;
+    let animationMixer: THREE.AnimationMixer;
+    const nameTags: NameTag[] = [];
+
+    //GameStart
+    const entityStore = useEntityStore();
+    const { snackmen, ghosts } = storeToRefs(entityStore);
+
+    console.log(
+      'Snackman Names:',
+      snackmen.value.map((item: Snackman) => item.username),
+    );
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
-      console.log('Processing server message');
+      //console.log('Processing server message');
 
       if (message.startsWith('MOVE')) {
         let key: string = message.split(':')[1];
 
-        // Move the camera
-        moveCamera(JSON.parse(message.split(';')[1]))
+        // Move the player
+        movePlayer(JSON.parse(message.split(';')[1]));
 
-        if (key === 'KeyD') {
+        /*  if (key === 'KeyD') {
           cone.position.x += 0.2;
         } else if (key === 'KeyA') {
           cone.position.x -= 0.2;
@@ -68,6 +89,7 @@ export default defineComponent({
         } else if (key === 'KeyS') {
           cone.position.z += 0.2;
         }
+          */
       } else if (message.startsWith('MAP')) {
         console.log('processing map');
         const map = JSON.parse(message.split(';')[1]);
@@ -76,19 +98,15 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      initScene();
       loadModels();
+      initScene();
       eventBus.on('serverMessage', handleServerMessage);
-
-      connect();
 
       window.addEventListener('resize', onWindowResize);
     });
 
     onUnmounted(() => {
       eventBus.off('serverMessage', handleServerMessage);
-
-      closeConnection();
 
       // Three.js Cleanup
       controls?.dispose();
@@ -107,13 +125,18 @@ export default defineComponent({
 
         // Modelle abrufen
         bananaModel = modelService.getModel('banana');
-        bananaModel.scale.set(0.05, 0.05, 0.05);
+        bananaModel.scale.set(0.075, 0.075, 0.075);
 
         appleModel = modelService.getModel('apple');
-        appleModel.scale.set(0.2, 0.2, 0.2);
+        appleModel.scale.set(0.4, 0.4, 0.4);
 
         orangeModel = modelService.getModel('orange');
         orangeModel.scale.set(0.0025, 0.0025, 0.0025);
+
+        cakeModel = modelService.getModel('cake');
+        cakeModel.scale.set(0.5, 0.5, 0.5);
+
+        chickenModel  = modelService.getModel('chicken');
 
         console.log('Models loaded');
       } catch (error) {
@@ -122,9 +145,9 @@ export default defineComponent({
     }
 
     function loadMap(map: any) {
-      console.log('Received mapdata' + map);
-      const w = map.w;
-      const h = map.h;
+      //console.log('Received mapdata' + map);
+      const w = map.w * mapScale;
+      const h = map.h * mapScale;
       const tiles = map.allTiles;
 
       for (const row of tiles) {
@@ -132,37 +155,63 @@ export default defineComponent({
           const occupationType = tile.occupationType;
           if (occupationType == 'WALL') {
             // console.log(tile)
-            wallsGroup.add(createWall(tile.x, tile.y));
+            wallsGroup.add(createWall(tile.x, tile.z));
           } else if (occupationType == 'ITEM') {
-            foodGroup.add(createFood(tile.x, tile.y, Math.random() * 400 + 100));
+            foodGroup.add(createFood(tile.x, tile.z, Math.random() * 400 + 100));
           }
         }
       }
 
+      // Test Chicken
+      if (chickenModel) {
+        console.log('ChickenModel loaded')
+        const chicken = chickenModel.clone();
+        chicken.castShadow = true;       
+        chicken.scale.set(4,4,4);
+        chicken.position.set(w / 2, 0, h / 2);
+        console.log('Chicken at:', chicken.position)
+        chicken.rotation.y = -45;
+        scene.add(chicken);
+
+        //Animation
+        animationMixer = new THREE.AnimationMixer(chicken);
+        const chickenAnimations = modelService.getAnimations('chicken');
+          if (chickenAnimations.length > 0) {
+          const action = animationMixer.clipAction(chickenAnimations[0]);
+          action.play();
+        }else{
+          console.log('Animation not found');
+        }
+      }
+      
 
       scene.add(wallsGroup);
-      wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+      //wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
       scene.add(foodGroup);
-      foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
+      //foodGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
 
       const floor = createFloorTile(w, h);
       // console.log('Creating Floor with: ' + w + '|' + h);
       scene.add(floor);
+
+      player.position.set(w / 2, mapScale, h / 2);
+
     }
 
     /**
      * The camera is moved to the updated position when the w-key is pressed
      */
-    function moveCamera(moveInformation: any) {
+    function movePlayer(moveInformation: any) {
+      const newPlayerPositionX = moveInformation.movementVector.x;
+      const newPlayerPositionY = moveInformation.movementVector.y;
+      const newPlayerPositionZ = moveInformation.movementVector.z;
 
-        const newCameraX = moveInformation.movementVector.x
-        const newCameraY = moveInformation.movementVector.y
-        const newCameraZ = moveInformation.movementVector.z
+      console.log(
+        `New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`,
+      );
 
-        console.log(`New camera position after move event was sent back from the server: x = ${newCameraX}, y = ${newCameraY}, z = ${newCameraZ}`)
-
-        camera.position.set(newCameraX, newCameraY, newCameraZ);
+      player.position.set(newPlayerPositionX * mapScale, newPlayerPositionY, newPlayerPositionZ * mapScale);
     }
 
     function initScene() {
@@ -176,7 +225,6 @@ export default defineComponent({
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 1.7, 0);
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -221,19 +269,38 @@ export default defineComponent({
       directionalLight.castShadow = true;
       scene.add(directionalLight);
 
+      // Player Body
+      const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 32);
+      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+      cone = new THREE.Mesh(coneGeometry, coneMaterial);
+      cone.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
+      cone.rotation.x = -Math.PI / 2;
+      cone.castShadow = true;
+      scene.add(cone);
+
+
       // Player Object
       scene.add(player);
       player.add(camera);
       player.add(cone);
 
-      // Player Body
-      const coneGeometry = new THREE.ConeGeometry(0.5, 1, 32);
-      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
-      cone = new THREE.Mesh(coneGeometry, coneMaterial);
-      cone.position.set(0, 0.5, 0);
-      cone.rotation.x = -Math.PI / 2;
-      cone.castShadow = true;
-      scene.add(cone);
+      // Test Body for Username Test
+      const testObj = new THREE.Mesh(coneGeometry, coneMaterial);
+      testObj.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      testObj.rotation.x = -Math.PI / 2;
+      testObj.castShadow = true;
+      scene.add(testObj);
+
+      // Test Player for Username Test
+      const testPlayer = new THREE.Mesh();
+      testPlayer.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
+      scene.add(testPlayer);
+      testPlayer.add(testObj);
+
+      // Create NameTag
+      nameTag = new NameTag('Snacko', testPlayer, scene);
+      nameTags.push(nameTag);     
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
@@ -257,68 +324,78 @@ export default defineComponent({
       });
 
       // TODO When entering a user name no move event should be sent to the backend
-      // Handle key press und send Event via WebSocket
-      const handleKeyPress = (event: KeyboardEvent) => {
-        if (['w', 'a', 's', 'd'].includes(event.key)) {
-          let forward = new THREE.Vector3(0, 0, 0);
-          forward = camera.getWorldDirection(forward);
-          forward.y = 0;
-          forward.normalize()
-          let vector;
-          const angle = Math.PI / 2;
-          const rotationAxis = new THREE.Vector3(0, 1, 0);
 
-          // Calculate movement vector
-          switch (event.key) {
-            case 'w':
-              vector = forward.clone();
-              break;
-            case 'a':
-              vector = forward.clone().applyAxisAngle(rotationAxis, angle).normalize();
-              break;
-            case 's':
-              vector = forward.clone().negate();
-              break;
-            case 'd':
-              vector = forward.clone().applyAxisAngle(rotationAxis, -angle).normalize()
-              break;
-          }
-          
-          //TODO: give vector to sendMessage()
-          const data = JSON.stringify({
-          type: "MOVE",
-          gameID: 0,
-          objectID: 0,
-          movementVector: vector
-          });
+      let keyPressedArray: string[] = [];
 
-          sendMessage(data);
-          //console.log('MovementVector:', vector);
-        } else if(event.key === " ") {
-          const data = JSON.stringify({
-          type: "MOVE",
-          gameID: 0,
-          objectID: 0,
-          movementVector: new THREE.Vector3(0, 1, 0)
-          });
-          sendMessage(data);
-        }
-      };
-
-      document.addEventListener('keypress', handleKeyPress);
+      /* Adds keys to the keyPressedArray when one of the specific movement keys is pressed */
       document.addEventListener('keydown', (event) => {
-
-        if(event.key === "Shift") {
-          const data = JSON.stringify({
-          type: "MOVE",
-          gameID: 0,
-          objectID: 0,
-          movementVector: new THREE.Vector3(0, -1, 0)
-          });
-          sendMessage(data);
+        if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
+          if (keyPressedArray.indexOf(event.key) === -1) {
+            keyPressedArray.push(event.key);
+          }
         }
-        
-      })
+      });
+
+      /* Removes movement key from the keyPressedArray when key is let go */
+      document.addEventListener('keyup', (event) => {
+        if (['w', 'a', 's', 'd', ' '].includes(event.key)) {
+          const index = keyPressedArray.indexOf(event.key);
+          if (index > -1) {
+            keyPressedArray.splice(index, 1);
+          }
+        }
+      });
+
+      /* Calculates movementVector depending on the pressed keys (= keys in the keyPressedArray) */
+      function handleMovement() {
+        // If no keys are pressed, no event is sent to the backend
+        if (keyPressedArray.length === 0) {
+          return;
+        }
+
+        let forward = new THREE.Vector3(0, 0, 0);
+        forward = camera.getWorldDirection(forward);
+        forward.y = 0;
+        forward.normalize();
+        let vector = new THREE.Vector3(0, 0, 0);
+        const angle = Math.PI / 2;
+        const rotationAxis = new THREE.Vector3(0, 1, 0);
+
+        if (keyPressedArray.includes('w')) {
+          vector = vector.add(forward.clone());
+        }
+
+        if (keyPressedArray.includes('a')) {
+          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, angle).normalize());
+        }
+
+        if (keyPressedArray.includes('s')) {
+          vector = vector.add(forward.clone().negate());
+        }
+
+        if (keyPressedArray.includes('d')) {
+          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
+        }
+
+        if (keyPressedArray.includes(' ')) {
+          vector = vector.add(new THREE.Vector3(0, 1, 0));
+        }
+
+        vector.normalize()
+
+        const data = JSON.stringify({
+          type: 'MOVE',
+          gameID: 1,
+          objectID: 831,
+          movementVector: vector,
+        });
+
+        sendMessage(data);
+      }
+
+      // Calls the handleMovement function in a specified time interval
+      setInterval(handleMovement, 25);
+
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
       });
@@ -328,50 +405,56 @@ export default defineComponent({
     }
 
     // Creates one large plane as the floor
-    function createFloorTile(x: number, y: number) {
-      const planeGeometry = new THREE.PlaneGeometry(x, y, 1, 1);
+    function createFloorTile(x: number, z: number) {
+      const planeGeometry = new THREE.PlaneGeometry(x, z, 1, 1);
       const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
       plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
-      plane.position.set(0, -0.5, 0);
+      plane.position.set(x / 2 - mapScale / 2, -0.5, z / 2 - mapScale / 2);
       plane.receiveShadow = true;
 
       return plane;
     }
 
     // Creates one cube per wall tile
-    function createWall(x: number, y: number) {
-      const boxGeometry = new THREE.BoxGeometry(1, 3, 1);
+    function createWall(x: number, z: number) {
+      const boxGeometry = new THREE.BoxGeometry(1 * mapScale, wallHeight, 1 * mapScale);
       const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
       box = new THREE.Mesh(boxGeometry, boxMaterial);
-      box.position.set(x, 0, y);
+      box.position.set(x * mapScale, 0, z * mapScale);
       box.castShadow = true;
 
       return box;
     }
 
     // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
-    function createFood(x: number, y: number, calories: number) {
+    function createFood(x: number, z: number, calories: number) {
+      let newModel;
       if (calories > 300) {
-        const newBanana = bananaModel.clone();
-        newBanana.position.set(x, 0, y);
-        return newBanana;
+        newModel = bananaModel.clone();
       } else if (calories > 200) {
-        const newApple = appleModel.clone();
-        newApple.position.set(x, 0, y);
-        return newApple;
+        newModel = appleModel.clone();
       } else {
-        const newPear = orangeModel.clone();
-        newPear.position.set(x, 0, y);
-        return newPear;
+        newModel = cakeModel.clone();
+        //newModel = orangeModel.clone();
       }
+      newModel.position.set(x * mapScale, 10, z * mapScale);
+      return newModel;
     }
 
     function animate() {
       requestAnimationFrame(animate);
       rotateBody();
-
       const time = Date.now() * 0.001;
+
+      // Update NameTag Orientation
+      nameTags.forEach((nameTag) => {
+        nameTag.update(player);
+      });
+
+      if(animationMixer){
+        animationMixer.update(0.01);
+      }
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {

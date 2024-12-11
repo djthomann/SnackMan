@@ -12,4 +12,12 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      '/ws-endpoint': {
+        target: 'ws://localhost:8080',
+        ws: true,
+      },
+    },
+  },
 });

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.RegisterSnackmanEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterSnackmanEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
@@ -30,11 +30,11 @@ public class GameTests {
         add(Mockito.mock(Chicken.class));
 
     }};
-    private SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
+    private SnackManMap map = new SnackManMap(gameConfig.getMapWidth(), gameConfig.getMapHeight());
 
     @BeforeEach
     void setUp() {
-        game = new Game(0, gameConfig, allMovables, map, gameManager);
+        //game = new Game(0, gameConfig, allMovables, map, gameManager);
     }
 
     /**

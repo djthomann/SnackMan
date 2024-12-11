@@ -6,8 +6,8 @@ package de.hsrm.mi.swt.projekt.snackman.communication.events;
 public abstract class Event {
 
     private EventType type;
-    private int gameID;
-    private int objectID;
+    private long gameID;
+    private long objectID;
 
     public EventType getType() {
         return type;
@@ -15,16 +15,16 @@ public abstract class Event {
     public void setType(EventType type) {
         this.type = type;
     }
-    public int getGameID() {
+    public long getGameID() {
         return gameID;
     }
-    public void setGameID(int gameID) {
+    public void setGameID(long gameID) {
         this.gameID = gameID;
     }
-    public int getObjectID() {
+    public long getObjectID() {
         return objectID;
     }
-    public void setObjectID(int objectID) {
+    public void setObjectID(long objectID) {
         this.objectID = objectID;
     }
 
