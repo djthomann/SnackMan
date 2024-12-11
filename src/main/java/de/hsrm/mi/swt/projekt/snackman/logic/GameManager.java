@@ -88,7 +88,6 @@ public class GameManager {
      * height for it
      * 
      * @param gameConfig
-     * @param allMoveables
      */
     public void createGame(GameConfig gameConfig) {
 
