@@ -30,8 +30,8 @@ const handleServerMessage = (message: string) => {
   if (message.startsWith('CLIENT_ID')) {
     let information = JSON.parse(message.split(';')[1]);
     userStore.setId(information.id);
+    router.push({ path: '/home'});
   }
-  router.push({ path: '/home'});
 }
 
 onMessage(handleServerMessage);
