@@ -5,6 +5,7 @@ import appleModelUrl from '@/assets/models/apple.glb'
 import orangeModelUrl from '@/assets/models/orange.glb'
 import cakeModelUrl from '@/assets/models/cake.glb'
 import chickenModelUrl from '@/assets/models/chicken.glb'
+import brokkoliModelUrl from '@/assets/models/brokkoli.glb'
 
 class ModelService {
   private loader: GLTFLoader
@@ -19,7 +20,8 @@ class ModelService {
       apple: appleModelUrl,
       orange: orangeModelUrl,
       cake: cakeModelUrl,
-      chicken: chickenModelUrl
+      chicken: chickenModelUrl,
+      brokkoli: brokkoliModelUrl
     }
     this.cache = new Map()
     this.isInitialized = false
