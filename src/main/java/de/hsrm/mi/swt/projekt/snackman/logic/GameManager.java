@@ -116,7 +116,6 @@ public class GameManager {
     }
 
     public void setGameConfig(GameConfig gameConfig, long gameID) {
-        // TODO: Only works with id: 1, as long as LobbyID and GameID aren't connected and there aren't more Games
         allGames.get(gameID).setGameConfig(gameConfig);
     }
 
