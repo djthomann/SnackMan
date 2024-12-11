@@ -166,7 +166,10 @@ export default defineComponent({
       if (chickenModel) {
         console.log('ChickenModel loaded')
         const chicken = chickenModel.clone();
-        chicken.castShadow = true;        chicken.position.set(1 - mapScale / 2, 0, 1 - mapScale / 2);
+        chicken.castShadow = true;       
+        chicken.scale.set(4,4,4);
+        chicken.position.set(w / 2, 0, h / 2);
+        console.log('Chicken at:', chicken.position)
         chicken.rotation.y = -45;
         scene.add(chicken);
 
