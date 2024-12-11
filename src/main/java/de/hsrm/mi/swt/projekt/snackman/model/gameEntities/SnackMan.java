@@ -8,13 +8,6 @@ import java.util.concurrent.TimeUnit;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.stereotype.Component;
-
-import de.hsrm.mi.swt.projekt.snackman.communication.events.*;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
@@ -71,8 +64,8 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      * @param y      the initial y-coordinate of the `SnackMan`
      * @param z      the initial z-coordinate of the `SnackMan`
      */
-    public SnackMan(long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
-        super(gameId, x, y, z);
+    public SnackMan(long id, long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
+        super(id, gameId, x, y, z);
         this.collisionManager = collisionManager;
 
         // TODO Initial calories to make jumping possible, change back to 0 later
@@ -225,7 +218,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     @Override
     public void handle(Event event) {
 
-        if (event.getObjectID() != this.id) {
+        if (event.getObjectID() != this.objectId) {
             return;
         }
 
