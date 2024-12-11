@@ -1,9 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
-import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -95,28 +92,6 @@ public class SnackManMap {
         h = allTiles.length;
         w = allTiles[0].length;
 
-        createFood();
-    }
-
-    private void createFood() {
-        Random r = new Random();
-        for (int row = 0; row < h; row++) {
-            for (int col = 0; col < w; col++) {
-                if (allTiles[row][col].getOccupationType() == OccupationType.ITEM) {
-                    FoodType foodType = FoodType.OKAY;
-                    if (r.nextBoolean()) {
-                        if (r.nextBoolean()) {
-                            foodType = FoodType.HEALTHY;
-                        } else {
-                            foodType = FoodType.UNHEALTHY;
-                        }
-                    }
-                    GameConfig gameConfig = new GameConfig();
-                    long gameId = 0; // to be optimized later (map exists before game)
-                    allTiles[row][col].setOccupation(new Food(gameId, col, row, foodType, gameConfig));
-                }
-            }
-        }
     }
 
     /**
@@ -204,8 +179,6 @@ public class SnackManMap {
         allTiles[1][w - 2].setOccupationType(OccupationType.FREE);
         allTiles[h - 2][1].setOccupationType(OccupationType.FREE);
         allTiles[h - 2][w - 2].setOccupationType(OccupationType.FREE);
-
-        createFood();
     }
 
     /**

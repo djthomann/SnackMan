@@ -15,6 +15,7 @@ public class GameObject {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.radius = radius; 
         this.id = IDGenerator.getInstance().getUniqueID();
     }
 
@@ -36,6 +37,10 @@ public class GameObject {
 
     public float getRadius() {
         return radius;
+    }
+
+    public void setRadius(float radius) {
+        this.radius = radius; 
     }
 
 }

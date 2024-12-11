@@ -1,6 +1,5 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,9 +8,6 @@ import java.util.Random;
 import org.python.core.PyObject;
 import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
@@ -20,7 +16,6 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
-
 
 /**
  * The `Chicken` class represents a NPC in the game.
@@ -39,16 +34,15 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     /** Jython-Interpreter for the script logic */
     private final PythonInterpreter scriptInterpreter;
 
-
     /**
      * Constructs a new Chicken with the id, and specified starting Coords.
      *
-     * @param x             the initial x-coordinate of the Chicken
-     * @param y             the initial y-coordinate of the Chicken
-     * @param z             the initial z-coordinate of the Chicken
-     * @param scriptPath    the path of the associated behavior script
-     * @param map           the game map 
-     * @param gameConfig    the configuration of the game
+     * @param x          the initial x-coordinate of the Chicken
+     * @param y          the initial y-coordinate of the Chicken
+     * @param z          the initial z-coordinate of the Chicken
+     * @param scriptPath the path of the associated behavior script
+     * @param map        the game map
+     * @param gameConfig the configuration of the game
      */
 
     public Chicken(long gameId, float x, float y, float z, String scriptPath, SnackManMap map, GameConfig gameConfig) {
@@ -60,7 +54,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
         // spawn chicken on a random free tile in the map (later in Game-logic)
         Tile[][] tiles = map.getAllTiles();
-        List <Tile> freeTiles = new ArrayList<>();
+        List<Tile> freeTiles = new ArrayList<>();
 
         for (int y_ = 0; y_ < tiles.length; y++) {
             for (int x_ = 0; x < tiles[y_].length; x++) {
@@ -69,14 +63,13 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 }
             }
 
-            if(!freeTiles.isEmpty()) {
+            if (!freeTiles.isEmpty()) {
                 Random random = new Random();
                 Tile startTile = freeTiles.get(random.nextInt(freeTiles.size()));
                 this.x = startTile.getX();
                 this.y = startTile.getZ();
                 this.z = 0;
-            }
-            else {
+            } else {
                 throw new IllegalStateException("No free tiles available for Chicken");
             }
         }
@@ -94,7 +87,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.x += newX;
         this.y += newY;
         this.z += newZ;
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
     }
 
     /**
@@ -104,7 +97,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      */
     public void executeScript(SnackManMap map) {
 
-        // TODO the associated tile should be here calculated from the position of chicken
+        // TODO the associated tile should be here calculated from the position of
+        // chicken
         Tile positionTile = map.getTileAt((int) x, (int) z);
 
         // Retrieve the surrounding tiles as a 3x3 grid
@@ -142,7 +136,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         } catch (Exception e) {
             e.printStackTrace();
         }
-}
+    }
 
     /**
      * Consumes the food, make the Chicken gain Calories.
@@ -152,9 +146,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     @Override
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
-        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
     }
-
 
     /**
      * Resets the gainedCalories for the Chicken to 0.
@@ -162,8 +155,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      */
     public void resetGainedCalories() {
         this.gainedCalories = 0;
-    }    
-    
+    }
+
     /**
      * Returns the number of gainedCalories.
      * 
@@ -176,6 +169,5 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     @Override
     public void handle(Event event) {
     }
-
 
 }

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
@@ -36,7 +35,6 @@ public class CollisionManager {
      *         collision is detected.
      */
     public String checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
-
         Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
 
         switch (wishedTile.getOccupationType()) {
@@ -50,11 +48,11 @@ public class CollisionManager {
                 Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
                 if (collisionPartner instanceof SnackMan) {
                     // currently food gets exact the same coord as tile
-                    float foodPosX = (float) (nearbyFood.getX() + 0.1);
-                    float foodPosZ = (float) (nearbyFood.getZ() + 0.1);
+                    float foodPosX = (float) (nearbyFood.getX() + 0.3);
+                    float foodPosZ = (float) (nearbyFood.getZ() + 0.3);
                     float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
-
-                    if (distance <= (collisionPartner.getRadius() + nearbyFood.getRadius())) {
+                    
+                    if (distance < (collisionPartner.getRadius() + nearbyFood.getRadius())) {
                         ((SnackMan) collisionPartner).eat(nearbyFood);
                         wishedTile.setOccupationType(OccupationType.FREE);
                         return "item";
@@ -63,8 +61,6 @@ public class CollisionManager {
                 } else {
                     return "none";
                 }
-
-                return "item";
             default:
                 return "none";
         }

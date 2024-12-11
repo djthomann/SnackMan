@@ -8,13 +8,6 @@ import java.util.concurrent.TimeUnit;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.stereotype.Component;
-
-import de.hsrm.mi.swt.projekt.snackman.communication.events.*;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
@@ -33,7 +26,7 @@ import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
  * 
  * 
  */
-public class SnackMan extends GameObject implements CanEat, MovableAndSubscribable{
+public class SnackMan extends GameObject implements CanEat, MovableAndSubscribable {
 
     private Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
@@ -72,14 +65,15 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      * @param y the initial y-coordinate of the `SnackMan`
      * @param z the initial z-coordinate of the `SnackMan`
      */
-    public SnackMan(long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,CollisionManager collisionManager) {
-        super(gameId, x, y, z);
+    public SnackMan(long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
+            CollisionManager collisionManager) {
+        super(gameId, x, y, z, gameConfig.getSnackManRadius());
+        this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
 
         // TODO Initial calories to make jumping possible, change back to 0 later
         this.gainedCalories = 1000000;
         this.gameManger = gameManager;
-        this.gameConfig = gameConfig;
 
         logger.info("Snack Man erstellt mit ID: " + id);
     }
@@ -101,10 +95,10 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        this.x += newX; 
-        this.y += newY; 
-        this.z += newZ; 
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
+        this.x += newX;
+        this.y += newY;
+        this.z += newZ;
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
     }
 
     /**
@@ -211,7 +205,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
     @Override
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
-        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food,gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
     }
 
     /**
@@ -244,8 +238,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
                 String collision = "none";
                 float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
                 float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
-                if ((int) wishedX != (int) this.getX() || (int) wishedZ != (int) this.getZ()) {
-
+                if (wishedX != this.getX() || wishedZ != this.getZ()) {
                     if (this.getY() < gameConfig.getWallHeight()) {
                         collision = collisionManager.checkCollision(wishedX, wishedZ, this);
                         if (collision.equals("wall")) {

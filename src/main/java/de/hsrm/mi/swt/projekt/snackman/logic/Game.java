@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,10 +10,14 @@ import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
+import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
 /**
  * The Game class contains all of the information and logic necessary within an individual game.
@@ -55,11 +60,32 @@ public class Game {
      * TODO: This method will be expanded to create all game objects and add them to the game object list.
      */
     public void init() {
-        allMovables.add(new SnackMan(id,20.0f, 1.1f, 20.0f, gameManager, gameConfig,collisionManager));
+        createFood(); 
+        allMovables.add(new SnackMan(id,20.0f, 1.1f, 20.0f, gameManager, gameConfig, collisionManager));
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
     }
 
+    private void createFood() {
+        Random r = new Random();
+        Tile allTiles[][] = map.getAllTiles(); 
+        for (int row = 0; row < map.getH(); row++) {
+            for (int col = 0; col < map.getW(); col++) {
+                if (allTiles[row][col].getOccupationType() == OccupationType.ITEM) {
+                    FoodType foodType = FoodType.OKAY;
+                    if (r.nextBoolean()) {
+                        if (r.nextBoolean()) {
+                            foodType = FoodType.HEALTHY;
+                        } else {
+                            foodType = FoodType.UNHEALTHY;
+                        }
+                    }
+                    allTiles[row][col].setOccupation(new Food(id, col, row, foodType, gameConfig));
+                }
+            }
+        }
+    }
+    
     /**
      * Creates a copy of allMovables casting the game objects to Subscribable for the event bus
      * @return allSubscribers
