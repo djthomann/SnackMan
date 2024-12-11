@@ -9,7 +9,7 @@ import { defineComponent, onUnmounted, ref, onMounted } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
-import { PointerLockControls } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader, PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
 import type { Snackman, Ghost, Food, Tile } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
@@ -26,6 +26,7 @@ let bananaModel: THREE.Group;
 let appleModel: THREE.Group;
 let orangeModel: THREE.Group;
 let cakeModel: THREE.Group;
+let chickenModel: THREE.Group;
 
 // mesh for walls
 let box: THREE.Mesh;
@@ -56,6 +57,7 @@ export default defineComponent({
     let controls: PointerLockControls;
     let mouseMovement = false;
     let nameTag: NameTag;
+    let animationMixer: THREE.AnimationMixer;
     const nameTags: NameTag[] = [];
 
     //GameStart
@@ -96,8 +98,8 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      initScene();
       loadModels();
+      initScene();
       eventBus.on('serverMessage', handleServerMessage);
 
       window.addEventListener('resize', onWindowResize);
@@ -134,6 +136,8 @@ export default defineComponent({
         cakeModel = modelService.getModel('cake');
         cakeModel.scale.set(0.5, 0.5, 0.5);
 
+        chickenModel  = modelService.getModel('chicken');
+
         console.log('Models loaded');
       } catch (error) {
         console.error('Error initializing or loading model:', error);
@@ -157,6 +161,26 @@ export default defineComponent({
           }
         }
       }
+
+      // Test Chicken
+      if (chickenModel) {
+        console.log('ChickenModel loaded')
+        const chicken = chickenModel.clone();
+        chicken.castShadow = true;        chicken.position.set(1 - mapScale / 2, 0, 1 - mapScale / 2);
+        chicken.rotation.y = -45;
+        scene.add(chicken);
+
+        //Animation
+        animationMixer = new THREE.AnimationMixer(chicken);
+        const chickenAnimations = modelService.getAnimations('chicken');
+          if (chickenAnimations.length > 0) {
+          const action = animationMixer.clipAction(chickenAnimations[0]);
+          action.play();
+        }else{
+          console.log('Animation not found');
+        }
+      }
+      
 
       scene.add(wallsGroup);
       //wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
@@ -252,6 +276,7 @@ export default defineComponent({
       cone.castShadow = true;
       scene.add(cone);
 
+
       // Player Object
       scene.add(player);
       player.add(camera);
@@ -272,7 +297,7 @@ export default defineComponent({
 
       // Create NameTag
       nameTag = new NameTag('Snacko', testPlayer, scene);
-      nameTags.push(nameTag);
+      nameTags.push(nameTag);     
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
@@ -423,6 +448,10 @@ export default defineComponent({
       nameTags.forEach((nameTag) => {
         nameTag.update(player);
       });
+
+      if(animationMixer){
+        animationMixer.update(0.01);
+      }
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {
