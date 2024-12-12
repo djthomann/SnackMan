@@ -259,6 +259,7 @@ export default defineComponent({
       // Create NameTag
       nameTag = new NameTag('Snacko', testPlayer, scene);
       nameTags.push(nameTag);
+      nameTags.push(nameTag);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
@@ -343,8 +344,8 @@ export default defineComponent({
 
         const data = JSON.stringify({
           type: 'MOVE',
-          gameID: 1,
-          objectID: 831,
+          gameID: 2,
+          objectID: 832,
           movementVector: vector,
         });
 

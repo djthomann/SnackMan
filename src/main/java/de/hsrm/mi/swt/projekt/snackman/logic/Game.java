@@ -48,6 +48,7 @@ public class Game {
         this.timer = new Timer();   
         startTimer();
         gameState = new GameState(this);
+        logger.info("craeted Game with id: " + id);
     }
 
     /**
