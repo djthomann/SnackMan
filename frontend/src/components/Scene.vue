@@ -170,7 +170,7 @@ export default defineComponent({
       if (chickenModel) {
         console.log('ChickenModel loaded')
         const chicken = chickenModel.clone();
-        chicken.castShadow = true;       
+        chicken.castShadow = true;
         chicken.scale.set(4,4,4);
         chicken.position.set(w / 2, 0, h / 2);
         console.log('Chicken at:', chicken.position)
@@ -187,7 +187,7 @@ export default defineComponent({
           console.log('Animation not found');
         }
       }
-      
+
 
       scene.add(wallsGroup);
       //wallsGroup.position.set(-(w / 2) + 0.5, 0, -(h / 2) + 0.5); // Center objects
@@ -304,7 +304,7 @@ export default defineComponent({
 
       // Create NameTag
       nameTag = new NameTag('Snacko', testPlayer, scene);
-      nameTags.push(nameTag);     
+      nameTags.push(nameTag);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
@@ -389,8 +389,8 @@ export default defineComponent({
 
         const data = JSON.stringify({
           type: 'MOVE',
-          gameID: 1,
-          objectID: 831,
+          gameID: 2,
+          objectID: 832,
           movementVector: vector,
         });
 
