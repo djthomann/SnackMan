@@ -1,10 +1,11 @@
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import * as THREE from 'three';
-import bananaModelUrl from '@/assets/models/banana.glb';
-import appleModelUrl from '@/assets/models/apple.glb';
-import orangeModelUrl from '@/assets/models/orange.glb';
-import cakeModelUrl from '@/assets/models/cake.glb';
-import chickenModelUrl from '@/assets/models/chicken.glb';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import * as THREE from 'three'
+import bananaModelUrl from '@/assets/models/banana.glb'
+import appleModelUrl from '@/assets/models/apple.glb'
+import orangeModelUrl from '@/assets/models/orange.glb'
+import cakeModelUrl from '@/assets/models/cake.glb'
+import chickenModelUrl from '@/assets/models/chicken.glb'
+import brokkoliModelUrl from '@/assets/models/brokkoli.glb'
 
 class ModelService {
   private loader: GLTFLoader;
@@ -22,6 +23,7 @@ class ModelService {
       orange: orangeModelUrl,
       cake: cakeModelUrl,
       chicken: chickenModelUrl,
+      brokkoli: brokkoliModelUrl
     };
     this.scales = {
       banana: 0.02,
@@ -29,6 +31,7 @@ class ModelService {
       orange: 0.0025,
       cake: 0.175,
       chicken: 1,
+      brokkoli: 1
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
@@ -160,7 +163,7 @@ class ModelService {
   public createFood(x: number, z: number, calories: number, scale: number) {
     let newModel;
     if (calories > 300) {
-      newModel = this.getModel('banana').clone();
+      newModel = this.getModel('brokkoli').clone();
     } else if (calories > 200) {
       newModel = this.getModel('apple').clone();
     } else {

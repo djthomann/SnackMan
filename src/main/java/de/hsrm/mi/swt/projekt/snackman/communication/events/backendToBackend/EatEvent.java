@@ -14,7 +14,7 @@ public class EatEvent extends ApplicationEvent {
      * Event that is called upon when a snackman collides with food.
      * @param source the object on which the event occurred => object that eats
      * @param food the food that was eaten.
-     * @param gameId id of the game the event belongs to.
+     * @param id id of the game the event belongs to.
      */
     public EatEvent(Object source, Food food, long id) {
         super(source);

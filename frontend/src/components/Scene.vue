@@ -22,6 +22,10 @@ let wallsGroup: THREE.Group;
 let foodGroup: THREE.Group;
 
 let chickenModel: THREE.Group;
+let brokkoliModel: THREE.Group;
+
+// mesh for walls
+let box: THREE.Mesh;
 
 const mapScale = 5;
 const wallHeight = 1.5 * mapScale;
@@ -131,6 +135,7 @@ export default defineComponent({
         }
       }
 
+      /*
       console.log('getting chicken');
       chickenModel = modelService.getModel('chicken');
 
@@ -155,7 +160,8 @@ export default defineComponent({
           console.log('Animation not found');
         }
       }
-
+      */
+      
       scene.add(wallsGroup);
 
       scene.add(foodGroup);

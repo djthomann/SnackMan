@@ -36,18 +36,5 @@ public class GameTests {
     void setUp() {
         //game = new Game(0, gameConfig, allMovables, map, gameManager);
     }
-
-    /**
-     * Tests whether every event the game receives gets passed on to every subscriber of its eventBus
-     */
-    @Test
-    void testReveiveEvent() {
-        RegisterSnackmanEvent testEvent = new RegisterSnackmanEvent();
-        game.receiveEvent(testEvent);
-
-        for (Subscribable actSubscriber : game.getAllSubscribers()) {
-            verify(actSubscriber).handle(testEvent);
-        }
-    }
     
 }

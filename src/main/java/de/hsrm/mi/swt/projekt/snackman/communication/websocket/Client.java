@@ -4,24 +4,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.WebSocketSession;
 
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Moveable;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
 
 public class Client {
 
     Logger logger = LoggerFactory.getLogger(Client.class);
 
+    private long clientId;
+
     private String username;
-    private Moveable role;
+    private GameObject role;
     private WebSocketSession session;
 
     public Client(WebSocketSession session) {
-        this("", null, session);
+        this.username = "";
+        this.session = session;
+        this.role = null;
+        this.clientId = IDGenerator.getInstance().getUniqueID();
+        logger.info("New Client: Session -" + session + "Id - "+ clientId);
     }
 
-    public Client(String username, Moveable role, WebSocketSession session) {
-        this.username = username;
-        this.session = session;
-        logger.info("New Client: Session-" + session);
+    public long getClientId() {
+        return clientId;
     }
 
     public String getUsername() {
@@ -32,11 +36,11 @@ public class Client {
         this.username = username;
     }
 
-    public Moveable getRole() {
+    public GameObject getRole() {
         return role;
     }
 
-    public void setRole(Moveable role) {
+    public void setRole(GameObject role) {
         this.role = role;
     }
 
