@@ -1,45 +1,71 @@
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import * as THREE from 'three'
-import bananaModelUrl from '@/assets/models/banana.glb'
-import appleModelUrl from '@/assets/models/apple.glb'
-import orangeModelUrl from '@/assets/models/orange.glb'
-import cakeModelUrl from '@/assets/models/cake.glb'
-import chickenModelUrl from '@/assets/models/chicken.glb'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as THREE from 'three';
+import bananaModelUrl from '@/assets/models/banana.glb';
+import appleModelUrl from '@/assets/models/apple.glb';
+import orangeModelUrl from '@/assets/models/orange.glb';
+import cakeModelUrl from '@/assets/models/cake.glb';
+import chickenModelUrl from '@/assets/models/chicken.glb';
 
 class ModelService {
-  private loader: GLTFLoader
-  private models: Record<string, string> // Key -> Modell-URLs
-  private cache: Map<string, { scene: THREE.Group, animations: THREE.AnimationClip[] }> // Store both scene and animations
-  private isInitialized: boolean
+  private loader: GLTFLoader;
+  private models: Record<string, string>; // Key -> Modell-URLs
+  private scales: Record<string, number>;
+  private modelCache: Map<string, { scene: THREE.Group }>; // Store scene
+  private animationCache: Map<string, { animations: THREE.AnimationClip[] }>;
+  private isInitialized: boolean;
 
   constructor() {
-    this.loader = new GLTFLoader()
+    this.loader = new GLTFLoader();
     this.models = {
       banana: bananaModelUrl,
       apple: appleModelUrl,
       orange: orangeModelUrl,
       cake: cakeModelUrl,
-      chicken: chickenModelUrl
+      chicken: chickenModelUrl,
+    };
+    this.scales = {
+      banana: 0.02,
+      apple: 0.1,
+      orange: 0.0025,
+      cake: 0.175,
+      chicken: 1,
+    };
+    this.modelCache = new Map();
+    this.animationCache = new Map();
+    this.isInitialized = false;
+  }
+
+  private scaleModels(globalScale: number): void {
+    // Iteriere über alle Einträge der modelCache Map
+    for (let [name, modelData] of this.modelCache) {
+      // Hole die Skalierung für das aktuelle Modell aus der scales Map
+      const scale = this.scales[name] * globalScale;
+
+      // Wenn eine Skalierung definiert ist, wende sie auf das Modell an
+      if (scale !== undefined) {
+        modelData.scene.scale.set(scale, scale, scale);
+      } else {
+        console.warn(`Keine Skalierung für Modell "${name}" gefunden.`);
+      }
     }
-    this.cache = new Map()
-    this.isInitialized = false
   }
 
   /**
-   * Initialize the service and load model data, store them in cache
+   * Initialize the service and load model data, store them in cache, scale them
    */
-  public async initialize(): Promise<void> {
-    if (this.isInitialized) return // Avoid reinitializing
+  public async initialize(scale: number): Promise<void> {
+    if (this.isInitialized) return; // Avoid reinitializing
 
     const loadPromises = Object.entries(this.models).map(([name, url]) =>
       this.loadModel(url).then((modelData) => {
-        this.cache.set(name, modelData) // Store scene and animations in cache
+        this.modelCache.set(name, modelData); // Store scene in cache
       }),
-    )
+    );
 
-    await Promise.all(loadPromises)
-    this.isInitialized = true
-    console.log('ModelService initialized: All models loaded.')
+    await Promise.all(loadPromises);
+    this.scaleModels(scale);
+    this.isInitialized = true;
+    console.log('ModelService initialized: All models loaded.');
   }
 
   /**
@@ -48,14 +74,14 @@ class ModelService {
    */
   public getModel(name: string): THREE.Group {
     if (!this.isInitialized) {
-      throw new Error('ModelService is not initialized. Call initialize() first.')
+      throw new Error('ModelService is not initialized. Call initialize() first.');
     }
 
-    const model = this.cache.get(name)
+    const model = this.modelCache.get(name);
     if (!model) {
-      throw new Error(`Model "${name}" not found in cache.`)
+      throw new Error(`Model "${name}" not found in cache.`);
     }
-    return model.scene
+    return model.scene;
   }
 
   /**
@@ -64,49 +90,87 @@ class ModelService {
    */
   public getAnimations(name: string): THREE.AnimationClip[] {
     if (!this.isInitialized) {
-      throw new Error('ModelService is not initialized. Call initialize() first.')
+      throw new Error('ModelService is not initialized. Call initialize() first.');
     }
 
-    const animationData = this.cache.get(name)
+    const animationData = this.animationCache.get(name);
     if (!animationData) {
-      console.log('No animation data found')
-      throw new Error(`Model "${name}" not found in cache.`)
+      console.log('No animation data found');
+      throw new Error(`Model "${name}" not found in cache.`);
     } else {
-      console.log('Animation Found!', animationData.animations)
+      console.log('Animation Found!', animationData.animations);
     }
-    return animationData?.animations || []
+    return animationData?.animations || [];
   }
 
   /**
    * Tries to load a model from a URL
    */
-  private loadModel(url: string): Promise<{ scene: THREE.Group, animations: THREE.AnimationClip[] }> {
+  private loadModel(
+    url: string,
+  ): Promise<{ scene: THREE.Group; animations: THREE.AnimationClip[] }> {
     return new Promise((resolve, reject) => {
       this.loader.load(
         url,
         (gltf) => {
           if (url === chickenModelUrl) {
-            console.log('GLTF Data:', gltf)
-            console.log('Animations:', gltf.animations)
+            console.log('GLTF Data:', gltf);
+            console.log('Animations:', gltf.animations);
           }
-          
-          const scene = gltf.scene
-          const animations = gltf.animations || []
-          
+
+          const scene = gltf.scene;
+          const animations = gltf.animations || [];
+
           // Store both the scene and animations in the cache
-          resolve({ scene, animations })
+          resolve({ scene, animations });
         },
         undefined,
         (error) => {
-          console.error(`Error loading model from ${url}:`, error)
-          reject(error)
+          console.error(`Error loading model from ${url}:`, error);
+          reject(error);
         },
-      )
-    })
+      );
+    });
+  }
+
+  // Creates one large plane as the floor
+  public createFloorTile(x: number, z: number, scale: number) {
+    const planeGeometry = new THREE.PlaneGeometry(x, z, 1, 1);
+    const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotation.x = -Math.PI / 2;
+    plane.position.set(x / 2 - scale / 2, -0.5, z / 2 - scale / 2);
+    plane.receiveShadow = true;
+
+    return plane;
+  }
+
+  // Creates one cube per wall tile
+  public createWall(x: number, z: number, scale: number, wallHeight: number) {
+    const boxGeometry = new THREE.BoxGeometry(1 * scale, wallHeight, 1 * scale);
+    const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+    const box = new THREE.Mesh(boxGeometry, boxMaterial);
+    box.position.set(x * scale, 0, z * scale);
+    box.castShadow = true;
+
+    return box;
+  }
+
+  // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
+  public createFood(x: number, z: number, calories: number, scale: number) {
+    let newModel;
+    if (calories > 300) {
+      newModel = this.getModel('banana').clone();
+    } else if (calories > 200) {
+      newModel = this.getModel('apple').clone();
+    } else {
+      newModel = this.getModel('cake').clone();
+    }
+    newModel.position.set(x * scale, 10, z * scale);
+    return newModel;
   }
 }
 
 // Singleton instance
-const modelService = new ModelService()
-modelService.initialize()
-export default modelService
+const modelService = new ModelService();
+export default modelService;
