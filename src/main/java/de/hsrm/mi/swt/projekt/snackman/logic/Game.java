@@ -94,7 +94,7 @@ public class Game {
     }
 
     private void createChicken() {
-        Tile tile = map.getTileAt(22, 22);  // HARD CODED FOR TEST PORPOSES
+        Tile tile = map.getTileAt(map.getW() / 2, map.getH() / 2);  // HARD CODED IN THE MIDDLE OF THE MAP FOR TEST PORPOSES
         if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
             Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX(), 0.0f,
                     (float) tile.getZ(), "test", gameManager, gameConfig, collisionManager);
