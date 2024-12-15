@@ -119,6 +119,7 @@ class ModelService {
           if (url === chickenModelUrl) {
             console.log('GLTF Data:', gltf);
             console.log('Animations:', gltf.animations);
+            this.animationCache.set("chicken", { animations: gltf.animations });
           }
 
           const scene = gltf.scene;
@@ -172,6 +173,20 @@ class ModelService {
     newModel.position.set(x * scale, 10, z * scale);
     return newModel;
   }
+
+  public createChicken(x: number, z: number) {
+    let chickenModel;
+    chickenModel = this.getModel('chicken');
+    console.log('ChickenModel loaded')
+    const chicken = chickenModel.clone();
+    chicken.castShadow = true;
+    chicken.scale.set(5,5,5);
+    chicken.position.set(x, 0, z);
+    console.log('Chicken at:', chicken.position)
+    chicken.rotation.y = -45;
+    return chicken;
+  }
+
 }
 
 // Singleton instance

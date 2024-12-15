@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 /**
@@ -30,14 +29,7 @@ public class GameManager {
     // TODO: To Be Deleted , Constructor for testing purposes with fake game
     public GameManager(WebSocketHandler webSocketHandler) {
 
-        logger.info("Game Manager Constructor \n");
-        this.webSocketHandler = webSocketHandler;
-        this.allGames = new HashMap<Long, Game>();
-        this.allLobbies = new HashMap<Long, Lobby>();
-
-        GameConfig gameConfig = new GameConfig();
-
-        createGame(gameConfig, IDGenerator.getInstance().getUniqueID());
+        //createGame(gameConfig, IDGenerator.getInstance().getUniqueID()); // Game Creation in websocket by MapRquest Event
     }
 
     public Game getGameById(Long id) {
@@ -81,15 +73,16 @@ public class GameManager {
      * @param gameConfig
      * @param id
      */
-    public void createGame(GameConfig gameConfig, long id) {
+    public void createGame(GameConfig gameConfig, long id, SnackManMap map) {
 
         logger.info("Create Game \n");
 
         // SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
-        SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
+        //SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
         // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
+
         Game newGame = new Game(id, gameConfig, map, this);
-        newGame.init(); // Add Snackman
+        newGame.init(); // Add Objects
         allGames.put(newGame.id, newGame);
     }
 
@@ -111,7 +104,7 @@ public class GameManager {
     public Lobby createLobby(){
         Lobby lobby = new Lobby();
         allLobbies.put(lobby.getId(), lobby);
-        createGame(gameConfig, lobby.getId());
+        //createGame(gameConfig, lobby.getId());
         return lobby;
     }
 
