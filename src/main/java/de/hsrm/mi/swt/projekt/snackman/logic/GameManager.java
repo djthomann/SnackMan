@@ -3,6 +3,7 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +22,14 @@ public class GameManager {
 
     Logger logger = LoggerFactory.getLogger(GameManager.class);
     
-    private final HashMap<Long, Game> allGames;
-    private final HashMap<Long, Lobby> allLobbies;
+    private final Map<Long, Game> allGames = new HashMap<>();
+    private final Map<Long, Lobby> allLobbies = new HashMap<>();
     private final WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
 
     // TODO: To Be Deleted , Constructor for testing purposes with fake game
     public GameManager(WebSocketHandler webSocketHandler) {
-
+        this.webSocketHandler = webSocketHandler;
         //createGame(gameConfig, IDGenerator.getInstance().getUniqueID()); // Game Creation in websocket by MapRquest Event
     }
 
@@ -112,7 +113,7 @@ public class GameManager {
         return new ArrayList<>(allLobbies.values());
     }
 
-    public HashMap<Long, Lobby> getLobbyMap() {
+    public Map<Long, Lobby> getLobbyMap() {
         return allLobbies;
     }
 
