@@ -131,7 +131,7 @@ export default defineComponent({
             );
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
-            if (occupation != null){
+            if (occupation != null){ // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
               const chicken = modelService.createChicken(tile.x* mapScale, tile.z*mapScale);
               chickenGroup.add(chicken);
             }
