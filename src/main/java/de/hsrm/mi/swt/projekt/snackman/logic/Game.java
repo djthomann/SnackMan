@@ -1,21 +1,14 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
@@ -35,12 +28,14 @@ public class Game {
     private GameConfig gameConfig;
     private ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
     //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
-    private Timer timer;
+    private Timer timer = new Timer();
     private SnackManMap map;
     private GameEventBus eventBus;
     private GameManager gameManager;
     private CollisionManager collisionManager;
     private GameState gameState;
+    private int numSnackmen = 0;
+    private int numGhosts = 0;
     
     
 
@@ -53,7 +48,72 @@ public class Game {
         this.timer = new Timer();   
         startTimer();
         gameState = new GameState(this);
-        logger.info("craeted Game with id: " + id);
+        logger.info("created Game with id: " + id);
+    }
+
+    public Game(Lobby lobby, GameManager gameManager) {
+        this.id = lobby.getId();
+        this.gameConfig = lobby.getGameConfig();
+        this.map = lobby.getMap();
+        this.gameManager = gameManager;
+
+        createMovables(lobby.getClientsAsList());
+
+        this.collisionManager = new CollisionManager(map, allMovables);
+        startTimer();
+        gameState = new GameState(this);
+        logger.info("created Game with id: " + id);
+    }
+
+    private void createMovables(List<Client> clients) {
+        for (Client c: clients) {
+            switch (c.getRole()) {
+                case SNACKMAN -> spawnSnackMan(c.getClientId());
+                case GHOST -> spawnGhost(c.getClientId());
+                default -> logger.warn("cannot cope with GameObjectType: " + c.getRole());
+            }
+        }
+    }
+
+    /**
+     * spawns ghost with given id, for now every Ghost on the same tile
+     * @param id
+     */
+    private void spawnGhost(long id) {
+        allMovables.add(new Ghost(id, this.id, (float) map.getW() / 2.0f, 0f, (float) map.getH() / 2.0f, this.gameConfig));
+    }
+
+    private void spawnSnackMan(long id) {
+        float x;
+        float z;
+        switch (numSnackmen) {
+            case 0 -> {
+                x = 1;
+                z = 1;
+            }
+            case 1 -> {
+                x = map.getW() - 2;
+                z = map.getH() - 2;
+            }
+            case 2 -> {
+                x = 1;
+                z = map.getH() - 2;
+            }
+            case 3 -> {
+                x = map.getW() - 2;
+                z = 1;
+            }
+            default -> {
+                logger.warn("already 4 Snackmen in Game");
+                return;
+            }
+        }
+
+        x += 0.5f;
+        z += 0.5f;
+
+        allMovables.add(new SnackMan(id, this.id, x, 0f, z, this.gameManager, this.gameConfig, this.collisionManager));
+        numSnackmen++;
     }
 
     /**

@@ -22,19 +22,13 @@ public class GameManager {
 
     Logger logger = LoggerFactory.getLogger(GameManager.class);
     
-    public HashMap<Long, Game> allGames;
-    public HashMap<Long, Lobby> allLobbies;
-    private WebSocketHandler webSocketHandler;
+    private final HashMap<Long, Game> allGames;
+    private final HashMap<Long, Lobby> allLobbies;
+    private final WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
 
-    public GameManager(WebSocketHandler webSocketHandler) {
-        this.webSocketHandler = webSocketHandler;
-        this.allGames = new HashMap<Long, Game>();
-        this.allLobbies = new HashMap<Long, Lobby>();
-    }
-
     // TODO: To Be Deleted , Constructor for testing purposes with fake game
-    public GameManager(WebSocketHandler webSocketHandler, String test) {
+    public GameManager(WebSocketHandler webSocketHandler) {
 
         logger.info("Game Manager Constructor \n");
         this.webSocketHandler = webSocketHandler;
@@ -99,20 +93,8 @@ public class GameManager {
         allGames.put(newGame.id, newGame);
     }
 
-    /**
-     * Creates a new game with a unique objectId, the specified gameConfig and Moveables,
-     * and creates a map from the given csv file
-     * 
-     * @param gameConfig
-     * @param id
-     * @param mapFile
-     */
-    public void createGame(GameConfig gameConfig, long id, String mapFile) {
-
-        SnackManMap map = new SnackManMap(mapFile, true);
-
-        Game newGame = new Game(id, gameConfig, map, this);
-        allGames.put(newGame.id, newGame);
+    public void createGame(long id) {
+        allGames.put(id, allLobbies.get(id).startGame(this));
     }
 
     public void setGameConfig(GameConfig gameConfig, long gameID) {
@@ -136,4 +118,9 @@ public class GameManager {
     public List<Lobby> getAllLobbies() {
         return new ArrayList<>(allLobbies.values());
     }
+
+    public HashMap<Long, Lobby> getLobbyMap() {
+        return allLobbies;
+    }
+
 }
