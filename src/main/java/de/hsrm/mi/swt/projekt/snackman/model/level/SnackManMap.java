@@ -1,5 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
+
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -108,6 +109,7 @@ public class SnackManMap {
                     occupationType = OccupationType.ITEM;
                 }
                 allTiles[z][x] = new Tile(x, z, occupationType);
+                allTiles[z][x].setOccupation(null);
             }
         }
     }

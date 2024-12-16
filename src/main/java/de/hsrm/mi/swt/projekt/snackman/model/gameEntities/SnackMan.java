@@ -237,7 +237,9 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
                 logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
                 String collision = "none";
                 float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
+                logger.info("Wished X: " + wishedX);
                 float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
+                logger.info("Wished Z: " + wishedZ);
                 if (wishedX != this.getX() || wishedZ != this.getZ()) {
                     if (this.getY() < gameConfig.getWallHeight()) {
                         collision = collisionManager.checkCollision(wishedX, wishedZ, this);
@@ -268,7 +270,7 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
 
         }
 
-        logger.info("Event arrived at SnackMan");
+        logger.info("Event arrived at SnackMan :" + event.toString());
     }
 
 }
