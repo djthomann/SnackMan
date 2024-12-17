@@ -7,6 +7,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
 /**
@@ -19,17 +20,15 @@ public class GameStartEvent extends Event {
     private List<Ghost> ghosts;
     private List<Chicken> chicken;
     private List<Food> foods;
-    private int floor; // TODO: No Data Format defined yet
-    private List<Tile> tiles;
+    private SnackManMap map;
 
     public GameStartEvent(List<SnackMan> snackMen, List<Ghost> ghosts, List<Chicken> chicken, List<Food> foods,
-            int floor, List<Tile> tiles) {
+            SnackManMap map) {
         this.snackMen = snackMen;
         this.ghosts = ghosts;
         this.chicken = chicken;
         this.foods = foods;
-        this.floor = floor;
-        this.tiles = tiles;
+        this.map = map;
     }
 
     public List<SnackMan> getSnackMen() {
