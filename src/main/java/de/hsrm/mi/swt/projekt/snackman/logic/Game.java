@@ -1,11 +1,9 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +20,9 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
 /**
- * The Game class contains all of the information and logic necessary within an
- * individual game.
+ * The Game class contains all of the information and logic necessary within an individual game.
  * The game starts as soon as the Game class is instantiated.
- * Every game has a map and its own game objects.
+ * Every game has a map and its own game objects. 
  * It can receive and pass on events to subscribers to its event bus.
  * 
  */
@@ -38,12 +35,17 @@ public class Game {
     private ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
     // private ArrayList<Food> allFoods; TODO might not be required here and only in
     // Map
-    private Timer timer;
+    //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
+    private Timer timer = new Timer();
     private SnackManMap map;
     private GameEventBus eventBus;
     private GameManager gameManager;
     private CollisionManager collisionManager;
     private GameState gameState;
+    private int numSnackmen = 0;
+    private int numGhosts = 0;
+
+    
 
     public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
@@ -54,7 +56,72 @@ public class Game {
         this.timer = new Timer();
         startTimer();
         gameState = new GameState(this);
-        logger.info("craeted Game with id: " + id);
+        logger.info("created Game with id: " + id);
+    }
+
+    public Game(Lobby lobby, GameManager gameManager) {
+        this.id = lobby.getId();
+        this.gameConfig = lobby.getGameConfig();
+        this.map = lobby.getMap();
+        this.gameManager = gameManager;
+
+        createMovables(lobby.getClientsAsList());
+
+        this.collisionManager = new CollisionManager(map, allMovables);
+        startTimer();
+        gameState = new GameState(this);
+        logger.info("created Game with id: " + id);
+    }
+
+    private void createMovables(List<Client> clients) {
+        for (Client c: clients) {
+            switch (c.getRole()) {
+                case SNACKMAN -> spawnSnackMan(c.getClientId());
+                case GHOST -> spawnGhost(c.getClientId());
+                default -> logger.warn("cannot cope with GameObjectType: " + c.getRole());
+            }
+        }
+    }
+
+    /**
+     * spawns ghost with given id, for now every Ghost on the same tile
+     * @param id
+     */
+    private void spawnGhost(long id) {
+        allMovables.add(new Ghost(id, this.id, (float) map.getW() / 2.0f, 0f, (float) map.getH() / 2.0f, this.gameConfig));
+    }
+
+    private void spawnSnackMan(long id) {
+        float x;
+        float z;
+        switch (numSnackmen) {
+            case 0 -> {
+                x = 1;
+                z = 1;
+            }
+            case 1 -> {
+                x = map.getW() - 2;
+                z = map.getH() - 2;
+            }
+            case 2 -> {
+                x = 1;
+                z = map.getH() - 2;
+            }
+            case 3 -> {
+                x = map.getW() - 2;
+                z = 1;
+            }
+            default -> {
+                logger.warn("already 4 Snackmen in Game");
+                return;
+            }
+        }
+
+        x += 0.5f;
+        z += 0.5f;
+
+        allMovables.add(new SnackMan(id, this.id, x, 0f, z, this.gameManager, this.gameConfig, this.collisionManager));
+        numSnackmen++;
     }
 
     /**
@@ -106,7 +173,7 @@ public class Game {
     /**
      * Creates a copy of allMovables casting the game objects to Subscribable for
      * the event bus
-     * 
+     *
      * @return allSubscribers
      */
     private ArrayList<Subscribable> createSubscriberList() {
@@ -166,7 +233,7 @@ public class Game {
          * float newY = ((SnackMan)this.allMovables.get(0)).getY();
          * float newZ = ((SnackMan)this.allMovables.get(0)).getZ();
          * MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
-         * 
+         *
          * this.gameManager.notifyChange(moveEvent);
          */
     }
