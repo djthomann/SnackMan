@@ -8,18 +8,16 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
-import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
 /**
- * Event that informs holds all Game/Level data which the frontend needs to
- * display
+ * Event that informs and holds all Game/Level data which the frontend needs to
+ * display and manage. Map holds all Food Data itself.
  */
 public class GameStartEvent extends Event {
 
     private List<SnackMan> snackMen;
     private List<Ghost> ghosts;
     private List<Chicken> chicken;
-    private List<Food> foods;
     private SnackManMap map;
 
     public GameStartEvent(List<SnackMan> snackMen, List<Ghost> ghosts, List<Chicken> chicken, List<Food> foods,
@@ -27,7 +25,6 @@ public class GameStartEvent extends Event {
         this.snackMen = snackMen;
         this.ghosts = ghosts;
         this.chicken = chicken;
-        this.foods = foods;
         this.map = map;
     }
 
@@ -55,28 +52,12 @@ public class GameStartEvent extends Event {
         this.chicken = chicken;
     }
 
-    public List<Food> getFoods() {
-        return foods;
+    public SnackManMap getMap() {
+        return map;
     }
 
-    public void setFoods(List<Food> foods) {
-        this.foods = foods;
-    }
-
-    public int getFloor() {
-        return floor;
-    }
-
-    public void setFloor(int floor) {
-        this.floor = floor;
-    }
-
-    public List<Tile> getTiles() {
-        return tiles;
-    }
-
-    public void setTiles(List<Tile> tiles) {
-        this.tiles = tiles;
+    public void setMap(SnackManMap map) {
+        this.map = map;
     }
 
 }
