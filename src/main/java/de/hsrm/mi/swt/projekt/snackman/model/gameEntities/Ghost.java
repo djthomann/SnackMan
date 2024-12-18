@@ -21,7 +21,6 @@ public class Ghost extends GameObject implements MovableAndSubscribable {
      * @param x          the initial x-coordinate of the `Ghost`
      * @param y          the initial y-coordinate of the `Ghost`
      * @param z          the initial z-coordinate of the `Ghost`
-     * @param radius     the radius of the `Ghost`
      * @param gameConfig the configuation of the game
      * 
      */
