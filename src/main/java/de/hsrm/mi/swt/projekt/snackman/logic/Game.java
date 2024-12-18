@@ -21,7 +21,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
 /**
- * The Game class contains all of the information and logic necessary within an individual game.
+ * The Game class contains all the information and logic necessary within an individual game.
  * The game starts as soon as the Game class is instantiated.
  * Every game has a map and its own game objects. 
  * It can receive and pass on events to subscribers to its event bus.
@@ -53,7 +53,7 @@ public class Game {
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
-        this.collisionManager = new CollisionManager(map, allMovables);
+        this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
         this.timer = new Timer();
         startTimer();
         gameState = new GameState(this);
@@ -69,7 +69,7 @@ public class Game {
         GameStartEvent gameStartEvent = new GameStartEvent();
         init();
 
-        this.collisionManager = new CollisionManager(map, allMovables);
+        this.collisionManager = new CollisionManager(this, map, allMovables);
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);
@@ -82,8 +82,8 @@ public class Game {
     private void createMovables(List<Client> clients) {
         for (Client c: clients) {
             switch (c.getRole()) {
-                case SNACKMAN -> spawnSnackMan(c.getClientId());
-                case GHOST -> spawnGhost(c.getClientId());
+                case SNACKMAN -> spawnSnackMan(c.getClientId(), c.getUsername());
+                case GHOST -> spawnGhost(c.getClientId(), c.getUsername());
                 default -> logger.warn("cannot cope with GameObjectType: " + c.getRole());
             }
         }
@@ -93,11 +93,11 @@ public class Game {
      * spawns ghost with given id, for now every Ghost on the same tile
      * @param id
      */
-    private void spawnGhost(long id) {
-        allMovables.add(new Ghost(id, this.id, (float) map.getW() / 2.0f, 0f, (float) map.getH() / 2.0f, this.gameConfig));
+    private void spawnGhost(long id, String username) {
+        allMovables.add(new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0f, (float) map.getH() / 2.0f, this.gameConfig));
     }
 
-    private void spawnSnackMan(long id) {
+    private void spawnSnackMan(long id, String username) {
         float x;
         float z;
         switch (numSnackmen) {
@@ -126,7 +126,7 @@ public class Game {
         x += 0.5f;
         z += 0.5f;
 
-        allMovables.add(new SnackMan(id, this.id, x, 0f, z, this.gameManager, this.gameConfig, this.collisionManager));
+        allMovables.add(new SnackMan(username, id, this.id, x, 0f, z, this.gameManager, this.gameConfig, this.collisionManager));
         numSnackmen++;
     }
 
@@ -139,7 +139,7 @@ public class Game {
      */
     public void init() {
         createFood();
-        allMovables.add(new SnackMan(IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
+        allMovables.add(new SnackMan("snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
                 gameConfig, collisionManager));
         createChicken();
         ArrayList<Subscribable> subscribers = createSubscriberList();
