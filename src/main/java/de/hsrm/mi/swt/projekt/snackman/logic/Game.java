@@ -133,7 +133,7 @@ public class Game {
      */
     public void init() {
         createFood();
-        allMovables.add(new SnackMan(IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
+        allMovables.add(new SnackMan("snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
                 gameConfig, collisionManager));
         createChicken();
         ArrayList<Subscribable> subscribers = createSubscriberList();
