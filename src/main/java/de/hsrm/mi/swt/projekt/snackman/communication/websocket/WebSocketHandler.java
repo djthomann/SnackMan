@@ -113,7 +113,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     try {
                         String json = mapper.writeValueAsString(map);
                         returnString = "MAP;" + json;
-                        logger.info("Final JSON: " + returnString);
+                        //logger.info("Final JSON: " + returnString);
                         session.sendMessage(new TextMessage(returnString));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
