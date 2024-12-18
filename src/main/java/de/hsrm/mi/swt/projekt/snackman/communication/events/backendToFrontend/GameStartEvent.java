@@ -28,6 +28,20 @@ public class GameStartEvent extends Event {
         this.map = map;
     }
 
+    public GameStartEvent() {}
+
+    public void addSnackMan(SnackMan s) {
+        this.snackMen.add(s);
+    }
+
+    public void addGhost(Ghost g) {
+        this.ghosts.add(g);
+    }
+
+    public void addChicken(Chicken c) {
+        this.chicken.add(c);
+    }
+
     public List<SnackMan> getSnackMen() {
         return snackMen;
     }

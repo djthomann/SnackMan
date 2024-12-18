@@ -2,6 +2,7 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.*;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
 import org.slf4j.Logger;
@@ -65,7 +66,8 @@ public class Game {
         this.map = lobby.getMap();
         this.gameManager = gameManager;
 
-        createMovables(lobby.getClientsAsList());
+        GameStartEvent gameStartEvent = new GameStartEvent();
+        init();
 
         this.collisionManager = new CollisionManager(map, allMovables);
         startTimer();
@@ -73,6 +75,10 @@ public class Game {
         logger.info("created Game with id: " + id);
     }
 
+    /**
+     * creates all
+     * @param clients
+     */
     private void createMovables(List<Client> clients) {
         for (Client c: clients) {
             switch (c.getRole()) {
