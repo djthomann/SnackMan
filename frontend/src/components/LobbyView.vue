@@ -42,6 +42,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
@@ -82,15 +85,15 @@ const handleServerMessage = (message: string) => {
   if (message.startsWith('GAME_CONFIG')) {
     gameConfig.value = JSON.parse(message.split(';')[1]);
   }
-}
+};
 
 // Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
   const data = JSON.stringify({
-    type: "SET_GAME_CONFIG",
+    type: 'SET_GAME_CONFIG',
     gameID: lobbyCode.value,
     objectID: 0,
-    gameConfig: gameConfig.value
+    gameConfig: gameConfig.value,
   });
   sendMessage(data);
 };
@@ -98,20 +101,19 @@ const submitForm = async () => {
 // On Reset-Button press, send message to BE with gameID: 0, to signify default value request
 const resetForm = async () => {
   const reset = JSON.stringify({
-    type: "GET_GAME_CONFIG",
+    type: 'GET_GAME_CONFIG',
     gameID: 0,
-  })
+  });
   sendMessage(reset);
-}
+};
 
 // Automatic call on load
 onMounted(async () => {
-
   // Method, to wait until Connection is established
   const awaitConnection = () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve("Connected");
+        resolve('Connected');
       }, 1000);
     });
   };
@@ -123,19 +125,19 @@ onMounted(async () => {
   try {
     await awaitConnection();
     const requestData = JSON.stringify({
-      type: "GET_GAME_CONFIG",
+      type: 'GET_GAME_CONFIG',
       gameID: lobbyCode.value,
     });
     sendMessage(requestData);
   } catch (e) {
-    console.log("Failed to fetch Data on load: ", e);
+    logger.info('Failed to fetch Data on load: ', e);
   }
 });
 
 // Method, to start the game
 const startGame = () => {
   const requestData = JSON.stringify({
-    type: "START_GAME",
+    type: 'START_GAME',
     gameID: lobbyCode.value,
   });
   sendMessage(requestData);

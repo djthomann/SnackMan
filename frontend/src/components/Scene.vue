@@ -9,12 +9,13 @@ import { defineComponent, onUnmounted, ref, onMounted } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
-import { GLTFLoader, PointerLockControls } from 'three/examples/jsm/Addons.js';
+import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
 import type { Snackman, Ghost, Food, Tile } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
+import { Logger } from '../util/logger';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -49,11 +50,13 @@ export default defineComponent({
     let animationMixer: THREE.AnimationMixer;
     const nameTags: NameTag[] = [];
 
+    const logger = new Logger();
+
     //GameStart
     const entityStore = useEntityStore();
     const { snackmen, ghosts } = storeToRefs(entityStore);
 
-    console.log(
+    logger.info(
       'Snackman Names:',
       snackmen.value.map((item: Snackman) => item.username),
     );
@@ -61,7 +64,6 @@ export default defineComponent({
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
-      //console.log('Processing server message');
 
       if (message.startsWith('MOVE')) {
         const key: string = message.split(':')[1];
@@ -69,7 +71,7 @@ export default defineComponent({
         // Move the player
         movePlayer(JSON.parse(message.split(';')[1]));
       } else if (message.startsWith('MAP')) {
-        console.log('processing map');
+        logger.info('processing map');
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
       }
@@ -107,14 +109,13 @@ export default defineComponent({
         // Service initialisieren
         await modelService.initialize(mapScale);
 
-        console.log('Models loaded');
+        logger.info('Models loaded');
       } catch (error) {
         console.error('Error initializing or loading model:', error);
       }
     }
 
     function loadMap(map: any) {
-      //console.log('Received mapdata' + map);
       const w = map.w * mapScale;
       const h = map.h * mapScale;
       const tiles = map.allTiles;
@@ -148,7 +149,7 @@ export default defineComponent({
         const action = animationMixer.clipAction(chickenAnimations[0]);
         action.play();
       } else {
-        console.log('Animation not found');
+        logger.info('Animation not found');
       }
 
       scene.add(wallsGroup);
@@ -169,8 +170,8 @@ export default defineComponent({
       const newPlayerPositionY = moveInformation.movementVector.y;
       const newPlayerPositionZ = moveInformation.movementVector.z;
 
-      console.log(
-        `New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`,
+      logger.info(
+        '`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`',
       );
 
       player.position.set(

@@ -27,6 +27,10 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
 
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
+
 const { sendMessage, onMessage } = useWebSocket();
 const router = useRouter();
 const lobbyCode = ref('');
@@ -46,7 +50,7 @@ const handleServerMessage = (message: string) => {
   serverMessage.value = message;
   if (message.startsWith('ALL_LOBBIES')) {
     lobbies.value = JSON.parse(message.split(';')[1]);
-    console.log('ALL LOBBIES' + lobbies.value);
+    logger.info('ALL LOBBIES' + lobbies.value);
   }
 };
 
@@ -62,7 +66,7 @@ const createLobby = () => {
 };
 
 const joinLobby = (code: string) => {
-  console.log(`Joining lobby with code: ${code}`);
+  logger.info(`Joining lobby with code: ${code}`);
   router.push({ path: `/lobby/${code}` });
 };
 
