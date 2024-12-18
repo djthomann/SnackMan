@@ -1,6 +1,8 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.python.core.PyObject;
 import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
@@ -42,6 +44,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * @param x          the initial x-coordinate of the Chicken
      * @param y          the initial y-coordinate of the Chicken
      * @param z          the initial z-coordinate of the Chicken
+     * @param scriptPath the path of the associated behavior script
      * @param gameConfig the configuration of the game
      */
 
@@ -52,12 +55,56 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.collisionManager = collisionManager;
         this.gameManger = gameManager;
         this.gainedCalories = 0;
-        // choose script file
         this.scriptInterpreter = new PythonInterpreter();
-        String scriptFile = script.equals("test")
-                ? "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/chickenTestScript.py"
-                : script;
+        initScriptInterpreter(script);
+    }
+
+    private void initScriptInterpreter(String script) {
+        String scriptFile;
+        switch (script) {
+            case "TEST", "test", "Test": // TO BE DELETED : TEST SCRIPT
+                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/chickenTestScript.py";
+                break;
+            case "ONE", "one", "One":
+                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/ChickenPersonalityOne.py";
+                break;
+            case "TWO", "two", "Two":
+                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/ChickenPersonalityTwo.py";
+                break;
+            default:
+                scriptFile = script;
+                break;
+        }
         this.scriptInterpreter.execfile(scriptFile);
+
+        new Thread(() -> {
+            try {
+                while (true) {
+                    executeTestScript();
+                    Thread.sleep(2000); // 1000 = 1 sec
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
+
+    }
+
+    // TO BE DELETED : RUN TEST SCRIPT
+    public void executeTestScript() {
+
+        scriptInterpreter.exec("result = forward()");
+        PyObject result = scriptInterpreter.get("result");
+        if (result instanceof PyTuple) {
+            PyTuple tuple = (PyTuple) result;
+
+            // Retrieve the elements of the tuple and cast them to float
+            float movementX = (float) (int) tuple.get(0);
+            float movementY = (float) (int) tuple.get(1);
+            float movementZ = (float) (int) tuple.get(2);
+            move((movementX), (movementY), (movementZ));
+
+        }
     }
 
     /**
@@ -82,27 +129,44 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      */
     public void executeScript(SnackManMap map) {
 
-        // TODO the associated tile should be here calculated from Chicken position
         Tile positionTile = map.getTileAt((int) x, (int) z);
-
-        // Retrieve the surrounding tiles as a 3x3 grid
         Tile[][] surroundings = map.getSurroundingTiles(positionTile);
-
-        // Convert the Tile[][] to a Python-compatible List<List<String>>
-        HashMap<String, String> pythonCompatibleSurroundings = new HashMap<>();
+        List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
 
         for (int row = -1; row <= 1; row++) {
-            for (int col = 1; col >= -1; col--) {
-                Tile tile = surroundings[row + 1][1 - col];
-                String key = "tile_" + row + "_" + col; // unique key for every tile
-                pythonCompatibleSurroundings.put(key, (tile != null) ? tile.getOccupationType().name() : "NULL");
+            List<String> rowList = new ArrayList<>();
+            for (int col = -1; col <= 1; col++) {
+                Tile tile = surroundings[row + 1][col + 1];
+                if (tile == null) {
+                    rowList.add("OUT");
+                } else {
+                    switch (tile.getOccupationType()) {
+                        case WALL:
+                            rowList.add("WALL");
+                            break;
+                        case ITEM:
+                            rowList.add(tile.getOccupation().toString().toUpperCase());
+                            break;
+                        case FREE:
+                            if (tile.getOccupation() != null) {
+                                rowList.add(tile.getOccupation().toString().toUpperCase());
+                            } else {
+                                rowList.add("FREE");
+                            }
+                            break;
+                        default:
+                            rowList.add("UNKNOWN");
+                    }
+                }
             }
+            pythonCompatibleSurroundings.add(rowList);
         }
 
-        // Set the surroundings in the PythonInterpreter
+        // TO BE DELETED : TEST LOG
+        logger.info("pythonCompatibleSurroundings: {}", pythonCompatibleSurroundings);
+
         scriptInterpreter.set("environment", pythonCompatibleSurroundings);
 
-        // Execute the Python script and retrieve the result
         try {
 
             scriptInterpreter.exec("result = run_behavior(environment)");
