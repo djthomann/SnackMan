@@ -8,6 +8,7 @@
   />
   <button v-show="!mapLoaded" class="my-cool-style" @click="uploadMap">Map hochladen</button>
   <button v-show="!mapLoaded" class="my-cool-style" @click="requestMap">Map anfordern</button>
+  <button class="my-cool-style" @click="testLogging">Test Logging</button>
 </template>
 
 <script setup lang="ts">
@@ -19,6 +20,9 @@ const { sendMessage } = useWebSocket();
 const mapLoaded = ref<boolean>(false);
 const file = ref<File | null>();
 const reader = FileReader;
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
 
 const requestMap = () => {
   if (!mapLoaded.value) {
@@ -31,6 +35,10 @@ const requestMap = () => {
   } else {
     console.log('loaded map already');
   }
+};
+
+const testLogging = () => {
+  logger.info('Das ist ein Logging Test');
 };
 
 const uploadMap = () => {
