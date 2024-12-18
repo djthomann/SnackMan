@@ -1,9 +1,13 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
@@ -27,21 +31,26 @@ public class GameStartEvent extends Event {
         this.map = map;
     }
 
-    public GameStartEvent() {}
+    public GameStartEvent() {
+        this.setType(EventType.GAME_START);
+        this.snackMen = new ArrayList<>();
+        this.chicken = new ArrayList<>();
+        this.ghosts = new ArrayList<>();
+    }
 
     public void addSnackMan(SnackMan s) {
-        this.snackMen.add(s);
+        this.snackMen.add(s.toRecord());
     }
 
     public void addGhost(Ghost g) {
-        this.ghosts.add(g);
+        this.ghosts.add(g.toRecord());
     }
 
     public void addChicken(Chicken c) {
-        this.chicken.add(c);
+        this.chicken.add(c.toRecord());
     }
 
-    public List<SnackMan> getSnackMen() {
+    public List<SnackManRecord> getSnackMen() {
         return snackMen;
     }
 

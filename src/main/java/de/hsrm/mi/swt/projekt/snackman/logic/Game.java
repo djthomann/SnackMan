@@ -66,8 +66,8 @@ public class Game {
         this.map = lobby.getMap();
         this.gameManager = gameManager;
 
-        GameStartEvent gameStartEvent = new GameStartEvent();
-        init();
+        createMovables(lobby.getClientsAsList());
+        init(lobby.getClientsAsList());
 
         this.collisionManager = new CollisionManager(this, map, allMovables);
         startTimer();
@@ -137,13 +137,35 @@ public class Game {
      * TODO: This method will be expanded to create all game objects and add them to
      * the game object list.
      */
-    public void init() {
+    public void init(List<Client> clients) {
+
+        // for testing clients is null
+        if (clients != null) createMovables(clients);
         createFood();
-        allMovables.add(new SnackMan("snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
+
+        // for testing setup test SnackMan
+        if (clients == null) allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
                 gameConfig, collisionManager));
         createChicken();
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
+
+        this.gameManager.notifyChange(createGameStartEvent());
+    }
+
+    private GameStartEvent createGameStartEvent() {
+        GameStartEvent res = new GameStartEvent();
+        for (MovableAndSubscribable m: allMovables) {
+            switch (m.getClass().getSimpleName()) {
+                case "SnackMan" -> res.addSnackMan((SnackMan) m);
+                case "Ghost" -> res.addGhost((Ghost) m);
+                case "Chicken" -> res.addChicken((Chicken) m);
+            }
+        }
+
+        res.setMap(map);
+
+        return res;
     }
 
     private void createFood() {
@@ -171,7 +193,7 @@ public class Game {
         if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
             Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX(), 0.0f,
                     (float) tile.getZ(), "test", gameManager, gameConfig, collisionManager);
-            tile.setOccupation(chickenOne);
+            tile.setOccupation(chickenOne.toRecord());
             allMovables.add(chickenOne);
         }
     }
