@@ -1,7 +1,7 @@
 <template>
   <h1>Lobby {{ lobbyCode }}</h1>
-  <button @click="chooseSnackMan">Choose SnackMan</button>
-  <button @click="chooseGhost">Choose Ghost</button>
+  <button @click="choose('SnackMan')">Choose SnackMan</button>
+  <button @click="choose('Ghost')">Choose Ghost</button>
   <h3>SnackMan</h3>
   <ul>
     <li v-for="player in snackManPlayers" :key="player.id">
@@ -71,6 +71,7 @@ const lobbyCode = ref(Number(route.params.code));
 const serverMessage = ref<string>('');
 const userStore = useUserStore();
 const name = computed(() => userStore.username);
+const clientID = computed(() => userStore.id); 
 const snackManPlayers = ref<Array<{ id: number; name: string }>>([]);
 const ghostPlayers = ref<Array<{ id: number; name: string }>>([]);
 const undecidedPlayers = ref<Array<{ id: number; name: string }>>([
@@ -170,15 +171,16 @@ const startGame = () => {
   router.push('/game/' + lobbyCode.value);
 };
 
-const chooseSnackMan = () => {
-  const message = JSON.stringify({ type: 'RegisterSnackman', username: name.value });
-  sendMessage(message);
-};
-
-const chooseGhost = () => {
-  const message = JSON.stringify({ type: 'REGISTERGHOST', username: name.value });
-  sendMessage(message);
-};
+const choose = (role: string) => {
+    const message = JSON.stringify({
+      type: "CHOOSEROLE",
+      clientID: clientID.value,
+      username: name.value,
+      gameID: lobbyCode.value,
+      isSnackMan: role === 'SnackMan' ? true : false,
+    });
+    sendMessage(message);
+  };
 
 </script>
 

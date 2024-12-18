@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.*;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
@@ -24,10 +22,16 @@ import com.google.gson.JsonSyntaxException;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChooseRoleEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.StartGameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
-import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
@@ -62,21 +66,18 @@ public class WebSocketHandler extends TextWebSocketHandler {
             String type = jsonObject.get("type").getAsString();
 
             switch (type) {
-                // User registered as Snackman
-                case "REGISTERSNACKMAN" -> {
-                    RegisterSnackmanEvent registerSnackmanEvent = gson.fromJson(jsonString,
-                            RegisterSnackmanEvent.class);
+                // User chooses role
+                case "CHOOSEROLE" -> {
+                    ChooseRoleEvent chooseRoleEvent = gson.fromJson(jsonString, ChooseRoleEvent.class);
+                    Client client = clients.get(session);
 
-                    clients.get(session).setUsername(registerSnackmanEvent.getUsername());
-                    clients.get(session).setRole(GameObjectType.SNACKMAN);
-                }
-                // User registered as Ghost
-                case "REGISTERGHOST" -> {
-                    RegisterGhostEvent registerGhostEvent = gson.fromJson(jsonString,
-                            RegisterGhostEvent.class);
+                    client.setUsername(chooseRoleEvent.getUsername());
 
-                    clients.get(session).setUsername(registerGhostEvent.getUsername());
-                    clients.get(session).setRole(GameObjectType.GHOST);
+                    if(chooseRoleEvent.isSnackMan()){
+                        client.setRole(GameObjectType.SNACKMAN);
+                    } else {
+                        client.setRole(GameObjectType.GHOST);
+                    }
                 }
                 /**
                  * User registers without Role, sets Unsername and sends back Client ID for
