@@ -3,6 +3,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
 /**
  * The `Ghost` class represents a player character in the game with
@@ -45,6 +46,10 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
     @Override
     public void handle(Event event) {
+    }
+
+    public GhostRecord toRecord() {
+        return new GhostRecord(gameId, objectId, getUsername(), x, y, z);
     }
 
 }

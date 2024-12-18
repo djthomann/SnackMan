@@ -170,6 +170,7 @@ const startGame = () => {
     gameID: lobbyCode.value,
   });
   sendMessage(requestData);
+  router.push('/game/' + lobbyCode.value);
 };
 
 const choose = (role: string) => {

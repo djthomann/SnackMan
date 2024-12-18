@@ -15,6 +15,7 @@ import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
 /**
  * The `Chicken` class represents a NPC in the game.
@@ -159,6 +160,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
         logger.info("Event arrived at chicken: " + event.toString());
 
+    }
+
+    public ChickenRecord toRecord() {
+        return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories);
     }
 
 }

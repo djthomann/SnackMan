@@ -7,15 +7,16 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
 public class GameState {
 
     private Game game;
 
-    private List<Ghost> changedGhosts;
-    private List<SnackMan> changedSnackMen;
-    private List<Chicken> changedChicken;
-    private List<Food> eatenFoods;
+    private List<GhostRecord> changedGhosts;
+    private List<SnackManRecord> changedSnackMen;
+    private List<ChickenRecord> changedChicken;
+    private List<FoodRecord> eatenFoods;
 
     /** synchronized (chnages to gamestate variables need to be declared to all threads) thread that sends out gamestateevent 
      * and then clears all lists every 1/30 seconds while uninterrupted.*/
@@ -53,50 +54,50 @@ public class GameState {
     }
 
     public void addChangedGhost(Ghost ghost) {
-        changedGhosts.add(ghost);
+        changedGhosts.add(ghost.toRecord());
     }
 
     public void addChangedSnackMan(SnackMan snackman) {
-        changedSnackMen.add(snackman);
+        changedSnackMen.add(snackman.toRecord());
     }
 
     public void addChangedChicken(Chicken chicken) {
-        changedChicken.add(chicken);
+        changedChicken.add(chicken.toRecord());
     }
 
     public void addEatenFood(Food food) {
-        eatenFoods.add(food);
+        eatenFoods.add(food.toRecord());
     }
 
-    public List<Ghost> getChangedGhosts() {
+    public List<GhostRecord> getChangedGhosts() {
         return changedGhosts;
     }
 
-    public void setChangedGhosts(List<Ghost> changedGhosts) {
+    public void setChangedGhosts(List<GhostRecord> changedGhosts) {
         this.changedGhosts = changedGhosts;
     }
 
-    public List<SnackMan> getChangedSnackMen() {
+    public List<SnackManRecord> getChangedSnackMen() {
         return changedSnackMen;
     }
 
-    public void setChangedSnackMen(List<SnackMan> changedSnackMen) {
+    public void setChangedSnackMen(List<SnackManRecord> changedSnackMen) {
         this.changedSnackMen = changedSnackMen;
     }
 
-    public List<Chicken> getChangedChicken() {
+    public List<ChickenRecord> getChangedChicken() {
         return changedChicken;
     }
 
-    public void setChangedChicken(List<Chicken> changedChicken) {
+    public void setChangedChicken(List<ChickenRecord> changedChicken) {
         this.changedChicken = changedChicken;
     }
 
-    public List<Food> getEatenFoods() {
+    public List<FoodRecord> getEatenFoods() {
         return eatenFoods;
     }
 
-    public void setEatenFoods(List<Food> eatenFoods) {
+    public void setEatenFoods(List<FoodRecord> eatenFoods) {
         this.eatenFoods = eatenFoods;
     }
 

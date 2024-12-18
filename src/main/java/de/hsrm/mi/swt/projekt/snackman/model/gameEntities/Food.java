@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 
 /**
  * The `Food` class represents a NP Object in the game.
@@ -30,7 +31,7 @@ public class Food extends GameObject {
         super(gameId, x, 0.5f, z, gameConfig.getFoodRadius());
         this.foodType = foodType;
         this.calories = foodType.getCalories();
-        this.gameConfig = gameConfig;
+
     }
 
     /**
@@ -40,6 +41,13 @@ public class Food extends GameObject {
      */
     public int getCalories() {
         return calories;
+    }
+
+    /**
+     * Returns record of Food.
+     */
+    public FoodRecord toRecord() {
+        return new FoodRecord(gameId, objectId, x, y, z, calories, foodType);
     }
 
 }
