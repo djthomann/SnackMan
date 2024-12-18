@@ -51,11 +51,11 @@ export default defineComponent({
 
     //GameStart
     const entityStore = useEntityStore();
-    const { snackmen, ghosts } = storeToRefs(entityStore);
+    const { snackMen, ghosts } = storeToRefs(entityStore);
 
     console.log(
       'Snackman Names:',
-      snackmen.value.map((item: Snackman) => item.username),
+      snackMen.value.map((item: Snackman) => item.username),
     );
 
     // React to server message (right now only simple movement)
