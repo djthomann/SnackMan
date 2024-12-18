@@ -14,5 +14,6 @@ public enum EventType {
     EAT, 
     LOBBY_CREATE_EVENT,
     CLIENT_ID,
-    START_GAME
+    START_GAME,
+    DISAPPEAR
 }
