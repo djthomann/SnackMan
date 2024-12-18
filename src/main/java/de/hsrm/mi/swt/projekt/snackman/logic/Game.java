@@ -52,7 +52,7 @@ public class Game {
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
-        this.collisionManager = new CollisionManager(map, allMovables);
+        this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
         this.timer = new Timer();
         startTimer();
         gameState = new GameState(this);
@@ -67,7 +67,7 @@ public class Game {
 
         createMovables(lobby.getClientsAsList());
 
-        this.collisionManager = new CollisionManager(map, allMovables);
+        this.collisionManager = new CollisionManager(this, map, allMovables);
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);

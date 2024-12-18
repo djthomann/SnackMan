@@ -161,7 +161,7 @@ class ModelService {
   }
 
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
-  public createFood(x: number, z: number, calories: number, scale: number) {
+  public createFood(id: number, x: number, z: number, calories: number, scale: number) {
     let newModel;
     if (calories > 300) {
       newModel = this.getModel('brokkoli').clone();
@@ -170,6 +170,7 @@ class ModelService {
     } else {
       newModel = this.getModel('cake').clone();
     }
+    newModel.userData.id = id; 
     newModel.position.set(x * scale, 10, z * scale);
     return newModel;
   }

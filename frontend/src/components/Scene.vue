@@ -72,6 +72,9 @@ export default defineComponent({
         console.log('processing map');
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
+      } else if (message.startsWith('DISAPPEAR')) {
+        const food = JSON.parse(message.split(';')[1]); 
+        makeDisappear(food.food.objectId); 
       }
     };
 
@@ -126,8 +129,10 @@ export default defineComponent({
             // console.log(tile)
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
+            const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale); 
+            food.userData.id = tile.occupation.objectId; 
             foodGroup.add(
-              modelService.createFood(tile.x, tile.z, Math.random() * 400 + 100, mapScale),
+              food
             );
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
@@ -179,6 +184,16 @@ export default defineComponent({
         newPlayerPositionY,
         newPlayerPositionZ * mapScale,
       );
+    }
+
+    function makeDisappear(id: number) {
+      foodGroup.children.forEach( (food) => {
+        if (food.userData.id == id) {
+          scene.remove(food); 
+          foodGroup.remove(food); 
+          console.log(`food with Id ${id} disappeared juhu`); 
+        }
+      }); 
     }
 
     function initScene() {
