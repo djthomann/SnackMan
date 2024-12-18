@@ -10,15 +10,16 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
  */
 public class GameEndEvent extends Event {
     
-    private int winner;
-    private Map<Integer, Integer> scores;
+    /*private long id;
+    // private Map<Integer, Integer> scores;
 
-    public GameEndEvent(int winner, Map<Integer, Integer> scores) {
+    public GameEndEvent(long id) {
         this.setType(EventType.GAME_END);
-        this.winner = winner;
-        this.scores = scores;
+        this.id = id;
+        // this.winner = winner;
+        // this.scores = scores;
     }
-    public int getWinner() {
+    /*public int getWinner() {
         return winner;
     }
     public void setWinner(int winner) {
@@ -30,5 +31,13 @@ public class GameEndEvent extends Event {
     public void setScores(Map<Integer, Integer> scores) {
         this.scores = scores;
     }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }*/
 
 }

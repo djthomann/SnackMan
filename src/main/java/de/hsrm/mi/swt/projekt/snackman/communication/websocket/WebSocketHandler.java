@@ -22,16 +22,18 @@ import com.google.gson.JsonSyntaxException;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChooseRoleEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.StartGameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
+import de.hsrm.mi.swt.projekt.snackman.logic.Game;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
-import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
@@ -96,10 +98,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
-                    long gameId = 2L;  // TODO to be fixed : Hardcoded for Test Game
+                    long gameId = 2L; // TODO to be fixed : Hardcoded for Test Game
                     SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
                     gameManager.createGame(new GameConfig(), gameId, map);
-                    
+
                     // SnackManMap map = new SnackManMap(40, 40);
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH +
                     // "testFile.csv");
@@ -189,11 +191,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
 
                 case "START_GAME" -> {
-                    //TODO: hows the map handled?
+                    // TODO: hows the map handled?
                     StartGameEvent startGameEvent = gson.fromJson(jsonString, StartGameEvent.class);
                     gameManager.createGame(startGameEvent.getGameID());
                 }
 
+                case "END_GAME" -> {
+                    GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
+                    Game currGame = gameManager.getGameById(gameEndEvent.getGameID());
+                    logger.info("[CURRENT GAME] : " + gameEndEvent.getGameID());
+
+                    // TODO: current Game ist nicht mehr null -> anhand von client id und game id alle spieler herausfinden
+
+                    for (Client client : clients.values()) {
+                        long clientId = client.getClientId();
+                    }
+                }
             }
         } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
