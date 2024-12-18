@@ -16,7 +16,7 @@ public class Lobby {
     
     Logger logger = LoggerFactory.getLogger(Lobby.class);
     private final long id = IDGenerator.getInstance().getUniqueID();
-    private GameConfig gameConfig;
+    private GameConfig gameConfig = new GameConfig();
     private SnackManMap map;
     private Map<Long, Client> clientMap = new HashMap<>();
 

@@ -1,5 +1,6 @@
 export type Snackman = {
-    id: number;
+    gameId: number;
+    objectId: number;
     username: string;
     x: number;
     y: number;
@@ -8,7 +9,8 @@ export type Snackman = {
   }
 
   export type Ghost = {
-    id: number;
+    gameId: number;
+    objectId: number;
     username: string;
     x: number;
     y: number;
@@ -16,7 +18,8 @@ export type Snackman = {
   }
 
   export type Chicken = {
-    id: number;
+    gameId: number;
+    objectId: number;
     x: number;
     y: number;
     z: number;
@@ -27,7 +30,8 @@ export type Snackman = {
   
 
   export type Food = {
-    id: number;
+    gameId: number;
+    objectId: number;
     x: number;
     y: number;
     calories: number;
@@ -40,4 +44,10 @@ export type Snackman = {
     x: number;
     y: number;
     occupationType: OccupationType;
+  }
+
+  export type SnackManMap = {
+    w: number;
+    h: number;
+    allTiles: Tile[][];
   }
