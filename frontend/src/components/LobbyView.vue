@@ -134,6 +134,11 @@ onMounted(async () => {
 
 // Method, to start the game
 const startGame = () => {
+  const requestData = JSON.stringify({
+    type: "START_GAME",
+    gameID: lobbyCode.value,
+  });
+  sendMessage(requestData);
   router.push('/game/' + lobbyCode.value);
 };
 </script>

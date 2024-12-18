@@ -1,8 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
 
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -13,7 +12,8 @@ import java.util.logging.Logger;
 public class SnackManMap {
 
     // due to sidewinder (and Simon's brain):
-    // Tile at (x, z) (y is always at 0, we view the map as 2D) can be reached via allTiles[z][x],
+    // Tile at (x, z) (y is always at 0, we view the map as 2D) can be reached via
+    // allTiles[z][x],
     // or (recommended) getTileAt(x, z)
     private int w;
     private int h;
@@ -21,8 +21,10 @@ public class SnackManMap {
     private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
-     * Constructor, creates randomly generated Map object with dimensions width w and height h
+     * Constructor, creates randomly generated Map object with dimensions width w
+     * and height h
      * to ensure proper map, w and h are made odd, if not already
+     * 
      * @param w breite
      * @param h höhe
      */
@@ -35,11 +37,16 @@ public class SnackManMap {
 
     /**
      * Constructor, creates Map object on base of given csv file
-     * @param input path to file (only filename needed, no path), or contents of csv-file
-     * @param isPath true, if given String is path to map-file, otherwise would be regarded as file-content
+     * 
+     * @param input  path to file (only filename needed, no path), or contents of
+     *               csv-file
+     * @param isPath true, if given String is path to map-file, otherwise would be
+     *               regarded as file-content
      */
     public SnackManMap(String input, boolean isPath) {
-        try (BufferedReader reader = (isPath) ? new BufferedReader(new FileReader(MapGenerationConfig.SAVED_MAPS_PATH + input)) : new BufferedReader(new StringReader(input))){
+        try (BufferedReader reader = (isPath)
+                ? new BufferedReader(new FileReader(MapGenerationConfig.SAVED_MAPS_PATH + input))
+                : new BufferedReader(new StringReader(input))) {
             parseFileContent(reader);
         } catch (IOException e) {
             logger.warning("Something went wrong while loading file:");
@@ -59,7 +66,8 @@ public class SnackManMap {
             String[] tokens = line.split(",");
 
             if (numTokens != 0) {
-                if (numTokens != tokens.length) throw new IOException("changing number of tokens per line");
+                if (numTokens != tokens.length)
+                    throw new IOException("changing number of tokens per line");
             } else {
                 numTokens = tokens.length;
             }
@@ -85,26 +93,6 @@ public class SnackManMap {
         h = allTiles.length;
         w = allTiles[0].length;
 
-        createFood();
-    }
-
-    private void createFood() {
-        Random r = new Random();
-        for (int row = 0; row < h; row++) {
-            for (int col = 0; col < w; col++) {
-                if (allTiles[row][col].getOccupationType() == OccupationType.ITEM) {
-                    FoodType foodType = FoodType.OKAY;
-                    if (r.nextBoolean()) {
-                        if (r.nextBoolean()) {
-                            foodType = FoodType.HEALTHY;
-                        } else {
-                            foodType = FoodType.UNHEALTHY;
-                        }
-                    }
-                    allTiles[row][col].setOccupation(new Food(0,col, row, foodType));
-                }
-            }
-        }
     }
 
     /**
@@ -121,6 +109,7 @@ public class SnackManMap {
                     occupationType = OccupationType.ITEM;
                 }
                 allTiles[z][x] = new Tile(x, z, occupationType);
+                allTiles[z][x].setOccupation(null);
             }
         }
     }
@@ -139,7 +128,7 @@ public class SnackManMap {
             List<Integer> run = new ArrayList<>();
             Set<Integer> cellUp;
 
-            for (int cell = 1; cell < w-2; cell += 2) {
+            for (int cell = 1; cell < w - 2; cell += 2) {
                 run.add(cell);
                 closed = cell == w - 2 || r.nextDouble() < MapGenerationConfig.SIDEWINDER_ODDS;
                 if (closed) {
@@ -154,8 +143,7 @@ public class SnackManMap {
                         }
                     }
                     run.clear();
-                }
-                else {
+                } else {
                     allTiles[row][cell + 1].setOccupationType(OccupationType.ITEM);
                 }
             }
@@ -166,7 +154,7 @@ public class SnackManMap {
 
         // for odd h: create empty row in the middle
         for (int i = 1; i < w - 1; i++) {
-            allTiles[h/2][i].setOccupationType(OccupationType.ITEM);
+            allTiles[h / 2][i].setOccupationType(OccupationType.ITEM);
         }
 
         // to prevent players from being trapped, create two horizontal paths
@@ -183,7 +171,8 @@ public class SnackManMap {
         int middleH = h / 2;
         for (int row = 0; row < spawnWidth; row++) {
             for (int col = 0; col < spawnHeight; col++) {
-                allTiles[middleH - (spawnHeight / 2) + col][middleW - (spawnWidth / 2) + row].setOccupationType(OccupationType.FREE);
+                allTiles[middleH - (spawnHeight / 2) + col][middleW - (spawnWidth / 2) + row]
+                        .setOccupationType(OccupationType.FREE);
             }
         }
 
@@ -192,18 +181,17 @@ public class SnackManMap {
         allTiles[1][w - 2].setOccupationType(OccupationType.FREE);
         allTiles[h - 2][1].setOccupationType(OccupationType.FREE);
         allTiles[h - 2][w - 2].setOccupationType(OccupationType.FREE);
-
-        createFood();
     }
 
     /**
      * mirrors upper on lower half
+     * 
      * @param h height of map
      */
     private void mirror(int h) {
         for (int i = 0; i < h / 2; i++) {
             for (int x = 0; x < w; x++) {
-                allTiles[(h-1) - i][x].setOccupationType(allTiles[i][x].getOccupationType());
+                allTiles[(h - 1) - i][x].setOccupationType(allTiles[i][x].getOccupationType());
             }
         }
     }
@@ -244,55 +232,61 @@ public class SnackManMap {
     public Tile[][] getAllTiles() {
         return allTiles;
     }
-    
+
     /**
-     * returns the current environment around the given tile 
+     * returns the current environment around the given tile
      *
-     * @param tile the tile in the center 
-     * @return 3x3 map with the surrounding tiles, where 'null' stands for outside positions (Prevention of ArrayindexoutofBoundsException)
+     * @param tile the tile in the center
+     * @return 3x3 map with the surrounding tiles, where 'null' stands for outside
+     *         positions (Prevention of ArrayindexoutofBoundsException)
      */
-    public Tile[][] getSurroundingTiles(Tile tile) {  
-        
-        Tile[][] surroudings = new Tile [3][3]; 
+    public Tile[][] getSurroundingTiles(Tile tile) {
+
+        Tile[][] surroudings = new Tile[3][3];
 
         for (int offsetZ = -1; offsetZ <= 1; offsetZ++) {
             for (int offsetX = -1; offsetX <= 1; offsetX++) {
-                int tileX = tile.getX() + offsetX; 
-                int tileY = tile.getZ() + offsetZ; 
+                int tileX = tile.getX() + offsetX;
+                int tileY = tile.getZ() + offsetZ;
 
-                if (tileX >=0 && tileX <w && tileY >= 0 && tileY < h) {
-                    surroudings[offsetX + 1][offsetZ + 1] = allTiles [tileY][tileX]; 
+                if (tileX >= 0 && tileX < w && tileY >= 0 && tileY < h) {
+                    surroudings[offsetX + 1][offsetZ + 1] = allTiles[tileY][tileX];
                 } else {
-                    surroudings[offsetX + 1][offsetZ + 1] = null; //outside the map
+                    surroudings[offsetX + 1][offsetZ + 1] = null; // outside the map
 
                 }
             }
         }
 
-        return surroudings; 
+        return surroudings;
     }
 
     public int getW() {
         return w;
     }
-    
+
     public int getH() {
         return h;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (! (o instanceof SnackManMap other)) {
+        if (!(o instanceof SnackManMap other)) {
             return false;
         }
 
         for (int row = 0; row < h; row++) {
             for (int col = 0; col < w; col++) {
-                if (this.allTiles[row][col].getOccupationType() != other.allTiles[row][col].getOccupationType()) return false;
+                if (this.allTiles[row][col].getOccupationType() != other.allTiles[row][col].getOccupationType())
+                    return false;
             }
         }
 
         return true;
     }
 
+    public Food getFoodOfTile(Tile tile) {
+        Food food = (Food) tile.getOccupation();
+        return food;
+    }
 }

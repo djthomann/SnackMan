@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
@@ -20,12 +22,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterGhostEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterSnackmanEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
@@ -34,7 +32,7 @@ import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
 public class WebSocketHandler extends TextWebSocketHandler {
 
     Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
-    GameManager gameManager = new GameManager(this, "test");
+    GameManager gameManager = new GameManager(this);
 
     Map<WebSocketSession, Client> clients = new HashMap<>();
 
@@ -70,7 +68,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                             RegisterSnackmanEvent.class);
 
                     clients.get(session).setUsername(registerSnackmanEvent.getUsername());
-                    clients.get(session).setRole(registerSnackmanEvent.getRole());
+                    clients.get(session).setRole(GameObjectType.SNACKMAN);
                 }
                 // User registered as Ghost
                 case "REGISTERGHOST" -> {
@@ -78,19 +76,29 @@ public class WebSocketHandler extends TextWebSocketHandler {
                             RegisterGhostEvent.class);
 
                     clients.get(session).setUsername(registerGhostEvent.getUsername());
-                    clients.get(session).setRole(registerGhostEvent.getRole());
+                    clients.get(session).setRole(GameObjectType.GHOST);
                 }
-                // User registered without Role
+                /**
+                 * User registers without Role, sets Unsername and sends back Client ID for
+                 * later use...
+                 */
                 case "REGISTERUSERNAME" -> {
                     RegisterUsernameEvent registerUsernameEvent = gson.fromJson(jsonString,
                             RegisterUsernameEvent.class);
 
                     clients.get(session).setUsername(registerUsernameEvent.getUsername());
+                    ClientIdEvent event = new ClientIdEvent(clients.get(session).getClientId());
+                    String json = gson.toJson(event);
+                    logger.info("Final JSON for event" + event.getType().toString() + "; " + json);
+                    session.sendMessage(new TextMessage(event.getType().toString() + ";" + json));
                 }
                 case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
+                    long gameId = 2L;  // TODO to be fixed : Hardcoded for Test Game
                     SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
+                    gameManager.createGame(new GameConfig(), gameId, map);
+                    
                     // SnackManMap map = new SnackManMap(40, 40);
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH +
                     // "testFile.csv");
@@ -126,7 +134,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
                 case "MOVE" -> {
                     MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);
-                    logger.info("GameId: " + moveEvent.getGameID() + "Vector x: " + moveEvent.getMovementVector().x);
+                    logger.info("GameId: " + moveEvent.getGameID() + " | Vector x: " + moveEvent.getMovementVector().x
+                            + " | Vector y: " + moveEvent.getMovementVector().y + " | Vector z: "
+                            + moveEvent.getMovementVector().z);
                     gameManager.handleEvent(moveEvent);
                 }
                 case "SET_GAME_CONFIG" -> {
@@ -164,16 +174,25 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     LobbyCreateEvent lobbyCreateEvent = gson.fromJson(jsonString, LobbyCreateEvent.class);
                     Lobby newLobby = null;
 
-                    if (lobbyCreateEvent.getId() == 0) { newLobby = gameManager.createLobby(); }
-                    logger.info("Lobby with ID: "+newLobby.getId()+"created");
+                    if (lobbyCreateEvent.getId() == 0) {
+                        newLobby = gameManager.createLobby();
+                    }
+                    logger.info("Lobby with ID: " + newLobby.getId() + "created");
                 }
                 case "LOBBY_SHOW_EVENT" -> {
                     ObjectMapper mapper = new ObjectMapper();
                     String json = mapper.writeValueAsString(gameManager.getAllLobbies());
                     String returnString = "ALL_LOBBIES;" + json;
-                    logger.info("Show all Lobbies: "+returnString);
+                    logger.info("Show all Lobbies: " + returnString);
                     session.sendMessage(new TextMessage(returnString));
                 }
+
+                case "START_GAME" -> {
+                    //TODO: hows the map handled?
+                    StartGameEvent startGameEvent = gson.fromJson(jsonString, StartGameEvent.class);
+                    gameManager.createGame(startGameEvent.getGameID());
+                }
+
             }
         } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
