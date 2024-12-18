@@ -91,15 +91,15 @@ public class GameManager {
         allGames.put(id, allLobbies.get(id).startGame(this));
     }
 
-    public void setGameConfig(GameConfig gameConfig, long gameID) {
-        allGames.get(gameID).setGameConfig(gameConfig);
+    public void setGameConfig(GameConfig gameConfig, long lobbyID) {
+        allLobbies.get(lobbyID).setGameConfig(gameConfig);
     }
 
-    public GameConfig getGameConfig(long gameID) {
-        if (allGames.get(gameID) == null) {
+    public GameConfig getGameConfig(long lobbyID) {
+        if (allLobbies.get(lobbyID) == null) {
             return this.gameConfig;
         }
-        return allGames.get(gameID).getGameConfig(); 
+        return allLobbies.get(lobbyID).getGameConfig();
     }
 
     public Lobby createLobby(){

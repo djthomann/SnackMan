@@ -62,6 +62,11 @@ class ModelService {
     const loadPromises = Object.entries(this.models).map(([name, url]) =>
       this.loadModel(url).then((modelData) => {
         this.modelCache.set(name, modelData); // Store scene in cache
+        if(modelData.animations.length > 0) {
+            this.animationCache.set(name, modelData);
+            console.log('Animation added to Cache');
+          
+        }
       }),
     );
 
