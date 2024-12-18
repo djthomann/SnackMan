@@ -123,7 +123,6 @@ export default defineComponent({
         for (const tile of row) {
           const occupationType = tile.occupationType;
           if (occupationType == 'WALL') {
-            // console.log(tile)
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
             foodGroup.add(
@@ -131,8 +130,9 @@ export default defineComponent({
             );
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
-            if (occupation != null){ // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
-              const chicken = modelService.createChicken(tile.x* mapScale, tile.z*mapScale);
+            if (occupation != null) {
+              // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
+              const chicken = modelService.createChicken(tile.x * mapScale, tile.z * mapScale);
               chickenGroup.add(chicken);
             }
           }
@@ -150,13 +150,12 @@ export default defineComponent({
       } else {
         console.log('Animation not found');
       }
-      
+
       scene.add(wallsGroup);
 
       scene.add(foodGroup);
 
       const floor = modelService.createFloorTile(w, h, mapScale);
-      // console.log('Creating Floor with: ' + w + '|' + h);
       scene.add(floor);
 
       player.position.set(w / 2, mapScale, h / 2);
@@ -406,7 +405,6 @@ export default defineComponent({
 
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            //console.log('Face Forward');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
@@ -415,12 +413,10 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            //console.log('Turn Forward Right');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
             // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            //console.log('Turn Right');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
@@ -429,7 +425,6 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            //console.log('Turn Backward Right');
             cone.rotation.z = THREE.MathUtils.lerp(
               currentAngle,
               -Math.PI / 2 - Math.PI / 4,
@@ -442,7 +437,6 @@ export default defineComponent({
             angleYCameraDirection < 0.125 &&
             angleYCameraDirection > -0.125
           ) {
-            //console.log('Turn Backwards');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
@@ -451,7 +445,6 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            //console.log('Turn Backward Left');
             cone.rotation.z = THREE.MathUtils.lerp(
               currentAngle,
               Math.PI / 2 + Math.PI / 4,
@@ -460,7 +453,6 @@ export default defineComponent({
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            //console.log('Turn Left');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
@@ -469,7 +461,6 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            //console.log('Turn Forward Left');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
           }
         }

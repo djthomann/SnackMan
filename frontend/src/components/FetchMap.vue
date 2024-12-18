@@ -26,14 +26,14 @@ const logger = new Logger();
 
 const requestMap = () => {
   if (!mapLoaded.value) {
-    console.log('loading map');
+    logger.info('loading map');
     const map = {
       type: 'MAPREQUEST',
     };
     sendMessage(JSON.stringify(map));
     mapLoaded.value = true;
   } else {
-    console.log('loaded map already');
+    logger.info('loaded map already');
   }
 };
 
@@ -60,7 +60,7 @@ const uploadMap = () => {
       };
     }
   } else {
-    console.log('loaded map already');
+    logger.info('loaded map already');
   }
 };
 
@@ -68,7 +68,7 @@ const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target && target.files) {
     file.value = target.files[0];
-    console.log('file loaded');
+    logger.info('file loaded');
   }
 };
 </script>

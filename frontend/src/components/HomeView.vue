@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Home</h1>
-    <p>Welcome, {{ name }} with the ID {{  id  }}</p>
+    <p>Welcome, {{ name }} with the ID {{ id }}</p>
 
     <h2>Lobbies</h2>
     <ul>
@@ -32,7 +32,7 @@ const router = useRouter();
 const lobbyCode = ref('');
 const serverMessage = ref<string>('');
 const name = computed(() => userStore.username || 'Guest');
-const id = computed(() => userStore.id || 0 );
+const id = computed(() => userStore.id || 0);
 const maxPlayers = 8;
 const userStore = useUserStore();
 
@@ -46,7 +46,7 @@ const handleServerMessage = (message: string) => {
   serverMessage.value = message;
   if (message.startsWith('ALL_LOBBIES')) {
     lobbies.value = JSON.parse(message.split(';')[1]);
-    console.log("ALL LOBIES"+lobbies.value);
+    console.log('ALL LOBBIES' + lobbies.value);
   }
 };
 
