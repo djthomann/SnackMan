@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.DisappearEvent;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
@@ -18,9 +19,12 @@ public class CollisionManager {
     private SnackManMap snackManMap;
     private ArrayList<MovableAndSubscribable> allMovables;
     Logger logger = LoggerFactory.getLogger(GameManager.class);
-
-    public CollisionManager(SnackManMap snackManMap, ArrayList<MovableAndSubscribable> allMovables) {
+    private Game game;
+    
+    // game here is temporary (until PR-- collision s-G is merged)
+    public CollisionManager(Game game, SnackManMap snackManMap, ArrayList<MovableAndSubscribable> allMovables) {
         this.snackManMap = snackManMap;
+        this.game = game; 
         this.allMovables = allMovables;
     }
 
@@ -54,6 +58,9 @@ public class CollisionManager {
                     
                     if (distance < (collisionPartner.getRadius() + nearbyFood.getRadius())) {
                         ((SnackMan) collisionPartner).eat(nearbyFood);
+                        GameManager gameManager = game.getGameManager(); 
+                        DisappearEvent event = new DisappearEvent(game.id, nearbyFood); 
+                        gameManager.notifyChange(event);
                         wishedTile.setOccupationType(OccupationType.FREE);
                         return "item";
                     }
