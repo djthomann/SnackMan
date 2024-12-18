@@ -42,8 +42,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * @param x          the initial x-coordinate of the Chicken
      * @param y          the initial y-coordinate of the Chicken
      * @param z          the initial z-coordinate of the Chicken
-     * @param scriptPath the path of the associated behavior script //"test" for
-     *                   testscript
      * @param gameConfig the configuration of the game
      */
 
