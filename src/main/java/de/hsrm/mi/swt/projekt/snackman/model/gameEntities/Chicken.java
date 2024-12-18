@@ -1,6 +1,9 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.python.core.PyObject;
 import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
@@ -30,6 +33,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
 
+    // Variables for passive calorie gain
+    private int passiveCalorieGain;
+    private int passiveCalorieGainDelay;
+    private Timer passiveCaloriesTimer;
+
     /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
 
@@ -52,6 +60,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.collisionManager = collisionManager;
         this.gameManger = gameManager;
         this.gainedCalories = 0;
+        //Timer for constant passive calorie gain
+        this.passiveCalorieGain = 10;
+        this.passiveCalorieGainDelay = 1000; //in ms
+        this.passiveCaloriesTimer = new Timer();
+        startPassiveCaloriesTimer();
         // choose script file
         this.scriptInterpreter = new PythonInterpreter();
         String scriptFile = script.equals("test")
@@ -158,6 +171,29 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         }
 
         logger.info("Event arrived at chicken: " + event.toString());
+
+    }
+
+    private void startPassiveCaloriesTimer() {
+
+        logger.info("Chicken " + objectId + " passive calorie gain started");
+
+        TimerTask task;
+        task = new TimerTask() {
+            
+            @Override
+            public void run() {
+
+                //logger.info("\n \nChicken with id " + objectId + " has passively gained calories");
+                //logger.info(objectId + " previous calories: " + gainedCalories);
+
+                gainedCalories += passiveCalorieGain;
+
+                //logger.info(objectId + " current calories: " + gainedCalories);
+            }
+        };
+
+        this.passiveCaloriesTimer.scheduleAtFixedRate(task, 0, passiveCalorieGainDelay);
 
     }
 
