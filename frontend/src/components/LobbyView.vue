@@ -111,6 +111,8 @@ const handleServerMessage = (message: string) => {
   serverMessage.value = message;
   if (message.startsWith('GAME_CONFIG')) {
     gameConfig.value = JSON.parse(message.split(';')[1]);
+  } else if (message.startsWith('GAME_START')) {
+    router.push('/game/' + lobbyCode.value);
   }
 };
 

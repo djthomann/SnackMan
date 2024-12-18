@@ -1,48 +1,39 @@
-import type { Food, Ghost, Snackman, Tile } from "@/types/SceneTypes";
+import type { Ghost, Snackman, SnackManMap, Chicken } from "@/types/SceneTypes";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import useWebSocket from '@/services/socketService';
+import eventBus from '@/services/eventBus';
+import { update } from "three/examples/jsm/libs/tween.module.js";
 
 export const useEntityStore = defineStore('entityStore', () => {
 
-    const ghosts = ref<Ghost[]>([
-        {
-          id: 3,
-          username: 'Booo',
-          x: 1,
-          y: 2,
-          z: 0,
-        } as Ghost,
-  ]);
-    const snackmen = ref<Snackman[]>([
-        {
-            id: 1,
-            username: 'Snacko',
-            x: 1,
-            y: 1,
-            z: 0,
-            gainedCalories: 10,
-          } as Snackman,
-          {
-            id: 2,
-            username: 'Snackish',
-            x: 2,
-            y: 2,
-            z: 0,
-            gainedCalories: 10,
-          } as Snackman,
-    ]);
+  const { sendMessage } = useWebSocket();
+  const serverMessage = ref<string>('');
 
-    const foods = ref<Food[]>([]);
+  const handleServerMessage = (message: string) => {
+    serverMessage.value = message;
+    if (message.startsWith('GAME_START')) {
+      let data = JSON.parse(message);
+      ghosts.value = data.ghosts;
+      snackMen.value = data.snackMen;
+      chicken.value = data.foods;
+      map.value = data.map;
+    } else if (message.startsWith('GAME_STATE')) {
 
-    // TODO: add floor once it's type etc is known
-
-    const tiles = ref<Tile[]>([]);
-
-
-    return {
-        snackmen,
-        ghosts,
-        foods,
-        tiles
     }
+  }
+
+  eventBus.on('serverMessage', handleServerMessage);
+
+  const ghosts = ref<Ghost[]>([]);
+  const snackMen = ref<Snackman[]>([]);
+  const chicken = ref<Chicken[]>([]);
+  const map = ref<SnackManMap>();
+
+  return {
+    snackMen,
+    ghosts,
+    chicken,
+    map
+  }
 })
