@@ -16,7 +16,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.Mo
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
-
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 /**
  * The `SnackMan` class represents a player character in the game who has an
  * initial position on a plane and has a calorie count.
@@ -271,6 +271,10 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         }
 
         logger.info("Event arrived at SnackMan :" + event.toString());
+    }
+
+    public SnackManRecord toRecord() {
+        return new SnackManRecord(gameId, objectId, getUsername(), x, y, z, gainedCalories);
     }
 
 }
