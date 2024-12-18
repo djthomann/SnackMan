@@ -16,14 +16,14 @@ import { ref } from 'vue';
 
 const { sendMessage } = useWebSocket();
 
-let mapLoaded = ref<boolean>(false);
+const mapLoaded = ref<boolean>(false);
 const file = ref<File | null>();
 const reader = FileReader;
 
 const requestMap = () => {
   if (!mapLoaded.value) {
     console.log('loading map');
-    let map = {
+    const map = {
       type: 'MAPREQUEST',
     };
     sendMessage(JSON.stringify(map));
@@ -43,7 +43,7 @@ const uploadMap = () => {
       reader.onload = () => {
         const fileContent = reader.result as string;
 
-        let map = {
+        const map = {
           type: 'MAPUPLOAD',
           content: fileContent,
         };
