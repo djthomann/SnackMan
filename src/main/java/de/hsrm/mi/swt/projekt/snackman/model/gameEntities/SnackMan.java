@@ -16,21 +16,21 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.Mo
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
-
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 /**
  * The `SnackMan` class represents a player character in the game who has an
  * initial position on a plane and has a calorie count.
- * 
  * This class extends `PlayerObject` and adds the ability to track and modify
  * the calorie count of the `SnackMan`.
  * 
  * 
  */
-public class SnackMan extends GameObject implements CanEat, MovableAndSubscribable {
+public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscribable {
 
-    private Logger logger = LoggerFactory.getLogger(SnackMan.class);
+    private final Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
     // Jumping constants
+    // TODO: put into real config file
     private final float GRAVITY = -9.81f; // Gravity constant for physically realistic jumping
     private final float INITIAL_VELOCITY = 8.0f; // Initial velocity at the start of the jump
     private final float JUMP_BOOST = 5.0f; // Boost applied to the current jump if the SnackMan is already jumping and
@@ -65,9 +65,9 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
      * @param y the initial y-coordinate of the `SnackMan`
      * @param z the initial z-coordinate of the `SnackMan`
      */
-    public SnackMan(long id, long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
+    public SnackMan(String username, long id, long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
             CollisionManager collisionManager) {
-        super(id, gameId, x, y, z, gameConfig.getSnackManRadius());
+        super(username, id, gameId, x, y, z, gameConfig.getSnackManRadius());
         this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
 
@@ -271,6 +271,10 @@ public class SnackMan extends GameObject implements CanEat, MovableAndSubscribab
         }
 
         logger.info("Event arrived at SnackMan :" + event.toString());
+    }
+
+    public SnackManRecord toRecord() {
+        return new SnackManRecord(gameId, objectId, getUsername(), x, y, z, gainedCalories);
     }
 
 }
