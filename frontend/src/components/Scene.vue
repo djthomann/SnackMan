@@ -307,7 +307,7 @@ export default defineComponent({
         forward.y = 0;
         forward.normalize();
         let vector = new THREE.Vector3(0, 0, 0);
-        const angle = Math.PI / 2;
+        //const angle = Math.PI / 2;
         const rotationAxis = new THREE.Vector3(0, 1, 0);
 
         if (keyPressedArray.includes('w')) {
@@ -315,7 +315,8 @@ export default defineComponent({
         }
 
         if (keyPressedArray.includes('a')) {
-          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, angle).normalize());
+          let linksVector = new THREE.Vector3(forward.z, 0, -forward.x);
+          vector = vector.add(linksVector.normalize());
         }
 
         if (keyPressedArray.includes('s')) {
@@ -323,7 +324,8 @@ export default defineComponent({
         }
 
         if (keyPressedArray.includes('d')) {
-          vector = vector.add(forward.clone().applyAxisAngle(rotationAxis, -angle).normalize());
+          let rechtsVector = new THREE.Vector3(-forward.z, 0, forward.x);
+          vector = vector.add(rechtsVector.normalize());
         }
 
         if (keyPressedArray.includes(' ')) {

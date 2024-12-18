@@ -3,6 +3,7 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +22,14 @@ public class GameManager {
 
     Logger logger = LoggerFactory.getLogger(GameManager.class);
     
-    public HashMap<Long, Game> allGames;
-    public HashMap<Long, Lobby> allLobbies;
-    private WebSocketHandler webSocketHandler;
+    private final Map<Long, Game> allGames = new HashMap<>();
+    private final Map<Long, Lobby> allLobbies = new HashMap<>();
+    private final WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
 
+    // TODO: To Be Deleted , Constructor for testing purposes with fake game
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
-        this.allGames = new HashMap<Long, Game>();
-        this.allLobbies = new HashMap<Long, Lobby>();
-
         //createGame(gameConfig, IDGenerator.getInstance().getUniqueID()); // Game Creation in websocket by MapRquest Event
     }
 
@@ -48,9 +47,13 @@ public class GameManager {
      * @param event
      */
     public void handleEvent(Event event) {
+
         logger.info("handleEvent\n");
+
         if (allGames.containsKey(event.getGameID())) {
+
             allGames.get(event.getGameID()).receiveEvent(event);
+
         }
     }
 
@@ -78,26 +81,14 @@ public class GameManager {
         // SnackManMap map = new SnackManMap(gameConfig.mapWidth, gameConfig.mapHeight);
         //SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
         // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
-        
+
         Game newGame = new Game(id, gameConfig, map, this);
         newGame.init(); // Add Objects
         allGames.put(newGame.id, newGame);
     }
 
-    /**
-     * Creates a new game with a unique objectId, the specified gameConfig and Moveables,
-     * and creates a map from the given csv file
-     * 
-     * @param gameConfig
-     * @param id
-     * @param mapFile
-     */
-    public void createGame(GameConfig gameConfig, long id, String mapFile) {
-
-        SnackManMap map = new SnackManMap(mapFile, true);
-
-        Game newGame = new Game(id, gameConfig, map, this);
-        allGames.put(newGame.id, newGame);
+    public void createGame(long id) {
+        allGames.put(id, allLobbies.get(id).startGame(this));
     }
 
     public void setGameConfig(GameConfig gameConfig, long gameID) {
@@ -121,4 +112,9 @@ public class GameManager {
     public List<Lobby> getAllLobbies() {
         return new ArrayList<>(allLobbies.values());
     }
+
+    public Map<Long, Lobby> getLobbyMap() {
+        return allLobbies;
+    }
+
 }
