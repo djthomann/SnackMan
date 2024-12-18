@@ -28,6 +28,7 @@ export type Snackman = {
 
   export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY';
   
+
   export type Food = {
     gameId: number;
     objectId: number;
