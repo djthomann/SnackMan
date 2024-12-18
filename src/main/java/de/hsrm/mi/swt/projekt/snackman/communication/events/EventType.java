@@ -5,7 +5,8 @@ package de.hsrm.mi.swt.projekt.snackman.communication.events;
  */
 public enum EventType {
     MOVE, 
-    REGISTER_SNACKMAN, REGISTER_GHOST, REGISTER_USERNAME, 
+    REGISTER_USERNAME,
+    CHOOSE_ROLE, 
     COLLISION, 
     GAME_CONFIG, 
     GAME_STATE, GAME_START, GAME_END, 
