@@ -1,6 +1,5 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +49,7 @@ public class Lobby {
     }
 
     public Game startGame(GameManager gameManager) {
+        if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
         return new Game(this, gameManager);
     }
 
