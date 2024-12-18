@@ -1,5 +1,25 @@
 <template>
   <h1>Lobby {{ lobbyCode }}</h1>
+  <button @click="choose('SnackMan')">Choose SnackMan</button>
+  <button @click="choose('Ghost')">Choose Ghost</button>
+  <h3>SnackMan</h3>
+  <ul>
+    <li v-for="player in snackManPlayers" :key="player.id">
+      {{ player.name }}
+    </li>
+  </ul>
+  <h3>Ghosts</h3>
+  <ul>
+    <li v-for="player in ghostPlayers" :key="player.id">
+      {{ player.name }}
+    </li>
+  </ul>
+  <h3>Undecided Players</h3>
+  <ul>
+    <li v-for="player in undecidedPlayers" :key="player.id">
+      {{ player.name }}
+    </li>
+  </ul>
   <form @submit.prevent="submitForm" id="gameConfig" :action="`/lobby/${lobbyCode}`" method="POST">
     <label for="scoreToWin">Score to Win:</label><br />
     <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" /><br /><br />
@@ -39,15 +59,25 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
+import { useUserStore } from '@/stores/userStore';
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
 const router = useRouter();
 const lobbyCode = ref(Number(route.params.code));
 const serverMessage = ref<string>('');
+const userStore = useUserStore();
+const name = computed(() => userStore.username);
+const clientID = computed(() => userStore.id); 
+const snackManPlayers = ref<Array<{ id: number; name: string }>>([]);
+const ghostPlayers = ref<Array<{ id: number; name: string }>>([]);
+const undecidedPlayers = ref<Array<{ id: number; name: string }>>([
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' },
+]);
 
 // Type definition of GameConfig interface
 interface GameConfig {
@@ -82,15 +112,15 @@ const handleServerMessage = (message: string) => {
   if (message.startsWith('GAME_CONFIG')) {
     gameConfig.value = JSON.parse(message.split(';')[1]);
   }
-}
+};
 
 // Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
   const data = JSON.stringify({
-    type: "SET_GAME_CONFIG",
+    type: 'SET_GAME_CONFIG',
     gameID: lobbyCode.value,
     objectID: 0,
-    gameConfig: gameConfig.value
+    gameConfig: gameConfig.value,
   });
   sendMessage(data);
 };
@@ -98,20 +128,19 @@ const submitForm = async () => {
 // On Reset-Button press, send message to BE with gameID: 0, to signify default value request
 const resetForm = async () => {
   const reset = JSON.stringify({
-    type: "GET_GAME_CONFIG",
+    type: 'GET_GAME_CONFIG',
     gameID: 0,
-  })
+  });
   sendMessage(reset);
-}
+};
 
 // Automatic call on load
 onMounted(async () => {
-
   // Method, to wait until Connection is established
   const awaitConnection = () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve("Connected");
+        resolve('Connected');
       }, 1000);
     });
   };
@@ -123,24 +152,36 @@ onMounted(async () => {
   try {
     await awaitConnection();
     const requestData = JSON.stringify({
-      type: "GET_GAME_CONFIG",
+      type: 'GET_GAME_CONFIG',
       gameID: lobbyCode.value,
     });
     sendMessage(requestData);
   } catch (e) {
-    console.log("Failed to fetch Data on load: ", e);
+    console.log('Failed to fetch Data on load: ', e);
   }
 });
 
 // Method, to start the game
 const startGame = () => {
   const requestData = JSON.stringify({
-    type: "START_GAME",
+    type: 'START_GAME',
     gameID: lobbyCode.value,
   });
   sendMessage(requestData);
   router.push('/game/' + lobbyCode.value);
 };
+
+const choose = (role: string) => {
+    const message = JSON.stringify({
+      type: "CHOOSEROLE",
+      clientID: clientID.value,
+      username: name.value,
+      gameID: lobbyCode.value,
+      isSnackMan: role === 'SnackMan' ? true : false,
+    });
+    sendMessage(message);
+  };
+
 </script>
 
 <style scoped></style>

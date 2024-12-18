@@ -18,7 +18,6 @@ const { sendMessage } = useWebSocket();
 
 const mapLoaded = ref<boolean>(false);
 const file = ref<File | null>();
-const reader = FileReader;
 
 const requestMap = () => {
   if (!mapLoaded.value) {
