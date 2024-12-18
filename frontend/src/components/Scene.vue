@@ -20,9 +20,7 @@ import NameTag from '@/services/nameTagService';
 let wallsGroup: THREE.Group;
 // let floorGroup: THREE.Group
 let foodGroup: THREE.Group;
-
-let chickenModel: THREE.Group;
-let brokkoliModel: THREE.Group;
+let chickenGroup: THREE.Group;
 
 // mesh for walls
 let box: THREE.Mesh;
@@ -131,36 +129,27 @@ export default defineComponent({
             foodGroup.add(
               modelService.createFood(tile.x, tile.z, Math.random() * 400 + 100, mapScale),
             );
+          } else if (occupationType == 'FREE') {
+            const occupation = tile.occupation;
+            if (occupation != null){ // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
+              const chicken = modelService.createChicken(tile.x* mapScale, tile.z*mapScale);
+              chickenGroup.add(chicken);
+            }
           }
         }
       }
 
-      /*
-      console.log('getting chicken');
-      chickenModel = modelService.getModel('chicken');
+      scene.add(chickenGroup);
 
-      // Test Chicken
-      if (chickenModel) {
-        console.log('ChickenModel loaded');
-        const chicken = chickenModel.clone();
-        chicken.castShadow = true;
-        chicken.scale.set(4, 4, 4);
-        chicken.position.set(w / 2, 0, h / 2);
-        console.log('Chicken at:', chicken.position);
-        chicken.rotation.y = -45;
-        scene.add(chicken);
+      animationMixer = new THREE.AnimationMixer(chickenGroup);
+      const chickenAnimations = modelService.getAnimations('chicken');
 
-        //Animation
-        animationMixer = new THREE.AnimationMixer(chicken);
-        const chickenAnimations = modelService.getAnimations('chicken');
-        if (chickenAnimations.length > 0) {
-          const action = animationMixer.clipAction(chickenAnimations[0]);
-          action.play();
-        } else {
-          console.log('Animation not found');
-        }
+      if (chickenAnimations.length > 0) {
+        const action = animationMixer.clipAction(chickenAnimations[0]);
+        action.play();
+      } else {
+        console.log('Animation not found');
       }
-      */
       
       scene.add(wallsGroup);
 
@@ -200,6 +189,7 @@ export default defineComponent({
       wallsGroup = new THREE.Group();
       // floorGroup = new THREE.Group()
       foodGroup = new THREE.Group();
+      chickenGroup = new THREE.Group();
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);

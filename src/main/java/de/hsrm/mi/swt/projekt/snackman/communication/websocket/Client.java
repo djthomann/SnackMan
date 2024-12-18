@@ -13,7 +13,7 @@ public class Client {
     private long clientId;
 
     private String username;
-    private GameObject role;
+    private GameObjectType role;
     private WebSocketSession session;
 
     public Client(WebSocketSession session) {
@@ -36,11 +36,11 @@ public class Client {
         this.username = username;
     }
 
-    public GameObject getRole() {
+    public GameObjectType getRole() {
         return role;
     }
 
-    public void setRole(GameObject role) {
+    public void setRole(GameObjectType role) {
         this.role = role;
     }
 
