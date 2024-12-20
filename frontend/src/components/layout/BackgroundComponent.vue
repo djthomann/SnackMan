@@ -23,6 +23,9 @@
                 </div>
                 
             </div>
+            <div class="background__content">
+                <slot></slot>
+            </div>
         </div>
     </div>
 </template>
@@ -43,9 +46,9 @@
 }
 
 .background__container {
-    width: 90dvw;
+    width: 92dvw;
     max-width: 1440px;
-    height: calc(100% - 10dvw);
+    height: calc(100% - 8dvw);
     max-height: 770px;
     position: relative;
     z-index: 2;
@@ -77,7 +80,9 @@
 }
 
 .background__sheet-tile--stretch {
-    width:100%;
+    width:calc(100% + 2px);
+    margin-left: -1px;
+    margin-right: -1px;
 }
 
 .background__sheet-tile--left .background__sheet-image,
@@ -92,5 +97,10 @@
     height: 100%;
 }
 
+.background__content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 
 </style>
