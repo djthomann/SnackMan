@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
 
 public class Tile {
@@ -53,6 +54,10 @@ public class Tile {
     }
 
     public TileRecord toRecord () {
-        return new TileRecord(x, z, occupationType, foodOnTile.toRecord());
+        FoodRecord foodRecord = null;
+        if (foodOnTile != null) {
+            foodRecord = foodOnTile.toRecord();
+        }
+        return new TileRecord(x, z, occupationType, foodRecord);
     }
 }

@@ -13,7 +13,7 @@ export const useEntityStore = defineStore('entityStore', () => {
   const handleServerMessage = (message: string) => {
     serverMessage.value = message;
     if (message.startsWith('GAME_START')) {
-      let data = JSON.parse(message);
+      let data = JSON.parse(message.split(';')[1]);
       ghosts.value = data.ghosts;
       snackMen.value = data.snackMen;
       chicken.value = data.foods;
@@ -22,6 +22,7 @@ export const useEntityStore = defineStore('entityStore', () => {
 
     }
   }
+
   eventBus.on('serverMessage', handleServerMessage);
 
   const ghosts = ref<Ghost[]>([]);
