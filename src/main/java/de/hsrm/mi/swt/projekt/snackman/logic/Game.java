@@ -36,9 +36,6 @@ public class Game {
     public long id;
     private GameConfig gameConfig;
     private ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
-    // private ArrayList<Food> allFoods; TODO might not be required here and only in
-    // Map
-    //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
     private Timer timer = new Timer();
     private SnackManMap map;
     private GameEventBus eventBus;
@@ -255,7 +252,6 @@ public class Game {
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
         eventBus.sendEventToSubscribers(event);
-
 
          float newX = ((SnackMan)this.allMovables.get(0)).getX();
          float newY = ((SnackMan)this.allMovables.get(0)).getY();
