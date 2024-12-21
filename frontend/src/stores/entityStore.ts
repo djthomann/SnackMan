@@ -22,7 +22,6 @@ export const useEntityStore = defineStore('entityStore', () => {
 
     }
   }
-
   eventBus.on('serverMessage', handleServerMessage);
 
   const ghosts = ref<Ghost[]>([]);

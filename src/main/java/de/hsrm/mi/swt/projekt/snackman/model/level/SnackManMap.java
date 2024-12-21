@@ -2,6 +2,9 @@ package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManMapRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -288,5 +291,15 @@ public class SnackManMap {
     public Food getFoodOfTile(Tile tile) {
         Food food = (Food) tile.getOccupation();
         return food;
+    }
+
+    public SnackManMapRecord toRecord() {
+        TileRecord [][] tileRecords = new TileRecord[h][w];
+        for (int z = 0; z < h; z++) {
+            for (int x = 0; x < w; x++) {
+                tileRecords[z][x] = allTiles[z][x].toRecord();
+            }
+        }
+        return new SnackManMapRecord(w, h, tileRecords);
     }
 }
