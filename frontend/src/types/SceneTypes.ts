@@ -28,12 +28,12 @@ export type Snackman = {
 
   export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY';
   
-
   export type Food = {
     gameId: number;
     objectId: number;
     x: number;
     y: number;
+    z: number,
     calories: number;
     foodType: FoodType;
   }
@@ -44,6 +44,7 @@ export type Snackman = {
     x: number;
     y: number;
     occupationType: OccupationType;
+    food: Food;
   }
 
   export type SnackManMap = {
