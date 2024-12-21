@@ -15,12 +15,45 @@ import type { Snackman } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
+import skybox_ftURL from '@/assets/images/skybox/skybox_ft.png';
+import skybox_bkURL from '@/assets/images/skybox/skybox_bk.png';
+import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
+import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
+import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
+import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
+
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
 // let floorGroup: THREE.Group
 let foodGroup: THREE.Group;
 let chickenGroup: THREE.Group;
+
+// Textures for Skybox
+const skyboxTextures: THREE.MeshBasicMaterial[] = [];
+const texture_ft = new THREE.TextureLoader().load(skybox_ftURL);
+texture_ft.colorSpace = THREE.SRGBColorSpace;
+const texture_bk = new THREE.TextureLoader().load(skybox_bkURL);
+texture_bk.colorSpace = THREE.SRGBColorSpace;
+const texture_up = new THREE.TextureLoader().load(skybox_upURL);
+texture_up.colorSpace = THREE.SRGBColorSpace;
+const texture_dn = new THREE.TextureLoader().load(skybox_dnURL);
+texture_dn.colorSpace = THREE.SRGBColorSpace;
+const texture_rt = new THREE.TextureLoader().load(skybox_rtURL);
+texture_rt.colorSpace = THREE.SRGBColorSpace;
+const texture_lf = new THREE.TextureLoader().load(skybox_lfURL);
+texture_lf.colorSpace = THREE.SRGBColorSpace;
+
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_ft}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_bk}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_up}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_dn}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_rt}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_lf}));
+
+console.log('textures found',texture_ft.image); // Should not be null or undefined
+
+
 
 // mesh for walls
 let box: THREE.Mesh;
@@ -164,7 +197,23 @@ export default defineComponent({
       // console.log('Creating Floor with: ' + w + '|' + h);
       scene.add(floor);
 
+      // Skybox
+      for(let i=0; i<6;i++){
+        skyboxTextures[i].side = THREE.BackSide;
+      }
+      const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
+      //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
+      const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
+      console.log('skybox position', skybox.position)
+      skybox.position.y = (w/4)/2;
+      skybox.position.x = w/2;
+      skybox.position.z = w/2;
+      //skybox.position.y = (w/4);
+      scene.add(skybox);
+
+
       player.position.set(w / 2, mapScale, h / 2);
+      
     }
 
     /**
