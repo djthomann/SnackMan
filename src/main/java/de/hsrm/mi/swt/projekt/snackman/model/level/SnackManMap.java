@@ -18,7 +18,7 @@ public class SnackManMap {
     private int w;
     private int h;
     private Tile[][] allTiles;
-    private final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
      * Constructor, creates randomly generated Map object with dimensions width w
