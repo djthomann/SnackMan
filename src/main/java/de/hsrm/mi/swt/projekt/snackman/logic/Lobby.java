@@ -1,8 +1,10 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,25 +15,19 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 public class Lobby {
     
     Logger logger = LoggerFactory.getLogger(Lobby.class);
-
-    private IDGenerator idGenerator = IDGenerator.getInstance();
-    private long id = idGenerator.getUniqueID();
-    private GameConfig gameConfig;
+    private final long id = IDGenerator.getInstance().getUniqueID();
+    private GameConfig gameConfig = new GameConfig();
     private SnackManMap map;
-    private List<String> players = new ArrayList<>();
-    
-    public Lobby(GameConfig gameConfig, SnackManMap map) {
-        this.gameConfig = gameConfig;
-        this.map = map;
-        this.players = new ArrayList<String>();
+    private Map<Long, Client> clientMap = new HashMap<>();
+
+    public List<Client> getClientsAsList() {
+        return clientMap.values().stream().toList();
     }
 
-    public Lobby() {
-        this.gameConfig = null;
-        this.map = null;
-        this.players = new ArrayList<String>();
+    public void addClient(Client c) {
+        clientMap.put(c.getClientId(), c);
     }
-    
+
     public long getId() {
         return id;
     }
@@ -50,6 +46,11 @@ public class Lobby {
 
     public void setMap(SnackManMap map) {
         this.map = map;
+    }
+
+    public Game startGame(GameManager gameManager) {
+        if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
+        return new Game(this, gameManager);
     }
 
 }

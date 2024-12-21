@@ -13,15 +13,29 @@ import useWebSocket from '@/services/socketService';
 
 const usernameInputField = ref('');
 const router = useRouter();
-const { sendMessage } = useWebSocket();
+const { sendMessage, onMessage } = useWebSocket();
+const serverMessage = ref<string>('');
 const userStore = useUserStore();
 
 const submitForm = () => {
   const message = JSON.stringify({ type: 'REGISTERUSERNAME', username: usernameInputField.value });
   sendMessage(message);
   userStore.setUsername(usernameInputField.value);
-  router.push({ path: '/home'});
 };
+
+// Method, to get ClientID from BE
+const handleServerMessage = (message: string) => {
+  console.log('Handling... ')
+  serverMessage.value = message;
+  if (message.startsWith('CLIENT_ID')) {
+    const information = JSON.parse(message.split(';')[1]);
+    userStore.setId(information.id);
+    router.push({ path: '/home'});
+  }
+}
+
+onMessage(handleServerMessage);
+
 </script>
 
 <style scoped></style>

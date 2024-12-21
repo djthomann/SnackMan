@@ -5,7 +5,7 @@ import TitleView from '@/components/TitleView.vue';
 import HomeView from '@/components/HomeView.vue';
 import LobbyView from '@/components/LobbyView.vue';
 import Username from '@/components/Username.vue';
-import EndScreen from '@/components/EndScreen.vue';
+import EndscreenView from '@/components/EndscreenView.vue';
 
 const routes = [
   { path: '/', component: Main },
@@ -14,7 +14,7 @@ const routes = [
   { path: '/lobby/:code', component: LobbyView },
   { path: '/username', component: Username },
   { path: '/game/:code', component: Main },
-  { path: '/results/:code', component: EndScreen },
+  { path: '/results/:code', component: EndscreenView },
 ];
 
 const router = createRouter({

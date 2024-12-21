@@ -76,3 +76,10 @@ sonar {
 		property "sonar.host.url", "http://localhost:9000/sonar"
 	}
 }
+
+test {
+	finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+	dependsOn test
+}

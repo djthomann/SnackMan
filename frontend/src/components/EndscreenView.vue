@@ -35,8 +35,7 @@ import { onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 // TODO: Testdata, delete later
-import testData from '@/assets/testData.json';
-
+// import testData from '@/assets/testData.json';
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
@@ -45,9 +44,9 @@ const lobbyCode = ref(Number(route.params.code));
 const serverMessage = ref<string>('');
 
 interface Player {
-    username: string;
-    role: string;
-    score: number;
+  username: string;
+  role: string;
+  score: number;
 }
 
 interface GameData {
@@ -72,14 +71,24 @@ const handleServerMessage = (message: string) => {
 };
 
 onMounted(async () => {
+  // Method, to wait until Connection is established
+  const awaitConnection = () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve('Connected');
+      }, 1000);
+    });
+  };
+
   eventBus.on('serverMessage', handleServerMessage);
 
   // TODO: Testing purposes, delete this line later
-  gameData.value = testData;
+  // gameData.value = testData;
 
   try {
+    await awaitConnection();
     const requestData = JSON.stringify({
-      type: 'GET_RESULTS',
+      type: 'END_GAME',
       gameID: lobbyCode.value,
     });
     sendMessage(requestData);
