@@ -2,6 +2,7 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.*;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
 import org.slf4j.Logger;
@@ -33,9 +34,6 @@ public class Game {
     public long id;
     private GameConfig gameConfig;
     private ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
-    // private ArrayList<Food> allFoods; TODO might not be required here and only in
-    // Map
-    //private ArrayList<Food> allFoods; TODO might not be required here and only in Map
     private Timer timer = new Timer();
     private SnackManMap map;
     private GameEventBus eventBus;
@@ -66,6 +64,7 @@ public class Game {
         this.gameManager = gameManager;
 
         createMovables(lobby.getClientsAsList());
+        init(lobby.getClientsAsList());
 
         this.collisionManager = new CollisionManager(this, map, allMovables);
         startTimer();
@@ -73,6 +72,10 @@ public class Game {
         logger.info("created Game with id: " + id);
     }
 
+    /**
+     * creates all
+     * @param clients
+     */
     private void createMovables(List<Client> clients) {
         for (Client c: clients) {
             switch (c.getRole()) {
@@ -131,13 +134,35 @@ public class Game {
      * TODO: This method will be expanded to create all game objects and add them to
      * the game object list.
      */
-    public void init() {
+    public void init(List<Client> clients) {
+
+        // for testing clients is null
+        if (clients != null) createMovables(clients);
         createFood();
-        allMovables.add(new SnackMan("snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
+
+        // for testing setup test SnackMan
+        if (clients == null) allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
                 gameConfig, collisionManager));
         createChicken();
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
+
+        this.gameManager.notifyChange(createGameStartEvent());
+    }
+
+    private GameStartEvent createGameStartEvent() {
+        GameStartEvent res = new GameStartEvent();
+        for (MovableAndSubscribable m: allMovables) {
+            switch (m.getClass().getSimpleName()) {
+                case "SnackMan" -> res.addSnackMan((SnackMan) m);
+                case "Ghost" -> res.addGhost((Ghost) m);
+                case "Chicken" -> res.addChicken((Chicken) m);
+            }
+        }
+
+        res.setMap(map);
+
+        return res;
     }
 
     private void createFood() {
@@ -165,7 +190,7 @@ public class Game {
         if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
             Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX(), 0.0f,
                     (float) tile.getZ(), "test", gameManager, gameConfig, collisionManager);
-            tile.setOccupation(chickenOne);
+            tile.setOccupation(chickenOne.toRecord());
             allMovables.add(chickenOne);
         }
     }
@@ -225,17 +250,6 @@ public class Game {
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
         eventBus.sendEventToSubscribers(event);
-
-        // Create new move event with the new position of the SnackMan that is sent back
-        // to the frontend for testing purposes
-        /*
-         * float newX = ((SnackMan)this.allMovables.get(0)).getX();
-         * float newY = ((SnackMan)this.allMovables.get(0)).getY();
-         * float newZ = ((SnackMan)this.allMovables.get(0)).getZ();
-         * MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
-         *
-         * this.gameManager.notifyChange(moveEvent);
-         */
     }
 
     /**

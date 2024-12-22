@@ -1,5 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStateEvent;
@@ -18,8 +19,11 @@ public class GameState {
     private List<ChickenRecord> changedChicken;
     private List<FoodRecord> eatenFoods;
 
-    /** synchronized (chnages to gamestate variables need to be declared to all threads) thread that sends out gamestateevent 
-     * and then clears all lists every 1/30 seconds while uninterrupted.*/
+    /**
+     * synchronized (chnages to gamestate variables need to be declared to all
+     * threads) thread that sends out gamestateevent
+     * and then clears all lists every 1/30 seconds while uninterrupted.
+     */
     public class GameStateThread extends Thread {
 
         @Override
@@ -31,12 +35,16 @@ public class GameState {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    GameStateEvent gameStateEvent = new GameStateEvent(changedGhosts,changedSnackMen,changedChicken,eatenFoods);
-                    game.getGameManager().notifyChange(gameStateEvent);
-                    changedGhosts.clear();
-                    changedSnackMen.clear();
-                    changedChicken.clear();
-                    eatenFoods.clear();
+                    if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
+                            || !eatenFoods.isEmpty()) {
+                        GameStateEvent gameStateEvent = new GameStateEvent(changedGhosts, changedSnackMen,
+                                changedChicken, eatenFoods);
+                        game.getGameManager().notifyChange(gameStateEvent);
+                        changedGhosts.clear();
+                        changedSnackMen.clear();
+                        changedChicken.clear();
+                        eatenFoods.clear();
+                    }
                 }
             }
 
@@ -44,11 +52,16 @@ public class GameState {
 
     }
 
-    /** 
-     *  Documents all updates that have been made to Game Objects such as Ghosts, Snackman, Chicken, as well as the food that was consumed.
+    /**
+     * Documents all updates that have been made to Game Objects such as Ghosts,
+     * Snackman, Chicken, as well as the food that was consumed.
      */
     public GameState(Game game) {
         this.game = game;
+        this.changedGhosts = new ArrayList<GhostRecord>();
+        this.changedSnackMen = new ArrayList<SnackManRecord>();
+        this.changedChicken = new ArrayList<ChickenRecord>();
+        this.eatenFoods = new ArrayList<FoodRecord>();
         GameStateThread thread = new GameStateThread();
         thread.start();
     }
