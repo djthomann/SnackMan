@@ -180,9 +180,10 @@ class ModelService {
     return newModel;
   }
 
-  public createChicken(x: number, z: number) {
+  public createChicken(id: number, x: number, z: number) {
     const chickenModel = this.getModel('chicken');
-    console.log('ChickenModel loaded')
+    console.log('ChickenModel loaded');
+    chickenModel.userData.id = id; 
     const chicken = chickenModel.clone();
     chicken.castShadow = true;
     chicken.scale.set(5,5,5);

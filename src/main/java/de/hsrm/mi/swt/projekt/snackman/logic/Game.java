@@ -284,4 +284,8 @@ public class Game {
         this.gameConfig = gameConfig;
     }
 
+    public SnackManMap getMap() {
+        return this.map; 
+    }
+
 }

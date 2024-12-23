@@ -29,10 +29,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     private Logger logger = LoggerFactory.getLogger(Chicken.class);
 
-    private GameManager gameManger;
+    private GameManager gameManager;
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
-
     /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
 
@@ -54,7 +53,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         super(id, gameId, x, y, z, gameConfig.getChickenMinRadius());
         this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
-        this.gameManger = gameManager;
+        this.gameManager = gameManager;
         this.gainedCalories = 0;
         this.scriptInterpreter = new PythonInterpreter();
         initScriptInterpreter(script);
@@ -77,11 +76,12 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 break;
         }
         this.scriptInterpreter.execfile(scriptFile);
-
+        SnackManMap map = gameManager.getGameById(gameId).getMap(); 
         new Thread(() -> {
             try {
-                while (true) {
-                    executeTestScript();
+                while (x < map.getW() && z < map.getH()) {
+                    logger.info("JUHU Im moving"); 
+                    executeScript(map);
                     Thread.sleep(2000); // 1000 = 1 sec
                 }
             } catch (InterruptedException e) {
@@ -91,45 +91,12 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     }
 
-    // TO BE DELETED : RUN TEST SCRIPT
-    public void executeTestScript() {
-
-        scriptInterpreter.exec("result = forward()");
-        PyObject result = scriptInterpreter.get("result");
-        if (result instanceof PyTuple) {
-            PyTuple tuple = (PyTuple) result;
-
-            // Retrieve the elements of the tuple and cast them to float
-            float movementX = (float) (int) tuple.get(0);
-            float movementY = (float) (int) tuple.get(1);
-            float movementZ = (float) (int) tuple.get(2);
-            move((movementX), (movementY), (movementZ));
-
-        }
-    }
-
-    /**
-     * Moves chicken to new coords
-     * 
-     * @param newX the x-coordinate to move the Chicken
-     * @param newY the y-coordinate to move the Chicken
-     * @param newZ the z-coordinate to move the Chicken
-     */
-    @Override
-    public void move(float newX, float newY, float newZ) {
-        this.x += newX;
-        this.y += newY;
-        this.z += newZ;
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
-    }
-
     /**
      * executes the behavior of the chicken, controlled by the script
      *
      * @param map the map, on which the chicken navigates
-     */
+     */    
     public void executeScript(SnackManMap map) {
-
         Tile positionTile = map.getTileAt((int) x, (int) z);
         Tile[][] surroundings = map.getSurroundingTiles(positionTile);
         List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
@@ -162,29 +129,42 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             }
             pythonCompatibleSurroundings.add(rowList);
         }
-
-        // TO BE DELETED : TEST LOG
-        logger.info("pythonCompatibleSurroundings: {}", pythonCompatibleSurroundings);
-
         scriptInterpreter.set("environment", pythonCompatibleSurroundings);
 
         try {
 
-            scriptInterpreter.exec("result = run_behavior(environment)");
+            scriptInterpreter.exec("result = forward(environment)");
             PyObject result = scriptInterpreter.get("result");
 
             if (result instanceof PyTuple) {
                 PyTuple tuple = (PyTuple) result;
 
                 // Retrieve the elements of the tuple and cast them to float
-                float movementX = (float) tuple.get(0);
-                float movementY = (float) tuple.get(1);
-                float movementZ = (float) tuple.get(2);
+                float movementX = (float) (int) tuple.get(0);
+                float movementY = (float) (int) tuple.get(1);
+                float movementZ = (float) (int) tuple.get(2);
                 move((movementX), (movementY), (movementZ));
+                gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
+                
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Moves chicken to new coords
+     * 
+     * @param newX the x-coordinate to move the Chicken
+     * @param newY the y-coordinate to move the Chicken
+     * @param newZ the z-coordinate to move the Chicken
+     */
+    @Override
+    public void move(float newX, float newY, float newZ) {
+        this.x += newX;
+        this.y += newY;
+        this.z += newZ;
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
     }
 
     /**

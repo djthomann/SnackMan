@@ -83,8 +83,8 @@ public class GameManager {
         // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
 
         Game newGame = new Game(id, gameConfig, map, this);
-        newGame.init(null); // Add Objects
         allGames.put(newGame.id, newGame);
+        newGame.init(null); // Add Objects
     }
 
     public void createGame(long id) {

@@ -115,7 +115,26 @@ export default defineComponent({
           loadChicken(chicken);
         }
       }
+      else if (message.startsWith('GAME_STATE')) {
+        const line = JSON.parse(message.split(';')[1]); 
+        for (const chicken of line.updatesChicken){
+          console.log("chicken-id", chicken.objectId); 
+          move(chicken.objectId, chicken.x, chicken.y, chicken.z);
+        }
+      }
     };
+
+    function move(id: number, x: number, y: number, z: number) {
+      chickenGroup.children.forEach((chicken) => {
+        if(chicken.userData.id === id) {
+          chicken.position.set(
+            x * mapScale, 
+            y * mapScale, 
+            z * mapScale
+          ); 
+        }
+      })
+    }
 
     onMounted(async () => {
       try {
@@ -156,7 +175,7 @@ export default defineComponent({
     }
 
     function loadChicken(newChicken: any) {
-      const chicken = modelService.createChicken(newChicken.x * mapScale, newChicken.z * mapScale); 
+      const chicken = modelService.createChicken(newChicken.objectId, newChicken.x * mapScale, newChicken.z * mapScale); 
       chickenGroup.add(chicken); 
 
       const chickenMixer = new THREE.AnimationMixer(chicken);
