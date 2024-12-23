@@ -192,6 +192,13 @@ public class Game {
                     (float) tile.getZ(), "test", gameManager, gameConfig, collisionManager);
             tile.setOccupation(chickenOne.toRecord());
             allMovables.add(chickenOne);
+        }   
+        Tile secTile = map.getTileAt((map.getW() / 2) + 1, (map.getH() / 2) + 1); 
+         if (secTile.getOccupationType() == OccupationType.FREE && secTile.getOccupation() == null) {
+            Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) secTile.getX(), 0.0f,
+                    (float) secTile.getZ(), "test", gameManager, gameConfig, collisionManager);
+            secTile.setOccupation(chickenTwo.toRecord());
+            allMovables.add(chickenTwo);
         }
     }
 

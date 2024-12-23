@@ -79,9 +79,9 @@ export default defineComponent({
     let controls: PointerLockControls;
     let mouseMovement = false;
     let nameTag: NameTag;
-    let animationMixer: THREE.AnimationMixer;
     const nameTags: NameTag[] = [];
-
+    const animationMixers: THREE.AnimationMixer[] = [];
+    
     //GameStart
     const entityStore = useEntityStore();
     const { snackMen, ghosts } = storeToRefs(entityStore);
@@ -106,8 +106,14 @@ export default defineComponent({
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
       } else if (message.startsWith('DISAPPEAR')) {
-        const food = JSON.parse(message.split(';')[1]); 
-        makeDisappear(food.food.objectId); 
+        const line = JSON.parse(message.split(';')[1]); 
+        makeDisappear(line.food.objectId); 
+      }
+      else if (message.startsWith('GAME_START')) {
+        const line = JSON.parse(message.split(';')[1]); 
+        for (const chicken of line.chicken) {
+          loadChicken(chicken);
+        }
       }
     };
 
@@ -149,6 +155,24 @@ export default defineComponent({
       }
     }
 
+    function loadChicken(newChicken: any) {
+      const chicken = modelService.createChicken(newChicken.x * mapScale, newChicken.z * mapScale); 
+      chickenGroup.add(chicken); 
+
+      const chickenMixer = new THREE.AnimationMixer(chicken);
+      const chickenAnimations = modelService.getAnimations('chicken');
+
+      if (chickenAnimations.length > 0) {
+        const action = chickenMixer.clipAction(chickenAnimations[0]);
+        action.play();
+      } else {
+        console.log('Animation not found');
+      }
+
+      // Mixer is stored in a global list, so that it can be used in the update-loop 
+      animationMixers.push(chickenMixer);
+    }
+
     function loadMap(map: any) {
       //console.log('Received mapdata' + map);
       const w = map.w * mapScale;
@@ -164,31 +188,12 @@ export default defineComponent({
           } else if (occupationType == 'ITEM') {
             const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale); 
             food.userData.id = tile.occupation.objectId; 
-            foodGroup.add(
-              food
-            );
-          } else if (occupationType == 'FREE') {
-            const occupation = tile.occupation;
-            if (occupation != null){ // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
-              const chicken = modelService.createChicken(tile.x* mapScale, tile.z*mapScale);
-              chickenGroup.add(chicken);
-            }
-          }
+            foodGroup.add(food);
+           }
         }
       }
+      scene.add(chickenGroup);      
 
-      scene.add(chickenGroup);
-
-      animationMixer = new THREE.AnimationMixer(chickenGroup);
-      const chickenAnimations = modelService.getAnimations('chicken');
-
-      if (chickenAnimations.length > 0) {
-        const action = animationMixer.clipAction(chickenAnimations[0]);
-        action.play();
-      } else {
-        console.log('Animation not found');
-      }
-      
       scene.add(wallsGroup);
 
       scene.add(foodGroup);
@@ -429,9 +434,10 @@ export default defineComponent({
         nameTag.update(player);
       });
 
-      if (animationMixer) {
-        animationMixer.update(0.01);
-      }
+      //update all animations
+      animationMixers.forEach((mixer) => {
+        mixer.update(0.01); 
+      }); 
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {
