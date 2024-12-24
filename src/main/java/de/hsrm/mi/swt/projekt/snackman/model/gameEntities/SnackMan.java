@@ -277,4 +277,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         return new SnackManRecord(gameId, objectId, getUsername(), x, y, z, gainedCalories);
     }
 
+    public String toString() {
+        return "SNACKMAN";
+    }
+
 }

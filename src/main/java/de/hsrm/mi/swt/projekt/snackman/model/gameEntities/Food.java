@@ -50,4 +50,8 @@ public class Food extends GameObject {
         return new FoodRecord(gameId, objectId, x, y, z, calories, foodType);
     }
 
+    public String toString() {
+        return "FOOD";
+    }
+
 }

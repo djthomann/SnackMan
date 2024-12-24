@@ -82,7 +82,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 while (x < map.getW() && z < map.getH()) {
                     logger.info("JUHU Im moving"); 
                     executeScript(map);
-                    Thread.sleep(2000); // 1000 = 1 sec
+                    Thread.sleep(50); // 1000 = 1 sec
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -113,11 +113,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                             rowList.add("WALL");
                             break;
                         case ITEM:
-                            rowList.add(tile.getOccupation().toString().toUpperCase());
+                            rowList.add(tile.getOccupation().toString());
                             break;
                         case FREE:
                             if (tile.getOccupation() != null) {
-                                rowList.add(tile.getOccupation().toString().toUpperCase());
+                                rowList.add(tile.getOccupation().toString());
                             } else {
                                 rowList.add("FREE");
                             }
@@ -140,9 +140,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 PyTuple tuple = (PyTuple) result;
 
                 // Retrieve the elements of the tuple and cast them to float
-                float movementX = (float) (int) tuple.get(0);
-                float movementY = (float) (int) tuple.get(1);
-                float movementZ = (float) (int) tuple.get(2);
+                float movementX = (float) (double) tuple.get(0);
+                float movementY = (float) (double) tuple.get(1);
+                float movementZ = (float) (double) tuple.get(2);
                 move((movementX), (movementY), (movementZ));
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
                 
