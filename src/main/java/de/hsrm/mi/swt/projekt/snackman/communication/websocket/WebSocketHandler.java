@@ -237,7 +237,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         for (WebSocketSession session : this.clients.keySet()) {
             try {
                 json = gson.toJson(event);
-                logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
+                // logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
 
                 // Synchronize this block to avoid sending messages during invalid states (e.g.
                 // enables moving while jumping)
