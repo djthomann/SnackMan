@@ -1,4 +1,5 @@
 <template>
+  <!--
   <div v-if="gameData">
     <h1>Congrats! {{ gameData.winningTeam }} Won!</h1>
     <div>
@@ -27,6 +28,16 @@
   <div v-else>
     <p>Loading Results...</p>
   </div>
+  -->
+  <div>
+    <BackgroundComponent>
+    <div class="background__container">
+      <div class="lobby-grid receiptpanel--full-height">
+        <ReceiptComponent></ReceiptComponent>
+      </div>
+    </div>
+    </BackgroundComponent>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -34,6 +45,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
+import BackgroundComponent from './layout/BackgroundComponent.vue';
+import ReceiptComponent from './layout/ReceiptComponent.vue';
 // TODO: Testdata, delete later
 // import testData from '@/assets/testData.json';
 
@@ -104,4 +117,20 @@ const toLobby = () => {
 // TODO: Save Map Button
 </script>
 
-<style scoped></style>
+<style scoped>
+.lobby-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: 1fr auto;
+  gap: 40px 60px;
+  padding: 4dvw;
+  box-sizing: border-box;
+}
+
+.lobby-grid__column--span-all {
+  grid-column: 1/4;
+  text-align: center;
+}
+</style>
