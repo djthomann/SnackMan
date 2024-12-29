@@ -127,11 +127,20 @@ export default defineComponent({
     function move(id: number, x: number, y: number, z: number) {
       chickenGroup.children.forEach((chicken) => {
         if(chicken.userData.id === id) {
+          // Calculate the movement vector
+          const moveX = x - chicken.position.x / mapScale;
+          const moveZ = z - chicken.position.z / mapScale;
+          // Update position
           chicken.position.set(
             x * mapScale, 
             y * mapScale, 
             z * mapScale
           ); 
+          // Calculate and apply rotation
+          if (moveX !== 0 || moveZ !== 0) {
+            const rotationY = Math.atan2(moveX, moveZ);
+            chicken.rotation.y = rotationY;
+          }
         }
       })
     }

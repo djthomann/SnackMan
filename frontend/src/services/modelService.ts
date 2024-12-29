@@ -189,7 +189,7 @@ class ModelService {
     chicken.scale.set(5,5,5);
     chicken.position.set(x, 0, z);
     console.log('Chicken at:', chicken.position)
-    chicken.rotation.y = -45;
+    chicken.rotation.y = 0; // Degrees * Math.PI / 180
     return chicken;
   }
 
