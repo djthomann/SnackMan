@@ -105,7 +105,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         Tile[][] surroundings = map.getSurroundingTiles(positionTile);
         List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
 
-        for (int row = -1; row <= 1; row++) {
+        for (int row = 1; row >= -1; row--) {
             List<String> rowList = new ArrayList<>();
             for (int col = -1; col <= 1; col++) {
                 Tile tile = surroundings[row + 1][col + 1];
