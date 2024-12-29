@@ -35,6 +35,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
 
+    /** The current direction of the Chicken (N, NE, E, SE, S, SW, W, NW) */
+    private String direction;
+
     /** Jython-Interpreter for the script logic */
     private final PythonInterpreter scriptInterpreter;
 
@@ -51,6 +54,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     public Chicken(long id, long gameId, float x, float y, float z, String script, GameManager gameManager,
             GameConfig gameConfig, CollisionManager collisionManager) {
         super(id, gameId, x, y, z, gameConfig.getChickenMinRadius());
+        this.direction = "N";
         this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
         this.gameManager = gameManager;
@@ -130,10 +134,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             pythonCompatibleSurroundings.add(rowList);
         }
         scriptInterpreter.set("environment", pythonCompatibleSurroundings);
+        scriptInterpreter.set("direction", direction);
 
         try {
 
-            scriptInterpreter.exec("result = forward(environment)");
+            scriptInterpreter.exec("result = forward(environment, direction)");
             PyObject result = scriptInterpreter.get("result");
 
             if (result instanceof PyTuple) {
@@ -143,6 +148,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 float movementX = (float) (double) tuple.get(0);
                 float movementY = (float) (double) tuple.get(1);
                 float movementZ = (float) (double) tuple.get(2);
+                this.direction = (String) tuple.get(3);
                 move((movementX), (movementY), (movementZ));
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
                 
