@@ -1,22 +1,6 @@
 <script setup lang="ts">
-import { computed, useSlots } from 'vue';
+import { useSlots } from 'vue';
 
-type Props = {
-  variant?: 'orange' | 'white';
-  heightBehaviour?: 'auto' | 'stretch';
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  variant: 'orange',
-  heightBehaviour: 'stretch',
-});
-
-const classes = computed(() => {
-  return {
-    [`playerpanel--variant-${props.variant}`]: true,
-    [`playerpanel--height-${props.heightBehaviour}`]: true,
-  };
-});
 
 const slots = useSlots();
 
@@ -61,30 +45,22 @@ hr {
 
 .receiptpanel {
   width: 350px;
-  background-color: white;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 1);
   border-radius: 8px;
   padding: 16px;
-  margin: 0;
-  height: 500px;
-}
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 100vh;
+  overflow: hidden;
 
-.receiptpanel--height-auto,
-.receiptpanel--height-auto .receiptpanel__container {
-  height: 250px;
-}
-
-.receiptpanel--height-stretch,
-.receiptpanel--height-stretch .receiptpanel__container {
-  height: 100%;
 }
 
 .receiptpanel__container {
-  position: absolute;
+  position: relative;
   width: 100%;
   max-width: 340px;
-  position: relative;
   z-index: 3;
+  height: 100%;
 }
 
 .receiptpanel__box {
@@ -92,6 +68,8 @@ hr {
   box-shadow: 15px 15px 0px rgba(0, 0, 0, 0.25);
   text-align: center;
   padding: 16px;
+  height: 100%;
+  overflow: hidden;
 }
 
 .receiptpanel__list {

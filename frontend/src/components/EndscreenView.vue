@@ -118,15 +118,17 @@ const toLobby = () => {
 </script>
 
 <style scoped>
+
 .lobby-grid {
   width: 100%;
-  height: 100%;
+  height: 90vh;
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-rows: 1fr auto;
   gap: 40px 60px;
   padding: 4dvw;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .lobby-grid__column--span-all {
