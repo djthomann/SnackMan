@@ -43,6 +43,12 @@
     position: absolute;
     z-index: 1;
     background-color: var(--colorSecondary);
+    background-image: url('../../assets/images/backgrounds/backgroundcontainer_image.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    user-select: none;
+    pointer-events: none;
 }
 
 .background__container {
@@ -66,6 +72,9 @@
     display: grid;
     grid-template-columns: auto 1fr auto 1fr auto;
     grid-template-rows: 100%;
+    filter: drop-shadow(35px 35px 4px rgba(0,0,0,0.2));
+    user-select: none;
+    pointer-events: none;
 }
 
 .background__sheet-tile {

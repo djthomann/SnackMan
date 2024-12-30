@@ -106,13 +106,21 @@ const startGame = () => {
     <BackgroundComponent>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
-          <PlayerPanelComponent></PlayerPanelComponent>
+          <PlayerPanelComponent  avatar="ghost">
+            <template #counter>2/4</template>
+            <template #button>Insert Button Component</template>
+            <template #content>David Snackham</template>
+          </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column">
-          <PlayerPanelComponent></PlayerPanelComponent>
+          <PlayerPanelComponent avatar="ghost"></PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column">
-          <PlayerPanelComponent></PlayerPanelComponent>
+          <PlayerPanelComponent  avatar="snackman" selected>
+            <template #counter>3/4</template>
+            <template #button>Insert Button Component</template>
+            <template #content>David Snackham</template>
+          </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
           Merry Crisis
