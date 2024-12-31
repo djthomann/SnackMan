@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import {ref, computed, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
@@ -50,11 +50,16 @@ const handleServerMessage = (message: string) => {
   }
 };
 
+onMounted(() => {
+  fetchLobbies();
+})
+
 onMessage(handleServerMessage);
 
 const createLobby = () => {
   const message = JSON.stringify({ type: 'LOBBY_CREATE_EVENT', id: 0 });
   sendMessage(message);
+  fetchLobbies();
 
   /* How do I attain the new lobby id
   const newLobbyCode = 'NEW759';
