@@ -1,4 +1,3 @@
 
-def forward(environment,direction): 
-    print(environment)
-    return (0.05, 0.0, 0.0,"N")
+def run_behavior(environment,direction,wall_collision): 
+    return (0.1, 0.0, 0.0,"N")

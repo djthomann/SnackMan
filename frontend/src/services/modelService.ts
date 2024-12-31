@@ -143,7 +143,7 @@ class ModelService {
   }
 
   // Creates one large plane as the floor
-  public createFloorTile(x: number, z: number, scale: number) {
+  /*public createFloorTile(x: number, z: number, scale: number) {
     const planeGeometry = new THREE.PlaneGeometry(x, z, 1, 1);
     const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -152,14 +152,14 @@ class ModelService {
     plane.receiveShadow = true;
 
     return plane;
-  }
+  }*/
 
   // Creates one cube per wall tile
   public createWall(x: number, z: number, scale: number, wallHeight: number) {
     const boxGeometry = new THREE.BoxGeometry(1 * scale, wallHeight, 1 * scale);
-    const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+    const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f ,depthTest: true,});
     const box = new THREE.Mesh(boxGeometry, boxMaterial);
-    box.position.set(x * scale, 0, z * scale);
+    box.position.set((x+0.5) * scale, 0, (z+0.5) * scale);
     box.castShadow = true;
 
     return box;
@@ -176,7 +176,7 @@ class ModelService {
       newModel = this.getModel('cake').clone();
     }
     newModel.userData.id = id; 
-    newModel.position.set(x * scale, 10, z * scale);
+    newModel.position.set((x+0.5) * scale, 10, (z+0.5) * scale);
     return newModel;
   }
 

@@ -38,6 +38,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     /** The current direction of the Chicken (N, NE, E, SE, S, SW, W, NW) */
     private String direction;
 
+    private List<List<String>> surroundings;
+
+    private Boolean wallCollision;
+
     /** Jython-Interpreter for the script logic */
     private final PythonInterpreter scriptInterpreter;
 
@@ -55,6 +59,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             GameConfig gameConfig, CollisionManager collisionManager) {
         super(id, gameId, x, y, z, gameConfig.getChickenMinRadius());
         this.direction = "N";
+        this.wallCollision = false;
         this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
         this.gameManager = gameManager;
@@ -84,9 +89,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         new Thread(() -> {
             try {
                 while (x < map.getW() && z < map.getH()) {
-                    logger.info("JUHU Im moving"); 
-                    executeScript(map);
-                    Thread.sleep(50); // 1000 = 1 sec
+                    surroundings = generateSurroundings(map);
+                    logger.info(surroundings.toString());
+                    Thread.sleep(100); // 1000 = 1 sec
+                    executeScript(surroundings); 
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -95,13 +101,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     }
 
-    /**
-     * executes the behavior of the chicken, controlled by the script
-     *
-     * @param map the map, on which the chicken navigates
-     */    
-    public void executeScript(SnackManMap map) {
-        Tile positionTile = map.getTileAt((int) x, (int) z);
+    public List<List<String>> generateSurroundings(SnackManMap map) {
+        Tile positionTile = map.getTileAt((int) (x), (int) (z));
         Tile[][] surroundings = map.getSurroundingTiles(positionTile);
         List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
 
@@ -133,12 +134,23 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             }
             pythonCompatibleSurroundings.add(rowList);
         }
+        return pythonCompatibleSurroundings;
+    }
+
+    /**
+     * executes the behavior of the chicken, controlled by the script
+     *
+     * @param map the map, on which the chicken navigates
+     */    
+    public void executeScript(List<List<String>> pythonCompatibleSurroundings) {
+
         scriptInterpreter.set("environment", pythonCompatibleSurroundings);
         scriptInterpreter.set("direction", direction);
+        scriptInterpreter.set("wall_collision", wallCollision );
 
         try {
 
-            scriptInterpreter.exec("result = forward(environment, direction)");
+            scriptInterpreter.exec("result = run_behavior(environment, direction, wall_collision)");
             PyObject result = scriptInterpreter.get("result");
 
             if (result instanceof PyTuple) {
@@ -149,7 +161,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 float movementY = (float) (double) tuple.get(1);
                 float movementZ = (float) (double) tuple.get(2);
                 this.direction = (String) tuple.get(3);
+                this.wallCollision = (boolean) tuple.get(4);
                 move((movementX), (movementY), (movementZ));
+                //logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
                 
             }

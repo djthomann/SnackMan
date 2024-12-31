@@ -226,22 +226,20 @@ export default defineComponent({
 
       scene.add(foodGroup);
 
-      const floor = modelService.createFloorTile(w, h, mapScale);
+      /*const floor = modelService.createFloorTile(w, h, mapScale);
       // console.log('Creating Floor with: ' + w + '|' + h);
-      scene.add(floor);
+      scene.add(floor);*/
 
       // Skybox
       for(let i=0; i<6;i++){
         skyboxTextures[i].side = THREE.BackSide;
       }
       const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
-      //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
       console.log('skybox position', skybox.position)
-      skybox.position.y = (w/4)/2;
+      skybox.position.y = ((w/4)/2)-(0.5);
       skybox.position.x = w/2;
       skybox.position.z = w/2;
-      //skybox.position.y = (w/4);
       scene.add(skybox);
 
 
@@ -262,9 +260,9 @@ export default defineComponent({
       );
 
       player.position.set(
-        newPlayerPositionX * mapScale,
+        (newPlayerPositionX+0.5) * mapScale,
         newPlayerPositionY,
-        newPlayerPositionZ * mapScale,
+        (newPlayerPositionZ+0.5) * mapScale,
       );
     }
 

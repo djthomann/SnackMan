@@ -141,7 +141,7 @@ public class Game {
         createFood();
 
         // for testing setup test SnackMan
-        if (clients == null) allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
+        if (clients == null) allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.5f, 1.1f, 20.5f, gameManager,
                 gameConfig, collisionManager));
         createChicken();
         ArrayList<Subscribable> subscribers = createSubscriberList();
@@ -188,18 +188,18 @@ public class Game {
     private void createChicken() {
         Tile tile = map.getTileAt(map.getW() / 2, map.getH() / 2);  // HARD CODED IN THE MIDDLE OF THE MAP FOR TEST PORPOSES
         if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
-            Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX(), 0.0f,
-                    (float) tile.getZ(), "test", gameManager, gameConfig, collisionManager);
+            Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX()+0.5f, 0.0f,
+                    (float) tile.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
             tile.setOccupation(chickenOne.toRecord());
             allMovables.add(chickenOne);
         }   
-        Tile secTile = map.getTileAt((map.getW() / 2) + 1, (map.getH() / 2) + 1); 
+        /*Tile secTile = map.getTileAt((map.getW() / 2) + 1, (map.getH() / 2) + 1); 
          if (secTile.getOccupationType() == OccupationType.FREE && secTile.getOccupation() == null) {
-            Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) secTile.getX(), 0.0f,
-                    (float) secTile.getZ(), "test", gameManager, gameConfig, collisionManager);
+            Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) secTile.getX()+0.5f, 0.0f,
+                    (float) secTile.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
             secTile.setOccupation(chickenTwo.toRecord());
             allMovables.add(chickenTwo);
-        }
+        }*/
     }
 
     /**
