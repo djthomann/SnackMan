@@ -5,19 +5,19 @@
   <h3>SnackMan</h3>
   <ul>
     <li v-for="player in snackManPlayers" :key="player.id">
-      {{ player.name }}
+      {{ player.username }}
     </li>
   </ul>
   <h3>Ghosts</h3>
   <ul>
     <li v-for="player in ghostPlayers" :key="player.id">
-      {{ player.name }}
+      {{ player.username }}
     </li>
   </ul>
   <h3>Undecided Players</h3>
   <ul>
     <li v-for="player in undecidedPlayers" :key="player.id">
-      {{ player.name }}
+      {{ player.username }}
     </li>
   </ul>
   <form @submit.prevent="submitForm" id="gameConfig" :action="`/lobby/${lobbyCode}`" method="POST">
@@ -63,6 +63,7 @@ import { computed, onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 import { useUserStore } from '@/stores/userStore';
+import type {Player} from "@/types/SceneTypes";
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
@@ -71,12 +72,12 @@ const lobbyCode = ref(Number(route.params.code));
 const serverMessage = ref<string>('');
 const userStore = useUserStore();
 const name = computed(() => userStore.username);
-const clientID = computed(() => userStore.id); 
-const snackManPlayers = ref<Array<{ id: number; name: string }>>([]);
-const ghostPlayers = ref<Array<{ id: number; name: string }>>([]);
-const undecidedPlayers = ref<Array<{ id: number; name: string }>>([
-  { id: 1, name: 'Alice' },
-  { id: 2, name: 'Bob' },
+const clientID = computed(() => userStore.id);
+const snackManPlayers = ref<Array<Player>>([]);
+const ghostPlayers = ref<Array<Player>>([]);
+const undecidedPlayers = ref<Array<Player>>([
+  { id: 1, username: 'Alice' },
+  { id: 2, username: 'Bob' },
 ]);
 
 // Type definition of GameConfig interface
@@ -113,6 +114,14 @@ const handleServerMessage = (message: string) => {
     gameConfig.value = JSON.parse(message.split(';')[1]);
   } else if (message.startsWith('GAME_START')) {
     router.push('/game/' + lobbyCode.value);
+  } else if (message.startsWith("PLAYERS")) {
+    const parsedData = JSON.parse(message.split(';')[1]);
+    const playersArray: Array<Player> = [];
+    parsedData.players.forEach((player: string[]) => {
+      console.log(`Username: ${player[0]}, Client ID: ${player[1]}`);
+      playersArray.push({id: Number(player[1]), username: player[0]})
+    })
+    undecidedPlayers.value = playersArray;
   }
 };
 
@@ -161,7 +170,17 @@ onMounted(async () => {
   } catch (e) {
     console.log('Failed to fetch Data on load: ', e);
   }
+
+  fetchPlayers();
 });
+
+const fetchPlayers = () => {
+  const requestData = JSON.stringify( {
+    type: "GET_PLAYERS",
+    lobbyCode: lobbyCode.value
+  })
+  sendMessage(requestData);
+}
 
 // Method, to start the game
 const startGame = () => {

@@ -2,8 +2,10 @@ package de.hsrm.mi.swt.projekt.snackman.communication.websocket;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.LobbyRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
@@ -171,6 +173,18 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     }
                     session.sendMessage(new TextMessage(returnString));
                 }
+                case "JOIN_LOBBY" -> {
+                    gameManager.addClientToLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
+                }
+                case "GET_PLAYERS" -> {
+                    JsonObject jo = new JsonObject();
+                    jo.add("players", gson.toJsonTree(gameManager.getPlayersInLobby(Long.parseLong(String.valueOf(jsonObject.get("lobbyCode"))))));
+
+                    // JSON-Objekt als String ausgeben
+                    String js = gson.toJson(jo);
+
+                    session.sendMessage(new TextMessage("PLAYERS;" + js));
+                }
                 case "LOBBY_CREATE_EVENT" -> {
                     LobbyCreateEvent lobbyCreateEvent = gson.fromJson(jsonString, LobbyCreateEvent.class);
                     Lobby newLobby = null;
@@ -182,7 +196,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
                 case "LOBBY_SHOW_EVENT" -> {
                     ObjectMapper mapper = new ObjectMapper();
-                    String json = mapper.writeValueAsString(gameManager.getAllLobbies());
+                    List<LobbyRecord> lobbyRecords = gameManager.getAllLobbies().stream().map(Lobby::toRecord).toList();
+                    String json = mapper.writeValueAsString(lobbyRecords);
                     String returnString = "ALL_LOBBIES;" + json;
                     logger.info("Show all Lobbies: " + returnString);
                     session.sendMessage(new TextMessage(returnString));

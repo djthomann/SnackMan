@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +86,17 @@ public class GameManager {
         Game newGame = new Game(id, gameConfig, map, this);
         newGame.init(null); // Add Objects
         allGames.put(newGame.id, newGame);
+    }
+
+    public String[][] getPlayersInLobby(long lobbyCode) {
+        Lobby lobby = this.allLobbies.get(lobbyCode);
+        return lobby.getClientsAsList().stream()
+                .map(client -> new String[]{client.getUsername(), String.valueOf(client.getClientId())})
+                .toArray(String[][]::new);
+    }
+
+    public void addClientToLobby(Client c, long lobbyCode) {
+        this.allLobbies.get(lobbyCode).addClient(c);
     }
 
     public void createGame(long id) {

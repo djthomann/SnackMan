@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.LobbyRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,10 @@ public class Lobby {
     public Game startGame(GameManager gameManager) {
         if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
         return new Game(this, gameManager);
+    }
+
+    public LobbyRecord toRecord() {
+        return new LobbyRecord(this.getClientsAsList().size(), this.id);
     }
 
 }
