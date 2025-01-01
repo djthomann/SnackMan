@@ -11,7 +11,7 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import type { Snackman } from '@/types/SceneTypes';
+import { Ghost, Snackman } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
@@ -86,6 +86,7 @@ export default defineComponent({
     const entityStore = useEntityStore();
     const { snackMen, ghosts } = storeToRefs(entityStore);
 
+    console.log('Snackmen:', snackMen.value.length)
     console.log(
       'Snackman Names:',
       snackMen.value.map((item: Snackman) => item.username),
@@ -120,6 +121,7 @@ export default defineComponent({
       }
       loadModels();
       initScene();
+      loadPlayerEntities(snackMen.value, ghosts.value, scene);
       eventBus.on('serverMessage', handleServerMessage);
 
       window.addEventListener('resize', onWindowResize);
@@ -147,6 +149,63 @@ export default defineComponent({
       } catch (error) {
         console.error('Error initializing or loading model:', error);
       }
+    }
+
+    /*
+    
+    */
+
+    function loadPlayerEntities (snackMen: Snackman[], ghosts: Ghost[], scene:any){
+      // Group for snackMen and ghosts
+      const snackMenGroup = new THREE.Group();
+      const ghostsGroup = new THREE.Group();
+
+      // Iterate over snackMen and add them to the scene
+      snackMen.forEach((snackMan) => {
+        const snackManGeometry = new THREE.SphereGeometry(1, 32, 32);
+        const snackManMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+        const snackManMesh = new THREE.Mesh(snackManGeometry, snackManMaterial);
+
+        // Position snackMan
+        snackManMesh.position.set(
+          snackMan.x,
+          mapScale / 2, 
+          snackMan.z
+        );
+
+        // Attach a NameTag
+        const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
+        nameTags.push(snackManTag);
+
+        // Add to snackMen group
+        snackMenGroup.add(snackManMesh);
+      });
+
+      // Iterate over ghosts and add them to the scene
+      ghosts.forEach((ghost) => {
+        const ghostGeometry = new THREE.ConeGeometry(1, 2, 32);
+        const ghostMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const ghostMesh = new THREE.Mesh(ghostGeometry, ghostMaterial);
+
+        // Position ghost
+        ghostMesh.position.set(
+          ghost.x,
+          mapScale / 2,
+          ghost.z
+        );
+
+        const ghostTag = new NameTag(ghost.username || "Ghost", ghostMesh, scene);
+        nameTags.push(ghostTag);
+
+        // Add to ghosts group
+        ghostsGroup.add(ghostMesh);
+      });
+
+      // Add groups to the scene
+      scene.add(snackMenGroup);
+      scene.add(ghostsGroup);
+
+      
     }
 
     function loadMap(map: any) {
@@ -213,6 +272,7 @@ export default defineComponent({
 
 
       player.position.set(w / 2, mapScale, h / 2);
+      console.log('PlayerPosition:', player.position)
       
     }
 
@@ -296,24 +356,6 @@ export default defineComponent({
       scene.add(player);
       player.add(camera);
       player.add(cone);
-
-      // Test Body for Username Test
-      const testObj = new THREE.Mesh(coneGeometry, coneMaterial);
-      testObj.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
-      testObj.rotation.x = -Math.PI / 2;
-      testObj.castShadow = true;
-      scene.add(testObj);
-
-      // Test Player for Username Test
-      const testPlayer = new THREE.Mesh();
-      testPlayer.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
-      scene.add(testPlayer);
-      testPlayer.add(testObj);
-
-      // Create NameTag
-      nameTag = new NameTag('Snacko', testPlayer, scene);
-      nameTags.push(nameTag);
-      nameTags.push(nameTag);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
@@ -414,7 +456,6 @@ export default defineComponent({
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
       });
-
       // start Render-Loop
       animate();
     }
