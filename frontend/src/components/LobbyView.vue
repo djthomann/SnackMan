@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!--
     <h1>Lobby {{ lobbyCode }}</h1>
       <button @click="choose('SnackMan')">Choose SnackMan</button>
       <button @click="choose('Ghost')">Choose Ghost</button>
@@ -57,32 +58,33 @@
         <button type="button" @click="startGame">Start Game</button>
       </form>
 
-      <!-- Progress for Lobby Layout
-        <BackgroundComponent>
-          <div class="lobby-grid">
-            <div class="lobby-grid__column">
-              <PlayerPanelComponent  avatar="ghost">
-                <template #counter>2/4</template>
-                <template #button>Insert Button Component</template>
-                <template #content>David Snackham</template>
-              </PlayerPanelComponent>
-            </div>
-            <div class="lobby-grid__column">
-              <PlayerPanelComponent avatar="ghost"></PlayerPanelComponent>
-            </div>
-            <div class="lobby-grid__column">
-              <PlayerPanelComponent  avatar="snackman" selected>
-                <template #counter>3/4</template>
-                <template #button>Insert Button Component</template>
-                <template #content>David Snackham</template>
-              </PlayerPanelComponent>
-            </div>
-            <div class="lobby-grid__column lobby-grid__column--span-all">
-              Merry Crisis
-            </div>
-          </div>
-        </BackgroundComponent>
-      -->
+    -->
+    
+      
+    <BackgroundComponent>
+      <div class="lobby-grid">
+        <div class="lobby-grid__column">
+          <PlayerPanelComponent  avatar="ghost">
+            <template #counter>2/4</template>
+            <template #button>Insert Button Component</template>
+            <template #content>David Snackham</template>
+          </PlayerPanelComponent>
+        </div>
+        <div class="lobby-grid__column">
+          <PlayerPanelComponent avatar="ghost"></PlayerPanelComponent>
+        </div>
+        <div class="lobby-grid__column">
+          <PlayerPanelComponent  avatar="snackman" selected>
+            <template #counter>3/4</template>
+            <template #button>Insert Button Component</template>
+            <template #content>David Snackham</template>
+          </PlayerPanelComponent>
+        </div>
+        <div class="lobby-grid__column lobby-grid__column--span-all">
+          Merry Crisis
+        </div>
+      </div>
+    </BackgroundComponent>
   </div>
 </template>
 
@@ -92,6 +94,8 @@ import { computed, onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 import { useUserStore } from '@/stores/userStore';
+import BackgroundComponent from './layout/BackgroundComponent.vue';
+import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
