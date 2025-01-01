@@ -152,7 +152,7 @@ export default defineComponent({
     }
 
     /*
-    
+      Ghosts and Snackmen are spawned on the correct position
     */
 
     function loadPlayerEntities (snackMen: Snackman[], ghosts: Ghost[], scene:any){
@@ -263,7 +263,7 @@ export default defineComponent({
       const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
       //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
-      console.log('skybox position', skybox.position)
+      //console.log('skybox position', skybox.position)
       skybox.position.y = (w/4)/2;
       skybox.position.x = w/2;
       skybox.position.z = w/2;
@@ -271,9 +271,7 @@ export default defineComponent({
       scene.add(skybox);
 
 
-      player.position.set(w / 2, mapScale, h / 2);
-      console.log('PlayerPosition:', player.position)
-      
+      player.position.set(w / 2, mapScale, h / 2);      
     }
 
     /**
