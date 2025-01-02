@@ -67,11 +67,23 @@
           <PlayerPanelComponent  avatar="ghost">
             <template #counter>2/4</template>
             <template #button>Insert Button Component</template>
-            <template #content>David Snackham</template>
+            <template #content>
+              <li v-for="player in snackManPlayers" :key="player.id">
+                {{ player.username }}
+              </li>
+            </template>
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column">
-          <PlayerPanelComponent avatar="ghost"></PlayerPanelComponent>
+          <PlayerPanelComponent avatar="ghost">
+            <template #counter>{{ undecidedPlayers.length }}/4</template>
+            <template #content>
+              Undecided Players
+              <li v-for="player in undecidedPlayers" :key="player.id">
+                {{ player.username }}
+              </li>
+            </template>
+          </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column">
           <PlayerPanelComponent  avatar="snackman" selected>
