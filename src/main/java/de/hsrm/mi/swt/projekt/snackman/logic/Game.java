@@ -162,8 +162,6 @@ public class Game {
             }
         }
 
-        res.setMap(map);
-
         return res;
     }
 

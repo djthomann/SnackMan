@@ -1,6 +1,6 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
-    <button id="startButton">Start</button>
+    <button id="startButton">loading</button>
   </div>
 </template>
 
@@ -84,6 +84,7 @@ export default defineComponent({
     let animationMixer: THREE.AnimationMixer;
     const nameTags: NameTag[] = [];
     let gameID = 2;
+    let startPromiseResolve: () => void;
 
     //GameStart
     const entityStore = useEntityStore();
@@ -112,7 +113,23 @@ export default defineComponent({
       } else if (message.startsWith('DISAPPEAR')) {
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
+      } else if (message.startsWith('GAME_START')) {
+        console.log("hier3");
+        handleStartEvent(message);
+        if (startPromiseResolve) {
+          startPromiseResolve();
+        }
       }
+    };
+
+    const handleStartEvent = (message: string) => {
+      console.log("handling start event")
+    }
+
+    const waitForStartMessage = () => {
+      return new Promise<void>((resolve) => {
+        startPromiseResolve = resolve;
+      });
     };
 
     const requestMap = () => {
@@ -125,6 +142,11 @@ export default defineComponent({
     };
 
     onMounted(async () => {
+      eventBus.on('serverMessage', handleServerMessage);
+      console.log("hier")
+      await waitForStartMessage();
+      console.log("hier2")
+
       try {
         // Service initialisieren
         await modelService.initialize(mapScale);
@@ -134,7 +156,6 @@ export default defineComponent({
       loadModels();
       initScene();
       loadPlayerEntities(snackMen.value, ghosts.value, scene);
-      eventBus.on('serverMessage', handleServerMessage);
 
       window.addEventListener('resize', onWindowResize);
 
