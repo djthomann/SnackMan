@@ -10,7 +10,7 @@ class NameTag{
 
         // Create Canvas
         const canvas = document.createElement('canvas');
-        canvas.width = 256;
+        canvas.width = 500;
         canvas.height = 128;
 
         // Create Context
@@ -35,6 +35,7 @@ class NameTag{
         const usernameMaterial = new THREE.MeshBasicMaterial({
             map: texture,
             side: THREE.DoubleSide,
+            depthWrite: false
         })
         usernameMaterial.transparent = true;
         
@@ -43,7 +44,8 @@ class NameTag{
         scene.add(nameTagObj);
 
         // Position NameTag above ParentObject (Player)
-        nameTagObj.position.set(parentObject.position.x, parentObject.position.y + 0.5, parentObject.position.z);
+        nameTagObj.position.set(0, 0, 0); // Relative to parent object's center
+        nameTagObj.position.y += parentObject.position.y/2;
 
         // Add NameTag to Parent
         parentObject.add(nameTagObj);
