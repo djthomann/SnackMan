@@ -142,9 +142,9 @@ export default defineComponent({
       if (/^\d+$/.test(lastSegment)) {
         gameID = Number(lastSegment);
       }
-      console.log("scene with gameID " + gameID)
+      console.log("scene with gameID " + gameID);
 
-      requestMap()
+      requestMap();
     });
 
     onUnmounted(() => {

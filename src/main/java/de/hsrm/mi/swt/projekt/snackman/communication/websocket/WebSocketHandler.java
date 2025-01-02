@@ -98,9 +98,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
-                    long gameId = 2L;  // TODO to be fixed : Hardcoded for Test Game
+                    //TODO: save map in corresponding Lobby-Object, if not present already through file-upload
+                    long gameId = 2L;
                     SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
-                    gameManager.createGame(new GameConfig(), gameId, map);
+                    // gameManager.createGame(new GameConfig(), gameId, map);
                     
                     // SnackManMap map = new SnackManMap(40, 40);
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH +
@@ -115,7 +116,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     try {
                         String json = mapper.writeValueAsString(map);
                         returnString = "MAP;" + json;
-                        logger.info("Final JSON: " + returnString);
+                        // logger.info("Final JSON: " + returnString);
                         session.sendMessage(new TextMessage(returnString));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
@@ -188,6 +189,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                         s.sendMessage(new TextMessage("PLAYERS;" + js));
                     }
 
+                }
+                case "ROLE" -> {
+                    GameObjectType gameObjectType = (jsonObject.get("snackman").getAsBoolean()) ? GameObjectType.SNACKMAN : GameObjectType.GHOST;
+                    clients.get(session).setRole(gameObjectType);
                 }
                 case "LOBBY_CREATE_EVENT" -> {
                     LobbyCreateEvent lobbyCreateEvent = gson.fromJson(jsonString, LobbyCreateEvent.class);

@@ -91,7 +91,7 @@ public class GameManager {
     public String[][] getPlayersInLobby(long lobbyCode) {
         Lobby lobby = this.allLobbies.get(lobbyCode);
         return lobby.getClientsAsList().stream()
-                .map(client -> new String[]{client.getUsername(), String.valueOf(client.getClientId())})
+                .map(client -> new String[]{client.getUsername(), String.valueOf(client.getClientId()), String.valueOf(client.getRole())})
                 .toArray(String[][]::new);
     }
 

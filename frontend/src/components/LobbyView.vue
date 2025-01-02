@@ -65,10 +65,10 @@
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent  avatar="ghost">
-            <template #counter>2/4</template>
-            <template #button>Insert Button Component</template>
+            <template #counter>{{ ghostPlayers.length }}/4</template>
+            <template #button><button type="button" @click="decide(false)"></button>be Ghost</template>
             <template #content>
-              <li v-for="player in snackManPlayers" :key="player.id">
+              <li v-for="player in ghostPlayers" :key="player.id">
                 {{ player.username }}
               </li>
             </template>
@@ -76,7 +76,7 @@
         </div>
         <div class="lobby-grid__column">
           <PlayerPanelComponent avatar="ghost">
-            <template #counter>{{ undecidedPlayers.length }}/4</template>
+            <template #counter>{{ undecidedPlayers.length }}/8</template>
             <template #content>
               Undecided Players
               <li v-for="player in undecidedPlayers" :key="player.id">
@@ -87,9 +87,13 @@
         </div>
         <div class="lobby-grid__column">
           <PlayerPanelComponent  avatar="snackman" selected>
-            <template #counter>3/4</template>
-            <template #button>Insert Button Component</template>
-            <template #content>David Snackham</template>
+            <template #counter>{{ snackManPlayers.length }}/4</template>
+            <template #button><button type="button" @click="decide(true)"></button>be Snackman</template>
+            <template #content>
+              <li v-for="player in snackManPlayers" :key="player.id">
+                {{ player.username }}
+              </li>
+            </template>
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
@@ -161,15 +165,29 @@ const handleServerMessage = (message: string) => {
   } else if (message.startsWith('GAME_START')) {
     router.push('/game/' + lobbyCode.value);
   } else if (message.startsWith("PLAYERS")) {
-    const parsedData = JSON.parse(message.split(';')[1]);
-    const playersArray: Array<Player> = [];
-    parsedData.players.forEach((player: string[]) => {
-      console.log(`Username: ${player[0]}, Client ID: ${player[1]}`);
-      playersArray.push({id: Number(player[1]), username: player[0]})
-    })
-    undecidedPlayers.value = playersArray;
+    buildPlayerArrays(message);
   }
 };
+
+const buildPlayerArrays = (message: string) => {
+  const parsedData = JSON.parse(message.split(';')[1]);
+  const snackmanArray: Array<Player> = [];
+  const ghostArray: Array<Player> = [];
+  const undecidedArray: Array<Player> = [];
+  parsedData.players.forEach((player: string[]) => {
+    console.log(`Username: ${player[0]}, Client ID: ${player[1]}`);
+    if (player[2] === "SNACKMAN") {
+      snackmanArray.push({id: Number(player[1]), username: player[0]})
+    } else if (player[2] === "GHOST") {
+      ghostArray.push({id: Number(player[1]), username: player[0]})
+    } else {
+      undecidedArray.push({id: Number(player[1]), username: player[0]})
+    }
+  })
+  snackManPlayers.value = snackmanArray;
+  undecidedPlayers.value = undecidedArray;
+  ghostPlayers.value = ghostArray;
+}
 
 // Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
@@ -190,6 +208,17 @@ const resetForm = async () => {
   });
   sendMessage(reset);
 };
+
+const decide = (snackman: boolean) => {
+  const data = JSON.stringify({
+    type: 'ROLE',
+    snackman: snackman,
+    id: userStore.id
+  });
+  sendMessage(data);
+
+  fetchPlayers();
+}
 
 // Automatic call on load
 onMounted(async () => {
