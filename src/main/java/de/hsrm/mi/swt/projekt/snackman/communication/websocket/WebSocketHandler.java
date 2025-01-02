@@ -178,12 +178,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
                 case "GET_PLAYERS" -> {
                     JsonObject jo = new JsonObject();
-                    jo.add("players", gson.toJsonTree(gameManager.getPlayersInLobby(Long.parseLong(String.valueOf(jsonObject.get("lobbyCode"))))));
+                    long lobbyCode = Long.parseLong(String.valueOf(jsonObject.get("lobbyCode")));
+                    jo.add("players", gson.toJsonTree(gameManager.getPlayersInLobby(lobbyCode)));
 
                     // JSON-Objekt als String ausgeben
                     String js = gson.toJson(jo);
 
-                    session.sendMessage(new TextMessage("PLAYERS;" + js));
+                    for (WebSocketSession s: gameManager.getLobbyMap().get(lobbyCode).getAllSessions()) {
+                        s.sendMessage(new TextMessage("PLAYERS;" + js));
+                    }
+
                 }
                 case "LOBBY_CREATE_EVENT" -> {
                     LobbyCreateEvent lobbyCreateEvent = gson.fromJson(jsonString, LobbyCreateEvent.class);

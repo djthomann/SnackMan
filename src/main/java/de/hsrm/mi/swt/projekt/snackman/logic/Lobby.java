@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
+import org.springframework.web.socket.WebSocketSession;
 
 public class Lobby {
     
@@ -52,6 +53,10 @@ public class Lobby {
     public Game startGame(GameManager gameManager) {
         if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
         return new Game(this, gameManager);
+    }
+
+    public List<WebSocketSession> getAllSessions() {
+        return this.getClientsAsList().stream().map(Client::getSession).toList();
     }
 
     public LobbyRecord toRecord() {
