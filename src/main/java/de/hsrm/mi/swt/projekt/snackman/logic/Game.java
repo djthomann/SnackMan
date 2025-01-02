@@ -161,6 +161,7 @@ public class Game {
                 case "Chicken" -> res.addChicken((Chicken) m);
             }
         }
+        res.setMap(map.toRecord());
 
         return res;
     }

@@ -114,7 +114,6 @@ export default defineComponent({
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
       } else if (message.startsWith('GAME_START')) {
-        console.log("hier3");
         handleStartEvent(message);
         if (startPromiseResolve) {
           startPromiseResolve();
@@ -123,7 +122,12 @@ export default defineComponent({
     };
 
     const handleStartEvent = (message: string) => {
-      console.log("handling start event")
+      console.log("handling start event");
+      const map = JSON.parse(message.split(';')[1]).map;
+      console.log(map);
+      loadMap(map);
+      //TODO: look for 'translator'
+      //TODO: make "map anfordern" work again
     }
 
     const waitForStartMessage = () => {
@@ -143,9 +147,6 @@ export default defineComponent({
 
     onMounted(async () => {
       eventBus.on('serverMessage', handleServerMessage);
-      console.log("hier")
-      await waitForStartMessage();
-      console.log("hier2")
 
       try {
         // Service initialisieren
@@ -155,6 +156,9 @@ export default defineComponent({
       }
       loadModels();
       initScene();
+
+      await waitForStartMessage();
+
       loadPlayerEntities(snackMen.value, ghosts.value, scene);
 
       window.addEventListener('resize', onWindowResize);
@@ -165,7 +169,7 @@ export default defineComponent({
       }
       console.log("scene with gameID " + gameID);
 
-      requestMap();
+      // requestMap();
     });
 
     onUnmounted(() => {
@@ -253,7 +257,7 @@ export default defineComponent({
       //console.log('Received mapdata' + map);
       const w = map.w * mapScale;
       const h = map.h * mapScale;
-      const tiles = map.allTiles;
+      const tiles = map.tileRecords;
 
       for (const row of tiles) {
         for (const tile of row) {
@@ -262,8 +266,8 @@ export default defineComponent({
             // console.log(tile)
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
-            food.userData.id = tile.occupation.objectId;
+            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
+            food.userData.id = tile.food.objectId;
             foodGroup.add(
               food
             );

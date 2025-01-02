@@ -9,7 +9,6 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
-import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 /**
  * Event that informs and holds all Game/Level data which the frontend needs to
@@ -20,12 +19,14 @@ public class GameStartEvent extends Event {
     private List<SnackManRecord> snackMen;
     private List<GhostRecord> ghosts;
     private List<ChickenRecord> chicken;
+    private SnackManMapRecord map;
 
-    public GameStartEvent(List<SnackManRecord> snackMen, List<GhostRecord> ghosts, List<ChickenRecord> chicken) {
+    public GameStartEvent(List<SnackManRecord> snackMen, List<GhostRecord> ghosts, List<ChickenRecord> chicken, SnackManMapRecord map) {
         this.setType(EventType.GAME_START);
         this.snackMen = snackMen;
         this.ghosts = ghosts;
         this.chicken = chicken;
+        this.map = map;
     }
 
     public GameStartEvent() {
@@ -71,4 +72,11 @@ public class GameStartEvent extends Event {
         this.chicken = chicken;
     }
 
+    public SnackManMapRecord getMap() {
+        return map;
+    }
+
+    public void setMap(SnackManMapRecord map) {
+        this.map = map;
+    }
 }

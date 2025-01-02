@@ -114,7 +114,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     ObjectMapper mapper = new ObjectMapper();
                     String returnString = "";
                     try {
-                        String json = mapper.writeValueAsString(map);
+                        String json = mapper.writeValueAsString(map.toRecord());
                         returnString = "MAP;" + json;
                         // logger.info("Final JSON: " + returnString);
                         session.sendMessage(new TextMessage(returnString));
