@@ -21,6 +21,7 @@ import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
 import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
 import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
 import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
+import {useRoute} from "vue-router";
 
 
 // Groups of different map objects
@@ -69,6 +70,7 @@ export default defineComponent({
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
     const player = new THREE.Mesh();
+    const route = useRoute();
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
@@ -81,6 +83,7 @@ export default defineComponent({
     let nameTag: NameTag;
     let animationMixer: THREE.AnimationMixer;
     const nameTags: NameTag[] = [];
+    let gameID = 2;
 
     //GameStart
     const entityStore = useEntityStore();
@@ -107,9 +110,18 @@ export default defineComponent({
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
       } else if (message.startsWith('DISAPPEAR')) {
-        const food = JSON.parse(message.split(';')[1]); 
-        makeDisappear(food.food.objectId); 
+        const food = JSON.parse(message.split(';')[1]);
+        makeDisappear(food.food.objectId);
       }
+    };
+
+    const requestMap = () => {
+      console.log('loading map');
+      const requestData = {
+        type: 'MAPREQUEST',
+        id: gameID
+      };
+      sendMessage(JSON.stringify(requestData));
     };
 
     onMounted(async () => {
@@ -125,6 +137,14 @@ export default defineComponent({
       eventBus.on('serverMessage', handleServerMessage);
 
       window.addEventListener('resize', onWindowResize);
+
+      const lastSegment = route.path.split('/').pop() || ''
+      if (/^\d+$/.test(lastSegment)) {
+        gameID = Number(lastSegment);
+      }
+      console.log("scene with gameID " + gameID)
+
+      requestMap()
     });
 
     onUnmounted(() => {
@@ -169,7 +189,7 @@ export default defineComponent({
         // Position snackMan
         snackManMesh.position.set(
           snackMan.x,
-          mapScale / 2, 
+          mapScale / 2,
           snackMan.z
         );
 
@@ -205,7 +225,7 @@ export default defineComponent({
       scene.add(snackMenGroup);
       scene.add(ghostsGroup);
 
-      
+
     }
 
     function loadMap(map: any) {
@@ -221,8 +241,8 @@ export default defineComponent({
             // console.log(tile)
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale); 
-            food.userData.id = tile.occupation.objectId; 
+            const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
+            food.userData.id = tile.occupation.objectId;
             foodGroup.add(
               food
             );
@@ -247,7 +267,7 @@ export default defineComponent({
       } else {
         console.log('Animation not found');
       }
-      
+
       scene.add(wallsGroup);
 
       scene.add(foodGroup);
@@ -271,7 +291,7 @@ export default defineComponent({
       scene.add(skybox);
 
 
-      player.position.set(w / 2, mapScale, h / 2);      
+      player.position.set(w / 2, mapScale, h / 2);
     }
 
     /**
@@ -296,11 +316,11 @@ export default defineComponent({
     function makeDisappear(id: number) {
       foodGroup.children.forEach( (food) => {
         if (food.userData.id == id) {
-          scene.remove(food); 
-          foodGroup.remove(food); 
-          console.log(`food with Id ${id} disappeared juhu`); 
+          scene.remove(food);
+          foodGroup.remove(food);
+          console.log(`food with Id ${id} disappeared juhu`);
         }
-      }); 
+      });
     }
 
     function initScene() {

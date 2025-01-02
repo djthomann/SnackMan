@@ -94,6 +94,7 @@
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
           Merry Crisis
+          <button type="button" @click="startGame">Start Game</button>
         </div>
       </div>
     </BackgroundComponent>
