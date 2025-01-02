@@ -5,6 +5,8 @@ import java.util.*;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
+
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +21,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
-
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.*;
 /**
  * The Game class contains all the information and logic necessary within an individual game.
  * The game starts as soon as the Game class is instantiated.
@@ -250,6 +252,14 @@ public class Game {
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
         eventBus.sendEventToSubscribers(event);
+
+         float newX = ((SnackMan)this.allMovables.get(0)).getX();
+         float newY = ((SnackMan)this.allMovables.get(0)).getY();
+         float newZ = ((SnackMan)this.allMovables.get(0)).getZ();
+         MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
+         
+         this.gameManager.notifyChange(moveEvent);
+
     }
 
     /**
