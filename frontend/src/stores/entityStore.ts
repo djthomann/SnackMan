@@ -25,8 +25,19 @@ export const useEntityStore = defineStore('entityStore', () => {
 
   eventBus.on('serverMessage', handleServerMessage);
 
+  /*
   const ghosts = ref<Ghost[]>([]);
   const snackMen = ref<Snackman[]>([]);
+  */
+
+  const ghosts = ref<Ghost[]>([
+    { gameId: 1, objectId: 101, username: "Ghosty1", x: 108, y: 0, z: 102 },
+    { gameId: 1, objectId: 102, username: "Ghosty2", x: 104, y: 0, z: 102 },
+  ]);
+  const snackMen = ref<Snackman[]>([
+    { gameId: 1, objectId: 201, username: "SnackMan1", x: 110, y: 0, z: 102, gainedCalories: 0 },
+    { gameId: 1, objectId: 202, username: "SnackMan2", x: 117, y: 0, z: 102, gainedCalories: 100 },
+  ]);
   const chicken = ref<Chicken[]>([]);
   const map = ref<SnackManMap>();
 
