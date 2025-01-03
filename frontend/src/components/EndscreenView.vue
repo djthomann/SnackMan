@@ -31,11 +31,17 @@
   -->
   <div>
     <BackgroundComponent>
-    <div class="background__container">
-      <div class="lobby-grid receiptpanel--full-height">
-        <ReceiptComponent></ReceiptComponent>
+      <div class="lobby-grid">
+        <div class="lobby-grid__column">
+          <PlayerPanelComponent avatar="snackman" variant="white">
+            <template #button>Insert Button Component</template>
+            <template #content>Snacko<br><strong>123456789 CAL</strong></template>
+          </PlayerPanelComponent>
+        </div>
+        <div class="recipe-grid">
+          <ReceiptComponent></ReceiptComponent>
+        </div>
       </div>
-    </div>
     </BackgroundComponent>
   </div>
 </template>
@@ -47,6 +53,7 @@ import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import ReceiptComponent from './layout/ReceiptComponent.vue';
+import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 // TODO: Testdata, delete later
 // import testData from '@/assets/testData.json';
 
@@ -118,15 +125,24 @@ const toLobby = () => {
 </script>
 
 <style scoped>
-
 .lobby-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: 1fr auto;
+  gap: 40px 60px;
+  padding: 4dvw;
+  box-sizing:border-box;
+}
+
+.recipe-grid {
   width: 100%;
   height: 90vh;
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-rows: 1fr auto;
   gap: 40px 60px;
-  padding: 4dvw;
   box-sizing: border-box;
   overflow: hidden;
 }
