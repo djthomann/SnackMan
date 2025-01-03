@@ -1,46 +1,32 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="background">
-    <div class="background__image"></div>
-    <div class="background__container">
-      <div class="background__sheet">
-        <div class="background__sheet-tile background__sheet-tile--left">
-          <img
-            class="background__sheet-image"
-            src="@/assets/images/backgrounds/backgroundcontainer_left.png"
-          />
+    <div class="background">
+        <div class="background__image"></div>
+        <div class="background__container">
+            <div class="background__sheet">
+                <div class="background__sheet-tile background__sheet-tile--left">
+                    <img class="background__sheet-image" src="@/assets/images/backgrounds/backgroundcontainer_left.png">
+                </div>
+                <div class="background__sheet-tile background__sheet-tile--stretch">
+                    <img class="background__sheet-image" src="@/assets/images/backgrounds/backgroundcontainer_stretch.png">
+                </div>
+                <div class="background__sheet-tile background__sheet-tile--center">
+                    <img class="background__sheet-image" src="@/assets/images/backgrounds/backgroundcontainer_center.png">
+                </div>
+                <div class="background__sheet-tile background__sheet-tile--stretch">
+                    <img class="background__sheet-image" src="@/assets/images/backgrounds/backgroundcontainer_stretch.png">
+                </div>
+                <div class="background__sheet-tile background__sheet-tile--right">
+                    <img class="background__sheet-image" src="@/assets/images/backgrounds/backgroundcontainer_right.png">
+                </div>
+                
+            </div>
+            <div class="background__content">
+                <slot></slot>
+            </div>
         </div>
-        <div class="background__sheet-tile background__sheet-tile--stretch">
-          <img
-            class="background__sheet-image"
-            src="@/assets/images/backgrounds/backgroundcontainer_stretch.png"
-          />
-        </div>
-        <div class="background__sheet-tile background__sheet-tile--center">
-          <img
-            class="background__sheet-image"
-            src="@/assets/images/backgrounds/backgroundcontainer_center.png"
-          />
-        </div>
-        <div class="background__sheet-tile background__sheet-tile--stretch">
-          <img
-            class="background__sheet-image"
-            src="@/assets/images/backgrounds/backgroundcontainer_stretch.png"
-          />
-        </div>
-        <div class="background__sheet-tile background__sheet-tile--right">
-          <img
-            class="background__sheet-image"
-            src="@/assets/images/backgrounds/backgroundcontainer_right.png"
-          />
-        </div>
-      </div>
-      <div class="background__content">
-        <slot></slot>
-      </div>
     </div>
-  </div>
 </template>
 
 <style scoped lang="css">
@@ -51,35 +37,43 @@
 }
 
 .background__image {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  z-index: 1;
-  background-color: var(--colorSecondary);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 1;
+    background-color: var(--colorSecondary);
+    background-image: url('../../assets/images/backgrounds/backgroundcontainer_image.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    user-select: none;
+    pointer-events: none;
 }
 
 .background__container {
-    
-  width: 90dvw;
-  max-width: 1440px;
-  height: calc(100% - 10dvw);
-  max-height: 770px;
-  position: relative;
-  z-index: 1;
-  /* position element centered */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  /*background-color: var(--colorPrimary);*/
+    width: 92dvw;
+    max-width: 1440px;
+    height: calc(100% - 8dvw);
+    max-height: 770px;
+    position: relative;
+    z-index: 2;
+    /* position element centered */ 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /*background-color: var(--colorPrimary);*/
 }
 
 .background__sheet {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  display: grid;
-  grid-template-columns: auto 1fr auto 1fr auto;
-  grid-template-rows: 100%;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr auto;
+    grid-template-rows: 100%;
+    filter: drop-shadow(35px 35px 4px rgba(0,0,0,0.2));
+    user-select: none;
+    pointer-events: none;
 }
 
 .background__sheet-tile {
@@ -93,7 +87,9 @@
 }
 
 .background__sheet-tile--stretch {
-  width: 100%;
+    width:calc(100% + 2px);
+    margin-left: -1px;
+    margin-right: -1px;
 }
 
 .background__sheet-tile--left .background__sheet-image,
@@ -107,4 +103,11 @@
   width: 100%;
   height: 100%;
 }
+
+.background__content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
 </style>
