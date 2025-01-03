@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useSlots } from 'vue';
+import { log } from 'three/webgpu';
+import { onMounted, ref, useSlots } from 'vue';
 
     type Props = {
         headline: string,
@@ -14,21 +15,50 @@ import { useSlots } from 'vue';
     })
 
     const slots = useSlots();
+
+    /* Dynamic computed body height */
+
+    const container = ref()
+    const header = ref()
+    const body = ref()
+    const footer = ref()
+
+    const calcPrefBodyHeight = () => {
+        // Prevent calculations when important elements are missing to prevent errors
+        if(!container.value || !header.value || !body.value) return false
+
+        // Get respective sizing values of container and children from viewport
+        const containerHeight = Math.round(container.value?.getBoundingClientRect().height ?? 0)
+        const headerHeight = Math.round(header.value?.getBoundingClientRect().height ?? 0)
+        const bodyHeight = Math.round(body.value?.getBoundingClientRect().height ?? 0)
+        const footerHeight = Math.round(footer.value?.getBoundingClientRect().height ?? 0)
+
+        // Calculate cumulative height of configpanel body element from container and sibling sizes
+        const prefComputedBodyHeight = containerHeight - headerHeight - footerHeight;
+
+        // Only apply computed height to body element if element height is greater than the computed
+        if(bodyHeight > prefComputedBodyHeight) body.value.style.height = `${prefComputedBodyHeight}px`
+    }
+
+    // Start body height when mounted lifecycle has finished
+    onMounted(() => {
+        calcPrefBodyHeight()
+    })
 </script>
 
 <template>
     <div class="configpanel">
-        <div class="configpanel__content">
-            <div class="configpanel__content-header">
+        <div class="configpanel__content" ref="container">
+            <div class="configpanel__content-header" ref="header">
                 <h2 class="configpanel__content-headline">{{ props.headline }}</h2>
                 <div class="configpanel__content-counter" v-if="props.counter">
                     {{ props.counter?.current }}/{{ props.counter?.max }}
                 </div>
             </div>
-            <div class="configpanel__content-body" v-if="slots.content">
+            <div class="configpanel__content-body" v-if="slots.content" ref="body">
                 <slot name="content"></slot>
             </div>
-            <div class="configpanel__content-footer" v-if="slots.footer">
+            <div class="configpanel__content-footer" v-if="slots.footer" ref="footer">
                 <slot name="footer"></slot>
             </div>
         </div>
@@ -46,10 +76,12 @@ import { useSlots } from 'vue';
 
     .configpanel__content {
         width: 100%;
+        height: 100%;
         display: grid;  
         grid-template-columns: 100%;
         grid-template-rows: auto 1fr auto;
         padding-bottom: 15px;
+        box-sizing: border-box;
     }
 
     .configpanel__content-header {
@@ -101,7 +133,7 @@ import { useSlots } from 'vue';
 
     .configpanel__content-body {
         width: 100%;
-        padding: 30px;
+        padding: 0 30px 15px;
         box-sizing: border-box;
         overflow: hidden;
     }

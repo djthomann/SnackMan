@@ -66,17 +66,36 @@
         <div class="lobby-grid__column">
           <PlayerPanelComponent  avatar="ghost">
             <template #counter>2/4</template>
-            <template #button>Insert Button Component</template>
+            <template #button>
+              <button @click="choose('Ghost')">Choose Ghost</button>
+            </template>
             <template #content>David Snackham</template>
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column">
-          <PlayerPanelComponent avatar="ghost"></PlayerPanelComponent>
+          <ConfigPanelComponent headline="Game Settings:" :counter="{current: 2, max: 8}">
+            <template #content>
+              <div class="config-panel-grid">
+                <FieldsetComponent height-behaviour="stretch">
+                  <span>Slay</span>
+                  <span>Slay</span>
+                </FieldsetComponent>
+                <FieldsetComponent height-behaviour="stretch">
+                  <span>Slay</span>
+                  <span>Slay</span>
+                  <span>Slay</span>
+                  <span>Slay</span>
+                </FieldsetComponent>
+              </div>
+            </template>
+          </ConfigPanelComponent>
         </div>
         <div class="lobby-grid__column">
           <PlayerPanelComponent  avatar="snackman" selected>
             <template #counter>3/4</template>
-            <template #button>Insert Button Component</template>
+            <template #button>
+              <button @click="choose('SnackMan')">Choose SnackMan</button>
+            </template>
             <template #content>David Snackham</template>
           </PlayerPanelComponent>
         </div>
@@ -96,6 +115,9 @@ import eventBus from '@/services/eventBus';
 import { useUserStore } from '@/stores/userStore';
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
+import ConfigPanelComponent from './layout/ConfigPanelComponent.vue';
+import FieldsetComponent from './layout/FieldsetComponent.vue';
+
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
@@ -232,8 +254,21 @@ const choose = (role: string) => {
   box-sizing:border-box;
 }
 
+.lobby-grid__column {
+  min-height:0;
+}
+
 .lobby-grid__column--span-all {
   grid-column: 1/4;
   text-align: center;
+}
+
+.config-panel-grid {
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 100%;
+  gap: 30px;
 }
 </style>
