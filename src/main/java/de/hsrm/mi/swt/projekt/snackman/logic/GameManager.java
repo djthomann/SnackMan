@@ -28,6 +28,7 @@ public class GameManager {
     private final WebSocketHandler webSocketHandler;
     private GameConfig gameConfig = new GameConfig();
 
+
     // TODO: To Be Deleted , Constructor for testing purposes with fake game
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;

@@ -98,7 +98,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         this.x += newX;
         this.y += newY;
         this.z += newZ;
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManger));
     }
 
     /**
@@ -254,8 +254,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
 
                 this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
+
+                /* more old stuff
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
                 gameManger.notifyChange(moveEvent);
+
+                 */
 
                 // checks if the movementVector is from a jump action or not
                 if (vector.y != 0.0) {

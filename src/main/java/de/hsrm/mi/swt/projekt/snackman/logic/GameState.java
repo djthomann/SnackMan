@@ -44,6 +44,7 @@ public class GameState {
                         changedSnackMen.clear();
                         changedChicken.clear();
                         eatenFoods.clear();
+                        System.out.println("hier");
                     }
                 }
             }

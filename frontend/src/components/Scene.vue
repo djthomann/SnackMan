@@ -11,7 +11,7 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import { Ghost, Snackman } from '@/types/SceneTypes';
+import {Ghost, Snackman} from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
@@ -22,6 +22,8 @@ import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
 import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
 import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
 import {useRoute} from "vue-router";
+import {useUserStore} from "@/stores/userStore";
+import {Mesh} from "three";
 
 
 // Groups of different map objects
@@ -71,6 +73,7 @@ export default defineComponent({
     const serverMessage = ref<string>('');
     const player = new THREE.Mesh();
     const route = useRoute();
+    const userStore = useUserStore();
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
@@ -88,12 +91,13 @@ export default defineComponent({
 
     //GameStart
     const entityStore = useEntityStore();
-    const { snackMen, ghosts } = storeToRefs(entityStore);
+    const { snackMen, ghosts, chicken, map } = storeToRefs(entityStore);
+    const meshes: Map<Number, Mesh> = new Map<Number, Mesh>();
 
-    console.log('Snackmen:', snackMen.value.length)
+    console.log('Snackmen:', snackMen.value.values.length)
     console.log(
       'Snackman Names:',
-      snackMen.value.map((item: Snackman) => item.username),
+      [...snackMen.value.values()].map((item: Snackman) => item.username),
     );
 
     // React to server message (right now only simple movement)
@@ -114,20 +118,35 @@ export default defineComponent({
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
       } else if (message.startsWith('GAME_START')) {
-        handleStartEvent(message);
+        handleStartEvent();
         if (startPromiseResolve) {
           startPromiseResolve();
         }
+      } else if (message.startsWith('GAME_STATE')) {
+        handleGameStateEvent(message.split(';')[1])
       }
     };
 
-    const handleStartEvent = (message: string) => {
-      console.log("handling start event");
-      const map = JSON.parse(message.split(';')[1]).map;
-      console.log(map);
-      loadMap(map);
-      //TODO: look for 'translator'
-      //TODO: make "map anfordern" work again
+    const handleGameStateEvent = (message: string) => {
+      console.log(message);
+
+      const parsedData = JSON.parse(message);
+      let i = 0;
+      parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
+        i++;
+        console.log(`handled ${i} snackman`)
+        meshes.get(snackman.objectId)!.position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+      })
+
+      parsedData.updatesGhosts.forEach((ghost: Ghost) => {
+        meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+      })
+
+    }
+
+    const handleStartEvent = () => {
+      console.log("handle start event")
+      loadMap(map.value);
     }
 
     const waitForStartMessage = () => {
@@ -159,7 +178,7 @@ export default defineComponent({
 
       await waitForStartMessage();
 
-      loadPlayerEntities(snackMen.value, ghosts.value, scene);
+      loadPlayerEntities([...snackMen.value.values()], [...ghosts.value.values()], scene);
 
       window.addEventListener('resize', onWindowResize);
 
@@ -224,6 +243,14 @@ export default defineComponent({
 
         // Add to snackMen group
         snackMenGroup.add(snackManMesh);
+
+        if (snackMan.objectId == userStore.id) {
+          snackManMesh.add(camera);
+          camera.position.set(0, 0, 0);
+        }
+
+        meshes.set(snackMan.objectId, snackManMesh);
+        console.log(`placed Snackman ${snackMan.objectId} on Scene`)
       });
 
       // Iterate over ghosts and add them to the scene
@@ -244,6 +271,7 @@ export default defineComponent({
 
         // Add to ghosts group
         ghostsGroup.add(ghostMesh);
+        meshes.set(ghost.objectId, ghostMesh);
       });
 
       // Add groups to the scene
@@ -253,11 +281,11 @@ export default defineComponent({
 
     }
 
-    function loadMap(map: any) {
-      //console.log('Received mapdata' + map);
-      const w = map.w * mapScale;
-      const h = map.h * mapScale;
-      const tiles = map.tileRecords;
+    function loadMap(m: any) {
+      console.log('Received mapdata' + m);
+      const w = m.w * mapScale;
+      const h = m.h * mapScale;
+      const tiles = m.tileRecords;
 
       for (const row of tiles) {
         for (const tile of row) {
@@ -331,11 +359,13 @@ export default defineComponent({
         `New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`,
       );
 
+
       player.position.set(
         newPlayerPositionX * mapScale,
         newPlayerPositionY,
         newPlayerPositionZ * mapScale,
-      );
+      )
+
     }
 
     function makeDisappear(id: number) {
@@ -485,8 +515,8 @@ export default defineComponent({
 
         const data = JSON.stringify({
           type: 'MOVE',
-          gameID: 2,
-          objectID: 832,
+          gameID: gameID,
+          objectID: userStore.id,
           movementVector: vector,
         });
 
