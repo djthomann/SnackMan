@@ -4,9 +4,12 @@ import java.util.*;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
 
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +57,7 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         this.map = map;
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
+        init(null);
         this.timer = new Timer();
         startTimer();
         gameState = new GameState(this);
@@ -251,17 +255,18 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
     public void receiveEvent(Event event) {
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
+
         eventBus.sendEventToSubscribers(event);
 
-        /* old stuff, maybe keep for testing/debugging?
-         float newX = ((SnackMan)this.allMovables.get(0)).getX();
-         float newY = ((SnackMan)this.allMovables.get(0)).getY();
-         float newZ = ((SnackMan)this.allMovables.get(0)).getZ();
-         MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
-         
-         this.gameManager.notifyChange(moveEvent);
+        // Testing mode means not starting a game via Lobby
+        if (WebSocketHandler.testingMode) {
+            float newX = ((SnackMan) this.allMovables.get(0)).getX();
+            float newY = ((SnackMan) this.allMovables.get(0)).getY();
+            float newZ = ((SnackMan) this.allMovables.get(0)).getZ();
+            MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
 
-         */
+            this.gameManager.notifyChange(moveEvent);
+        }
 
     }
 

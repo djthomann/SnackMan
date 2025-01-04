@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +99,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         this.x += newX;
         this.y += newY;
         this.z += newZ;
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManger));
+        if (!WebSocketHandler.testingMode) EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManger));
     }
 
     /**
@@ -225,7 +226,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     @Override
     public void handle(Event event) {
 
-        if (event.getObjectID() != this.objectId) {
+        if (!WebSocketHandler.testingMode && event.getObjectID() != this.objectId) {
             return;
         }
 
@@ -255,11 +256,11 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
                 this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
 
-                /* more old stuff
+
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
                 gameManger.notifyChange(moveEvent);
 
-                 */
+
 
                 // checks if the movementVector is from a jump action or not
                 if (vector.y != 0.0) {

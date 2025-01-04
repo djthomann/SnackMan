@@ -1,6 +1,6 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
-    <button id="startButton">loading</button>
+    <button id="startButton">play</button>
   </div>
 </template>
 
@@ -88,6 +88,7 @@ export default defineComponent({
     const nameTags: NameTag[] = [];
     let gameID = 2;
     let startPromiseResolve: () => void;
+    let testingMode = false;
 
     //GameStart
     const entityStore = useEntityStore();
@@ -106,6 +107,7 @@ export default defineComponent({
       //console.log('Processing server message');
 
       if (message.startsWith('MOVE')) {
+        testingMode = true;
         const key: string = message.split(':')[1];
 
         // Move the player
@@ -128,13 +130,9 @@ export default defineComponent({
     };
 
     const handleGameStateEvent = (message: string) => {
-      console.log(message);
 
       const parsedData = JSON.parse(message);
-      let i = 0;
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
-        i++;
-        console.log(`handled ${i} snackman`)
         meshes.get(snackman.objectId)!.position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
       })
 
@@ -244,7 +242,7 @@ export default defineComponent({
         // Add to snackMen group
         snackMenGroup.add(snackManMesh);
 
-        if (snackMan.objectId == userStore.id) {
+        if (!testingMode && snackMan.objectId == userStore.id) {
           snackManMesh.add(camera);
           camera.position.set(0, 0, 0);
         }

@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.LobbyRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
@@ -41,6 +44,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
     GameManager gameManager = new GameManager(this);
 
     Map<WebSocketSession, Client> clients = new HashMap<>();
+
+    // true when game is not properly started via a Lobby
+    public static boolean testingMode = false;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -98,10 +104,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
-                    //TODO: save map in corresponding Lobby-Object, if not present already through file-upload
+                    //TODO: delete once map always comes with GameStartEvent
                     long gameId = 2L;
                     SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
-                    // gameManager.createGame(new GameConfig(), gameId, map);
+                    createFood(map);
+                    testingMode = true;
+                    gameManager.createGame(new GameConfig(), gameId, map);
                     
                     // SnackManMap map = new SnackManMap(40, 40);
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH +
@@ -243,7 +251,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         for (WebSocketSession session : this.clients.keySet()) {
             try {
                 json = gson.toJson(event);
-                // logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
+                logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
 
                 // Synchronize this block to avoid sending messages during invalid states (e.g.
                 // enables moving while jumping)
@@ -307,5 +315,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     public Map<WebSocketSession, Client> getClients() {
         return clients;
+    }
+
+    /**
+     * creates Food on Map, to simplify testing, should be deleted asap
+     */
+
+    private void createFood(SnackManMap map) {
+        for (int row = 0; row < map.getH(); row++) {
+            for (int col = 0; col < map.getW(); col++) {
+                if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
+                    map.getTileAt(col, row).setOccupation(new Food(0, col, row, FoodType.OKAY, new GameConfig()));
+                }
+            }
+        }
     }
 }

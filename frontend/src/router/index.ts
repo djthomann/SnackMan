@@ -7,7 +7,7 @@ import LobbyView from '@/components/LobbyView.vue';
 import Username from '@/components/Username.vue';
 
 const routes = [
-  { path: '/', redirect: '/title' },
+  { path: '/', component: Main },
   { path: '/title', component: TitleView },
   { path: '/home', component: HomeView },
   { path: '/lobby/:code', component: LobbyView },
