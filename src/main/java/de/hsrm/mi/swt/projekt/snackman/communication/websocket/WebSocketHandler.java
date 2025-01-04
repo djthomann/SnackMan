@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.*;
+import de.hsrm.mi.swt.projekt.snackman.logic.Game;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.LobbyRecord;
@@ -27,11 +30,6 @@ import com.google.gson.JsonSyntaxException;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChooseRoleEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.StartGameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
@@ -221,14 +219,29 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
 
                 case "START_GAME" -> {
-                    //TODO: hows the map handled?
                     StartGameEvent startGameEvent = gson.fromJson(jsonString, StartGameEvent.class);
+                    notifyClientsAboutForeignGameStart(session, startGameEvent.getGameID());
+
                     gameManager.createGame(startGameEvent.getGameID());
                 }
 
             }
         } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
+        }
+    }
+
+    private void notifyClientsAboutForeignGameStart(WebSocketSession source, long gameId) {
+        Lobby lobby = gameManager.getLobbyById(gameId);
+
+        for (Client c: lobby.getClientsAsList()) {
+            if (c.getSession() != source) {
+                try {
+                    c.getSession().sendMessage(new TextMessage("FOREIGN_GAMESTART"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

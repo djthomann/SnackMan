@@ -258,7 +258,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
 
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                gameManger.notifyChange(moveEvent);
+                if (WebSocketHandler.testingMode) gameManger.notifyChange(moveEvent);
 
 
 

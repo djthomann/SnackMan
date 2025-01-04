@@ -48,11 +48,13 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
     private final CollisionManager collisionManager;
     private final GameState gameState;
     private int numSnackmen = 0;
+    private GameStartEvent gameStartEvent;
 
     
 
     public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
+        //TODO: check weird movement in real mode
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
@@ -167,6 +169,8 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
             }
         }
         res.setMap(map.toRecord());
+
+        this.gameStartEvent = res;
 
         return res;
     }
@@ -294,5 +298,9 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
     @Override
     public boolean supportsAsyncExecution() {
         return ApplicationListener.super.supportsAsyncExecution();
+    }
+
+    public GameStartEvent getGameStartEvent() {
+        return gameStartEvent;
     }
 }

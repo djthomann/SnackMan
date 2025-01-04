@@ -163,9 +163,12 @@ const handleServerMessage = (message: string) => {
   if (message.startsWith('GAME_CONFIG')) {
     gameConfig.value = JSON.parse(message.split(';')[1]);
   } else if (message.startsWith('GAME_START')) {
+    //TODO: get this event into scene
     router.push('/game/' + lobbyCode.value);
   } else if (message.startsWith("PLAYERS")) {
     buildPlayerArrays(message);
+  } else if (message.startsWith("FOREIGN_GAMESTART")) {
+    router.push('/game/' + lobbyCode.value);
   }
 };
 

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,13 @@ public class GameManager {
             allGames.get(event.getGameID()).receiveEvent(event);
 
         }
+    }
+
+    public GameStartEvent getGameStartEventById(long id) {
+        if (allGames.containsKey(id)) {
+            return allGames.get(id).getGameStartEvent();
+        }
+        return null;
     }
 
     /**
@@ -132,6 +140,10 @@ public class GameManager {
 
     public Map<Long, Lobby> getLobbyMap() {
         return allLobbies;
+    }
+
+    public Lobby getLobbyById(long id) {
+        return allLobbies.get(id);
     }
 
 }

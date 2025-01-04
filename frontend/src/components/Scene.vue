@@ -114,6 +114,7 @@ export default defineComponent({
         movePlayer(JSON.parse(message.split(';')[1]));
       } else if (message.startsWith('MAP')) {
         console.log('processing map');
+        testingMode = true;
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
       } else if (message.startsWith('DISAPPEAR')) {
