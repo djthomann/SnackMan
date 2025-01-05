@@ -1,10 +1,15 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
+
 public class Tile {
 
     private final int x;
     private final int z;
     private OccupationType occupationType;
+    private Food foodOnTile;
 
     private Object occupation;
 
@@ -43,5 +48,16 @@ public class Tile {
 
     public void setOccupation(Object occupation) {
         this.occupation = occupation;
+        if (occupation instanceof Food) {
+            this.foodOnTile = (Food)occupation;
+        }
+    }
+
+    public TileRecord toRecord () {
+        FoodRecord foodRecord = null;
+        if (foodOnTile != null) {
+            foodRecord = foodOnTile.toRecord();
+        }
+        return new TileRecord(x, z, occupationType, foodRecord);
     }
 }

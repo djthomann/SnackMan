@@ -83,7 +83,7 @@ public class GameManager {
         // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
 
         Game newGame = new Game(id, gameConfig, map, this);
-        newGame.init(); // Add Objects
+        newGame.init(null); // Add Objects
         allGames.put(newGame.id, newGame);
     }
 
@@ -91,15 +91,15 @@ public class GameManager {
         allGames.put(id, allLobbies.get(id).startGame(this));
     }
 
-    public void setGameConfig(GameConfig gameConfig, long gameID) {
-        allGames.get(gameID).setGameConfig(gameConfig);
+    public void setGameConfig(GameConfig gameConfig, long lobbyID) {
+        allLobbies.get(lobbyID).setGameConfig(gameConfig);
     }
 
-    public GameConfig getGameConfig(long gameID) {
-        if (allGames.get(gameID) == null) {
+    public GameConfig getGameConfig(long lobbyID) {
+        if (allLobbies.get(lobbyID) == null) {
             return this.gameConfig;
         }
-        return allGames.get(gameID).getGameConfig(); 
+        return allLobbies.get(lobbyID).getGameConfig();
     }
 
     public Lobby createLobby(){

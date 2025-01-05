@@ -62,6 +62,11 @@ class ModelService {
     const loadPromises = Object.entries(this.models).map(([name, url]) =>
       this.loadModel(url).then((modelData) => {
         this.modelCache.set(name, modelData); // Store scene in cache
+        if(modelData.animations.length > 0) {
+            this.animationCache.set(name, modelData);
+            console.log('Animation added to Cache');
+          
+        }
       }),
     );
 
@@ -161,7 +166,7 @@ class ModelService {
   }
 
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
-  public createFood(x: number, z: number, calories: number, scale: number) {
+  public createFood(id: number, x: number, z: number, calories: number, scale: number) {
     let newModel;
     if (calories > 300) {
       newModel = this.getModel('brokkoli').clone();
@@ -170,6 +175,7 @@ class ModelService {
     } else {
       newModel = this.getModel('cake').clone();
     }
+    newModel.userData.id = id; 
     newModel.position.set(x * scale, 10, z * scale);
     return newModel;
   }
