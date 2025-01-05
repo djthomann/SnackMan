@@ -1,6 +1,5 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,7 @@ public class Lobby {
     
     Logger logger = LoggerFactory.getLogger(Lobby.class);
     private final long id = IDGenerator.getInstance().getUniqueID();
-    private GameConfig gameConfig;
+    private GameConfig gameConfig = new GameConfig();
     private SnackManMap map;
     private Map<Long, Client> clientMap = new HashMap<>();
 
@@ -50,6 +49,7 @@ public class Lobby {
     }
 
     public Game startGame(GameManager gameManager) {
+        if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
         return new Game(this, gameManager);
     }
 

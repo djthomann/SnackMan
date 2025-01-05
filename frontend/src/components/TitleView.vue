@@ -31,7 +31,7 @@ const handleServerMessage = (message: string) => {
   logger.info('Handling server message');
   serverMessage.value = message;
   if (message.startsWith('CLIENT_ID')) {
-    let information = JSON.parse(message.split(';')[1]);
+    const information = JSON.parse(message.split(';')[1]);
     userStore.setId(information.id);
     router.push({ path: '/home' });
   }

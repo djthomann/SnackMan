@@ -14,7 +14,7 @@
     <label>You:</label>
     <p>Hi {{ playerUsername }}! You play as a {{ playerRole }}...</p>
     <label>Other Players Online:</label>
-    <li v-for="value in usernamesList">{{ value }}</li>
+    <li v-for="(value, index) in usernamesList" :key="index">{{ value }}</li>
   </div>
 </template>
 

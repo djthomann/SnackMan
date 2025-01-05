@@ -11,10 +11,17 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import type { Snackman, Ghost, Food, Tile } from '@/types/SceneTypes';
+import { Ghost, Snackman } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
+import skybox_ftURL from '@/assets/images/skybox/skybox_ft.png';
+import skybox_bkURL from '@/assets/images/skybox/skybox_bk.png';
+import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
+import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
+import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
+import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
+
 import { Logger } from '../util/logger';
 
 // Groups of different map objects
@@ -22,6 +29,32 @@ let wallsGroup: THREE.Group;
 // let floorGroup: THREE.Group
 let foodGroup: THREE.Group;
 let chickenGroup: THREE.Group;
+
+// Textures for Skybox
+const skyboxTextures: THREE.MeshBasicMaterial[] = [];
+const texture_ft = new THREE.TextureLoader().load(skybox_ftURL);
+texture_ft.colorSpace = THREE.SRGBColorSpace;
+const texture_bk = new THREE.TextureLoader().load(skybox_bkURL);
+texture_bk.colorSpace = THREE.SRGBColorSpace;
+const texture_up = new THREE.TextureLoader().load(skybox_upURL);
+texture_up.colorSpace = THREE.SRGBColorSpace;
+const texture_dn = new THREE.TextureLoader().load(skybox_dnURL);
+texture_dn.colorSpace = THREE.SRGBColorSpace;
+const texture_rt = new THREE.TextureLoader().load(skybox_rtURL);
+texture_rt.colorSpace = THREE.SRGBColorSpace;
+const texture_lf = new THREE.TextureLoader().load(skybox_lfURL);
+texture_lf.colorSpace = THREE.SRGBColorSpace;
+
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_ft}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_bk}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_up}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_dn}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_rt}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_lf}));
+
+console.log('textures found',texture_ft.image); // Should not be null or undefined
+
+
 
 // mesh for walls
 let box: THREE.Mesh;
@@ -54,11 +87,11 @@ export default defineComponent({
 
     //GameStart
     const entityStore = useEntityStore();
-    const { snackmen, ghosts } = storeToRefs(entityStore);
+    const { snackMen, ghosts } = storeToRefs(entityStore);
 
     logger.info(
       'Snackman Names:',
-      snackmen.value.map((item: Snackman) => item.username),
+      snackMen.value.map((item: Snackman) => item.username),
     );
 
     // React to server message (right now only simple movement)
@@ -74,6 +107,9 @@ export default defineComponent({
         logger.info('processing map');
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
+      } else if (message.startsWith('DISAPPEAR')) {
+        const food = JSON.parse(message.split(';')[1]); 
+        makeDisappear(food.food.objectId); 
       }
     };
 
@@ -86,6 +122,7 @@ export default defineComponent({
       }
       loadModels();
       initScene();
+      loadPlayerEntities(snackMen.value, ghosts.value, scene);
       eventBus.on('serverMessage', handleServerMessage);
 
       window.addEventListener('resize', onWindowResize);
@@ -115,6 +152,63 @@ export default defineComponent({
       }
     }
 
+    /*
+      Ghosts and Snackmen are spawned on the correct position
+    */
+
+    function loadPlayerEntities (snackMen: Snackman[], ghosts: Ghost[], scene:any){
+      // Group for snackMen and ghosts
+      const snackMenGroup = new THREE.Group();
+      const ghostsGroup = new THREE.Group();
+
+      // Iterate over snackMen and add them to the scene
+      snackMen.forEach((snackMan) => {
+        const snackManGeometry = new THREE.SphereGeometry(1, 32, 32);
+        const snackManMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+        const snackManMesh = new THREE.Mesh(snackManGeometry, snackManMaterial);
+
+        // Position snackMan
+        snackManMesh.position.set(
+          snackMan.x,
+          mapScale / 2, 
+          snackMan.z
+        );
+
+        // Attach a NameTag
+        const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
+        nameTags.push(snackManTag);
+
+        // Add to snackMen group
+        snackMenGroup.add(snackManMesh);
+      });
+
+      // Iterate over ghosts and add them to the scene
+      ghosts.forEach((ghost) => {
+        const ghostGeometry = new THREE.ConeGeometry(1, 2, 32);
+        const ghostMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const ghostMesh = new THREE.Mesh(ghostGeometry, ghostMaterial);
+
+        // Position ghost
+        ghostMesh.position.set(
+          ghost.x,
+          mapScale / 2,
+          ghost.z
+        );
+
+        const ghostTag = new NameTag(ghost.username || "Ghost", ghostMesh, scene);
+        nameTags.push(ghostTag);
+
+        // Add to ghosts group
+        ghostsGroup.add(ghostMesh);
+      });
+
+      // Add groups to the scene
+      scene.add(snackMenGroup);
+      scene.add(ghostsGroup);
+
+      
+    }
+
     function loadMap(map: any) {
       const w = map.w * mapScale;
       const h = map.h * mapScale;
@@ -126,8 +220,10 @@ export default defineComponent({
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
+            const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale); 
+            food.userData.id = tile.occupation.objectId; 
             foodGroup.add(
-              modelService.createFood(tile.x, tile.z, Math.random() * 400 + 100, mapScale),
+              food
             );
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
@@ -159,7 +255,22 @@ export default defineComponent({
       const floor = modelService.createFloorTile(w, h, mapScale);
       scene.add(floor);
 
-      player.position.set(w / 2, mapScale, h / 2);
+      // Skybox
+      for(let i=0; i<6;i++){
+        skyboxTextures[i].side = THREE.BackSide;
+      }
+      const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
+      //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
+      const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
+      //console.log('skybox position', skybox.position)
+      skybox.position.y = (w/4)/2;
+      skybox.position.x = w/2;
+      skybox.position.z = w/2;
+      //skybox.position.y = (w/4);
+      scene.add(skybox);
+
+
+      player.position.set(w / 2, mapScale, h / 2);      
     }
 
     /**
@@ -179,6 +290,16 @@ export default defineComponent({
         newPlayerPositionY,
         newPlayerPositionZ * mapScale,
       );
+    }
+
+    function makeDisappear(id: number) {
+      foodGroup.children.forEach( (food) => {
+        if (food.userData.id == id) {
+          scene.remove(food); 
+          foodGroup.remove(food); 
+          console.log(`food with Id ${id} disappeared juhu`); 
+        }
+      }); 
     }
 
     function initScene() {
@@ -232,24 +353,6 @@ export default defineComponent({
       scene.add(player);
       player.add(camera);
       player.add(cone);
-
-      // Test Body for Username Test
-      const testObj = new THREE.Mesh(coneGeometry, coneMaterial);
-      testObj.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
-      testObj.rotation.x = -Math.PI / 2;
-      testObj.castShadow = true;
-      scene.add(testObj);
-
-      // Test Player for Username Test
-      const testPlayer = new THREE.Mesh();
-      testPlayer.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
-      scene.add(testPlayer);
-      testPlayer.add(testObj);
-
-      // Create NameTag
-      nameTag = new NameTag('Snacko', testPlayer, scene);
-      nameTags.push(nameTag);
-      nameTags.push(nameTag);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
@@ -350,7 +453,6 @@ export default defineComponent({
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
       });
-
       // start Render-Loop
       animate();
     }
