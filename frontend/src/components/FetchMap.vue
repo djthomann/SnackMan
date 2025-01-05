@@ -28,7 +28,7 @@ const requestMap = () => {
   if (!mapLoaded.value) {
     logger.info('loading map');
     const map = {
-      type: 'MAPREQUEST',
+      type: 'MAPREQUEST'
     };
     sendMessage(JSON.stringify(map));
     mapLoaded.value = true;
@@ -71,6 +71,7 @@ const handleFileUpload = (event: Event) => {
     logger.info('file loaded');
   }
 };
+
 </script>
 
 <style scoped>

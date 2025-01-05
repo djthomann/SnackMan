@@ -1,6 +1,6 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
-    <button id="startButton">Start</button>
+    <button id="startButton">play</button>
   </div>
 </template>
 
@@ -11,7 +11,7 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import { Ghost, Snackman } from '@/types/SceneTypes';
+import {Ghost, Snackman} from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
@@ -21,6 +21,9 @@ import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
 import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
 import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
 import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
+import {useRoute} from "vue-router";
+import {useUserStore} from "@/stores/userStore";
+import {Mesh} from "three";
 
 import { Logger } from '../util/logger';
 
@@ -70,6 +73,8 @@ export default defineComponent({
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
     const player = new THREE.Mesh();
+    const route = useRoute();
+    const userStore = useUserStore();
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
@@ -82,16 +87,20 @@ export default defineComponent({
     let nameTag: NameTag;
     let animationMixer: THREE.AnimationMixer;
     const nameTags: NameTag[] = [];
+    let gameID = 2;
+    let startPromiseResolve: () => void;
+    let testingMode = false;
 
     const logger = new Logger();
 
     //GameStart
     const entityStore = useEntityStore();
-    const { snackMen, ghosts } = storeToRefs(entityStore);
+    const { snackMen, ghosts, chicken, map } = storeToRefs(entityStore);
+    const meshes: Map<Number, Mesh> = new Map<Number, Mesh>();
 
     logger.info(
       'Snackman Names:',
-      snackMen.value.map((item: Snackman) => item.username),
+      [...snackMen.value.values()].map((item: Snackman) => item.username),
     );
 
     // React to server message (right now only simple movement)
@@ -99,21 +108,65 @@ export default defineComponent({
       serverMessage.value = message;
 
       if (message.startsWith('MOVE')) {
+        testingMode = true;
         const key: string = message.split(':')[1];
 
         // Move the player
         movePlayer(JSON.parse(message.split(';')[1]));
       } else if (message.startsWith('MAP')) {
         logger.info('processing map');
+        testingMode = true;
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
       } else if (message.startsWith('DISAPPEAR')) {
-        const food = JSON.parse(message.split(';')[1]); 
-        makeDisappear(food.food.objectId); 
+        const food = JSON.parse(message.split(';')[1]);
+        makeDisappear(food.food.objectId);
+      } else if (message.startsWith('GAME_START')) {
+        handleStartEvent();
+        if (startPromiseResolve) {
+          startPromiseResolve();
+        }
+      } else if (message.startsWith('GAME_STATE')) {
+        handleGameStateEvent(message.split(';')[1])
       }
     };
 
+    const handleGameStateEvent = (message: string) => {
+
+      const parsedData = JSON.parse(message);
+      parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
+        meshes.get(snackman.objectId)!.position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+      })
+
+      parsedData.updatesGhosts.forEach((ghost: Ghost) => {
+        meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+      })
+
+    }
+
+    const handleStartEvent = () => {
+      console.log("handle start event")
+      loadMap(map.value);
+    }
+
+    const waitForStartMessage = () => {
+      return new Promise<void>((resolve) => {
+        startPromiseResolve = resolve;
+      });
+    };
+
+    const requestMap = () => {
+      console.log('loading map');
+      const requestData = {
+        type: 'MAPREQUEST',
+        id: gameID
+      };
+      sendMessage(JSON.stringify(requestData));
+    };
+
     onMounted(async () => {
+      eventBus.on('serverMessage', handleServerMessage);
+
       try {
         // Service initialisieren
         await modelService.initialize(mapScale);
@@ -122,10 +175,20 @@ export default defineComponent({
       }
       loadModels();
       initScene();
-      loadPlayerEntities(snackMen.value, ghosts.value, scene);
-      eventBus.on('serverMessage', handleServerMessage);
+
+      await waitForStartMessage();
+
+      loadPlayerEntities([...snackMen.value.values()], [...ghosts.value.values()], scene);
 
       window.addEventListener('resize', onWindowResize);
+
+      const lastSegment = route.path.split('/').pop() || ''
+      if (/^\d+$/.test(lastSegment)) {
+        gameID = Number(lastSegment);
+      }
+      console.log("scene with gameID " + gameID);
+
+      // requestMap();
     });
 
     onUnmounted(() => {
@@ -170,7 +233,7 @@ export default defineComponent({
         // Position snackMan
         snackManMesh.position.set(
           snackMan.x,
-          mapScale / 2, 
+          mapScale / 2,
           snackMan.z
         );
 
@@ -180,6 +243,14 @@ export default defineComponent({
 
         // Add to snackMen group
         snackMenGroup.add(snackManMesh);
+
+        if (!testingMode && snackMan.objectId == userStore.id) {
+          snackManMesh.add(camera);
+          camera.position.set(0, 0, 0);
+        }
+
+        meshes.set(snackMan.objectId, snackManMesh);
+        console.log(`placed Snackman ${snackMan.objectId} on Scene`)
       });
 
       // Iterate over ghosts and add them to the scene
@@ -200,19 +271,21 @@ export default defineComponent({
 
         // Add to ghosts group
         ghostsGroup.add(ghostMesh);
+        meshes.set(ghost.objectId, ghostMesh);
       });
 
       // Add groups to the scene
       scene.add(snackMenGroup);
       scene.add(ghostsGroup);
 
-      
+
     }
 
-    function loadMap(map: any) {
-      const w = map.w * mapScale;
-      const h = map.h * mapScale;
-      const tiles = map.allTiles;
+    function loadMap(m: any) {
+      console.log('Received mapdata' + m);
+      const w = m.w * mapScale;
+      const h = m.h * mapScale;
+      const tiles = m.tileRecords;
 
       for (const row of tiles) {
         for (const tile of row) {
@@ -220,8 +293,8 @@ export default defineComponent({
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale); 
-            food.userData.id = tile.occupation.objectId; 
+            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
+            food.userData.id = tile.food.objectId;
             foodGroup.add(
               food
             );
@@ -270,7 +343,7 @@ export default defineComponent({
       scene.add(skybox);
 
 
-      player.position.set(w / 2, mapScale, h / 2);      
+      player.position.set(w / 2, mapScale, h / 2);
     }
 
     /**
@@ -285,21 +358,23 @@ export default defineComponent({
         '`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`',
       );
 
+
       player.position.set(
         newPlayerPositionX * mapScale,
         newPlayerPositionY,
         newPlayerPositionZ * mapScale,
-      );
+      )
+
     }
 
     function makeDisappear(id: number) {
       foodGroup.children.forEach( (food) => {
         if (food.userData.id == id) {
-          scene.remove(food); 
-          foodGroup.remove(food); 
-          console.log(`food with Id ${id} disappeared juhu`); 
+          scene.remove(food);
+          foodGroup.remove(food);
+          console.log(`food with Id ${id} disappeared juhu`);
         }
-      }); 
+      });
     }
 
     function initScene() {
@@ -439,8 +514,8 @@ export default defineComponent({
 
         const data = JSON.stringify({
           type: 'MOVE',
-          gameID: 2,
-          objectID: 832,
+          gameID: gameID,
+          objectID: userStore.id,
           movementVector: vector,
         });
 
