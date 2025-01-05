@@ -5,10 +5,10 @@
 
     <h2>Lobbies</h2>
     <ul>
-      <li v-for="lobby in lobbies" :key="lobby.id ?? 'default-key'">
-        <p>Lobby Code: {{ lobby.id }}</p>
-        <p>0/{{ maxPlayers }} Players</p>
-        <button @click="joinLobby(lobby.id?.toString() ?? '')">Enter Lobby</button>
+      <li v-for="lobby in lobbies" :key="lobby.lobbyCode ?? 'default-key'">
+        <p>Lobby Code: {{ lobby.lobbyCode }}</p>
+        <p>{{ lobby.numPlayers }}/{{ maxPlayers }} Players</p>
+        <button @click="joinLobby(lobby.lobbyCode?.toString() ?? '')">Enter Lobby</button>
       </li>
     </ul>
 
@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import {ref, computed, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
@@ -37,7 +37,8 @@ const maxPlayers = 8;
 const userStore = useUserStore();
 
 interface Lobby {
-  id: number | null;
+  lobbyCode: number | null;
+  numPlayers: number;
 }
 
 const lobbies = ref<Lobby[]>([]);
@@ -46,15 +47,20 @@ const handleServerMessage = (message: string) => {
   serverMessage.value = message;
   if (message.startsWith('ALL_LOBBIES')) {
     lobbies.value = JSON.parse(message.split(';')[1]);
-    console.log("ALL LOBIES"+lobbies.value);
+    console.log("ALL LOBBIES"+lobbies.value);
   }
 };
+
+onMounted(() => {
+  fetchLobbies();
+})
 
 onMessage(handleServerMessage);
 
 const createLobby = () => {
   const message = JSON.stringify({ type: 'LOBBY_CREATE_EVENT', id: 0 });
   sendMessage(message);
+  fetchLobbies();
 
   /* How do I attain the new lobby id
   const newLobbyCode = 'NEW759';
@@ -63,6 +69,11 @@ const createLobby = () => {
 
 const joinLobby = (code: string) => {
   console.log(`Joining lobby with code: ${code}`);
+  const data = JSON.stringify({
+    type: 'JOIN_LOBBY',
+    lobbyCode: code
+  });
+  sendMessage(data);
   router.push({ path: `/lobby/${code}` });
 };
 

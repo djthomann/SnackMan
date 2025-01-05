@@ -45,7 +45,6 @@ export default function useWebSocket() {
   };
 
   const sendMessage = (message: string) => {
-    console.log('Trying to send... ' + message);
     if (websocket.value && websocket.value.readyState === WebSocket.OPEN) {
       console.log('sending: ' + message);
       websocket.value.send(message);

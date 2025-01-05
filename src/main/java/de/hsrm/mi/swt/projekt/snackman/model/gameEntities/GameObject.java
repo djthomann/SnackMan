@@ -47,4 +47,7 @@ public class GameObject {
         this.radius = radius; 
     }
 
+    public long getGameId() {
+        return gameId;
+    }
 }
