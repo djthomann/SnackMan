@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!--
+    
     <h1>Lobby {{ lobbyCode }}</h1>
       <button @click="choose('SnackMan')">Choose SnackMan</button>
       <button @click="choose('Ghost')">Choose Ghost</button>
@@ -58,9 +58,9 @@
         <button type="button" @click="startGame">Start Game</button>
       </form>
 
-    -->
     
-      
+    
+    <!--
     <BackgroundComponent>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
@@ -104,6 +104,7 @@
         </div>
       </div>
     </BackgroundComponent>
+  -->
   </div>
 </template>
 

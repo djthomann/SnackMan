@@ -85,7 +85,7 @@
 .background__sheet-tile--left,
 .background__sheet-tile--center,
 .background__sheet-tile--right {
-    width: auto;
+    width: max-content;
 }
 
 .background__sheet-tile--stretch {
@@ -97,7 +97,7 @@
 .background__sheet-tile--left .background__sheet-image,
 .background__sheet-tile--center .background__sheet-image,
 .background__sheet-tile--right .background__sheet-image {
-    width: auto;
+    width: max-content;
     height: 100%;
 }
 
