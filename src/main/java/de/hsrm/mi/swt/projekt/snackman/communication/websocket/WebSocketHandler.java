@@ -105,7 +105,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     //TODO: delete once map always comes with GameStartEvent
                     long gameId = 2L;
                     SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
-                    createFood(map);
                     testingMode = true;
                     gameManager.createGame(new GameConfig(), gameId, map);
                     
@@ -330,17 +329,4 @@ public class WebSocketHandler extends TextWebSocketHandler {
         return clients;
     }
 
-    /**
-     * creates Food on Map, to simplify testing, should be deleted asap
-     */
-
-    private void createFood(SnackManMap map) {
-        for (int row = 0; row < map.getH(); row++) {
-            for (int col = 0; col < map.getW(); col++) {
-                if (map.getTileAt(col, row).getOccupationType() == OccupationType.ITEM) {
-                    map.getTileAt(col, row).setOccupation(new Food(0, col, row, FoodType.OKAY, new GameConfig()));
-                }
-            }
-        }
-    }
 }

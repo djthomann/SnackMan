@@ -54,7 +54,6 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
 
     public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
-        //TODO: check weird movement in real mode
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
@@ -156,7 +155,7 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
 
-        this.gameManager.notifyChange(createGameStartEvent());
+        if (clients != null) this.gameManager.notifyChange(createGameStartEvent());
     }
 
     private GameStartEvent createGameStartEvent() {
