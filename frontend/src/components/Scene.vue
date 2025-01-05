@@ -25,6 +25,7 @@ import {useRoute} from "vue-router";
 import {useUserStore} from "@/stores/userStore";
 import {Mesh} from "three";
 
+import { Logger } from '../util/logger';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -90,13 +91,14 @@ export default defineComponent({
     let startPromiseResolve: () => void;
     let testingMode = false;
 
+    const logger = new Logger();
+
     //GameStart
     const entityStore = useEntityStore();
     const { snackMen, ghosts, chicken, map } = storeToRefs(entityStore);
     const meshes: Map<Number, Mesh> = new Map<Number, Mesh>();
 
-    console.log('Snackmen:', snackMen.value.values.length)
-    console.log(
+    logger.info(
       'Snackman Names:',
       [...snackMen.value.values()].map((item: Snackman) => item.username),
     );
@@ -104,7 +106,6 @@ export default defineComponent({
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
-      //console.log('Processing server message');
 
       if (message.startsWith('MOVE')) {
         testingMode = true;
@@ -113,7 +114,7 @@ export default defineComponent({
         // Move the player
         movePlayer(JSON.parse(message.split(';')[1]));
       } else if (message.startsWith('MAP')) {
-        console.log('processing map');
+        logger.info('processing map');
         testingMode = true;
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
@@ -208,7 +209,7 @@ export default defineComponent({
         // Service initialisieren
         await modelService.initialize(mapScale);
 
-        console.log('Models loaded');
+        logger.info('Models loaded');
       } catch (error) {
         console.error('Error initializing or loading model:', error);
       }
@@ -290,7 +291,6 @@ export default defineComponent({
         for (const tile of row) {
           const occupationType = tile.occupationType;
           if (occupationType == 'WALL') {
-            // console.log(tile)
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
             const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
@@ -300,8 +300,9 @@ export default defineComponent({
             );
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
-            if (occupation != null){ // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
-              const chicken = modelService.createChicken(tile.x* mapScale, tile.z*mapScale);
+            if (occupation != null) {
+              // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
+              const chicken = modelService.createChicken(tile.x * mapScale, tile.z * mapScale);
               chickenGroup.add(chicken);
             }
           }
@@ -317,7 +318,7 @@ export default defineComponent({
         const action = animationMixer.clipAction(chickenAnimations[0]);
         action.play();
       } else {
-        console.log('Animation not found');
+        logger.info('Animation not found');
       }
 
       scene.add(wallsGroup);
@@ -325,7 +326,6 @@ export default defineComponent({
       scene.add(foodGroup);
 
       const floor = modelService.createFloorTile(w, h, mapScale);
-      // console.log('Creating Floor with: ' + w + '|' + h);
       scene.add(floor);
 
       // Skybox
@@ -354,8 +354,8 @@ export default defineComponent({
       const newPlayerPositionY = moveInformation.movementVector.y;
       const newPlayerPositionZ = moveInformation.movementVector.z;
 
-      console.log(
-        `New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`,
+      logger.info(
+        '`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`',
       );
 
 
@@ -583,7 +583,6 @@ export default defineComponent({
 
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            //console.log('Face Forward');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
@@ -592,12 +591,10 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            //console.log('Turn Forward Right');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
             // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            //console.log('Turn Right');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
@@ -606,7 +603,6 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            //console.log('Turn Backward Right');
             cone.rotation.z = THREE.MathUtils.lerp(
               currentAngle,
               -Math.PI / 2 - Math.PI / 4,
@@ -619,7 +615,6 @@ export default defineComponent({
             angleYCameraDirection < 0.125 &&
             angleYCameraDirection > -0.125
           ) {
-            //console.log('Turn Backwards');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
@@ -628,7 +623,6 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            //console.log('Turn Backward Left');
             cone.rotation.z = THREE.MathUtils.lerp(
               currentAngle,
               Math.PI / 2 + Math.PI / 4,
@@ -637,7 +631,6 @@ export default defineComponent({
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            //console.log('Turn Left');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
@@ -646,7 +639,6 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            //console.log('Turn Forward Left');
             cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
           }
         }

@@ -114,6 +114,9 @@ import { useUserStore } from '@/stores/userStore';
 import type {Player} from "@/types/SceneTypes";
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
@@ -246,7 +249,7 @@ onMounted(async () => {
     });
     sendMessage(requestData);
   } catch (e) {
-    console.log('Failed to fetch Data on load: ', e);
+    logger.info('Failed to fetch Data on load: ', e);
   }
 
   fetchPlayers();

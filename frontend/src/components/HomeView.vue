@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Home</h1>
-    <p>Welcome, {{ name }} with the ID {{  id  }}</p>
+    <p>Welcome, {{ name }} with the ID {{ id }}</p>
 
     <h2>Lobbies</h2>
     <ul>
@@ -27,12 +27,16 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
 
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
+
 const { sendMessage, onMessage } = useWebSocket();
 const router = useRouter();
 const lobbyCode = ref('');
 const serverMessage = ref<string>('');
 const name = computed(() => userStore.username || 'Guest');
-const id = computed(() => userStore.id || 0 );
+const id = computed(() => userStore.id || 0);
 const maxPlayers = 8;
 const userStore = useUserStore();
 
@@ -47,7 +51,7 @@ const handleServerMessage = (message: string) => {
   serverMessage.value = message;
   if (message.startsWith('ALL_LOBBIES')) {
     lobbies.value = JSON.parse(message.split(';')[1]);
-    console.log("ALL LOBBIES"+lobbies.value);
+    logger.info('ALL LOBBIES' + lobbies.value);
   }
 };
 
@@ -68,7 +72,7 @@ const createLobby = () => {
 };
 
 const joinLobby = (code: string) => {
-  console.log(`Joining lobby with code: ${code}`);
+  logger.info(`Joining lobby with code: ${code}`);
   const data = JSON.stringify({
     type: 'JOIN_LOBBY',
     lobbyCode: code
