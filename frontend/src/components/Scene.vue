@@ -59,7 +59,7 @@ console.log('textures found',texture_ft.image); // Should not be null or undefin
 let box: THREE.Mesh;
 
 const mapScale = 5;
-const wallHeight = 1.5 * mapScale;
+const wallHeight = 1 * mapScale;
 
 export default defineComponent({
   name: 'Scene',
@@ -237,7 +237,7 @@ export default defineComponent({
       const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
       console.log('skybox position', skybox.position)
-      skybox.position.y = ((w/4)/2)-(0.5);
+      skybox.position.y = ((w/4)/2);
       skybox.position.x = w/2;
       skybox.position.z = w/2;
       scene.add(skybox);
@@ -327,6 +327,13 @@ export default defineComponent({
       scene.add(player);
       player.add(camera);
       player.add(cone);
+
+      // Test cylinder
+      //const geometry = new THREE.CylinderGeometry(0.2 * mapScale, 0.2 * mapScale, 3, 32);
+      //const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+      //const cylinder = new THREE.Mesh(geometry, material);
+      //cylinder.position.set( 20.5 * mapScale , 0, 20.5 * mapScale );
+      //scene.add(cylinder);
 
       // Test Body for Username Test
       const testObj = new THREE.Mesh(coneGeometry, coneMaterial);
@@ -468,7 +475,7 @@ export default defineComponent({
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {
         element.rotation.y += 0.01;
-        element.position.y = Math.sin(time * 2 + index) * 0.1;
+        element.position.y = (Math.sin(time * 2 + index) * 0.1) + 0.1 * mapScale;
       });
 
       renderer.render(scene, camera);

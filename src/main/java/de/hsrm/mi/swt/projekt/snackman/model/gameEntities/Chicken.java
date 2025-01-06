@@ -91,7 +91,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 while ( x >= 1.0 && x < map.getW() && z >= 1.0 && z < map.getH()) {  
                     surroundings = generateSurroundings(map);
                     logger.info(surroundings.toString());
-                    Thread.sleep(100); // 1000 = 1 sec
+                    Thread.sleep(50); // 1000 = 1 sec
                     executeScript(surroundings); 
                 }
             } catch (InterruptedException e) {
@@ -147,10 +147,12 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         scriptInterpreter.set("environment", pythonCompatibleSurroundings);
         scriptInterpreter.set("direction", direction);
         scriptInterpreter.set("wall_collision", wallCollision );
+        scriptInterpreter.set("x", x);
+        scriptInterpreter.set("z", z);
 
         try {
 
-            scriptInterpreter.exec("result = run_behavior(environment, direction, wall_collision)");
+            scriptInterpreter.exec("result = run_behavior(environment, direction, wall_collision,x,z)");
             PyObject result = scriptInterpreter.get("result");
 
             if (result instanceof PyTuple) {
@@ -165,15 +167,15 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
                 if(this.wallCollision == false) {
                     String collision = "none";
-                    float wishedX = this.getX();
-                    float wishedZ = this.getZ();
+                    float wishedX = 0.0f;
+                    float wishedZ = 0.0f;
 
                     if ( direction.equals("N") || direction.equals("E") ) {
-                        wishedX = wishedX + (movementX + this.radius);
-                        wishedZ = wishedZ + (movementZ + this.radius);
+                        wishedX = this.getX() + (movementX + this.radius);
+                        wishedZ = this.getZ() + (movementZ + this.radius);
                     } else {
-                        wishedX = wishedX + (movementX - this.radius);
-                        wishedZ = wishedZ + (movementZ - this.radius);
+                        wishedX = this.getX() + (movementX - this.radius);
+                        wishedZ = this.getZ() + (movementZ - this.radius);
                     }
                     collision = collisionManager.checkCollision(wishedX, wishedZ, this);
                         if (collision.equals("wall")) {

@@ -1,6 +1,6 @@
 import random
 
-def run_behavior(environment, direction, wall_collision):
+def run_behavior(environment, direction, wall_collision,x,z):
     """
     Executes the chicken's behavior based on its surroundings and the last known direction of movement.
     
@@ -16,15 +16,15 @@ def run_behavior(environment, direction, wall_collision):
     }
     
     move_vectors = {
-        "N": (0.1, 0.0, 0.0), "NE": (0.1, 0.0, 0.1),
-        "E": (0.0, 0.0, 0.1), "SE": (-0.1, 0.0, 0.1),
-        "S": (-0.1, 0.0, 0.0), "SW": (-0.1, 0.0, -0.1),
-        "W": (0.0, 0.0, -0.1), "NW": (0.1, 0.0, -0.1)
+        "N": (0.05, 0.0, 0.0), "NE": (0.05, 0.0, 0.05),
+        "E": (0.0, 0.0, 0.05), "SE": (-0.05, 0.0, 0.05),
+        "S": (-0.05, 0.0, 0.0), "SW": (-0.05, 0.0, -0.05),
+        "W": (0.0, 0.0, -0.05), "NW": (0.05, 0.0, -0.05)
     }
     
     alternatives = {
-        "N": ["E", "W", "S"], "E": ["N", "S", "W"],
-        "S": ["W", "E", "N"], "W": ["S", "N", "E"],
+        "N": ["E", "W"], "E": ["N", "S"],
+        "S": ["W", "E"], "W": ["S", "N"],
     }
     
     opposite_directions = {
@@ -41,8 +41,21 @@ def run_behavior(environment, direction, wall_collision):
     # Check the tile in the current direction and the next Tile
     current_tile = get_tile(1, 1)
     next_tile = get_tile(*direction_offsets[direction])
-
-    # If the current direction is not blocked, continue moving in that direction
+    
+    # If the current direction is not blocked and has no food in it, check for food right or left
+    if current_tile != "WALL" and next_tile != "FOOD" and wall_collision == False:
+        if ((direction == "N" or direction == "S") and (x % 1.0 > 0.49 and x % 1.0 < 0.51)) or ((direction == "E" or direction == "W") and (z % 1.0 > 0.49 and z % 1.0 < 0.51)):
+            valid_directions = []
+            for new_direction in alternatives[direction]:
+                if get_tile(*direction_offsets[new_direction]) == "FOOD":
+                    valid_directions.append(new_direction)
+            if valid_directions:
+                new_direction = random.choice(valid_directions)
+                return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+            else:
+                return move_vectors[direction] + (direction,) + (wall_collision,)
+        
+    # If the current direction is not blocked and has food in it, continue moving in that direction
     if current_tile != "WALL" and wall_collision == False: 
         return move_vectors[direction] + (direction,) + (wall_collision,)
     
@@ -61,6 +74,9 @@ def run_behavior(environment, direction, wall_collision):
             new_direction = random.choice(valid_directions)  # Randomly select a valid direction
             wall_collision = False
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        else:
+            wall_collision = False
+            return move_vectors[opposite_directions[direction]] + (opposite_directions[direction],) + (wall_collision,)
 
     # If no alternative is available, stay in place
     return (0.0, 0.0, 0.0, direction, wall_collision)

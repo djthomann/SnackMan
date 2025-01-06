@@ -159,7 +159,7 @@ class ModelService {
     const boxGeometry = new THREE.BoxGeometry(1 * scale, wallHeight, 1 * scale);
     const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f ,depthTest: true,});
     const box = new THREE.Mesh(boxGeometry, boxMaterial);
-    box.position.set((x+0.5) * scale, 0, (z+0.5) * scale);
+    box.position.set((x+0.5) * scale, 0.5 * scale, (z+0.5) * scale);
     box.castShadow = true;
 
     return box;
@@ -176,7 +176,7 @@ class ModelService {
       newModel = this.getModel('cake').clone();
     }
     newModel.userData.id = id; 
-    newModel.position.set((x+0.5) * scale, 10, (z+0.5) * scale);
+    newModel.position.set((x+0.5) * scale, 0.5, (z+0.5) * scale);
     return newModel;
   }
 
@@ -186,7 +186,7 @@ class ModelService {
     chickenModel.userData.id = id; 
     const chicken = chickenModel.clone();
     chicken.castShadow = true;
-    chicken.scale.set(5,5,5);
+    chicken.scale.set(3.25,3,3);     // Radius 0.1 -> (3.25,3,3), Radius 0.2 -> (6.5,6,6)
     chicken.position.set(x, 0, z);
     console.log('Chicken at:', chicken.position)
     chicken.rotation.y = 0; // Degrees * Math.PI / 180

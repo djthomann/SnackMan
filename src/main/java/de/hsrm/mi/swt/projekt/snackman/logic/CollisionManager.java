@@ -62,6 +62,7 @@ public class CollisionManager {
                         DisappearEvent event = new DisappearEvent(game.id, nearbyFood); 
                         gameManager.notifyChange(event);
                         wishedTile.setOccupationType(OccupationType.FREE);
+                        wishedTile.setOccupation(null);
                         return "item";
                     }
 
