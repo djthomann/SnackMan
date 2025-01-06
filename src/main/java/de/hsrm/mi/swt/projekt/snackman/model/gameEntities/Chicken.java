@@ -88,7 +88,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         SnackManMap map = gameManager.getGameById(gameId).getMap(); 
         new Thread(() -> {
             try {
-                while (x < map.getW() && z < map.getH()) {
+                while ( x >= 1.0 && x < map.getW() && z >= 1.0 && z < map.getH()) {  
                     surroundings = generateSurroundings(map);
                     logger.info(surroundings.toString());
                     Thread.sleep(100); // 1000 = 1 sec
@@ -157,13 +157,33 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 PyTuple tuple = (PyTuple) result;
 
                 // Retrieve the elements of the tuple and cast them to float
-                float movementX = (float) (double) tuple.get(0);
-                float movementY = (float) (double) tuple.get(1);
-                float movementZ = (float) (double) tuple.get(2);
+                float movementX = gameConfig.getChickenSpeed() * (float) (double) tuple.get(0);
+                float movementY = gameConfig.getChickenSpeed() * (float) (double) tuple.get(1);
+                float movementZ = gameConfig.getChickenSpeed() * (float) (double) tuple.get(2);
                 this.direction = (String) tuple.get(3);
                 this.wallCollision = (boolean) tuple.get(4);
+
+                if(this.wallCollision == false) {
+                    String collision = "none";
+                    float wishedX = this.getX();
+                    float wishedZ = this.getZ();
+
+                    if ( direction.equals("N") || direction.equals("E") ) {
+                        wishedX = wishedX + (movementX + this.radius);
+                        wishedZ = wishedZ + (movementZ + this.radius);
+                    } else {
+                        wishedX = wishedX + (movementX - this.radius);
+                        wishedZ = wishedZ + (movementZ - this.radius);
+                    }
+                    collision = collisionManager.checkCollision(wishedX, wishedZ, this);
+                        if (collision.equals("wall")) {
+                            movementX = 0.0f;
+                            movementZ = 0.0f; 
+                            this.wallCollision = true;  
+                        }
+                }
                 move((movementX), (movementY), (movementZ));
-                //logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
+                logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
                 
             }

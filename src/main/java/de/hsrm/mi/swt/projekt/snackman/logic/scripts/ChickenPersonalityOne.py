@@ -46,18 +46,21 @@ def run_behavior(environment, direction, wall_collision):
     if current_tile != "WALL" and wall_collision == False: 
         return move_vectors[direction] + (direction,) + (wall_collision,)
     
-    # If the current direction is blocked, turn around and set wall_collision to True
+    # If the current direction is blocked, turn around and set wall_collision to True , should not happen!
     if current_tile == "WALL":
         wall_collision = True
         return move_vectors[opposite_directions[direction]] + (direction,) + (wall_collision,)
 
     # If the current direction is blocked, check if an alternative is available
-    if wall_collision == True:
+    if wall_collision:
+        valid_directions = []
         for new_direction in alternatives[direction]:
-            current_tile = get_tile(*direction_offsets[new_direction])
-            if current_tile != "WALL":
-                wall_collision = False
-                return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+            if get_tile(*direction_offsets[new_direction]) != "WALL":
+                valid_directions.append(new_direction)
+        if valid_directions:
+            new_direction = random.choice(valid_directions)  # Randomly select a valid direction
+            wall_collision = False
+            return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
 
     # If no alternative is available, stay in place
     return (0.0, 0.0, 0.0, direction, wall_collision)

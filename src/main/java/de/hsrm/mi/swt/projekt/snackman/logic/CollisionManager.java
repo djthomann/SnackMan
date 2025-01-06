@@ -44,11 +44,11 @@ public class CollisionManager {
         switch (wishedTile.getOccupationType()) {
             case WALL:
                 logger.info(
-                        "snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                        "collisionPartner and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 return "wall";
             case ITEM:
                 logger.info(
-                        "snackman and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                        "collisionPartner and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
                 if (collisionPartner instanceof SnackMan) {
                     // currently food gets exact the same coord as tile

@@ -244,8 +244,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     if (this.getY() < gameConfig.getWallHeight()) {
                         collision = collisionManager.checkCollision(wishedX, wishedZ, this);
                         if (collision.equals("wall")) {
-                            vector.x = 0;
-                            vector.z = 0;
+                            vector.x = 0.0f;
+                            vector.z = 0.0f;
                         } else if (collision.equals("item")) {
                             logger.info("MMMMMM delicious ");
                         }
