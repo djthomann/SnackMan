@@ -27,7 +27,7 @@ export type Snackman = {
   }
 
   export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY';
-  
+
   export type Food = {
     gameId: number;
     objectId: number;
@@ -51,4 +51,9 @@ export type Snackman = {
     w: number;
     h: number;
     allTiles: Tile[][];
+  }
+
+  export type Player = {
+    id: number,
+    username: string
   }
