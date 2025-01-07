@@ -6,6 +6,8 @@ import orangeModelUrl from '@/assets/models/orange.glb'
 import cakeModelUrl from '@/assets/models/cake.glb'
 import chickenModelUrl from '@/assets/models/chicken.glb'
 import brokkoliModelUrl from '@/assets/models/brokkoli.glb'
+import snackmanModelUrl from '@/assets/models/snackman.glb'
+
 
 class ModelService {
   private loader: GLTFLoader;
@@ -23,7 +25,8 @@ class ModelService {
       orange: orangeModelUrl,
       cake: cakeModelUrl,
       chicken: chickenModelUrl,
-      brokkoli: brokkoliModelUrl
+      brokkoli: brokkoliModelUrl,
+      snackman: snackmanModelUrl
     };
     this.scales = {
       banana: 0.02,
