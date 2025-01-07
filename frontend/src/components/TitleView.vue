@@ -2,9 +2,9 @@
     <div class="titleview">
       <div class="titleview__titleimage"></div>
       <div class="titleview__panel">
-        <label for="usernameInputField">Player-Username:</label>
-        <input type="text" v-model="usernameInputField" class="usernameInputField"/>
-        <button @click="submitForm">Submit</button>
+        <label for="username__inputfield">Player-Username:</label>
+        <input type="text" v-model="usernameInputField" class="username__inputfield"/>
+        <button @click="submitForm">START</button>
       </div>
     </div>
 </template>
@@ -62,11 +62,9 @@ onMessage(handleServerMessage);
 }
 
 .titleview__titleimage {
-  width: 50dvw;
-  height: 50dvh;
-  display: flex;
-  justify-content: center;
-  align-content: center;
+  width: 60svw;
+  height: 20svw;
+  max-height: 50%;
   background-image: url('../assets/images/decorations/skateboard.png');
   background-size: 100%;
   background-repeat: no-repeat;
@@ -74,6 +72,7 @@ onMessage(handleServerMessage);
 }
 
 .titleview__panel {
+  width: 20svw;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -82,19 +81,38 @@ onMessage(handleServerMessage);
   background-size: 100%;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 5% 10% 5% 10%;
+  padding: 7%;
 }
 
 label {
   align-self: flex-start;
-  padding: 0 5% 5% 0;
+  color: var(--colorTextDark);
 }
 
 input {
   border: none;
   width: 100%;
   border-radius: 5px;
+  margin: 5%;
+  padding: 3% 2%;
 }
 
+button {
+  color: var(--colorTextDark);
+  background-color: var(--colorTertiary);
+  width: 70%;
+  border-style: solid;
+  border-width: 5px;
+  border-color: white;
+  border-radius: 10px;
+  font-family: "Lilita One","Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  padding: 3%;
+  transition-duration: 0.4s;
+}
+
+button:hover {
+  background-color: var(--colorTertiary);
+  box-shadow: 10px 10px var(--colorShadow);
+}
 
 </style>
