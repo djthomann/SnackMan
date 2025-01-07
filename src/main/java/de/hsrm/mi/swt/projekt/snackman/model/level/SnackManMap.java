@@ -20,8 +20,8 @@ public class SnackManMap {
     // Tile at (x, z) (y is always at 0, we view the map as 2D) can be reached via
     // allTiles[z][x],
     // or (recommended) getTileAt(x, z)
-    private int w;
-    private int h;
+    private int w; // x-coordinate
+    private int h; // z-coordinate
     private Tile[][] allTiles;
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -230,14 +230,16 @@ public class SnackManMap {
         }
     }
 
-    // a bit ugly... but couldn't get it to work with w and h
+    // TODO: a bit ugly... but couldn't get it to work with width and height
     public boolean positionIsWithinMapBounds(float x, float z) {
-        try {
-            Tile tile = getTileAt((int)x, (int)z);
-            return true;
-        } catch(IndexOutOfBoundsException e) {
-            return false;
+        logger.info("Checking position: x|z " + x + " " + z);
+        logger.info("Map bounds: w|h " + w + " " + h);
+
+        // Überprüfen, ob die Position innerhalb der Kartenbreite und -höhe liegt
+        if (x < 0 || x >= w || z < 0 || z >= h) {
+            return false; // Position ist außerhalb der Karte
         }
+        return true;
     }
 
     public Tile getTileAt(int x, int z) throws IndexOutOfBoundsException {
