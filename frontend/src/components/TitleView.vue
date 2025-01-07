@@ -14,6 +14,9 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
 
 const router = useRouter();
 const { sendMessage, onMessage } = useWebSocket();
@@ -29,16 +32,16 @@ const submitForm = () => {
 
 // Method, to get ClientID from BE
 const handleServerMessage = (message: string) => {
-  console.log('Handling... ')
+  logger.info('Handling server message');
   serverMessage.value = message;
   if (message.startsWith('CLIENT_ID')) {
     const information = JSON.parse(message.split(';')[1]);
     userStore.setId(information.id);
-    router.push({ path: '/home'});
+    router.push({ path: '/home' });
   }
-}
-onMessage(handleServerMessage);
+};
 
+onMessage(handleServerMessage);
 </script>
 
 <style scoped>
