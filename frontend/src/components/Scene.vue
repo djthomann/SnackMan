@@ -298,9 +298,8 @@ export default defineComponent({
       player.add(cone);
 
       // Test Body for Username Test
-      const testObj = new THREE.Mesh(coneGeometry, coneMaterial);
-      testObj.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
-      testObj.rotation.x = -Math.PI / 2;
+      const testObj = modelService.createSnackman(1, 0 - mapScale / 2, 0 - mapScale / 2 );
+
       testObj.castShadow = true;
       scene.add(testObj);
 
