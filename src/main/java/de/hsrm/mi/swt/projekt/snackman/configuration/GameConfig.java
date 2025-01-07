@@ -5,6 +5,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 public class GameConfig {
 
+    public final static int WALL_HEIGHT = 5;
+
     @Positive
     private int scoreToWin;
     @Positive
