@@ -230,7 +230,6 @@ public class SnackManMap {
         }
     }
 
-    // TODO: a bit ugly... but couldn't get it to work with width and height
     public boolean positionIsWithinMapBounds(float x, float z) {
         logger.info("Checking position: x|z " + x + " " + z);
         logger.info("Map bounds: w|h " + w + " " + h);
