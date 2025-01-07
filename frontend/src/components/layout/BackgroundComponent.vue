@@ -1,4 +1,9 @@
 <script setup lang="ts">
+type Props = {
+    title?: string
+}
+
+const props = defineProps<Props>();
 </script>
 
 <template>
@@ -22,6 +27,9 @@
                     <img class="background__sheet-image" src="@/assets/images/backgrounds/backgroundcontainer_right.png">
                 </div>
                 
+            </div>
+            <div class="background__title" v-if="props.title">
+                <h1 class="background__headline">{{ props.title }}</h1>
             </div>
             <div class="background__content">
                 <slot></slot>
