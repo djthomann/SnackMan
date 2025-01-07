@@ -23,6 +23,10 @@ import { onUnmounted, ref, onMounted } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
+
 const { sendMessage } = useWebSocket();
 
 const serverMessage = ref<string>('');
@@ -92,7 +96,7 @@ onUnmounted(() => {
 // TODO: Backend Events should arrive here.
 const handleServerMessage = (message: string) => {
   serverMessage.value = message;
-  console.log('Received server message: ' + message);
+  logger.info('Received server message: ' + message);
 
   if (message.startsWith('USERNAME')) {
     playerUsername.value = message.split(':')[1];
@@ -102,7 +106,7 @@ const handleServerMessage = (message: string) => {
     usernames.forEach((username) => {
       if (username != 'OTHERPLAYERINFO' && username != '') {
         usernamesList.value.push(username);
-        console.log('New user:' + username + 'All Users: ' + usernamesList.value);
+        logger.info('New user:' + username + 'All Users: ' + usernamesList.value);
       }
     });
   }
