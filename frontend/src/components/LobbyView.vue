@@ -57,11 +57,11 @@
         <button type="button" @click="resetForm">Reset</button>
         <button type="button" @click="startGame">Start Game</button>
       </form>
-
     -->
-
-
-    <BackgroundComponent>
+    
+    
+    
+    <BackgroundComponent :title="`LOBBY #123`">
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent  avatar="ghost">
@@ -102,6 +102,7 @@
         </div>
       </div>
     </BackgroundComponent>
+  
   </div>
 </template>
 
@@ -114,6 +115,8 @@ import { useUserStore } from '@/stores/userStore';
 import type {Player} from "@/types/SceneTypes";
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
+import ConfigPanelComponent from './layout/ConfigPanelComponent.vue';
+import FieldsetComponent from './layout/FieldsetComponent.vue';
 import { Logger } from '../util/logger';
 
 const logger = new Logger();
@@ -299,8 +302,21 @@ const choose = (role: string) => {
   box-sizing:border-box;
 }
 
+.lobby-grid__column {
+  min-height:0;
+}
+
 .lobby-grid__column--span-all {
   grid-column: 1/4;
   text-align: center;
+}
+
+.config-panel-grid {
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 100%;
+  gap: 30px;
 }
 </style>
