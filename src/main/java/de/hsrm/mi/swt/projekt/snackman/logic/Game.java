@@ -186,20 +186,20 @@ public class Game {
     }
 
     private void createChicken() {
-        Tile tile = map.getTileAt(23, 23);  // HARD CODED IN THE MIDDLE OF THE MAP FOR TEST PORPOSES
+        Tile tile = map.getTileAt((map.getW() / 2) - 3, (map.getH() / 2) - 3);
         if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
             Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX()+0.5f, 0.0f,
                     (float) tile.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
             tile.setOccupation(chickenOne.toRecord());
             allMovables.add(chickenOne);
         }   
-        /*Tile secTile = map.getTileAt((map.getW() / 2) + 1, (map.getH() / 2) + 1); 
+        Tile secTile = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3); 
          if (secTile.getOccupationType() == OccupationType.FREE && secTile.getOccupation() == null) {
             Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) secTile.getX()+0.5f, 0.0f,
                     (float) secTile.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
             secTile.setOccupation(chickenTwo.toRecord());
             allMovables.add(chickenTwo);
-        }*/
+        }
     }
 
     /**

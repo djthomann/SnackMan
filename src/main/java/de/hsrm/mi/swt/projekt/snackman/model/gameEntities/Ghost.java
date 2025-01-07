@@ -53,7 +53,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
     }
 
     public String toString() {
-        return "GHOST";
+        return "GHOST-" + this.objectId;
     }
 
 }

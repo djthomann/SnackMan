@@ -278,7 +278,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     }
 
     public String toString() {
-        return "SNACKMAN";
+        return "SNACKMAN-" + this.objectId;
     }
 
 }
