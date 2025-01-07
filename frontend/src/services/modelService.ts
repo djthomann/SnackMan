@@ -6,6 +6,7 @@ import orangeModelUrl from '@/assets/models/orange.glb';
 import cakeModelUrl from '@/assets/models/cake.glb';
 import chickenModelUrl from '@/assets/models/chicken.glb';
 import brokkoliModelUrl from '@/assets/models/brokkoli.glb';
+import skybox_dnURL from '@/assets/images/skybox/floor.png';
 
 import { Logger } from '../util/logger';
 
@@ -17,6 +18,7 @@ class ModelService {
   private animationCache: Map<string, { animations: THREE.AnimationClip[] }>;
   private isInitialized: boolean;
   private logger: Logger;
+  private texture_dn: THREE.Texture;
 
   constructor() {
     this.logger = new Logger();
@@ -40,6 +42,7 @@ class ModelService {
     this.modelCache = new Map();
     this.animationCache = new Map();
     this.isInitialized = false;
+    this.texture_dn = new THREE.TextureLoader().load(skybox_dnURL);
   }
 
   private scaleModels(globalScale: number): void {
@@ -66,10 +69,9 @@ class ModelService {
     const loadPromises = Object.entries(this.models).map(([name, url]) =>
       this.loadModel(url).then((modelData) => {
         this.modelCache.set(name, modelData); // Store scene in cache
-        if(modelData.animations.length > 0) {
-            this.animationCache.set(name, modelData);
-            console.log('Animation added to Cache');
-          
+        if (modelData.animations.length > 0) {
+          this.animationCache.set(name, modelData);
+          console.log('Animation added to Cache');
         }
       }),
     );
@@ -146,13 +148,15 @@ class ModelService {
     });
   }
 
-  // Creates one large plane as the floor
+  // Creates small floor tiles
   public createFloorTile(x: number, z: number, scale: number) {
-    const planeGeometry = new THREE.PlaneGeometry(x, z, 1, 1);
-    const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
+    const planeGeometry = new THREE.PlaneGeometry(scale, scale, 1, 1);
+    const planeMaterial = new THREE.MeshStandardMaterial({
+      map: this.texture_dn,
+    });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
-    plane.position.set(x / 2 - scale / 2, -0.5, z / 2 - scale / 2);
+    plane.position.set(x * scale, 0, z * scale);
     plane.receiveShadow = true;
 
     return plane;
@@ -179,7 +183,7 @@ class ModelService {
     } else {
       newModel = this.getModel('cake').clone();
     }
-    newModel.userData.id = id; 
+    newModel.userData.id = id;
     newModel.position.set(x * scale, 10, z * scale);
     return newModel;
   }

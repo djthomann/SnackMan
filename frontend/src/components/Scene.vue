@@ -11,7 +11,7 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import {Ghost, Snackman} from '@/types/SceneTypes';
+import type { Ghost, Snackman } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
@@ -21,15 +21,15 @@ import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
 import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
 import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
 import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
-import {useRoute} from "vue-router";
-import {useUserStore} from "@/stores/userStore";
-import {Mesh} from "three";
+import { useRoute } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
+import { Mesh } from 'three';
 
 import { Logger } from '../util/logger';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
-// let floorGroup: THREE.Group
+let floorGroup: THREE.Group;
 let foodGroup: THREE.Group;
 let chickenGroup: THREE.Group;
 
@@ -48,16 +48,20 @@ texture_rt.colorSpace = THREE.SRGBColorSpace;
 const texture_lf = new THREE.TextureLoader().load(skybox_lfURL);
 texture_lf.colorSpace = THREE.SRGBColorSpace;
 
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_ft}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_bk}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_up}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_dn}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_rt}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_lf}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_ft }));
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_bk }));
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_up }));
+skyboxTextures.push(
+  new THREE.MeshBasicMaterial({
+    map: texture_dn,
+    transparent: true,
+    opacity: 0,
+  }),
+);
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_rt }));
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_lf }));
 
-console.log('textures found',texture_ft.image); // Should not be null or undefined
-
-
+console.log('textures found', texture_ft.image); // Should not be null or undefined
 
 // mesh for walls
 let box: THREE.Mesh;
@@ -127,27 +131,29 @@ export default defineComponent({
           startPromiseResolve();
         }
       } else if (message.startsWith('GAME_STATE')) {
-        handleGameStateEvent(message.split(';')[1])
+        handleGameStateEvent(message.split(';')[1]);
       }
     };
 
     const handleGameStateEvent = (message: string) => {
-
       const parsedData = JSON.parse(message);
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
-        meshes.get(snackman.objectId)!.position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
-      })
+        meshes
+          .get(snackman.objectId)!
+          .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+      });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
-        meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
-      })
-
-    }
+        meshes
+          .get(ghost.objectId)!
+          .position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+      });
+    };
 
     const handleStartEvent = () => {
-      console.log("handle start event")
+      console.log('handle start event');
       loadMap(map.value);
-    }
+    };
 
     const waitForStartMessage = () => {
       return new Promise<void>((resolve) => {
@@ -159,7 +165,7 @@ export default defineComponent({
       console.log('loading map');
       const requestData = {
         type: 'MAPREQUEST',
-        id: gameID
+        id: gameID,
       };
       sendMessage(JSON.stringify(requestData));
     };
@@ -182,11 +188,11 @@ export default defineComponent({
 
       window.addEventListener('resize', onWindowResize);
 
-      const lastSegment = route.path.split('/').pop() || ''
+      const lastSegment = route.path.split('/').pop() || '';
       if (/^\d+$/.test(lastSegment)) {
         gameID = Number(lastSegment);
       }
-      console.log("scene with gameID " + gameID);
+      console.log('scene with gameID ' + gameID);
 
       // requestMap();
     });
@@ -219,7 +225,7 @@ export default defineComponent({
       Ghosts and Snackmen are spawned on the correct position
     */
 
-    function loadPlayerEntities (snackMen: Snackman[], ghosts: Ghost[], scene:any){
+    function loadPlayerEntities(snackMen: Snackman[], ghosts: Ghost[], scene: any) {
       // Group for snackMen and ghosts
       const snackMenGroup = new THREE.Group();
       const ghostsGroup = new THREE.Group();
@@ -231,11 +237,7 @@ export default defineComponent({
         const snackManMesh = new THREE.Mesh(snackManGeometry, snackManMaterial);
 
         // Position snackMan
-        snackManMesh.position.set(
-          snackMan.x,
-          mapScale / 2,
-          snackMan.z
-        );
+        snackManMesh.position.set(snackMan.x, mapScale / 2, snackMan.z);
 
         // Attach a NameTag
         const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
@@ -250,7 +252,7 @@ export default defineComponent({
         }
 
         meshes.set(snackMan.objectId, snackManMesh);
-        console.log(`placed Snackman ${snackMan.objectId} on Scene`)
+        console.log(`placed Snackman ${snackMan.objectId} on Scene`);
       });
 
       // Iterate over ghosts and add them to the scene
@@ -260,13 +262,9 @@ export default defineComponent({
         const ghostMesh = new THREE.Mesh(ghostGeometry, ghostMaterial);
 
         // Position ghost
-        ghostMesh.position.set(
-          ghost.x,
-          mapScale / 2,
-          ghost.z
-        );
+        ghostMesh.position.set(ghost.x, mapScale / 2, ghost.z);
 
-        const ghostTag = new NameTag(ghost.username || "Ghost", ghostMesh, scene);
+        const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
 
         // Add to ghosts group
@@ -277,8 +275,6 @@ export default defineComponent({
       // Add groups to the scene
       scene.add(snackMenGroup);
       scene.add(ghostsGroup);
-
-
     }
 
     function loadMap(m: any) {
@@ -293,13 +289,20 @@ export default defineComponent({
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
-            food.userData.id = tile.food.objectId;
-            foodGroup.add(
-              food
+            const food = modelService.createFood(
+              tile.food.objectId,
+              tile.x,
+              tile.z,
+              Math.random() * 400 + 100,
+              mapScale,
             );
+            food.userData.id = tile.food.objectId;
+            foodGroup.add(food);
+            floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
+            floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
+
             if (occupation != null) {
               // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
               const chicken = modelService.createChicken(tile.x * mapScale, tile.z * mapScale);
@@ -322,26 +325,25 @@ export default defineComponent({
       }
 
       scene.add(wallsGroup);
-
       scene.add(foodGroup);
-
-      const floor = modelService.createFloorTile(w, h, mapScale);
-      scene.add(floor);
+      scene.add(floorGroup);
 
       // Skybox
-      for(let i=0; i<6;i++){
+      for (let i = 0; i < 6; i++) {
         skyboxTextures[i].side = THREE.BackSide;
+        skyboxTextures[i].transparent = true;
       }
-      const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
+      console.log(skyboxTextures);
+      const skyboxGeo = new THREE.BoxGeometry(w, w / 4, w);
+      console.log(skyboxGeo);
       //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
       //console.log('skybox position', skybox.position)
-      skybox.position.y = (w/4)/2;
+      skybox.position.y = w / 4 / 2;
       skybox.position.x = w / 2 - 0.5 * mapScale;
       skybox.position.z = w / 2 - 0.5 * mapScale;
       //skybox.position.y = (w/4);
       scene.add(skybox);
-
 
       player.position.set(w / 2, mapScale, h / 2);
     }
@@ -358,17 +360,15 @@ export default defineComponent({
         '`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`',
       );
 
-
       player.position.set(
         newPlayerPositionX * mapScale,
         newPlayerPositionY,
         newPlayerPositionZ * mapScale,
-      )
-
+      );
     }
 
     function makeDisappear(id: number) {
-      foodGroup.children.forEach( (food) => {
+      foodGroup.children.forEach((food) => {
         if (food.userData.id == id) {
           scene.remove(food);
           foodGroup.remove(food);
@@ -383,7 +383,7 @@ export default defineComponent({
       scene.background = new THREE.Color(0x111111);
 
       wallsGroup = new THREE.Group();
-      // floorGroup = new THREE.Group()
+      floorGroup = new THREE.Group();
       foodGroup = new THREE.Group();
       chickenGroup = new THREE.Group();
 
