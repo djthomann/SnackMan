@@ -156,7 +156,7 @@ class ModelService {
     });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
-    plane.position.set(x * scale, 0, z * scale);
+    plane.position.set(x * scale, -1, z * scale);
     plane.receiveShadow = true;
 
     return plane;
