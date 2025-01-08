@@ -38,7 +38,7 @@ class ModelService {
       cake: 0.175,
       chicken: 1,
       brokkoli: 1,
-      snackman: 0.017
+      snackman: 0.012
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
@@ -177,9 +177,14 @@ class ModelService {
     newModel.userData.id = id;
     newModel.position.set(x,0,z );
     return newModel;
-
   }
 
+  public createGhost(id: number, x: number, z: number) {
+    const newModel = this.getModel('snackman').clone();
+    newModel.userData.id = id;
+    newModel.position.set(x,0,z );
+    return newModel;
+  }
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
   public createFood(id: number, x: number, z: number, calories: number, scale: number) {
     let newModel;

@@ -96,7 +96,7 @@ export default defineComponent({
     //GameStart
     const entityStore = useEntityStore();
     const { snackMen, ghosts, chicken, map } = storeToRefs(entityStore);
-    const meshes: Map<Number, Mesh> = new Map<Number, Mesh>();
+    const meshes: Map<number, THREE.Group> = new Map<number, THREE.Group>();
 
     logger.info(
       'Snackman Names:',
@@ -226,6 +226,7 @@ export default defineComponent({
 
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
+        /*
         const snackManGeometry = new THREE.SphereGeometry(1, 32, 32);
         const snackManMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
         const snackManMesh = new THREE.Mesh(snackManGeometry, snackManMaterial);
@@ -236,7 +237,9 @@ export default defineComponent({
           mapScale / 2,
           snackMan.z
         );
+        */
 
+        const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x, snackMan.z);
         // Attach a NameTag
         const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
         nameTags.push(snackManTag);
@@ -255,6 +258,7 @@ export default defineComponent({
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
+        /*
         const ghostGeometry = new THREE.ConeGeometry(1, 2, 32);
         const ghostMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
         const ghostMesh = new THREE.Mesh(ghostGeometry, ghostMaterial);
@@ -265,6 +269,9 @@ export default defineComponent({
           mapScale / 2,
           ghost.z
         );
+        */
+
+        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
 
         const ghostTag = new NameTag(ghost.username || "Ghost", ghostMesh, scene);
         nameTags.push(ghostTag);
@@ -422,12 +429,14 @@ export default defineComponent({
       camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
       cone.rotation.x = -Math.PI / 2;
       cone.castShadow = true;
-      scene.add(cone);
+
+      const playerObj = modelService.createSnackman(3,0 - mapScale / 2, 0 - mapScale / 2 );
+      scene.add(playerObj);
 
       // Player Object
       scene.add(player);
       player.add(camera);
-      player.add(cone);
+      player.add(playerObj);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
