@@ -180,6 +180,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                             resolveOnTopOfWall();
                         }
                     } else {
+                        // Check if SnackMan has landed on food
+                        collisionManager.checkCollision(x, z, SnackMan.this);
                         if (y < 0.8f) {
                             y = 0.8f;
                             jumping = false;
@@ -188,6 +190,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     
 
                     MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                    
                     gameManger.notifyChange(moveEvent);
 
                     // If the jump is done, the task is not repeated anymore
@@ -370,7 +373,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         }
 
-        logger.info("Event arrived at SnackMan :" + event.toString());
+        // logger.info("Event arrived at SnackMan :" + event.toString());
     }
 
     public SnackManRecord toRecord() {

@@ -96,7 +96,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     clients.get(session).setUsername(registerUsernameEvent.getUsername());
                     ClientIdEvent event = new ClientIdEvent(clients.get(session).getClientId());
                     String json = gson.toJson(event);
-                    logger.info("Final JSON for event" + event.getType().toString() + "; " + json);
+                    // logger.info("Final JSON for event" + event.getType().toString() + "; " + json);
                     session.sendMessage(new TextMessage(event.getType().toString() + ";" + json));
                 }
                 case "MAPREQUEST" -> {
@@ -105,10 +105,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     //TODO: delete once map always comes with GameStartEvent
                     long gameId = 2L;
                     SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
+                    // SnackManMap map = new SnackManMap(20, 40);
                     testingMode = true;
                     gameManager.createGame(new GameConfig(), gameId, map);
                     
-                    // SnackManMap map = new SnackManMap(40, 40);
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH +
                     // "testFile.csv");
                     // map.saveAsCSV();
@@ -135,7 +135,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     try {
                         String json = mapper.writeValueAsString(map);
                         returnString = "MAP;" + json;
-                        logger.info("Final JSON: " + returnString);
+                        // logger.info("Final JSON: " + returnString);
                         session.sendMessage(new TextMessage(returnString));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
@@ -263,7 +263,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         for (WebSocketSession session : this.clients.keySet()) {
             try {
                 json = gson.toJson(event);
-                logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
+                // logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
 
                 // Synchronize this block to avoid sending messages during invalid states (e.g.
                 // enables moving while jumping)
