@@ -97,6 +97,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         this.gainedCalories = 1000000;
         this.gameManger = gameManager;
 
+        this.invincible = false;
+        this.stunned = false;
+        this.alive = true;
+        this.stunnedTimer = new Timer();
+        this.invincibleTimer = new Timer();
+
         logger.info("created SnackMan with id: " + id);
     }
 
@@ -310,6 +316,13 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
             case MOVE:
 
+                // The SnackMan is unable to move when stunned
+                if(this.stunned) {
+                    MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                    gameManger.notifyChange(moveEvent);
+                    return;
+                }
+
                 Vector3f vector = ((MoveEvent) event).getMovementVector();
                 logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
 
@@ -350,6 +363,32 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                         }
                     }
 
+                }
+
+                /**
+                 * In case of a ghost collision the SnackMan loses calories,
+                 * is stunned and unable to move for a certain time period
+                 * and invincible for a certain time period
+                 */
+                if(collisions.contains("ghost") && !this.invincible) {
+                    reactToGhostCollision();
+                }
+
+                /**
+                 * In case of a SnackMan collision the SnackMan is unable to move through the other SnackMan
+                 */
+                if(collisions.contains("snackman")) {
+
+                    // If the SnackMan is mid-jump, it has landed on another SnackMan
+                    if(this.jumping) {
+                        this.jumping = false;
+                        jumpTaskFuture.cancel(false);
+                        this.y = gameConfig.getSnackManHeight() + gameConfig.getSnackManHeight() / 2;
+                    }
+
+                    logger.info("Kollision mit Snack Man, aktuelle Kalorien: " + this.gainedCalories);
+                    vector.x = 0;
+                    vector.z = 0;
                 }
 
                 this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
@@ -443,10 +482,10 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
     public void reactToGhostCollision() {
         logger.info("SnackMan calories before ghost collision: " + this.gainedCalories);
-        //checkIfDead(gameConfig.getGhostCollisionCalories());
+        checkIfDead(gameConfig.getGhostCollisionCalories());
         logger.info("SnackMan calories after ghost collision: " + this.gainedCalories);
-        //startStunnedTimer();
-        //startInvincibleTimer();
+        startStunnedTimer();
+        startInvincibleTimer();
     }
 
 }

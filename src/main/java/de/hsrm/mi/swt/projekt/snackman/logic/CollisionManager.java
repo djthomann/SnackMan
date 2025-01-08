@@ -100,7 +100,7 @@ public class CollisionManager {
 
                     // Heights /2 because the y-coordinate is in the middle of the object
                     if (heightDistance <= collisionPartner.getHeight()/2 + ((Ghost)aktMovable).getHeight()/2){
-                        logger.info("Collision with Ghost !");
+                        logger.info("Collision with Ghost!");
                         collisions.add("ghost");
                     }
                 }
@@ -126,7 +126,8 @@ public class CollisionManager {
 
                         // Heights /2 because the y-coordinate is in the middle of the object
                         if (heightDistance <= collisionPartner.getHeight()/2 + ((SnackMan)aktMovable).getHeight()/2){
-                            logger.info("Collision with SnackMan !");
+                            logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
+                            logger.info("This SnackMan: " + collisionPartner.getObjectId());
                             collisions.add("snackman");
                         }
 
@@ -134,7 +135,8 @@ public class CollisionManager {
                     // If not call reactToGhostCollision from the SnackMan (to cover the cases when a SnackMan is standing still
                     // and a ghost runs into them)
                     } else if(collisionPartner instanceof Ghost && !((SnackMan)aktMovable).isInvincible()){
-                        logger.info("Collision with SnackMan !");
+                        logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
+                        logger.info("This Ghost: " + collisionPartner.getObjectId());
                         collisions.add("snackman");
                         ((SnackMan)aktMovable).reactToGhostCollision();;
                     }
