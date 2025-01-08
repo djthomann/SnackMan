@@ -14,9 +14,8 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Eat
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
+import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
-import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
-import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
 /**
@@ -130,7 +129,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 this.wallCollision = (boolean) tuple.get(4);
 
                 if(this.wallCollision == false) {
-                    String collision = "none";
+                    ArrayList<CollisionType> collisions;
                     float wishedX = 0.0f;
                     float wishedZ = 0.0f;
 
@@ -141,8 +140,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                         wishedX = this.getX() + (movementX - this.radius);
                         wishedZ = this.getZ() + (movementZ - this.radius);
                     }
-                    collision = collisionManager.checkCollision(wishedX, wishedZ, this);
-                        if (collision.equals("wall")) {
+                    collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
+                        if (collisions.contains(CollisionType.WALL)) {
                             movementX = 0.0f;
                             movementZ = 0.0f; 
                             this.wallCollision = true;  
