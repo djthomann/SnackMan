@@ -1,6 +1,8 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -65,6 +67,17 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
     /** The calorie count of the SnackMan */
     private int gainedCalories;
+
+    // Collision constants
+    private final long STUNNED_TIME = 1000;
+    private final long INVINCIBLE_TIME = 3000;
+
+    // Collision variables
+    private boolean stunned;
+    private Timer stunnedTimer;
+    private boolean invincible;
+    private Timer invincibleTimer;
+    private boolean alive;
 
     /**
      * Constructs a new `SnackMan` with the specified starting position and
@@ -362,6 +375,75 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
     public SnackManRecord toRecord() {
         return new SnackManRecord(gameId, objectId, getUsername(), x, y, z, gainedCalories);
+    }
+
+    public boolean isInvincible() {
+        return invincible;
+    }
+
+    /**
+     * Makes the SnackMan lose the passed calorie amount
+     * and sets the SnackMan to dead if its new calorie count is negative or zero
+     * @param calorieLoss
+     */
+    private void checkIfDead(int calorieLoss) {
+        this.gainedCalories -= calorieLoss;
+        if(this.gainedCalories <= 0) {
+            this.alive = false;
+        }
+    }
+
+    /**
+     * While the timer runs, the SnackMan is stunned and thus unable to move
+     * 
+     */
+    private void startStunnedTimer() {
+
+        this.stunned = true;
+        logger.info("SnackMan with id " + this.objectId + " is stunned");
+
+        TimerTask task;
+         task = new TimerTask() {
+            
+            @Override
+            public void run() {
+                stunned = false;
+                logger.info("SnackMan with id " + objectId + " is NOT stunned anymore");
+            }
+        };
+
+        this.stunnedTimer.schedule(task, STUNNED_TIME);
+    }
+
+    /**
+     * While the timer runs, the SnackMan is invincible 
+     * and thus cannot be stunned by a ghost and lose calories
+     * 
+     */
+    private void startInvincibleTimer() {
+
+        this.invincible = true;
+        logger.info("SnackMan with id " + this.objectId + " is invincible");
+
+        TimerTask task;
+         task = new TimerTask() {
+            
+            @Override
+            public void run() {
+                invincible = false;
+                logger.info("SnackMan with id " + objectId + " is NOT invincible anymore");
+            }
+        };
+
+        this.invincibleTimer.schedule(task, INVINCIBLE_TIME);
+    }
+
+    public void reactToGhostCollision() {
+        logger.info("SnackMan calories before ghost collision: " + this.gainedCalories);
+        //checkIfDead(gameConfig.getGhostCollisionCalories());
+        logger.info("SnackMan calories after ghost collision: " + this.gainedCalories);
+        //startStunnedTimer();
+        //startInvincibleTimer();
     }
 
 }
