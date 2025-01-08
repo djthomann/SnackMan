@@ -1,22 +1,23 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend;
 
+import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import org.springframework.context.ApplicationEvent;
 
 public class InternalMoveEvent extends ApplicationEvent {
 
-    private long gameId;
+    private final GameManager gameManager;
 
     /**
      * Event that is called upon when an object moves.
-     * @param source the object on which the event occurrs => the object that moves.
+     * @param source the object on which the event occurs => the object that moves.
      * * @param gameId objectId of the game the event belongs to.
      */
-    public InternalMoveEvent(Object source, long id) {
+    public InternalMoveEvent(Object source, GameManager gameManager) {
         super(source);
-        this.gameId = id;
+        this.gameManager = gameManager;
     }
 
-    public long getGameId() {
-        return gameId;
+    public GameManager getGameManager() {
+        return gameManager;
     }
 }

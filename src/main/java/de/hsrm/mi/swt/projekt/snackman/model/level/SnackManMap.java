@@ -1,16 +1,25 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManMapRecord;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
+
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManMapRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
 
 public class SnackManMap {
 
@@ -18,8 +27,8 @@ public class SnackManMap {
     // Tile at (x, z) (y is always at 0, we view the map as 2D) can be reached via
     // allTiles[z][x],
     // or (recommended) getTileAt(x, z)
-    private int w;
-    private int h;
+    private int w; // x-coordinate
+    private int h; // z-coordinate
     private Tile[][] allTiles;
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -228,8 +237,24 @@ public class SnackManMap {
         }
     }
 
-    public Tile getTileAt(int x, int z) {
-        return allTiles[z][x];
+    public boolean positionIsWithinMapBounds(float x, float z) {
+        logger.info("Checking position: x|z " + x + " " + z);
+        logger.info("Map bounds: w|h " + w + " " + h);
+
+        // Überprüfen, ob die Position innerhalb der Kartenbreite und -höhe liegt
+        if (x < 0 || x >= w || z < 0 || z >= h) {
+            return false; // Position ist außerhalb der Karte
+        }
+        return true;
+    }
+
+    public Tile getTileAt(int x, int z) throws IndexOutOfBoundsException {
+        try {
+            return allTiles[z][x];
+        } catch(IndexOutOfBoundsException e) {
+            logger.info("Position asked for not within bounds");
+            throw e;
+        }
     }
 
     public Tile[][] getAllTiles() {

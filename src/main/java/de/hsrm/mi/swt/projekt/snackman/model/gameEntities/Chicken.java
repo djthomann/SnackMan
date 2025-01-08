@@ -30,7 +30,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     private Logger logger = LoggerFactory.getLogger(Chicken.class);
 
-    private GameManager gameManger;
+    private GameManager gameManager;
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
 
@@ -72,7 +72,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         super(id, gameId, x, y, z, gameConfig.getChickenMinRadius());
         this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
-        this.gameManger = gameManager;
+        this.gameManager = gameManager;
         this.gainedCalories = 0;
         //Timer for constant passive calorie gain
         this.passiveCalorieGain = 10;
@@ -99,7 +99,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.x += newX;
         this.y += newY;
         this.z += newZ;
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
     /**
@@ -184,7 +184,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             return;
         }
 
-        logger.info("Event arrived at chicken: " + event.toString());
+        // logger.info("Event arrived at chicken: " + event.toString());
 
     }
 

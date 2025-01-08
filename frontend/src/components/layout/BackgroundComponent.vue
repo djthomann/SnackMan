@@ -1,4 +1,9 @@
 <script setup lang="ts">
+type Props = {
+    title?: string
+}
+
+const props = defineProps<Props>();
 </script>
 
 <template>
@@ -22,6 +27,9 @@
                     <img class="background__sheet-image" src="@/assets/images/backgrounds/backgroundcontainer_right.png">
                 </div>
                 
+            </div>
+            <div class="background__title" v-if="props.title">
+                <h1 class="background__headline">{{ props.title }}</h1>
             </div>
             <div class="background__content">
                 <slot></slot>
@@ -85,7 +93,7 @@
 .background__sheet-tile--left,
 .background__sheet-tile--center,
 .background__sheet-tile--right {
-    width: auto;
+    width: max-content;
 }
 
 .background__sheet-tile--stretch {
@@ -97,7 +105,7 @@
 .background__sheet-tile--left .background__sheet-image,
 .background__sheet-tile--center .background__sheet-image,
 .background__sheet-tile--right .background__sheet-image {
-    width: auto;
+    width: max-content;
     height: 100%;
 }
 
@@ -106,10 +114,33 @@
     height: 100%;
 }
 
+.background__title {
+    position: absolute;
+    width: max-content;
+    height: 90px;
+    left: 4dvw;
+    top: -32px;
+    z-index: 2;
+    background-color: var(--colorPrimary);
+    border: 9px solid var(--colorLight);
+    border-radius: 2px;
+    box-sizing: border-box;
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+    padding: 10px 25px;
+}
+
+.background__headline {
+    color: var(--colorLight);
+    margin: 0;
+    font-size: 45px;
+    font-weight: normal;
+}
+
 .background__content {
     position: relative;
     width: 100%;
     height: 100%;
+    padding-top: 2dvw;
 }
 
 </style>

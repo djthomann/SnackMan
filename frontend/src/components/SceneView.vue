@@ -1,18 +1,20 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
-    <button id="startButton">Start</button>
+    <GameOverlay ref="gameOverlayRef" />
+    <button id="startButton">play</button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, ref, onMounted } from 'vue';
+import { defineComponent, onUnmounted, ref, onMounted, nextTick } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import { Ghost, Snackman } from '@/types/SceneTypes';
+import type { Ghost, Snackman } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
+import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
 import skybox_ftURL from '@/assets/images/skybox/skybox_ft.png';
@@ -21,11 +23,16 @@ import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
 import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
 import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
 import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
+import { useRoute } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
+import { Mesh } from 'three';
+import GameOverlay from './GameOverlay.vue';
 
+import { Logger } from '../util/logger';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
-// let floorGroup: THREE.Group
+let floorGroup: THREE.Group;
 let foodGroup: THREE.Group;
 let chickenGroup: THREE.Group;
 
@@ -44,16 +51,20 @@ texture_rt.colorSpace = THREE.SRGBColorSpace;
 const texture_lf = new THREE.TextureLoader().load(skybox_lfURL);
 texture_lf.colorSpace = THREE.SRGBColorSpace;
 
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_ft}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_bk}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_up}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_dn}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_rt}));
-skyboxTextures.push(new THREE.MeshBasicMaterial({map: texture_lf}));
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_ft }));
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_bk }));
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_up }));
+skyboxTextures.push(
+  new THREE.MeshBasicMaterial({
+    map: texture_dn,
+    transparent: true,
+    opacity: 0,
+  }),
+);
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_rt }));
+skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_lf }));
 
-console.log('textures found',texture_ft.image); // Should not be null or undefined
-
-
+console.log('textures found', texture_ft.image); // Should not be null or undefined
 
 // mesh for walls
 let box: THREE.Mesh;
@@ -62,17 +73,24 @@ const mapScale = 5;
 const wallHeight = 1.5 * mapScale;
 
 export default defineComponent({
-  name: 'Scene',
+  components: {
+    GameOverlay,
+  },
+  name: 'SceneView',
   setup() {
+    const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
+
     const { sendMessage } = useWebSocket();
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
     const player = new THREE.Mesh();
+    const route = useRoute();
+    const userStore = useUserStore();
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
-    let cone: THREE.Mesh;
+    let playerObj: THREE.Group;
     let plane: THREE.Mesh;
     let ambientLight: THREE.AmbientLight;
     let directionalLight: THREE.DirectionalLight;
@@ -81,38 +99,99 @@ export default defineComponent({
     let nameTag: NameTag;
     let animationMixer: THREE.AnimationMixer;
     const nameTags: NameTag[] = [];
+    let gameID = 2;
+    let startPromiseResolve: () => void;
+    let testingMode = false;
+
+    const logger = new Logger();
 
     //GameStart
     const entityStore = useEntityStore();
-    const { snackMen, ghosts } = storeToRefs(entityStore);
+    const gameStore = useGameStore();
+    const { snackMen, ghosts, chicken, map } = storeToRefs(entityStore);
+    const meshes: Map<number, THREE.Group> = new Map<number, THREE.Group>();
 
-    console.log('Snackmen:', snackMen.value.length)
-    console.log(
+    logger.info(
       'Snackman Names:',
-      snackMen.value.map((item: Snackman) => item.username),
+      [...snackMen.value.values()].map((item: Snackman) => item.username),
     );
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
-      //console.log('Processing server message');
 
       if (message.startsWith('MOVE')) {
+        testingMode = true;
         const key: string = message.split(':')[1];
 
         // Move the player
         movePlayer(JSON.parse(message.split(';')[1]));
       } else if (message.startsWith('MAP')) {
-        console.log('processing map');
+        logger.info('processing map');
+        testingMode = true;
         const map = JSON.parse(message.split(';')[1]);
         loadMap(map);
       } else if (message.startsWith('DISAPPEAR')) {
-        const food = JSON.parse(message.split(';')[1]); 
-        makeDisappear(food.food.objectId); 
+        const food = JSON.parse(message.split(';')[1]);
+        makeDisappear(food.food.objectId);
+        updateCalories(100);
+      } else if (message.startsWith('GAME_START')) {
+        handleStartEvent();
+        if (startPromiseResolve) {
+          startPromiseResolve();
+        }
+      } else if (message.startsWith('GAME_STATE')) {
+        handleGameStateEvent(message.split(';')[1]);
       }
     };
 
+    const updateCalories = (amount: number) => {
+      gameStore.addCalories(amount);
+    };
+
+    const updateTime = (sec: number) => {
+      gameStore.setRemainingTime(sec);
+    };
+
+    const handleGameStateEvent = (message: string) => {
+      const parsedData = JSON.parse(message);
+      parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
+        meshes
+          .get(snackman.objectId)!
+          .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+      });
+
+      parsedData.updatesGhosts.forEach((ghost: Ghost) => {
+        meshes
+          .get(ghost.objectId)!
+          .position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+      });
+    };
+    const handleStartEvent = () => {
+      console.log('handle start event');
+      loadMap(map.value);
+    };
+
+    const waitForStartMessage = () => {
+      return new Promise<void>((resolve) => {
+        startPromiseResolve = resolve;
+      });
+    };
+
+    const requestMap = () => {
+      console.log('loading map');
+      const requestData = {
+        type: 'MAPREQUEST',
+        id: gameID,
+      };
+      sendMessage(JSON.stringify(requestData));
+    };
+
     onMounted(async () => {
+      await nextTick();
+      console.log(gameOverlayRef.value);
+      eventBus.on('serverMessage', handleServerMessage);
+
       try {
         // Service initialisieren
         await modelService.initialize(mapScale);
@@ -121,10 +200,20 @@ export default defineComponent({
       }
       loadModels();
       initScene();
-      loadPlayerEntities(snackMen.value, ghosts.value, scene);
-      eventBus.on('serverMessage', handleServerMessage);
+
+      await waitForStartMessage();
+
+      loadPlayerEntities([...snackMen.value.values()], [...ghosts.value.values()], scene);
 
       window.addEventListener('resize', onWindowResize);
+
+      const lastSegment = route.path.split('/').pop() || '';
+      if (/^\d+$/.test(lastSegment)) {
+        gameID = Number(lastSegment);
+      }
+      console.log('scene with gameID ' + gameID);
+
+      // requestMap();
     });
 
     onUnmounted(() => {
@@ -145,7 +234,7 @@ export default defineComponent({
         // Service initialisieren
         await modelService.initialize(mapScale);
 
-        console.log('Models loaded');
+        logger.info('Models loaded');
       } catch (error) {
         console.error('Error initializing or loading model:', error);
       }
@@ -155,81 +244,83 @@ export default defineComponent({
       Ghosts and Snackmen are spawned on the correct position
     */
 
-    function loadPlayerEntities (snackMen: Snackman[], ghosts: Ghost[], scene:any){
+    function loadPlayerEntities(snackMen: Snackman[], ghosts: Ghost[], scene: any) {
       // Group for snackMen and ghosts
       const snackMenGroup = new THREE.Group();
       const ghostsGroup = new THREE.Group();
 
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
-        const snackManGeometry = new THREE.SphereGeometry(1, 32, 32);
-        const snackManMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-        const snackManMesh = new THREE.Mesh(snackManGeometry, snackManMaterial);
+      
+        
 
-        // Position snackMan
-        snackManMesh.position.set(
-          snackMan.x,
-          mapScale / 2, 
-          snackMan.z
-        );
+        if (!testingMode && snackMan.objectId == userStore.id) {
+          //snackManMesh.add(camera);
+          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x, snackMan.z );
+          playerMesh.add(camera)
+          camera.position.set(0, 0, 0);
+          meshes.set(snackMan.objectId, playerMesh);
+        } else{
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x, snackMan.z);
+          // Attach a NameTag
+          const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
+          nameTags.push(snackManTag);
 
-        // Attach a NameTag
-        const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
-        nameTags.push(snackManTag);
+          // Add to snackMen group
+          snackMenGroup.add(snackManMesh); 
+          meshes.set(snackMan.objectId, snackManMesh);
+          console.log(`placed Snackman ${snackMan.objectId} on Scene`);
+        }
 
-        // Add to snackMen group
-        snackMenGroup.add(snackManMesh);
       });
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
-        const ghostGeometry = new THREE.ConeGeometry(1, 2, 32);
-        const ghostMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-        const ghostMesh = new THREE.Mesh(ghostGeometry, ghostMaterial);
+    
+        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
 
-        // Position ghost
-        ghostMesh.position.set(
-          ghost.x,
-          mapScale / 2,
-          ghost.z
-        );
-
-        const ghostTag = new NameTag(ghost.username || "Ghost", ghostMesh, scene);
+        const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
 
         // Add to ghosts group
         ghostsGroup.add(ghostMesh);
+        meshes.set(ghost.objectId, ghostMesh);
       });
 
       // Add groups to the scene
       scene.add(snackMenGroup);
       scene.add(ghostsGroup);
-
-      
     }
 
-    function loadMap(map: any) {
-      //console.log('Received mapdata' + map);
-      const w = map.w * mapScale;
-      const h = map.h * mapScale;
-      const tiles = map.allTiles;
+    function loadMap(m: any) {
+      console.log('Received mapdata' + m);
+      const w = m.w * mapScale;
+      const h = m.h * mapScale;
+      const tiles = m.tileRecords;
 
       for (const row of tiles) {
         for (const tile of row) {
           const occupationType = tile.occupationType;
           if (occupationType == 'WALL') {
-            // console.log(tile)
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale); 
-            food.userData.id = tile.occupation.objectId; 
-            foodGroup.add(
-              food
+            const food = modelService.createFood(
+              tile.food.objectId,
+              tile.x,
+              tile.z,
+              Math.random() * 400 + 100,
+              mapScale,
             );
+            food.userData.id = tile.food.objectId;
+            foodGroup.add(food);
+            floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
-            if (occupation != null){ // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
-              const chicken = modelService.createChicken(tile.x* mapScale, tile.z*mapScale);
+            floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
+
+            if (occupation != null) {
+              // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
+              const chicken = modelService.createChicken(tile.x * mapScale, tile.z * mapScale);
               chickenGroup.add(chicken);
             }
           }
@@ -245,33 +336,29 @@ export default defineComponent({
         const action = animationMixer.clipAction(chickenAnimations[0]);
         action.play();
       } else {
-        console.log('Animation not found');
+        logger.info('Animation not found');
       }
-      
+
       scene.add(wallsGroup);
-
       scene.add(foodGroup);
-
-      const floor = modelService.createFloorTile(w, h, mapScale);
-      // console.log('Creating Floor with: ' + w + '|' + h);
-      scene.add(floor);
+      scene.add(floorGroup);
 
       // Skybox
-      for(let i=0; i<6;i++){
+      for (let i = 0; i < 6; i++) {
         skyboxTextures[i].side = THREE.BackSide;
+        skyboxTextures[i].transparent = true;
       }
-      const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
+      const skyboxGeo = new THREE.BoxGeometry(w, w / 4, w);
       //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
       //console.log('skybox position', skybox.position)
-      skybox.position.y = (w/4)/2;
-      skybox.position.x = w/2;
-      skybox.position.z = w/2;
+      skybox.position.y = w / 4 / 2;
+      skybox.position.x = w / 2 - 0.5 * mapScale;
+      skybox.position.z = w / 2 - 0.5 * mapScale;
       //skybox.position.y = (w/4);
       scene.add(skybox);
 
-
-      player.position.set(w / 2, mapScale, h / 2);      
+      player.position.set(w / 2, mapScale, h / 2);
     }
 
     /**
@@ -282,8 +369,8 @@ export default defineComponent({
       const newPlayerPositionY = moveInformation.movementVector.y;
       const newPlayerPositionZ = moveInformation.movementVector.z;
 
-      console.log(
-        `New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`,
+      logger.info(
+        '`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`',
       );
 
       player.position.set(
@@ -294,13 +381,15 @@ export default defineComponent({
     }
 
     function makeDisappear(id: number) {
-      foodGroup.children.forEach( (food) => {
+      updateCalories(100);
+      updateTime(id);
+      foodGroup.children.forEach((food) => {
         if (food.userData.id == id) {
-          scene.remove(food); 
-          foodGroup.remove(food); 
-          console.log(`food with Id ${id} disappeared juhu`); 
+          scene.remove(food);
+          foodGroup.remove(food);
+          console.log(`food with Id ${id} disappeared juhu`);
         }
-      }); 
+      });
     }
 
     function initScene() {
@@ -309,7 +398,7 @@ export default defineComponent({
       scene.background = new THREE.Color(0x111111);
 
       wallsGroup = new THREE.Group();
-      // floorGroup = new THREE.Group()
+      floorGroup = new THREE.Group();
       foodGroup = new THREE.Group();
       chickenGroup = new THREE.Group();
 
@@ -341,19 +430,24 @@ export default defineComponent({
       scene.add(directionalLight);
 
       // Player Body
-      const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 32);
-      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
-      cone = new THREE.Mesh(coneGeometry, coneMaterial);
-      cone.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
       camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
-      cone.rotation.x = -Math.PI / 2;
-      cone.castShadow = true;
-      scene.add(cone);
+      //TODO: Player ID!
+      playerObj = modelService.createPlayer(userStore.id ,0 - mapScale / 2, 0 - mapScale / 2 );
+      //meshes.add(playerObj);
+      scene.add(playerObj);
+
+      // TODO For testing, take out later
+      const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
+      const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
+      const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
+      ghostMesh.position.set(16 * mapScale, 0, 20 * mapScale)
+      scene.add(ghostMesh)
+
 
       // Player Object
       scene.add(player);
       player.add(camera);
-      player.add(cone);
+      player.add(playerObj);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
@@ -419,7 +513,7 @@ export default defineComponent({
         }
 
         if (keyPressedArray.includes('a')) {
-          let linksVector = new THREE.Vector3(forward.z, 0, -forward.x);
+          const linksVector = new THREE.Vector3(forward.z, 0, -forward.x);
           vector = vector.add(linksVector.normalize());
         }
 
@@ -428,7 +522,7 @@ export default defineComponent({
         }
 
         if (keyPressedArray.includes('d')) {
-          let rechtsVector = new THREE.Vector3(-forward.z, 0, forward.x);
+          const rechtsVector = new THREE.Vector3(-forward.z, 0, forward.x);
           vector = vector.add(rechtsVector.normalize());
         }
 
@@ -440,8 +534,8 @@ export default defineComponent({
 
         const data = JSON.stringify({
           type: 'MOVE',
-          gameID: 2,
-          objectID: 832,
+          gameID: gameID,
+          objectID: userStore.id,
           movementVector: vector,
         });
 
@@ -505,12 +599,11 @@ export default defineComponent({
 
           // Interpolation for smooth rotation
           const smoothingFactor = 0.1;
-          const currentAngle = cone.rotation.z;
+          const currentAngle = playerObj.rotation.y;
 
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            //console.log('Face Forward');
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
           } else if (
@@ -518,13 +611,11 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            //console.log('Turn Forward Right');
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
             // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            //console.log('Turn Right');
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
           } else if (
@@ -532,8 +623,7 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            //console.log('Turn Backward Right');
-            cone.rotation.z = THREE.MathUtils.lerp(
+            playerObj.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               -Math.PI / 2 - Math.PI / 4,
               smoothingFactor,
@@ -545,8 +635,7 @@ export default defineComponent({
             angleYCameraDirection < 0.125 &&
             angleYCameraDirection > -0.125
           ) {
-            //console.log('Turn Backwards');
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
           } else if (
@@ -554,8 +643,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            //console.log('Turn Backward Left');
-            cone.rotation.z = THREE.MathUtils.lerp(
+            playerObj.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               Math.PI / 2 + Math.PI / 4,
               smoothingFactor,
@@ -563,8 +651,7 @@ export default defineComponent({
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            //console.log('Turn Left');
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
           } else if (
@@ -572,8 +659,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            //console.log('Turn Forward Left');
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
           }
         }
       }

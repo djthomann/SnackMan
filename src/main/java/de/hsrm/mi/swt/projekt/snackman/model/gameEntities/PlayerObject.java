@@ -4,8 +4,8 @@ public abstract class PlayerObject extends GameObject {
 
     private String username;
 
-    public PlayerObject(String username, long objectId, long gameId, float x, float y, float z, float radius) {
-        super(objectId, gameId, x, y, z, radius);
+    public PlayerObject(String username, long objectId, long gameId, float x, float y, float z, float radius, float height) {
+        super(objectId, gameId, x, y, z, radius, height);
         this.username = username;
     }
 

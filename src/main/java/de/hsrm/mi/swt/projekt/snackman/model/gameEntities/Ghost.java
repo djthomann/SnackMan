@@ -1,8 +1,17 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import java.util.ArrayList;
+
+import org.joml.Vector3f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
+import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
 /**
@@ -15,6 +24,11 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
  */
 public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
+    private final GameManager gameManager;
+    private GameConfig gameConfig;
+    private CollisionManager collisionManager;
+    private final Logger logger = LoggerFactory.getLogger(Ghost.class);
+
     /**
      * Constructs a new `Ghost` with the specified starting position.
      *
@@ -25,8 +39,11 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
      * 
      */
 
-    public Ghost(String username, long id, long gameId, float x, float y, float z, GameConfig gameConfig) {
-        super(username, id, gameId, x, y, z, gameConfig.getGhostRadius());
+    public Ghost(String username, long id, long gameId, float x, float y, float z, GameConfig gameConfig, GameManager gameManager, CollisionManager collisionManager) {
+        super(username, id, gameId, x, y, z, gameConfig.getGhostRadius(), gameConfig.getGhostHeight());
+        this.gameManager = gameManager;
+        this.gameConfig = gameConfig;
+        this.collisionManager = collisionManager;
     }
 
     /**
@@ -41,11 +58,49 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
         x = newX;
         y = newY;
         z = newZ;
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
     @Override
     public void handle(Event event) {
+
+        if (event.getObjectID() != this.objectId) {
+            return;
+        }
+
+        switch (event.getType()) {
+
+            case MOVE:
+
+                Vector3f vector = ((MoveEvent) event).getMovementVector();
+                logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
+                ArrayList<String> collisions;
+                float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
+                logger.info("Wished X: " + wishedX);
+                float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
+                logger.info("Wished Z: " + wishedZ);
+                collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
+                if (wishedX != this.getX() || wishedZ != this.getZ()) {
+                    if (this.getY() < gameConfig.getWallHeight()) {
+                        if (collisions.contains("wall")) {
+                            vector.x = 0;
+                            vector.z = 0;
+                        } 
+                    }
+
+                }
+
+                this.move(vector.x * gameConfig.getGhostStep(), 0, vector.z * gameConfig.getGhostStep());
+                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                gameManager.notifyChange(moveEvent);
+
+            default:
+                break;
+
+        }
+
+        logger.info("Event arrived at Ghost :" + event.toString());
+
     }
 
     public GhostRecord toRecord() {

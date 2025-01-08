@@ -13,6 +13,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: "Lilita One","Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  color: var(--colorTextDark);
 }
 
 

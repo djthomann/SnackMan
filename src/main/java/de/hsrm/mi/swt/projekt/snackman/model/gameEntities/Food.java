@@ -16,8 +16,6 @@ public class Food extends GameObject {
     /** The type of the Food */
     private FoodType foodType;
 
-    private GameConfig gameConfig;
-
     /**
      * Constructs a new Food with the specified position and
      * initial calorie count.
@@ -28,7 +26,7 @@ public class Food extends GameObject {
      * @param gameConfig the configuration of the game
      */
     public Food(long gameId, float x, float z, FoodType foodType, GameConfig gameConfig) {
-        super(gameId, x, 0.5f, z, gameConfig.getFoodRadius());
+        super(gameId, x, 0.5f, z, gameConfig.getFoodRadius(), gameConfig.getFoodHeight());
         this.foodType = foodType;
         this.calories = foodType.getCalories();
 

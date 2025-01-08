@@ -1,11 +1,19 @@
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import * as THREE from 'three'
-import bananaModelUrl from '@/assets/models/banana.glb'
-import appleModelUrl from '@/assets/models/apple.glb'
-import orangeModelUrl from '@/assets/models/orange.glb'
-import cakeModelUrl from '@/assets/models/cake.glb'
-import chickenModelUrl from '@/assets/models/chicken.glb'
-import brokkoliModelUrl from '@/assets/models/brokkoli.glb'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as THREE from 'three';
+import bananaModelUrl from '@/assets/models/banana.glb';
+import appleModelUrl from '@/assets/models/apple.glb';
+import orangeModelUrl from '@/assets/models/orange.glb';
+import cakeModelUrl from '@/assets/models/cake.glb';
+import chickenModelUrl from '@/assets/models/chicken.glb';
+import brokkoliModelUrl from '@/assets/models/brokkoli.glb';
+import snackmanModelUrl from '@/assets/models/snackmouse.glb';
+import skybox_dnURL from '@/assets/images/skybox/floor.png';
+import playerModelUrl from '@/assets/models/player.glb';
+
+
+
+import { Logger } from '../util/logger';
+
 
 class ModelService {
   private loader: GLTFLoader;
@@ -14,8 +22,11 @@ class ModelService {
   private modelCache: Map<string, { scene: THREE.Group }>; // Store scene
   private animationCache: Map<string, { animations: THREE.AnimationClip[] }>;
   private isInitialized: boolean;
+  private logger: Logger;
+  private texture_dn: THREE.Texture;
 
   constructor() {
+    this.logger = new Logger();
     this.loader = new GLTFLoader();
     this.models = {
       banana: bananaModelUrl,
@@ -23,7 +34,9 @@ class ModelService {
       orange: orangeModelUrl,
       cake: cakeModelUrl,
       chicken: chickenModelUrl,
-      brokkoli: brokkoliModelUrl
+      brokkoli: brokkoliModelUrl,
+      snackman: snackmanModelUrl,
+      player: playerModelUrl
     };
     this.scales = {
       banana: 0.02,
@@ -31,11 +44,14 @@ class ModelService {
       orange: 0.0025,
       cake: 0.175,
       chicken: 1,
-      brokkoli: 1
+      brokkoli: 1,
+      snackman: 0.012,
+      player: 0.012
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
     this.isInitialized = false;
+    this.texture_dn = new THREE.TextureLoader().load(skybox_dnURL);
   }
 
   private scaleModels(globalScale: number): void {
@@ -62,10 +78,9 @@ class ModelService {
     const loadPromises = Object.entries(this.models).map(([name, url]) =>
       this.loadModel(url).then((modelData) => {
         this.modelCache.set(name, modelData); // Store scene in cache
-        if(modelData.animations.length > 0) {
-            this.animationCache.set(name, modelData);
-            console.log('Animation added to Cache');
-          
+        if (modelData.animations.length > 0) {
+          this.animationCache.set(name, modelData);
+          console.log('Animation added to Cache');
         }
       }),
     );
@@ -73,7 +88,7 @@ class ModelService {
     await Promise.all(loadPromises);
     this.scaleModels(scale);
     this.isInitialized = true;
-    console.log('ModelService initialized: All models loaded.');
+    this.logger.info('ModelService initialized: All models loaded.');
   }
 
   /**
@@ -103,10 +118,10 @@ class ModelService {
 
     const animationData = this.animationCache.get(name);
     if (!animationData) {
-      console.log('No animation data found');
+      this.logger.info('No animation data found');
       throw new Error(`Model "${name}" not found in cache.`);
     } else {
-      console.log('Animation Found!', animationData.animations);
+      this.logger.info('Animation Found!', animationData.animations);
     }
     return animationData?.animations || [];
   }
@@ -122,9 +137,9 @@ class ModelService {
         url,
         (gltf) => {
           if (url === chickenModelUrl) {
-            console.log('GLTF Data:', gltf);
-            console.log('Animations:', gltf.animations);
-            this.animationCache.set("chicken", { animations: gltf.animations });
+            this.logger.info('GLTF Data:', gltf);
+            this.logger.info('Animations:', gltf.animations);
+            this.animationCache.set('chicken', { animations: gltf.animations });
           }
 
           const scene = gltf.scene;
@@ -142,13 +157,17 @@ class ModelService {
     });
   }
 
-  // Creates one large plane as the floor
+
+
+  // Creates small floor tiles
   public createFloorTile(x: number, z: number, scale: number) {
-    const planeGeometry = new THREE.PlaneGeometry(x, z, 1, 1);
-    const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xf7f7f7 });
+    const planeGeometry = new THREE.PlaneGeometry(scale, scale, 1, 1);
+    const planeMaterial = new THREE.MeshStandardMaterial({
+      map: this.texture_dn,
+    });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
-    plane.position.set(x / 2 - scale / 2, -0.5, z / 2 - scale / 2);
+    plane.position.set(x * scale, -1, z * scale);
     plane.receiveShadow = true;
 
     return plane;
@@ -165,6 +184,28 @@ class ModelService {
     return box;
   }
 
+  public createPlayer(id: number | undefined, x: number, z: number) {
+    const newModel = this.getModel('player').clone();
+    newModel.userData.id = id;
+    newModel.position.set(x,0,z );
+    return newModel;
+  }
+  
+  //Creates Snackman and positions it
+  public createSnackman(id: number, x: number, z: number) {
+    const newModel = this.getModel('snackman').clone();
+    newModel.userData.id = id;
+    newModel.position.set(x,0,z );
+    return newModel;
+  }
+
+    //Creates Ghost and positions it
+  public createGhost(id: number, x: number, z: number) {
+    const newModel = this.getModel('snackman').clone();
+    newModel.userData.id = id;
+    newModel.position.set(x,0,z );
+    return newModel;
+  }
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
   public createFood(id: number, x: number, z: number, calories: number, scale: number) {
     let newModel;
@@ -175,23 +216,22 @@ class ModelService {
     } else {
       newModel = this.getModel('cake').clone();
     }
-    newModel.userData.id = id; 
+    newModel.userData.id = id;
     newModel.position.set(x * scale, 10, z * scale);
     return newModel;
   }
 
   public createChicken(x: number, z: number) {
     const chickenModel = this.getModel('chicken');
-    console.log('ChickenModel loaded')
+    this.logger.info('ChickenModel loaded');
     const chicken = chickenModel.clone();
     chicken.castShadow = true;
-    chicken.scale.set(5,5,5);
+    chicken.scale.set(5, 5, 5);
     chicken.position.set(x, 0, z);
-    console.log('Chicken at:', chicken.position)
+    this.logger.info('Chicken at:', chicken.position);
     chicken.rotation.y = -45;
     return chicken;
   }
-
 }
 
 // Singleton instance
