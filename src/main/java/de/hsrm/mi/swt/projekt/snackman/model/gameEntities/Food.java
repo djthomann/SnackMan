@@ -26,7 +26,7 @@ public class Food extends GameObject {
      * @param gameConfig the configuration of the game
      */
     public Food(long gameId, float x, float z, FoodType foodType, GameConfig gameConfig) {
-        super(gameId, x, 0.5f, z, gameConfig.getFoodRadius());
+        super(gameId, x, 0.5f, z, gameConfig.getFoodRadius(), gameConfig.getFoodHeight());
         this.foodType = foodType;
         this.calories = foodType.getCalories();
 
