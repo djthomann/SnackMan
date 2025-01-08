@@ -15,12 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
@@ -99,7 +93,7 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
      * @param id said id
      */
     private void spawnGhost(long id, String username) {
-        allMovables.add(new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0.5f, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager));
+        allMovables.add(new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0.5f, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager, this.collisionManager));
     }
 
     private void spawnSnackMan(long id, String username) {
@@ -149,8 +143,13 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         createFood();
 
         // for testing setup test SnackMan
-        if (clients == null) allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager,
-                gameConfig, collisionManager));
+        if (clients == null && allMovables.size() < 1) {
+            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager, gameConfig, collisionManager));
+
+            // Ghost to test collision
+            Ghost debugGhost = new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.0f, 1.1f, 20.0f, gameConfig, gameManager, collisionManager);
+            allMovables.add(debugGhost);
+        }
         createChicken();
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);

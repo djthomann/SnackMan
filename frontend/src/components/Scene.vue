@@ -443,6 +443,14 @@ export default defineComponent({
       cone.castShadow = true;
       scene.add(cone);
 
+      // TODO For testing, take out later
+      const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
+      const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
+      const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
+      ghostMesh.position.set(16 * mapScale, 0, 20 * mapScale)
+      scene.add(ghostMesh)
+
+
       // Player Object
       scene.add(player);
       player.add(camera);
