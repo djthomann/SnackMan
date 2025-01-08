@@ -1,7 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;

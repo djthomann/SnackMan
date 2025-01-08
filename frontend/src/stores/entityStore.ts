@@ -1,13 +1,10 @@
-import type { Ghost, Snackman, SnackManMap, Chicken } from "@/types/SceneTypes";
+import type { Ghost, Snackman, Chicken } from "@/types/SceneTypes";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
-import * as THREE from 'three';
 
 export const useEntityStore = defineStore('entityStore', () => {
 
-  const { sendMessage } = useWebSocket();
   const serverMessage = ref<string>('');
 
   const handleServerMessage = (message: string) => {
@@ -53,15 +50,15 @@ export const useEntityStore = defineStore('entityStore', () => {
   const snackMen = ref<Snackman[]>([]);
   */
 
-  const ghosts = ref<Map<Number, Ghost>>(new Map([
+  const ghosts = ref<Map<number, Ghost>>(new Map([
     [101, { gameId: 1, objectId: 101, username: "Ghosty1", x: 108, y: 0, z: 102 }],
     [102, { gameId: 1, objectId: 102, username: "Ghosty2", x: 104, y: 0, z: 102 }]
   ]));
-  const snackMen = ref<Map<Number, Snackman>>(new Map([
+  const snackMen = ref<Map<number, Snackman>>(new Map([
     [201, { gameId: 1, objectId: 201, username: "SnackMan1", x: 110, y: 0, z: 102, gainedCalories: 0 }],
     [202, { gameId: 1, objectId: 202, username: "SnackMan2", x: 117, y: 0, z: 102, gainedCalories: 100 }],
   ]));
-  const chicken = ref<Map<Number, Chicken>>(new Map([]));
+  const chicken = ref<Map<number, Chicken>>(new Map([]));
   const map = ref();
 
   return {
