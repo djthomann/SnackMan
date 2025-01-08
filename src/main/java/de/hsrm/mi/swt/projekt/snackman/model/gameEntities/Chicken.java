@@ -244,7 +244,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             return;
         }
 
-        //logger.info("Event arrived at chicken: " + event.toString());
+        // logger.info("Event arrived at chicken: " + event.toString());
 
     }
 
