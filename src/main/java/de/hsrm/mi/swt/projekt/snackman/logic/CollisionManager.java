@@ -1,7 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -44,10 +43,10 @@ public class CollisionManager {
      * @return String of The type of entity/object collided with, or "none" if no
      *         collision is detected.
      */
-    public ArrayList<String> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
+    public ArrayList<CollisionType> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
         
         // Changed return type from string to array list as several collisions can happen at once, e.g. ghost and item
-        ArrayList<String> collisions = new ArrayList<>();
+        ArrayList<CollisionType> collisions = new ArrayList<>();
         collisions.clear();
         Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
 
@@ -55,7 +54,7 @@ public class CollisionManager {
             case WALL:
                 logger.info(
                         "snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
-                collisions.add("wall");
+                collisions.add(CollisionType.WALL);
             case ITEM:
                 logger.info(
                         "snackman and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
@@ -74,7 +73,7 @@ public class CollisionManager {
                             DisappearEvent event = new DisappearEvent(game.id, nearbyFood); 
                             gameManager.notifyChange(event);
                             wishedTile.setOccupationType(OccupationType.FREE);
-                            collisions.add("item");
+                            collisions.add(CollisionType.ITEM);
                         }
                     } catch(NullPointerException e) {
 
@@ -101,7 +100,7 @@ public class CollisionManager {
                     // Heights /2 because the y-coordinate is in the middle of the object
                     if (heightDistance <= collisionPartner.getHeight()/2 + ((Ghost)aktMovable).getHeight()/2){
                         logger.info("Collision with Ghost!");
-                        collisions.add("ghost");
+                        collisions.add(CollisionType.GHOST);
                     }
                 }
                 
@@ -128,7 +127,7 @@ public class CollisionManager {
                         if (heightDistance <= collisionPartner.getHeight()/2 + ((SnackMan)aktMovable).getHeight()/2){
                             logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
                             logger.info("This SnackMan: " + collisionPartner.getObjectId());
-                            collisions.add("snackman");
+                            collisions.add(CollisionType.SNACKMAN);
                         }
 
                     // When collisionPartner is an instanceof Ghost check if SnackMan is invincible
@@ -137,7 +136,7 @@ public class CollisionManager {
                     } else if(collisionPartner instanceof Ghost && !((SnackMan)aktMovable).isInvincible()){
                         logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
                         logger.info("This Ghost: " + collisionPartner.getObjectId());
-                        collisions.add("snackman");
+                        collisions.add(CollisionType.SNACKMAN);
                         ((SnackMan)aktMovable).reactToGhostCollision();;
                     }
 
