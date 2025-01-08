@@ -7,19 +7,19 @@
       <h3>SnackMan</h3>
       <ul>
         <li v-for="player in snackManPlayers" :key="player.id">
-          {{ player.name }}
+          {{ player.username }}
         </li>
       </ul>
       <h3>Ghosts</h3>
       <ul>
         <li v-for="player in ghostPlayers" :key="player.id">
-          {{ player.name }}
+          {{ player.username }}
         </li>
       </ul>
       <h3>Undecided Players</h3>
       <ul>
         <li v-for="player in undecidedPlayers" :key="player.id">
-          {{ player.name }}
+          {{ player.username }}
         </li>
       </ul>
       <form @submit.prevent="submitForm" id="gameConfig" :action="`/lobby/${lobbyCode}`" method="POST">
@@ -57,34 +57,52 @@
         <button type="button" @click="resetForm">Reset</button>
         <button type="button" @click="startGame">Start Game</button>
       </form>
-
     -->
     
-      
-    <BackgroundComponent>
+    
+    
+    <BackgroundComponent :title="`LOBBY #123`">
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent  avatar="ghost">
-            <template #counter>2/4</template>
-            <template #button>Insert Button Component</template>
-            <template #content>David Snackham</template>
+            <template #counter>{{ ghostPlayers.length }}/4</template>
+            <template #button><button type="button" @click="decide(false)"></button>be Ghost</template>
+            <template #content>
+              <li v-for="player in ghostPlayers" :key="player.id">
+                {{ player.username }}
+              </li>
+            </template>
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column">
-          <PlayerPanelComponent avatar="ghost"></PlayerPanelComponent>
+          <PlayerPanelComponent avatar="ghost">
+            <template #counter>{{ undecidedPlayers.length }}/8</template>
+            <template #content>
+              Undecided Players
+              <li v-for="player in undecidedPlayers" :key="player.id">
+                {{ player.username }}
+              </li>
+            </template>
+          </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column">
           <PlayerPanelComponent  avatar="snackman" selected>
-            <template #counter>3/4</template>
-            <template #button>Insert Button Component</template>
-            <template #content>David Snackham</template>
+            <template #counter>{{ snackManPlayers.length }}/4</template>
+            <template #button><button type="button" @click="decide(true)"></button>be Snackman</template>
+            <template #content>
+              <li v-for="player in snackManPlayers" :key="player.id">
+                {{ player.username }}
+              </li>
+            </template>
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
           Merry Crisis
+          <button type="button" @click="startGame">Start Game</button>
         </div>
       </div>
     </BackgroundComponent>
+  
   </div>
 </template>
 
@@ -94,8 +112,14 @@ import { computed, onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 import { useUserStore } from '@/stores/userStore';
+import type {Player} from "@/types/SceneTypes";
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
+import ConfigPanelComponent from './layout/ConfigPanelComponent.vue';
+import FieldsetComponent from './layout/FieldsetComponent.vue';
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
@@ -104,12 +128,12 @@ const lobbyCode = ref(Number(route.params.code));
 const serverMessage = ref<string>('');
 const userStore = useUserStore();
 const name = computed(() => userStore.username);
-const clientID = computed(() => userStore.id); 
-const snackManPlayers = ref<Array<{ id: number; name: string }>>([]);
-const ghostPlayers = ref<Array<{ id: number; name: string }>>([]);
-const undecidedPlayers = ref<Array<{ id: number; name: string }>>([
-  { id: 1, name: 'Alice' },
-  { id: 2, name: 'Bob' },
+const clientID = computed(() => userStore.id);
+const snackManPlayers = ref<Array<Player>>([]);
+const ghostPlayers = ref<Array<Player>>([]);
+const undecidedPlayers = ref<Array<Player>>([
+  { id: 1, username: 'Alice' },
+  { id: 2, username: 'Bob' },
 ]);
 
 // Type definition of GameConfig interface
@@ -145,9 +169,34 @@ const handleServerMessage = (message: string) => {
   if (message.startsWith('GAME_CONFIG')) {
     gameConfig.value = JSON.parse(message.split(';')[1]);
   } else if (message.startsWith('GAME_START')) {
+    //TODO: get this event into scene
+    router.push('/game/' + lobbyCode.value);
+  } else if (message.startsWith("PLAYERS")) {
+    buildPlayerArrays(message);
+  } else if (message.startsWith("FOREIGN_GAMESTART")) {
     router.push('/game/' + lobbyCode.value);
   }
 };
+
+const buildPlayerArrays = (message: string) => {
+  const parsedData = JSON.parse(message.split(';')[1]);
+  const snackmanArray: Array<Player> = [];
+  const ghostArray: Array<Player> = [];
+  const undecidedArray: Array<Player> = [];
+  parsedData.players.forEach((player: string[]) => {
+    console.log(`Username: ${player[0]}, Client ID: ${player[1]}`);
+    if (player[2] === "SNACKMAN") {
+      snackmanArray.push({id: Number(player[1]), username: player[0]})
+    } else if (player[2] === "GHOST") {
+      ghostArray.push({id: Number(player[1]), username: player[0]})
+    } else {
+      undecidedArray.push({id: Number(player[1]), username: player[0]})
+    }
+  })
+  snackManPlayers.value = snackmanArray;
+  undecidedPlayers.value = undecidedArray;
+  ghostPlayers.value = ghostArray;
+}
 
 // Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
@@ -168,6 +217,17 @@ const resetForm = async () => {
   });
   sendMessage(reset);
 };
+
+const decide = (snackman: boolean) => {
+  const data = JSON.stringify({
+    type: 'ROLE',
+    snackman: snackman,
+    id: userStore.id
+  });
+  sendMessage(data);
+
+  fetchPlayers();
+}
 
 // Automatic call on load
 onMounted(async () => {
@@ -192,9 +252,19 @@ onMounted(async () => {
     });
     sendMessage(requestData);
   } catch (e) {
-    console.log('Failed to fetch Data on load: ', e);
+    logger.info('Failed to fetch Data on load: ', e);
   }
+
+  fetchPlayers();
 });
+
+const fetchPlayers = () => {
+  const requestData = JSON.stringify( {
+    type: "GET_PLAYERS",
+    lobbyCode: lobbyCode.value
+  })
+  sendMessage(requestData);
+}
 
 // Method, to start the game
 const startGame = () => {
@@ -232,8 +302,21 @@ const choose = (role: string) => {
   box-sizing:border-box;
 }
 
+.lobby-grid__column {
+  min-height:0;
+}
+
 .lobby-grid__column--span-all {
   grid-column: 1/4;
   text-align: center;
+}
+
+.config-panel-grid {
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 100%;
+  gap: 30px;
 }
 </style>

@@ -15,5 +15,6 @@ public enum EventType {
     LOBBY_CREATE_EVENT,
     CLIENT_ID,
     START_GAME,
-    DISAPPEAR
+    DISAPPEAR,
+    REQUEST_GAMESTART
 }
