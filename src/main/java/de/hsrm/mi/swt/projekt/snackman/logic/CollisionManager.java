@@ -94,6 +94,8 @@ public class CollisionManager {
 
         Vector3f vec = new Vector3f(0, 0, 0);
     
+        boolean vectorFound = false;
+
         // Koordinaten des aktuellen Tiles
         int coordX = (int) x;
         int coordZ = (int) z;
@@ -116,36 +118,65 @@ public class CollisionManager {
         } catch(IndexOutOfBoundsException e) {}
               
     
-        // Berechne Distanzen zu den Kanten
-        float[] distances = distancesToEdges(x, z); // [links, rechts, unten, oben]
-    
-        // Initialisiere die Richtung und die kürzeste Distanz
+        float[] distances = distancesToEdges(x, z);
+        
         Vector3f direction = new Vector3f(0, 0, 0);
         float minDistance = Float.MAX_VALUE;
     
-        // Überprüfe jede Kante und ob sie begehbar ist
+        // Check whether a Tile is Free
         if (leftTile != null && leftTile.getOccupationType() != OccupationType.WALL && distances[0] < minDistance) {
             minDistance = distances[0];
-            direction.set(-1, 0, 0); // Richtung nach links
+            direction.set(-1, 0, 0);
+            vectorFound = true;
         }
     
         if (rightTile != null && rightTile.getOccupationType() != OccupationType.WALL && distances[1] < minDistance) {
             minDistance = distances[1];
-            direction.set(1, 0, 0); // Richtung nach rechts
+            direction.set(1, 0, 0);
+            vectorFound = true;
         }
     
         if (bottomTile != null && bottomTile.getOccupationType() != OccupationType.WALL && distances[2] < minDistance) {
             minDistance = distances[2];
-            direction.set(0, 0, 1); // Richtung nach unten
+            direction.set(0, 0, 1);
+            vectorFound = true;
         }
     
         if (topTile != null && topTile.getOccupationType() != OccupationType.WALL && distances[3] < minDistance) {
             minDistance = distances[3];
-            direction.set(0, 0, -1); // Richtung nach oben
+            direction.set(0, 0, -1);
+            vectorFound = true;
         }
     
-        // Gib den Vektor zurück
+        if(!vectorFound) {
+            // If no Tile is Free, Move to a WALL Tile
+            if (leftTile != null) {
+                minDistance = distances[0];
+                direction.add(-1, 0, 0);
+                vectorFound = true;
+            }
+        
+            if (rightTile != null) {
+                minDistance = distances[1];
+                direction.add(1, 0, 0);
+                vectorFound = true;
+            }
+        
+            if (bottomTile != null) {
+                minDistance = distances[2];
+                direction.add(0, 0, 1);
+                vectorFound = true;
+            }
+        
+            if (topTile != null) {
+                minDistance = distances[3];
+                direction.add(0, 0, -1);
+                vectorFound = true;
+            }
+        } 
+
         return direction;
+        
     }
 
     public float[] distancesToEdges(float x, float z) {
