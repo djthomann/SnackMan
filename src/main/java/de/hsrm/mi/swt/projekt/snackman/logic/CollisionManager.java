@@ -18,6 +18,9 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
 public class CollisionManager {
 
+    // Translation added to x- and z-values for correct depiction in frontend
+    private final float TRANSLATION = 0.5f;
+
     private SnackManMap snackManMap;
     private ArrayList<MovableAndSubscribable> allMovables;
     Logger logger = LoggerFactory.getLogger(GameManager.class);
@@ -40,14 +43,18 @@ public class CollisionManager {
      * @return String of The type of entity/object collided with, or "none" if no
      *         collision is detected.
      */
-    public String checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
+    public ArrayList<String> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
+        
+        // Changed return type from string to array list as several collisions can happen at once, e.g. ghost and item
+        ArrayList<String> collisions = new ArrayList<>();
+        collisions.clear();
         Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
 
         switch (wishedTile.getOccupationType()) {
             case WALL:
                 logger.info(
                         "snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
-                return "wall";
+                collisions.add("wall");
             case ITEM:
                 logger.info(
                         "snackman and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
@@ -64,16 +71,15 @@ public class CollisionManager {
                         DisappearEvent event = new DisappearEvent(game.id, nearbyFood); 
                         gameManager.notifyChange(event);
                         wishedTile.setOccupationType(OccupationType.FREE);
-                        return "item";
+                        collisions.add("item");
                     }
 
-                } else {
-                    return "none";
                 }
-            default:
-                return "none";
+                break;
+
         }
 
+        return collisions;
     }
 
     public boolean positionIsWithinMapBounds(float x, float z) {

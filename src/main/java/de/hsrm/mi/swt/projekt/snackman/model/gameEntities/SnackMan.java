@@ -1,5 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -75,7 +76,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
      */
     public SnackMan(String username, long id, long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
             CollisionManager collisionManager) {
-        super(username, id, gameId, x, y, z, gameConfig.getSnackManRadius());
+        super(username, id, gameId, x, y, z, gameConfig.getSnackManRadius(), gameConfig.getSnackManHeight());
         this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
 
@@ -321,14 +322,14 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
 
                 // Logic for collision with wall side and food
-                String collision = "none";
+                ArrayList<String> collisions;
+                collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
                 if (wishedX != this.getX() || wishedZ != this.getZ()) {
                     if (this.getY() < gameConfig.getWallHeight()) {
-                        collision = collisionManager.checkCollision(wishedX, wishedZ, this);
-                        if (collision.equals("wall")) {
+                        if (collisions.contains("wall")) {
                             vector.x = 0;
                             vector.z = 0;
-                        } else if (collision.equals("item")) {
+                        } else if (collisions.contains("item")) {
                             logger.info("MMMMMM delicious ");
                         }
                     }

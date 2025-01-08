@@ -29,7 +29,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
      */
 
     public Ghost(String username, long id, long gameId, float x, float y, float z, GameConfig gameConfig, GameManager gameManager) {
-        super(username, id, gameId, x, y, z, gameConfig.getGhostRadius());
+        super(username, id, gameId, x, y, z, gameConfig.getGhostRadius(), gameConfig.getGhostHeight());
         this.gameManager = gameManager;
 
     }
