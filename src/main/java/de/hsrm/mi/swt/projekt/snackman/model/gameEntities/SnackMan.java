@@ -19,6 +19,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Int
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
+import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 /**
@@ -412,14 +413,14 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
 
                 // Logic for collision with wall side and food
-                ArrayList<String> collisions;
+                ArrayList<CollisionType> collisions;
                 collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
                 if (wishedX != this.getX() || wishedZ != this.getZ()) {
                     if (this.getY() < gameConfig.getWallHeight()) {
-                        if (collisions.contains("wall")) {
+                        if (collisions.contains(CollisionType.WALL)) {
                             vector.x = 0;
                             vector.z = 0;
-                        } else if (collisions.contains("item")) {
+                        } else if (collisions.contains(CollisionType.ITEM)) {
                             logger.info("MMMMMM delicious ");
                         }
                     }
@@ -431,14 +432,14 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                  * is stunned and unable to move for a certain time period
                  * and invincible for a certain time period
                  */
-                if(collisions.contains("ghost") && !this.invincible) {
+                if(collisions.contains(CollisionType.GHOST) && !this.invincible) {
                     reactToGhostCollision();
                 }
 
                 /**
                  * In case of a SnackMan collision the SnackMan is unable to move through the other SnackMan
                  */
-                if(collisions.contains("snackman")) {
+                if(collisions.contains(CollisionType.SNACKMAN)) {
 
                     // If the SnackMan is mid-jump, it has landed on another SnackMan
                     if(this.jumping) {
