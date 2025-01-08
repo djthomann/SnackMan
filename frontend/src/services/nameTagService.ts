@@ -5,7 +5,7 @@ class NameTag {
   private nameTagObj: THREE.Mesh | undefined = undefined;
   private logger: Logger;
 
-  constructor(name: string, parentObject: THREE.Mesh, scene: THREE.Scene) {
+  constructor(name: string, parentObject: THREE.Group, scene: THREE.Scene) {
     this.logger = new Logger();
 
         // Create Canvas
