@@ -127,10 +127,10 @@ export default defineComponent({
         if (startPromiseResolve) {
           startPromiseResolve();
         }
-        const line = JSON.parse(message.split(';')[1]); 
-        for (const chicken of line.chicken) {
-          loadChicken(chicken);
-        }
+        //const line = JSON.parse(message.split(';')[1]);     // Need a new Solution !
+        //for (const chicken of line.chicken) {
+        //  loadChicken(chicken);
+        //}
       } else if (message.startsWith('GAME_STATE')) {
         handleGameStateEvent(message.split(';')[1])
       }
@@ -342,20 +342,18 @@ export default defineComponent({
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.occupation.objectID, tile.x, tile.z, Math.random() * 400 + 100, mapScale); 
-            food.userData.id = tile.occupation.objectId; 
+            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
+            food.userData.id = tile.food.objectId; 
             foodGroup.add(food);
            }
         }
       }
       scene.add(chickenGroup);      
-
       scene.add(wallsGroup);
-
       scene.add(foodGroup);
 
-      /*const floor = modelService.createFloorTile(w, h, mapScale);
-      scene.add(floor);*/
+      //const floor = modelService.createFloorTile(w, h, mapScale);
+      //scene.add(floor);
 
       // Skybox
       for(let i=0; i<6;i++){

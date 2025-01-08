@@ -90,7 +90,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             try {
                 while ( x >= 1.0 && x < map.getW() && z >= 1.0 && z < map.getH()) {  
                     surroundings = generateSurroundings(map);
-                    logger.info(surroundings.toString());
+                    //logger.info(surroundings.toString());
                     Thread.sleep(50); // 1000 = 1 sec
                     executeScript(surroundings); 
                 }
@@ -185,7 +185,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                         }
                 }
                 move((movementX), (movementY), (movementZ));
-                logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
+                //logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
                 
             }
@@ -244,7 +244,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             return;
         }
 
-        logger.info("Event arrived at chicken: " + event.toString());
+        //logger.info("Event arrived at chicken: " + event.toString());
 
     }
 

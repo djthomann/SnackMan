@@ -66,22 +66,22 @@ public class GameState {
         thread.start();
     }
 
-    public void addChangedGhost(Ghost ghost) {
+    public synchronized void addChangedGhost(Ghost ghost) {
         changedGhosts.removeIf(record -> record.objectId() == ghost.getObjectId());
         changedGhosts.add(ghost.toRecord());
     }
 
-    public void addChangedSnackMan(SnackMan snackman) {
+    public synchronized void addChangedSnackMan(SnackMan snackman) {
         changedSnackMen.removeIf(record -> record.objectId() == snackman.getObjectId());
         changedSnackMen.add(snackman.toRecord());
     }
 
-    public void addChangedChicken(Chicken chicken) {
+    public synchronized void addChangedChicken(Chicken chicken) {
         changedChicken.removeIf(record -> record.objectId() == chicken.getObjectId());
         changedChicken.add(chicken.toRecord());
     }
 
-    public void addEatenFood(Food food) {
+    public synchronized void addEatenFood(Food food) {
         eatenFoods.removeIf(record -> record.objectId() == food.getObjectId());
         eatenFoods.add(food.toRecord());
     }
