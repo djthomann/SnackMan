@@ -126,6 +126,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         this.x += newX;
         this.y += newY;
         this.z += newZ;
+        logger.info("Snackman " + objectId + " moved to " + x + ", " + y + ", " + z);
         if (!WebSocketHandler.testingMode) EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManger));
     }
 
@@ -312,6 +313,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             return;
         }
 
+        logger.info("Event " + event.getType() + " in Snackman " + objectId);
         switch (event.getType()) {
 
             case MOVE:
