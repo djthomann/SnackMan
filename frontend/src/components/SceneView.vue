@@ -76,7 +76,7 @@ export default defineComponent({
   components: {
     GameOverlay,
   },
-  name: 'Scene',
+  name: 'SceneView',
   setup() {
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
 
@@ -513,7 +513,7 @@ export default defineComponent({
         }
 
         if (keyPressedArray.includes('a')) {
-          let linksVector = new THREE.Vector3(forward.z, 0, -forward.x);
+          const linksVector = new THREE.Vector3(forward.z, 0, -forward.x);
           vector = vector.add(linksVector.normalize());
         }
 
@@ -522,7 +522,7 @@ export default defineComponent({
         }
 
         if (keyPressedArray.includes('d')) {
-          let rechtsVector = new THREE.Vector3(-forward.z, 0, forward.x);
+          const rechtsVector = new THREE.Vector3(-forward.z, 0, forward.x);
           vector = vector.add(rechtsVector.normalize());
         }
 

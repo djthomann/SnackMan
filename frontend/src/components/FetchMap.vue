@@ -19,7 +19,6 @@ const { sendMessage } = useWebSocket();
 
 const mapLoaded = ref<boolean>(false);
 const file = ref<File | null>();
-const reader = FileReader;
 import { Logger } from '../util/logger';
 
 const logger = new Logger();
