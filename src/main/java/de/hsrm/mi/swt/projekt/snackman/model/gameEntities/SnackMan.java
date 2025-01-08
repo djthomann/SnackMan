@@ -359,7 +359,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         }
 
-        logger.info("Event arrived at SnackMan :" + event.toString());
+        // logger.info("Event arrived at SnackMan :" + event.toString());
     }
 
     public SnackManRecord toRecord() {
