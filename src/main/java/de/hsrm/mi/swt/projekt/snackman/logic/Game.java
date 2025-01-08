@@ -51,8 +51,8 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
-        this.init(null);
         this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
+        this.init(null);
         this.timer = new Timer();
         startTimer();
         gameState = new GameState(this);
