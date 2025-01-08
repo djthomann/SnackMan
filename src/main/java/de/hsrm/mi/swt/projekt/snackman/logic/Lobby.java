@@ -52,7 +52,9 @@ public class Lobby {
 
     public Game startGame(GameManager gameManager) {
         if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
-        return new Game(this, gameManager);
+        Game game = new Game(this, gameManager); 
+        game.init(this.getClientsAsList()); 
+        return game;
     }
 
     public List<WebSocketSession> getAllSessions() {

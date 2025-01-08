@@ -66,7 +66,6 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         this.collisionManager = new CollisionManager(this, map, allMovables);
 
         createMovables(lobby.getClientsAsList());
-        init(lobby.getClientsAsList());
 
         startTimer();
         gameState = new GameState(this);
