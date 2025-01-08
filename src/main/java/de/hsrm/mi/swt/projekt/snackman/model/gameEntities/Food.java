@@ -51,7 +51,7 @@ public class Food extends GameObject {
     }
 
     public String toString() {
-        return "FOOD-" + this.objectId;
+        return "FOOD";
     }
 
 }
