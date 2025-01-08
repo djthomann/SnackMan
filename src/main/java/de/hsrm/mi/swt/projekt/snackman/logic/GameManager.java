@@ -98,7 +98,6 @@ public class GameManager {
 
         Game newGame = new Game(id, gameConfig, map, this);
         allGames.put(newGame.id, newGame);
-        newGame.init(null); // Add Objects
     }
 
     public String[][] getPlayersInLobby(long lobbyCode) {

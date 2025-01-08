@@ -51,6 +51,7 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
+        this.init(null);
         this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
         this.timer = new Timer();
         startTimer();
@@ -65,8 +66,7 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables);
 
-        createMovables(lobby.getClientsAsList());
-
+        init(lobby.getClientsAsList()); 
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);
@@ -305,4 +305,42 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
     public GameStartEvent getGameStartEvent() {
         return gameStartEvent;
     }
+
+    public List<List<String>> generateSurroundings(float x, float z) {
+        Tile positionTile = this.map.getTileAt((int) (x), (int) (z));
+        Tile[][] surroundings = this.map.getSurroundingTiles(positionTile);
+        List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
+
+        for (int row = 1; row >= -1; row--) {
+            List<String> rowList = new ArrayList<>();
+            for (int col = -1; col <= 1; col++) {
+                Tile tile = surroundings[row + 1][col + 1];
+                if (tile == null) {
+                    rowList.add("OUT");
+                } else {
+                    switch (tile.getOccupationType()) {
+                        case WALL:
+                            rowList.add("WALL");
+                            break;
+                        case ITEM:
+                            rowList.add(tile.getOccupation().toString());
+                            break;
+                        case FREE:
+                            if (tile.getOccupation() != null) {
+                                rowList.add(tile.getOccupation().toString());
+                            } else {
+                                rowList.add("FREE");
+                            }
+                            break;
+                        default:
+                            rowList.add("UNKNOWN");
+                    }
+                }
+            }
+            pythonCompatibleSurroundings.add(rowList);
+        }
+        return pythonCompatibleSurroundings;
+    }
+
+
 }

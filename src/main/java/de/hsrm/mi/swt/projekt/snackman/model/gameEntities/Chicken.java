@@ -84,16 +84,14 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 scriptFile = script;
                 break;
         }
-        this.scriptInterpreter.execfile(scriptFile);
-        SnackManMap map = gameManager.getGameById(gameId).getMap(); 
+        this.scriptInterpreter.execfile(scriptFile); 
         new Thread(() -> {
-            try {
-                while ( x >= 1.0 && x < map.getW() && z >= 1.0 && z < map.getH()) {  
-                    surroundings = generateSurroundings(map);
-                    //logger.info(surroundings.toString());
+            try {     
                     Thread.sleep(50); // 1000 = 1 sec
+                    surroundings = gameManager.getGameById(gameId).generateSurroundings(this.x, this.z);
+                    //logger.info(surroundings.toString());
                     executeScript(surroundings); 
-                }
+                
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -101,41 +99,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     }
 
-    public List<List<String>> generateSurroundings(SnackManMap map) {
-        Tile positionTile = map.getTileAt((int) (x), (int) (z));
-        Tile[][] surroundings = map.getSurroundingTiles(positionTile);
-        List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
-
-        for (int row = 1; row >= -1; row--) {
-            List<String> rowList = new ArrayList<>();
-            for (int col = -1; col <= 1; col++) {
-                Tile tile = surroundings[row + 1][col + 1];
-                if (tile == null) {
-                    rowList.add("OUT");
-                } else {
-                    switch (tile.getOccupationType()) {
-                        case WALL:
-                            rowList.add("WALL");
-                            break;
-                        case ITEM:
-                            rowList.add(tile.getOccupation().toString());
-                            break;
-                        case FREE:
-                            if (tile.getOccupation() != null) {
-                                rowList.add(tile.getOccupation().toString());
-                            } else {
-                                rowList.add("FREE");
-                            }
-                            break;
-                        default:
-                            rowList.add("UNKNOWN");
-                    }
-                }
-            }
-            pythonCompatibleSurroundings.add(rowList);
-        }
-        return pythonCompatibleSurroundings;
-    }
+    
 
     /**
      * executes the behavior of the chicken, controlled by the script
