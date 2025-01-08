@@ -85,9 +85,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
                         if (collisions.contains("wall")) {
                             vector.x = 0;
                             vector.z = 0;
-                        } else if (collisions.contains("item")) {
-                            logger.info("MMMMMM delicious ");
-                        }
+                        } 
                     }
 
                 }
