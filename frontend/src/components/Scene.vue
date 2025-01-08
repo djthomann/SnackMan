@@ -252,21 +252,26 @@ export default defineComponent({
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
       
-        const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x, snackMan.z);
-        // Attach a NameTag
-        const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
-        nameTags.push(snackManTag);
-
-        // Add to snackMen group
-        snackMenGroup.add(snackManMesh);
+        
 
         if (!testingMode && snackMan.objectId == userStore.id) {
-          snackManMesh.add(camera);
+          //snackManMesh.add(camera);
+          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x, snackMan.z );
+          playerMesh.add(camera)
           camera.position.set(0, 0, 0);
+          meshes.set(snackMan.objectId, playerMesh);
+        } else{
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x, snackMan.z);
+          // Attach a NameTag
+          const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
+          nameTags.push(snackManTag);
+
+          // Add to snackMen group
+          snackMenGroup.add(snackManMesh); 
+          meshes.set(snackMan.objectId, snackManMesh);
+          console.log(`placed Snackman ${snackMan.objectId} on Scene`);
         }
 
-        meshes.set(snackMan.objectId, snackManMesh);
-        console.log(`placed Snackman ${snackMan.objectId} on Scene`);
       });
 
       // Iterate over ghosts and add them to the scene
@@ -427,7 +432,7 @@ export default defineComponent({
       // Player Body
       camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
       //TODO: Player ID!
-      playerObj = modelService.createPlayer(3,0 - mapScale / 2, 0 - mapScale / 2 );
+      playerObj = modelService.createPlayer(userStore.id ,0 - mapScale / 2, 0 - mapScale / 2 );
       //meshes.add(playerObj);
       scene.add(playerObj);
 
