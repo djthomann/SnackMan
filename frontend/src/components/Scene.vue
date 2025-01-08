@@ -1,18 +1,21 @@
 <template>
+  <GameOverlay ref="gameOverlayRef" />
   <div ref="rendererContainer" class="canvas-container">
     <button id="startButton">play</button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, ref, onMounted } from 'vue';
+import { defineComponent, onUnmounted, ref, onMounted, nextTick } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
 import type { Ghost, Snackman } from '@/types/SceneTypes';
+import type { Ghost, Snackman } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
+import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
 import skybox_ftURL from '@/assets/images/skybox/skybox_ft.png';
@@ -24,6 +27,7 @@ import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { Mesh } from 'three';
+import GameOverlay from './GameOverlay.vue';
 
 import { Logger } from '../util/logger';
 
@@ -70,8 +74,13 @@ const mapScale = 5;
 const wallHeight = 1.5 * mapScale;
 
 export default defineComponent({
+  components: {
+    GameOverlay,
+  },
   name: 'Scene',
   setup() {
+    const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
+
     const { sendMessage } = useWebSocket();
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
@@ -99,6 +108,7 @@ export default defineComponent({
 
     //GameStart
     const entityStore = useEntityStore();
+    const gameStore = useGameStore();
     const { snackMen, ghosts, chicken, map } = storeToRefs(entityStore);
     const meshes: Map<Number, Mesh> = new Map<Number, Mesh>();
 
@@ -125,6 +135,7 @@ export default defineComponent({
       } else if (message.startsWith('DISAPPEAR')) {
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
+        updateCalories(100);
       } else if (message.startsWith('GAME_START')) {
         handleStartEvent();
         if (startPromiseResolve) {
@@ -133,6 +144,14 @@ export default defineComponent({
       } else if (message.startsWith('GAME_STATE')) {
         handleGameStateEvent(message.split(';')[1]);
       }
+    };
+
+    const updateCalories = (amount: number) => {
+      gameStore.addCalories(amount);
+    };
+
+    const updateTime = (sec: number) => {
+      gameStore.setRemainingTime(sec);
     };
 
     const handleGameStateEvent = (message: string) => {
@@ -149,7 +168,6 @@ export default defineComponent({
           .position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
       });
     };
-
     const handleStartEvent = () => {
       console.log('handle start event');
       loadMap(map.value);
@@ -171,6 +189,8 @@ export default defineComponent({
     };
 
     onMounted(async () => {
+      await nextTick();
+      console.log(gameOverlayRef.value);
       eventBus.on('serverMessage', handleServerMessage);
 
       try {
@@ -333,9 +353,7 @@ export default defineComponent({
         skyboxTextures[i].side = THREE.BackSide;
         skyboxTextures[i].transparent = true;
       }
-      console.log(skyboxTextures);
       const skyboxGeo = new THREE.BoxGeometry(w, w / 4, w);
-      console.log(skyboxGeo);
       //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
       //console.log('skybox position', skybox.position)
@@ -368,6 +386,8 @@ export default defineComponent({
     }
 
     function makeDisappear(id: number) {
+      updateCalories(100);
+      updateTime(id);
       foodGroup.children.forEach((food) => {
         if (food.userData.id == id) {
           scene.remove(food);
