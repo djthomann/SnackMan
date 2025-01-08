@@ -22,6 +22,10 @@ public class Client {
         this.role = null;
         this.clientId = IDGenerator.getInstance().getUniqueID();
         logger.info("New Client: Session -" + session + "Id - "+ clientId);
+
+        //set Role to Snackman for developing purposes
+        // should later be checked for null before starting game
+        role = GameObjectType.SNACKMAN;
     }
 
     public long getClientId() {

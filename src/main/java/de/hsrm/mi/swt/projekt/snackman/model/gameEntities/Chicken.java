@@ -206,7 +206,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.x += newX;
         this.y += newY;
         this.z += newZ;
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
     /**

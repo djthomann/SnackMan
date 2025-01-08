@@ -1,4 +1,9 @@
 <script setup lang="ts">
+type Props = {
+    title?: string
+}
+
+const props = defineProps<Props>();
 </script>
 
 <template>
@@ -23,6 +28,12 @@
                 </div>
                 
             </div>
+            <div class="background__title" v-if="props.title">
+                <h1 class="background__headline">{{ props.title }}</h1>
+            </div>
+            <div class="background__content">
+                <slot></slot>
+            </div>
         </div>
     </div>
 </template>
@@ -40,12 +51,18 @@
     position: absolute;
     z-index: 1;
     background-color: var(--colorSecondary);
+    background-image: url('../../assets/images/backgrounds/backgroundcontainer_image.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    user-select: none;
+    pointer-events: none;
 }
 
 .background__container {
-    width: 90dvw;
+    width: 92dvw;
     max-width: 1440px;
-    height: calc(100% - 10dvw);
+    height: calc(100% - 8dvw);
     max-height: 770px;
     position: relative;
     z-index: 2;
@@ -63,6 +80,9 @@
     display: grid;
     grid-template-columns: auto 1fr auto 1fr auto;
     grid-template-rows: 100%;
+    filter: drop-shadow(35px 35px 4px rgba(0,0,0,0.2));
+    user-select: none;
+    pointer-events: none;
 }
 
 .background__sheet-tile {
@@ -73,17 +93,19 @@
 .background__sheet-tile--left,
 .background__sheet-tile--center,
 .background__sheet-tile--right {
-    width: auto;
+    width: max-content;
 }
 
 .background__sheet-tile--stretch {
-    width:100%;
+    width:calc(100% + 2px);
+    margin-left: -1px;
+    margin-right: -1px;
 }
 
 .background__sheet-tile--left .background__sheet-image,
 .background__sheet-tile--center .background__sheet-image,
 .background__sheet-tile--right .background__sheet-image {
-    width: auto;
+    width: max-content;
     height: 100%;
 }
 
@@ -92,5 +114,10 @@
     height: 100%;
 }
 
+.background__content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 
 </style>

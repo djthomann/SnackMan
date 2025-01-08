@@ -16,8 +16,6 @@ public class Food extends GameObject {
     /** The type of the Food */
     private FoodType foodType;
 
-    private GameConfig gameConfig;
-
     /**
      * Constructs a new Food with the specified position and
      * initial calorie count.

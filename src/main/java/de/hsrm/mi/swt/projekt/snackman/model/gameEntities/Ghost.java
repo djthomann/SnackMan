@@ -3,6 +3,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
 /**
@@ -15,6 +16,8 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
  */
 public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
+    private final GameManager gameManager;
+
     /**
      * Constructs a new `Ghost` with the specified starting position.
      *
@@ -25,8 +28,10 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
      * 
      */
 
-    public Ghost(String username, long id, long gameId, float x, float y, float z, GameConfig gameConfig) {
+    public Ghost(String username, long id, long gameId, float x, float y, float z, GameConfig gameConfig, GameManager gameManager) {
         super(username, id, gameId, x, y, z, gameConfig.getGhostRadius());
+        this.gameManager = gameManager;
+
     }
 
     /**
@@ -41,7 +46,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
         x = newX;
         y = newY;
         z = newZ;
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
     @Override
