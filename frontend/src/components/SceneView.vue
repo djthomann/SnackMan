@@ -251,8 +251,8 @@ export default defineComponent({
 
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
-      
-        
+
+
 
         if (!testingMode && snackMan.objectId == userStore.id) {
           //snackManMesh.add(camera);
@@ -267,7 +267,7 @@ export default defineComponent({
           nameTags.push(snackManTag);
 
           // Add to snackMen group
-          snackMenGroup.add(snackManMesh); 
+          snackMenGroup.add(snackManMesh);
           meshes.set(snackMan.objectId, snackManMesh);
           console.log(`placed Snackman ${snackMan.objectId} on Scene`);
         }
@@ -276,7 +276,7 @@ export default defineComponent({
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
-    
+
         const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
 
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
@@ -374,9 +374,9 @@ export default defineComponent({
       );
 
       player.position.set(
-        newPlayerPositionX * mapScale,
+        (newPlayerPositionX + 0.5) * mapScale,
         newPlayerPositionY,
-        newPlayerPositionZ * mapScale,
+        (newPlayerPositionZ + 0.5) * mapScale,
       );
     }
 

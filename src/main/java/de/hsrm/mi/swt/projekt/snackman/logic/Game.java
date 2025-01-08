@@ -28,7 +28,7 @@ import org.springframework.context.ApplicationListener;
  * 
  */
 
-public class Game implements ApplicationListener<InternalMoveEvent> {
+public class Game {
 
     Logger logger = LoggerFactory.getLogger(Game.class);
 
@@ -60,6 +60,7 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
     }
 
     public Game(Lobby lobby, GameManager gameManager) {
+        logger.info("in Game Constructor");
         this.id = lobby.getId();
         this.gameConfig = lobby.getGameConfig();
         this.map = lobby.getMap();
@@ -138,8 +139,6 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
      */
     public void init(List<Client> clients) {
 
-        // for testing clients is null
-        if (clients != null) createMovables(clients);
         createFood();
 
         // for testing setup test SnackMan
@@ -278,24 +277,6 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
 
     public GameManager getGameManager() {
         return gameManager;
-    }
-
-    @Override
-    public void onApplicationEvent(InternalMoveEvent event) {
-        if (event.getSource() instanceof SnackMan) {
-            this.gameState.addChangedSnackMan(((SnackMan) event.getSource()));
-        } else if (event.getSource() instanceof Ghost) {
-            this.gameState.addChangedGhost((Ghost) event.getSource());
-        } else if (event.getSource() instanceof Chicken) {
-            this.gameState.addChangedChicken((Chicken) event.getSource());
-        } else {
-            logger.warn("Something unknown moved: " + event.getClass().getSimpleName());
-        }
-    }
-
-    @Override
-    public boolean supportsAsyncExecution() {
-        return ApplicationListener.super.supportsAsyncExecution();
     }
 
     public GameStartEvent getGameStartEvent() {
