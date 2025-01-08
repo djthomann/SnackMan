@@ -251,19 +251,7 @@ export default defineComponent({
 
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
-        /*
-        const snackManGeometry = new THREE.SphereGeometry(1, 32, 32);
-        const snackManMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-        const snackManMesh = new THREE.Mesh(snackManGeometry, snackManMaterial);
-
-        // Position snackMan
-        snackManMesh.position.set(
-          snackMan.x,
-          mapScale / 2,
-          snackMan.z
-        );
-        */
-
+      
         const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x, snackMan.z);
         // Attach a NameTag
         const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
@@ -283,19 +271,7 @@ export default defineComponent({
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
-        /*
-        const ghostGeometry = new THREE.ConeGeometry(1, 2, 32);
-        const ghostMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-        const ghostMesh = new THREE.Mesh(ghostGeometry, ghostMaterial);
-
-        // Position ghost
-        ghostMesh.position.set(
-          ghost.x,
-          mapScale / 2,
-          ghost.z
-        );
-        */
-
+    
         const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
 
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
@@ -450,7 +426,9 @@ export default defineComponent({
 
       // Player Body
       camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
-      playerObj = modelService.createSnackman(3,0 - mapScale / 2, 0 - mapScale / 2 );
+      //TODO: Player ID!
+      playerObj = modelService.createPlayer(3,0 - mapScale / 2, 0 - mapScale / 2 );
+      //meshes.add(playerObj);
       scene.add(playerObj);
 
       // Player Object
