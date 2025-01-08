@@ -13,7 +13,6 @@ import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
 import type { Ghost, Snackman } from '@/types/SceneTypes';
-import type { Ghost, Snackman } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
