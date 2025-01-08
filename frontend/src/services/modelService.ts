@@ -1,12 +1,13 @@
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import * as THREE from 'three'
-import bananaModelUrl from '@/assets/models/banana.glb'
-import appleModelUrl from '@/assets/models/apple.glb'
-import orangeModelUrl from '@/assets/models/orange.glb'
-import cakeModelUrl from '@/assets/models/cake.glb'
-import chickenModelUrl from '@/assets/models/chicken.glb'
-import brokkoliModelUrl from '@/assets/models/brokkoli.glb'
-import snackmanModelUrl from '@/assets/models/snackmouse.glb'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as THREE from 'three';
+import bananaModelUrl from '@/assets/models/banana.glb';
+import appleModelUrl from '@/assets/models/apple.glb';
+import orangeModelUrl from '@/assets/models/orange.glb';
+import cakeModelUrl from '@/assets/models/cake.glb';
+import chickenModelUrl from '@/assets/models/chicken.glb';
+import brokkoliModelUrl from '@/assets/models/brokkoli.glb';
+import snackmanModelUrl from '@/assets/models/snackmouse.glb';
+import { Logger } from '../util/logger';
 
 
 class ModelService {
@@ -16,8 +17,10 @@ class ModelService {
   private modelCache: Map<string, { scene: THREE.Group }>; // Store scene
   private animationCache: Map<string, { animations: THREE.AnimationClip[] }>;
   private isInitialized: boolean;
+  private logger: Logger;
 
   constructor() {
+    this.logger = new Logger();
     this.loader = new GLTFLoader();
     this.models = {
       banana: bananaModelUrl,
@@ -77,7 +80,7 @@ class ModelService {
     await Promise.all(loadPromises);
     this.scaleModels(scale);
     this.isInitialized = true;
-    console.log('ModelService initialized: All models loaded.');
+    this.logger.info('ModelService initialized: All models loaded.');
   }
 
   /**
@@ -107,10 +110,10 @@ class ModelService {
 
     const animationData = this.animationCache.get(name);
     if (!animationData) {
-      console.log('No animation data found');
+      this.logger.info('No animation data found');
       throw new Error(`Model "${name}" not found in cache.`);
     } else {
-      console.log('Animation Found!', animationData.animations);
+      this.logger.info('Animation Found!', animationData.animations);
     }
     return animationData?.animations || [];
   }
@@ -126,9 +129,9 @@ class ModelService {
         url,
         (gltf) => {
           if (url === chickenModelUrl) {
-            console.log('GLTF Data:', gltf);
-            console.log('Animations:', gltf.animations);
-            this.animationCache.set("chicken", { animations: gltf.animations });
+            this.logger.info('GLTF Data:', gltf);
+            this.logger.info('Animations:', gltf.animations);
+            this.animationCache.set('chicken', { animations: gltf.animations });
           }
 
           const scene = gltf.scene;
@@ -194,16 +197,15 @@ class ModelService {
 
   public createChicken(x: number, z: number) {
     const chickenModel = this.getModel('chicken');
-    console.log('ChickenModel loaded')
+    this.logger.info('ChickenModel loaded');
     const chicken = chickenModel.clone();
     chicken.castShadow = true;
-    chicken.scale.set(5,5,5);
+    chicken.scale.set(5, 5, 5);
     chicken.position.set(x, 0, z);
-    console.log('Chicken at:', chicken.position)
+    this.logger.info('Chicken at:', chicken.position);
     chicken.rotation.y = -45;
     return chicken;
   }
-
 }
 
 // Singleton instance
