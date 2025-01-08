@@ -1,6 +1,6 @@
 <template>
-  <GameOverlay ref="gameOverlayRef" />
   <div ref="rendererContainer" class="canvas-container">
+    <GameOverlay ref="gameOverlayRef" />
     <button id="startButton">play</button>
   </div>
 </template>
