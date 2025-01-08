@@ -30,17 +30,29 @@ public class GameConfig {
     @Positive
     private int wallHeight;
     @Positive
+    private float snackManHeight;
+    @Positive
+    private float ghostHeight;
+    @Positive
+    private float chickenHeight;
+    @Positive
+    private float foodHeight;
+    @Positive
     private float snackManRadius;
     @Positive
     private float snackManStep;
     @Positive
     private float ghostRadius;
     @Positive
+    private float ghostStep;
+    @Positive
     private float chickenMinRadius;
     @Positive
     private float chickenMaxRadius;
     @Positive
     private float foodRadius;
+    @Positive
+    private int ghostCollisionCalories;
 
     public GameConfig() {
         // Placeholder default values for the beginning -> change later to reasonable default values
@@ -54,14 +66,36 @@ public class GameConfig {
         this.mapWidth = 40;
         this.mapHeight = 40;
         this.wallHeight = 3;
+        this.snackManHeight = 1.5f;
+        this.ghostHeight = 1.5f;
+        this.chickenHeight = 1.5f;
+        this.foodHeight = 1.0f;
         this.snackManRadius = 0.35f;
         this.snackManStep = 0.1f;
         this.ghostRadius = 0.35f;
+        this.ghostStep = 0.1f;
         this.chickenMinRadius = 0.1f;
         this.chickenMaxRadius = 0.5f;
         this.foodRadius = 0.2f;
         this.chickenCount = 4;
         this.jumpCalories = 100;
+        this.ghostCollisionCalories = 10;
+    }
+
+    public float getSnackManHeight() {
+        return snackManHeight;
+    }
+
+    public float getGhostHeight() {
+        return ghostHeight;
+    }
+
+    public float getChickenHeight() {
+        return chickenHeight;
+    }
+
+    public float getFoodHeight() {
+        return foodHeight;
     }
 
     public int getWallHeight() {
@@ -198,6 +232,18 @@ public class GameConfig {
 
     public void setJumpCalories(int jumpCalories) {
         this.jumpCalories = jumpCalories;
+    }
+
+    public int getGhostCollisionCalories() {
+        return ghostCollisionCalories;
+    }
+
+    public float getGhostStep() {
+        return ghostStep;
+    }
+
+    public void setGhostStep(float ghostStep) {
+        this.ghostStep = ghostStep;
     }
     
 }

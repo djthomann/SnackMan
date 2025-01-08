@@ -1,6 +1,6 @@
 <template>
-  <GameOverlay ref="gameOverlayRef" />
   <div ref="rendererContainer" class="canvas-container">
+    <GameOverlay ref="gameOverlayRef" />
     <button id="startButton">play</button>
   </div>
 </template>
@@ -76,7 +76,7 @@ export default defineComponent({
   components: {
     GameOverlay,
   },
-  name: 'Scene',
+  name: 'SceneView',
   setup() {
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
 
@@ -90,7 +90,7 @@ export default defineComponent({
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
-    let cone: THREE.Mesh;
+    let playerObj: THREE.Group;
     let plane: THREE.Mesh;
     let ambientLight: THREE.AmbientLight;
     let directionalLight: THREE.DirectionalLight;
@@ -110,7 +110,7 @@ export default defineComponent({
     const entityStore = useEntityStore();
     const gameStore = useGameStore();
     const { snackMen, ghosts, chicken, map } = storeToRefs(entityStore);
-    const meshes: Map<Number, Mesh> = new Map<Number, Mesh>();
+    const meshes: Map<number, THREE.Group> = new Map<number, THREE.Group>();
 
     logger.info(
       'Snackman Names:',
@@ -300,37 +300,33 @@ export default defineComponent({
 
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
-        const snackManGeometry = new THREE.SphereGeometry(1, 32, 32);
-        const snackManMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-        const snackManMesh = new THREE.Mesh(snackManGeometry, snackManMaterial);
-
-        // Position snackMan
-        snackManMesh.position.set(snackMan.x, mapScale / 2, snackMan.z);
-
-        // Attach a NameTag
-        const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
-        nameTags.push(snackManTag);
-
-        // Add to snackMen group
-        snackMenGroup.add(snackManMesh);
+      
+        
 
         if (!testingMode && snackMan.objectId == userStore.id) {
-          snackManMesh.add(camera);
+          //snackManMesh.add(camera);
+          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x, snackMan.z );
+          playerMesh.add(camera)
           camera.position.set(0, 0, 0);
+          meshes.set(snackMan.objectId, playerMesh);
+        } else{
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x, snackMan.z);
+          // Attach a NameTag
+          const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
+          nameTags.push(snackManTag);
+
+          // Add to snackMen group
+          snackMenGroup.add(snackManMesh); 
+          meshes.set(snackMan.objectId, snackManMesh);
+          console.log(`placed Snackman ${snackMan.objectId} on Scene`);
         }
 
-        meshes.set(snackMan.objectId, snackManMesh);
-        console.log(`placed Snackman ${snackMan.objectId} on Scene`);
       });
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
-        const ghostGeometry = new THREE.ConeGeometry(1, 2, 32);
-        const ghostMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-        const ghostMesh = new THREE.Mesh(ghostGeometry, ghostMaterial);
-
-        // Position ghost
-        ghostMesh.position.set(ghost.x, mapScale / 2, ghost.z);
+    
+        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
 
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
@@ -457,19 +453,24 @@ export default defineComponent({
       scene.add(directionalLight);
 
       // Player Body
-      const coneGeometry = new THREE.ConeGeometry(0.3, 0.5, 32);
-      const coneMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
-      cone = new THREE.Mesh(coneGeometry, coneMaterial);
-      cone.position.set(0 - mapScale / 2, 0, 0 - mapScale / 2);
       camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
-      cone.rotation.x = -Math.PI / 2;
-      cone.castShadow = true;
-      scene.add(cone);
+      //TODO: Player ID!
+      playerObj = modelService.createPlayer(userStore.id ,0 - mapScale / 2, 0 - mapScale / 2 );
+      //meshes.add(playerObj);
+      scene.add(playerObj);
+
+      // TODO For testing, take out later
+      const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
+      const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
+      const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
+      ghostMesh.position.set(16 * mapScale, 0, 20 * mapScale)
+      scene.add(ghostMesh)
+
 
       // Player Object
       scene.add(player);
       player.add(camera);
-      player.add(cone);
+      player.add(playerObj);
 
       // Test cylinder
       //const geometry = new THREE.CylinderGeometry(0.2 * mapScale, 0.2 * mapScale, 3, 32);
@@ -560,7 +561,7 @@ export default defineComponent({
         }
 
         if (keyPressedArray.includes('a')) {
-          let linksVector = new THREE.Vector3(forward.z, 0, -forward.x);
+          const linksVector = new THREE.Vector3(forward.z, 0, -forward.x);
           vector = vector.add(linksVector.normalize());
         }
 
@@ -569,7 +570,7 @@ export default defineComponent({
         }
 
         if (keyPressedArray.includes('d')) {
-          let rechtsVector = new THREE.Vector3(-forward.z, 0, forward.x);
+          const rechtsVector = new THREE.Vector3(-forward.z, 0, forward.x);
           vector = vector.add(rechtsVector.normalize());
         }
 
@@ -647,11 +648,11 @@ export default defineComponent({
 
           // Interpolation for smooth rotation
           const smoothingFactor = 0.1;
-          const currentAngle = cone.rotation.z;
+          const currentAngle = playerObj.rotation.y;
 
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
           } else if (
@@ -659,11 +660,11 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
             // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
           } else if (
@@ -671,7 +672,7 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            cone.rotation.z = THREE.MathUtils.lerp(
+            playerObj.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               -Math.PI / 2 - Math.PI / 4,
               smoothingFactor,
@@ -683,7 +684,7 @@ export default defineComponent({
             angleYCameraDirection < 0.125 &&
             angleYCameraDirection > -0.125
           ) {
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
           } else if (
@@ -691,7 +692,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            cone.rotation.z = THREE.MathUtils.lerp(
+            playerObj.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               Math.PI / 2 + Math.PI / 4,
               smoothingFactor,
@@ -699,7 +700,7 @@ export default defineComponent({
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
           } else if (
@@ -707,7 +708,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            cone.rotation.z = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
+            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
           }
         }
       }
