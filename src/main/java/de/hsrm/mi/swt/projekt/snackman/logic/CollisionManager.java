@@ -76,6 +76,10 @@ public class CollisionManager {
 
     }
 
+    public boolean positionIsWithinMapBounds(float x, float z) {
+        return snackManMap.positionIsWithinMapBounds(x, z);
+    }
+
     public boolean positionInWall(float x, float z) {
         Tile tileAtPosition = snackManMap.getTileAt((int)x, (int)z);
         switch(tileAtPosition.getOccupationType()) {
@@ -94,11 +98,23 @@ public class CollisionManager {
         int coordX = (int) x;
         int coordZ = (int) z;
     
-        // Hol die Nachbar-Tiles
-        Tile leftTile = snackManMap.getTileAt(coordX - 1, coordZ);
-        Tile rightTile = snackManMap.getTileAt(coordX + 1, coordZ);
-        Tile bottomTile = snackManMap.getTileAt(coordX, coordZ + 1);
-        Tile topTile = snackManMap.getTileAt(coordX, coordZ - 1);
+        Tile leftTile = null;
+        Tile rightTile = null;
+        Tile bottomTile = null;
+        Tile topTile = null;
+        try {
+            leftTile = snackManMap.getTileAt(coordX - 1, coordZ);
+        } catch(IndexOutOfBoundsException e) {}
+        try {
+            rightTile = snackManMap.getTileAt(coordX + 1, coordZ);
+        } catch(IndexOutOfBoundsException e) {}
+        try {
+            bottomTile = snackManMap.getTileAt(coordX, coordZ + 1);
+        } catch(IndexOutOfBoundsException e) {}
+        try {
+            topTile = snackManMap.getTileAt(coordX, coordZ - 1);
+        } catch(IndexOutOfBoundsException e) {}
+              
     
         // Berechne Distanzen zu den Kanten
         float[] distances = distancesToEdges(x, z); // [links, rechts, unten, oben]

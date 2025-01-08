@@ -12,6 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
 
+import org.python.antlr.ast.Index;
+
 public class SnackManMap {
 
     // due to sidewinder (and Simon's brain):
@@ -228,8 +230,23 @@ public class SnackManMap {
         }
     }
 
-    public Tile getTileAt(int x, int z) {
-        return allTiles[z][x];
+    // a bit ugly... but couldn't get it to work with w and h
+    public boolean positionIsWithinMapBounds(float x, float z) {
+        try {
+            Tile tile = getTileAt((int)x, (int)z);
+            return true;
+        } catch(IndexOutOfBoundsException e) {
+            return false;
+        }
+    }
+
+    public Tile getTileAt(int x, int z) throws IndexOutOfBoundsException {
+        try {
+            return allTiles[z][x];
+        } catch(IndexOutOfBoundsException e) {
+            logger.info("Position asked for not within bounds");
+            throw e;
+        }
     }
 
     public Tile[][] getAllTiles() {

@@ -349,9 +349,9 @@ export default defineComponent({
       //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
       //console.log('skybox position', skybox.position)
-      skybox.position.y = w / 4 / 2;
-      skybox.position.x = w / 2;
-      skybox.position.z = w / 2;
+      skybox.position.y = (w/4)/2;
+      skybox.position.x = w / 2 - 0.5 * mapScale;
+      skybox.position.z = w / 2 - 0.5 * mapScale;
       //skybox.position.y = (w/4);
       scene.add(skybox);
 
