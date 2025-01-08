@@ -12,14 +12,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
 
+import org.python.antlr.ast.Index;
+
 public class SnackManMap {
 
     // due to sidewinder (and Simon's brain):
     // Tile at (x, z) (y is always at 0, we view the map as 2D) can be reached via
     // allTiles[z][x],
     // or (recommended) getTileAt(x, z)
-    private int w;
-    private int h;
+    private int w; // x-coordinate
+    private int h; // z-coordinate
     private Tile[][] allTiles;
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -228,8 +230,24 @@ public class SnackManMap {
         }
     }
 
-    public Tile getTileAt(int x, int z) {
-        return allTiles[z][x];
+    public boolean positionIsWithinMapBounds(float x, float z) {
+        logger.info("Checking position: x|z " + x + " " + z);
+        logger.info("Map bounds: w|h " + w + " " + h);
+
+        // Überprüfen, ob die Position innerhalb der Kartenbreite und -höhe liegt
+        if (x < 0 || x >= w || z < 0 || z >= h) {
+            return false; // Position ist außerhalb der Karte
+        }
+        return true;
+    }
+
+    public Tile getTileAt(int x, int z) throws IndexOutOfBoundsException {
+        try {
+            return allTiles[z][x];
+        } catch(IndexOutOfBoundsException e) {
+            logger.info("Position asked for not within bounds");
+            throw e;
+        }
     }
 
     public Tile[][] getAllTiles() {

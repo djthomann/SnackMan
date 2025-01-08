@@ -166,6 +166,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                             resolveOnTopOfWall();
                         }
                     } else {
+                        // Check if SnackMan has landed on food
+                        collisionManager.checkCollision(x, z, SnackMan.this);
                         if (y < 0.8f) {
                             y = 0.8f;
                             jumping = false;
@@ -174,6 +176,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     
 
                     MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                    
                     gameManger.notifyChange(moveEvent);
 
                     // If the jump is done, the task is not repeated anymore
@@ -228,7 +231,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
                 
 
-                // logger.info("Trying to resolve");
+                logger.info("Trying to resolve");
 
                 move(resolveVector.x * RESOLVE_SPEED, 0, resolveVector.z * RESOLVE_SPEED);
 
@@ -293,10 +296,19 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
             case MOVE:
 
-                
-
                 Vector3f vector = ((MoveEvent) event).getMovementVector();
                 logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
+
+                float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
+                logger.info("Wished X: " + wishedX);
+                float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
+                logger.info("Wished Z: " + wishedZ);
+
+                if(!collisionManager.positionIsWithinMapBounds(wishedX, wishedZ)) {
+                    vector.x = 0;
+                    vector.z = 0;
+                    return;
+                }
 
                 if(needsResolving) {
                     logger.info("Can't move during resolving");
@@ -304,11 +316,6 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     vector.z = 0;
                     return;
                 }
-
-                float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
-                logger.info("Wished X: " + wishedX);
-                float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
-                logger.info("Wished Z: " + wishedZ);
 
                 if(collisionManager.positionInWall(x, z) && !jumping) {
                     if(!collisionManager.positionInWall(wishedX, wishedZ)) {
@@ -352,7 +359,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         }
 
-        logger.info("Event arrived at SnackMan :" + event.toString());
+        // logger.info("Event arrived at SnackMan :" + event.toString());
     }
 
     public SnackManRecord toRecord() {
