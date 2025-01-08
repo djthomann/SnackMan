@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
 import type { Ghost, Snackman } from '@/types/SceneTypes';
+import type { Ghost, Snackman } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
@@ -32,7 +33,7 @@ import { Logger } from '../util/logger';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
-// let floorGroup: THREE.Group
+let floorGroup: THREE.Group;
 let foodGroup: THREE.Group;
 let chickenGroup: THREE.Group;
 
@@ -54,7 +55,13 @@ texture_lf.colorSpace = THREE.SRGBColorSpace;
 skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_ft }));
 skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_bk }));
 skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_up }));
-skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_dn }));
+skyboxTextures.push(
+  new THREE.MeshBasicMaterial({
+    map: texture_dn,
+    transparent: true,
+    opacity: 0,
+  }),
+);
 skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_rt }));
 skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_lf }));
 
@@ -311,8 +318,11 @@ export default defineComponent({
             );
             food.userData.id = tile.food.objectId;
             foodGroup.add(food);
+            floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
+            floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
+
             if (occupation != null) {
               // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
               const chicken = modelService.createChicken(tile.x * mapScale, tile.z * mapScale);
@@ -335,15 +345,13 @@ export default defineComponent({
       }
 
       scene.add(wallsGroup);
-
       scene.add(foodGroup);
-
-      const floor = modelService.createFloorTile(w, h, mapScale);
-      scene.add(floor);
+      scene.add(floorGroup);
 
       // Skybox
       for (let i = 0; i < 6; i++) {
         skyboxTextures[i].side = THREE.BackSide;
+        skyboxTextures[i].transparent = true;
       }
       const skyboxGeo = new THREE.BoxGeometry(w, w / 4, w);
       //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
@@ -395,7 +403,7 @@ export default defineComponent({
       scene.background = new THREE.Color(0x111111);
 
       wallsGroup = new THREE.Group();
-      // floorGroup = new THREE.Group()
+      floorGroup = new THREE.Group();
       foodGroup = new THREE.Group();
       chickenGroup = new THREE.Group();
 
