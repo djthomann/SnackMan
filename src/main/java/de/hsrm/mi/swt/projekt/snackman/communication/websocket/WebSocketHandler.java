@@ -2,8 +2,16 @@ package de.hsrm.mi.swt.projekt.snackman.communication.websocket;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.*;
+import de.hsrm.mi.swt.projekt.snackman.logic.Game;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.LobbyRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
@@ -20,23 +28,23 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterGhostEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterSnackmanEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
-import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 
 public class WebSocketHandler extends TextWebSocketHandler {
 
     Logger logger = LoggerFactory.getLogger(WebSocketHandler.class);
-    GameManager gameManager = new GameManager(this, "test");
+    GameManager gameManager = new GameManager(this);
 
     Map<WebSocketSession, Client> clients = new HashMap<>();
+
+    // true when game is not properly started via a Lobby
+    public static boolean testingMode = false;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -64,34 +72,43 @@ public class WebSocketHandler extends TextWebSocketHandler {
             String type = jsonObject.get("type").getAsString();
 
             switch (type) {
-                // User registered as Snackman
-                case "REGISTERSNACKMAN" -> {
-                    RegisterSnackmanEvent registerSnackmanEvent = gson.fromJson(jsonString,
-                            RegisterSnackmanEvent.class);
+                // User chooses role
+                case "CHOOSEROLE" -> {
+                    ChooseRoleEvent chooseRoleEvent = gson.fromJson(jsonString, ChooseRoleEvent.class);
+                    Client client = clients.get(session);
 
-                    clients.get(session).setUsername(registerSnackmanEvent.getUsername());
-                    clients.get(session).setRole(registerSnackmanEvent.getRole());
-                }
-                // User registered as Ghost
-                case "REGISTERGHOST" -> {
-                    RegisterGhostEvent registerGhostEvent = gson.fromJson(jsonString,
-                            RegisterGhostEvent.class);
+                    client.setUsername(chooseRoleEvent.getUsername());
 
-                    clients.get(session).setUsername(registerGhostEvent.getUsername());
-                    clients.get(session).setRole(registerGhostEvent.getRole());
+                    if(chooseRoleEvent.isSnackMan()){
+                        client.setRole(GameObjectType.SNACKMAN);
+                    } else {
+                        client.setRole(GameObjectType.GHOST);
+                    }
                 }
-                // User registered without Role
+                /**
+                 * User registers without Role, sets Unsername and sends back Client ID for
+                 * later use...
+                 */
                 case "REGISTERUSERNAME" -> {
                     RegisterUsernameEvent registerUsernameEvent = gson.fromJson(jsonString,
                             RegisterUsernameEvent.class);
 
                     clients.get(session).setUsername(registerUsernameEvent.getUsername());
+                    ClientIdEvent event = new ClientIdEvent(clients.get(session).getClientId());
+                    String json = gson.toJson(event);
+                    // logger.info("Final JSON for event" + event.getType().toString() + "; " + json);
+                    session.sendMessage(new TextMessage(event.getType().toString() + ";" + json));
                 }
                 case "MAPREQUEST" -> {
                     // Generate or Load a new Map Object, Map it to JSON and send it to frontend
 
+                    //TODO: delete once map always comes with GameStartEvent
+                    long gameId = 2L;
                     SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
-                    // SnackManMap map = new SnackManMap(40, 40);
+                    // SnackManMap map = new SnackManMap(20, 40);
+                    testingMode = true;
+                    gameManager.createGame(new GameConfig(), gameId, map);
+                    
                     // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH +
                     // "testFile.csv");
                     // map.saveAsCSV();
@@ -102,9 +119,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     ObjectMapper mapper = new ObjectMapper();
                     String returnString = "";
                     try {
-                        String json = mapper.writeValueAsString(map);
+                        String json = mapper.writeValueAsString(map.toRecord());
                         returnString = "MAP;" + json;
-                        logger.info("Final JSON: " + returnString);
+                        // logger.info("Final JSON: " + returnString);
                         session.sendMessage(new TextMessage(returnString));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
@@ -118,7 +135,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     try {
                         String json = mapper.writeValueAsString(map);
                         returnString = "MAP;" + json;
-                        logger.info("Final JSON: " + returnString);
+                        // logger.info("Final JSON: " + returnString);
                         session.sendMessage(new TextMessage(returnString));
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
@@ -126,7 +143,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
                 case "MOVE" -> {
                     MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);
-                    logger.info("GameId: " + moveEvent.getGameID() + "Vector x: " + moveEvent.getMovementVector().x);
+                    logger.info("GameId: " + moveEvent.getGameID() + " | Vector x: " + moveEvent.getMovementVector().x
+                            + " | Vector y: " + moveEvent.getMovementVector().y + " | Vector z: "
+                            + moveEvent.getMovementVector().z);
                     gameManager.handleEvent(moveEvent);
                 }
                 case "SET_GAME_CONFIG" -> {
@@ -160,23 +179,68 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     }
                     session.sendMessage(new TextMessage(returnString));
                 }
+                case "JOIN_LOBBY" -> {
+                    gameManager.addClientToLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
+                }
+                case "GET_PLAYERS" -> {
+                    JsonObject jo = new JsonObject();
+                    long lobbyCode = Long.parseLong(String.valueOf(jsonObject.get("lobbyCode")));
+                    jo.add("players", gson.toJsonTree(gameManager.getPlayersInLobby(lobbyCode)));
+
+                    // JSON-Objekt als String ausgeben
+                    String js = gson.toJson(jo);
+
+                    for (WebSocketSession s: gameManager.getLobbyMap().get(lobbyCode).getAllSessions()) {
+                        s.sendMessage(new TextMessage("PLAYERS;" + js));
+                    }
+
+                }
+                case "ROLE" -> {
+                    GameObjectType gameObjectType = (jsonObject.get("snackman").getAsBoolean()) ? GameObjectType.SNACKMAN : GameObjectType.GHOST;
+                    clients.get(session).setRole(gameObjectType);
+                }
                 case "LOBBY_CREATE_EVENT" -> {
                     LobbyCreateEvent lobbyCreateEvent = gson.fromJson(jsonString, LobbyCreateEvent.class);
                     Lobby newLobby = null;
 
-                    if (lobbyCreateEvent.getId() == 0) { newLobby = gameManager.createLobby(); }
-                    logger.info("Lobby with ID: "+newLobby.getId()+"created");
+                    if (lobbyCreateEvent.getId() == 0) {
+                        newLobby = gameManager.createLobby();
+                    }
+                    logger.info("Lobby with ID: " + newLobby.getId() + "created");
                 }
                 case "LOBBY_SHOW_EVENT" -> {
                     ObjectMapper mapper = new ObjectMapper();
-                    String json = mapper.writeValueAsString(gameManager.getAllLobbies());
+                    List<LobbyRecord> lobbyRecords = gameManager.getAllLobbies().stream().map(Lobby::toRecord).toList();
+                    String json = mapper.writeValueAsString(lobbyRecords);
                     String returnString = "ALL_LOBBIES;" + json;
-                    logger.info("Show all Lobbies: "+returnString);
+                    logger.info("Show all Lobbies: " + returnString);
                     session.sendMessage(new TextMessage(returnString));
                 }
+
+                case "START_GAME" -> {
+                    StartGameEvent startGameEvent = gson.fromJson(jsonString, StartGameEvent.class);
+                    notifyClientsAboutForeignGameStart(session, startGameEvent.getGameID());
+
+                    gameManager.createGame(startGameEvent.getGameID());
+                }
+
             }
         } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
+        }
+    }
+
+    private void notifyClientsAboutForeignGameStart(WebSocketSession source, long gameId) {
+        Lobby lobby = gameManager.getLobbyById(gameId);
+
+        for (Client c: lobby.getClientsAsList()) {
+            if (c.getSession() != source) {
+                try {
+                    c.getSession().sendMessage(new TextMessage("FOREIGN_GAMESTART"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -199,7 +263,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         for (WebSocketSession session : this.clients.keySet()) {
             try {
                 json = gson.toJson(event);
-                logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
+                // logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
 
                 // Synchronize this block to avoid sending messages during invalid states (e.g.
                 // enables moving while jumping)
@@ -264,4 +328,5 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public Map<WebSocketSession, Client> getClients() {
         return clients;
     }
+
 }

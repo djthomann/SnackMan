@@ -1,34 +1,37 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
-
+import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
 /**
  * The `Ghost` class represents a player character in the game with
  * an initial position on a plane.
- * 
  * This class extends `PlayerObject` and inherits its properties for
- * the id, and coordinates management.
+ * the objectId, and coordinates management.
  * 
  * 
  */
-public class Ghost extends GameObject implements MovableAndSubscribable {
+public class Ghost extends PlayerObject implements MovableAndSubscribable {
+
+    private final GameManager gameManager;
 
     /**
      * Constructs a new `Ghost` with the specified starting position.
      *
-     * @param x         the initial x-coordinate of the `Ghost`
-     * @param y         the initial y-coordinate of the `Ghost`
-     * @param z         the initial z-coordinate of the `Ghost`
-     * @param radius    the radius of the `Ghost`
+     * @param x          the initial x-coordinate of the `Ghost`
+     * @param y          the initial y-coordinate of the `Ghost`
+     * @param z          the initial z-coordinate of the `Ghost`
+     * @param gameConfig the configuration of the game
+     * 
      */
-    public Ghost(long gameId, float x, float y, float z, float radius) {
-        super(gameId, x, y, z);
+
+    public Ghost(String username, long id, long gameId, float x, float y, float z, GameConfig gameConfig, GameManager gameManager) {
+        super(username, id, gameId, x, y, z, gameConfig.getGhostRadius());
+        this.gameManager = gameManager;
+
     }
 
     /**
@@ -40,14 +43,18 @@ public class Ghost extends GameObject implements MovableAndSubscribable {
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        x = newX; 
-        y = newY; 
-        z = newZ; 
-        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this,gameId));
+        x = newX;
+        y = newY;
+        z = newZ;
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
     @Override
     public void handle(Event event) {
+    }
+
+    public GhostRecord toRecord() {
+        return new GhostRecord(gameId, objectId, getUsername(), x, y, z);
     }
 
 }

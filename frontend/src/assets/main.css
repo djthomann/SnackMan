@@ -1,3 +1,5 @@
+@import './base.css';
+
 html {
   margin: 0;
   padding: 0;
@@ -6,10 +8,16 @@ html {
 body {
   margin: 0;
   padding: 0;
+  font-size: var(--fontSizeDefault);
+  /*letter-spacing: 0.015em; -> Headline Component*/
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: "Lilita One","Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  color: var(--colorTextDark);
 }
 
-/*@import './base.css';
 
+/*
 #app {
   max-width: 1280px;
   margin: 0 auto;

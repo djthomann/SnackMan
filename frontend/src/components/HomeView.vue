@@ -1,14 +1,14 @@
 <template>
   <div>
     <h1>Home</h1>
-    <p>Welcome, {{ name }}</p>
+    <p>Welcome, {{ name }} with the ID {{ id }}</p>
 
     <h2>Lobbies</h2>
     <ul>
-      <li v-for="lobby in lobbies" :key="lobby.id ?? 'default-key'">
-        <p>Lobby Code: {{ lobby.id }}</p>
-        <p>0/{{ maxPlayers }} Players</p>
-        <button @click="joinLobby(lobby.id?.toString() ?? '')">Enter Lobby</button>
+      <li v-for="lobby in lobbies" :key="lobby.lobbyCode ?? 'default-key'">
+        <p>Lobby Code: {{ lobby.lobbyCode }}</p>
+        <p>{{ lobby.numPlayers }}/{{ maxPlayers }} Players</p>
+        <button @click="joinLobby(lobby.lobbyCode?.toString() ?? '')">Enter Lobby</button>
       </li>
     </ul>
 
@@ -22,21 +22,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import {ref, computed, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
+
+import { Logger } from '../util/logger';
+
+const logger = new Logger();
 
 const { sendMessage, onMessage } = useWebSocket();
 const router = useRouter();
 const lobbyCode = ref('');
 const serverMessage = ref<string>('');
 const name = computed(() => userStore.username || 'Guest');
+const id = computed(() => userStore.id || 0);
 const maxPlayers = 8;
 const userStore = useUserStore();
 
 interface Lobby {
-  id: number | null;
+  lobbyCode: number | null;
+  numPlayers: number;
 }
 
 const lobbies = ref<Lobby[]>([]);
@@ -45,15 +51,20 @@ const handleServerMessage = (message: string) => {
   serverMessage.value = message;
   if (message.startsWith('ALL_LOBBIES')) {
     lobbies.value = JSON.parse(message.split(';')[1]);
-    console.log("ALL LOBIES"+lobbies.value);
+    logger.info('ALL LOBBIES' + lobbies.value);
   }
 };
+
+onMounted(() => {
+  fetchLobbies();
+})
 
 onMessage(handleServerMessage);
 
 const createLobby = () => {
   const message = JSON.stringify({ type: 'LOBBY_CREATE_EVENT', id: 0 });
   sendMessage(message);
+  fetchLobbies();
 
   /* How do I attain the new lobby id
   const newLobbyCode = 'NEW759';
@@ -61,7 +72,12 @@ const createLobby = () => {
 };
 
 const joinLobby = (code: string) => {
-  console.log(`Joining lobby with code: ${code}`);
+  logger.info(`Joining lobby with code: ${code}`);
+  const data = JSON.stringify({
+    type: 'JOIN_LOBBY',
+    lobbyCode: code
+  });
+  sendMessage(data);
   router.push({ path: `/lobby/${code}` });
 };
 

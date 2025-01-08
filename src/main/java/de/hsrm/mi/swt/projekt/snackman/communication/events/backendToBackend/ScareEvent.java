@@ -13,7 +13,7 @@ public class ScareEvent extends ApplicationEvent {
      * Event that is called upon when a ghost collides with a snackman.
      * @param source the object on which the event occurred initially or an object with which the event is associated
      * @param scaredSnackMan the snackman that collided with the ghost.
-     * * @param gameId id of the game the event belongs to.
+     * * @param gameId objectId of the game the event belongs to.
      */
     public ScareEvent(Object source, SnackMan scaredSnackMan, long id) {
         super(source);
