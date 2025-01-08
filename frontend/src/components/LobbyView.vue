@@ -115,8 +115,6 @@ import { useUserStore } from '@/stores/userStore';
 import type {Player} from "@/types/SceneTypes";
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
-import ConfigPanelComponent from './layout/ConfigPanelComponent.vue';
-import FieldsetComponent from './layout/FieldsetComponent.vue';
 import { Logger } from '../util/logger';
 
 const logger = new Logger();
