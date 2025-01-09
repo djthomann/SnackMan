@@ -28,8 +28,8 @@
      inkscape:cx="125.33218"
      inkscape:cy="158.40028"
      inkscape:window-width="1920"
-     inkscape:window-height="1007"
-     inkscape:window-x="1920"
+     inkscape:window-height="1051"
+     inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="g1055"
@@ -44,18 +44,18 @@
        id="g1055"
        transform="translate(-0.57327652,-1.0036201)">
       <ellipse
-         style="fill:none;stroke:#ffffff;stroke-width:9.31051;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:#ffffff;stroke:#000000;stroke-width:9.31051;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;fill-opacity:1"
          id="path111"
          cx="55.573277"
          cy="56.00362"
          rx="46.450138"
          ry="46.449947" />
       <path
-         style="fill:none;stroke:#ffffff;stroke-width:6.96317;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:none;stroke:#0b0b0b;stroke-width:6.96317;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="M 55.573279,56.952833 V 26.346393 Z"
          id="path1007" />
       <path
-         style="fill:none;stroke:#ffffff;stroke-width:6.96317;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="fill:none;stroke:#0b0b0b;stroke-width:6.96317;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="M 55.573279,56.952833 77.215301,78.594855 Z"
          id="path1007-3" />
     </g>
