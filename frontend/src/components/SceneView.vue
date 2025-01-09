@@ -2,6 +2,7 @@
   <div ref="rendererContainer" class="canvas-container">
     <GameOverlay ref="gameOverlayRef" />
     <button id="startButton">play</button>
+    <AudioPlayer ref="audioPlayer" :audioFile="'@/assets/sounds/'" :loop="true" :volume="0.5" />
   </div>
 </template>
 
@@ -27,6 +28,7 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { Mesh } from 'three';
 import GameOverlay from './GameOverlay.vue';
+import AudioPlayer from './AudioPlayer.vue';
 
 import { Logger } from '../util/logger';
 
@@ -74,7 +76,6 @@ const wallHeight = 1.5 * mapScale;
 
 export default defineComponent({
   components: {
-    GameOverlay,
   },
   name: 'SceneView',
   setup() {
@@ -104,6 +105,35 @@ export default defineComponent({
     let testingMode = false;
 
     const logger = new Logger();
+
+    // Sound stuff
+    const sounds = [];
+    let foodSound1: THREE.Audio, foodSound2: THREE.Audio, collisionSound: THREE.Audio;
+    const manager = new THREE.LoadingManager();
+    manager.onLoad = () => console.log('sounds loaded');
+    const audioLoader = new THREE.AudioLoader(manager);
+    const mp3s = ['eat1', 'eat2', 'hit'];
+    const listener = new THREE.AudioListener();
+    mp3s.forEach((name) => {
+      const sound = new THREE.Audio(listener);
+      sound.name = name;
+      if (name === 'eat1') {
+        foodSound1 = sound;
+        sound.setVolume(0.5);
+      }
+      if (name === 'eat2') {
+        foodSound2 = sound;
+        sound.setVolume(0.5);
+      }
+      if (name === 'hit') {
+        collisionSound = sound;
+        sound.setVolume(0.5);
+      }
+      sounds.push(sound);
+      audioLoader.load(`src/assets/sounds/${name}.mp3`, function (buffer) {
+        sound.setBuffer(buffer);
+      });
+    });
 
     //GameStart
     const entityStore = useEntityStore();
