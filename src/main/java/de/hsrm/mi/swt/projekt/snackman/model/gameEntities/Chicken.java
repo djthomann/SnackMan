@@ -110,12 +110,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             try {
                 while(!Thread.currentThread().isInterrupted()) {
                 if (gameManager.getGameById(gameId) == null) {
-                    logger.info("in if game id : " +gameId);
                     Thread.sleep(1000);
                 } else {
                     Thread.sleep(50); // 1000 = 1 sec
                     surroundings = gameManager.getGameById(gameId).generateSurroundings(this.x, this.z);
-                    logger.info(surroundings.toString());
+                    //logger.info(surroundings.toString());
                     executeScript(surroundings);
                 }
             }
@@ -171,7 +170,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                         }
                 }
                 move((movementX), (movementY), (movementZ));
-                logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
+                //logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
                 
             }
@@ -228,7 +227,7 @@ public void handle(Event event) {
     if (event == null || event.getObjectID() != this.objectId) {
         return;
     }
-    logger.info("Event received for object ID {}: {}", this.objectId, event);
+    //logger.info("Event received for object ID {}: {}", this.objectId, event);
 }
 
     public ChickenRecord toRecord() {

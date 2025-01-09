@@ -465,7 +465,7 @@ export default defineComponent({
       //const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
       //const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
       //const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
-      //ghostMesh.position.set(16 * mapScale, 0, 20 * mapScale)
+      //ghostMesh.position.set(16.5 * mapScale, 0, 20.5 * mapScale)
       //scene.add(ghostMesh)
 
       // Dummy Cylinder in the Center to test the Measurements of the Models.

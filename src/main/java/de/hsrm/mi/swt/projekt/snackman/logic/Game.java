@@ -7,7 +7,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.Mo
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -147,6 +146,7 @@ public class Game {
             gameConfig, gameManager, collisionManager));
         }
 
+        // Initialize food and chicken
         createFood();
         createChicken();
 
