@@ -167,6 +167,7 @@ public class Game {
             }
         }
         res.setMap(map.toRecord());
+        res.setGameTime(gameConfig.getGameTime());
 
         this.gameStartEvent = res;
 

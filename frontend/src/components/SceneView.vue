@@ -135,7 +135,7 @@ export default defineComponent({
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
       } else if (message.startsWith('GAME_START')) {
-        handleStartEvent();
+        handleStartEvent(message.split(';')[1]);
         if (startPromiseResolve) {
           startPromiseResolve();
         }
@@ -168,8 +168,20 @@ export default defineComponent({
           .position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
       });
     };
-    const handleStartEvent = () => {
+    const handleStartEvent = (message: string) => {
       console.log('handle start event');
+
+      const parsedData = JSON.parse(message);
+      gameStore.setRemainingTime(parsedData.gameTime);
+
+      parsedData.snackMen.forEach((snackman: Snackman) => {
+
+      if(snackman.objectId === userStore.id) {
+        gameStore.setCalories(snackman.gainedCalories);
+      }
+
+      });
+
       loadMap(map.value);
     };
 

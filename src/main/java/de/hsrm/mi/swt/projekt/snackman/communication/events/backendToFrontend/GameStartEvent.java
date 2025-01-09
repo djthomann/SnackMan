@@ -20,13 +20,15 @@ public class GameStartEvent extends Event {
     private List<GhostRecord> ghosts;
     private List<ChickenRecord> chicken;
     private SnackManMapRecord map;
+    private long gameTime;
 
-    public GameStartEvent(List<SnackManRecord> snackMen, List<GhostRecord> ghosts, List<ChickenRecord> chicken, SnackManMapRecord map) {
+    public GameStartEvent(List<SnackManRecord> snackMen, List<GhostRecord> ghosts, List<ChickenRecord> chicken, SnackManMapRecord map, long gameTime) {
         this.setType(EventType.GAME_START);
         this.snackMen = snackMen;
         this.ghosts = ghosts;
         this.chicken = chicken;
         this.map = map;
+        this.gameTime = gameTime;
     }
 
     public GameStartEvent() {
@@ -79,4 +81,13 @@ public class GameStartEvent extends Event {
     public void setMap(SnackManMapRecord map) {
         this.map = map;
     }
+
+    public long getGameTime() {
+        return gameTime;
+    }
+
+    public void setGameTime(long gameTime) {
+        this.gameTime = gameTime;
+    }
+    
 }
