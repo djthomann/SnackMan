@@ -43,6 +43,7 @@ public class Game {
     private final GameState gameState;
     private int numSnackmen = 0;
     private GameStartEvent gameStartEvent;
+    private long startTime;
 
     
 
@@ -166,6 +167,7 @@ public class Game {
             }
         }
         res.setMap(map.toRecord());
+        res.setGameTime(gameConfig.getGameTime());
 
         this.gameStartEvent = res;
 
@@ -241,6 +243,16 @@ public class Game {
         long delay = gameConfig.getGameTime() * 1000L;
 
         timer.schedule(task, delay);
+
+        startTime = System.currentTimeMillis();
+    }
+
+    public long getElapsedMillis() {
+        return System.currentTimeMillis() - startTime;
+    }
+
+    public long getRemainingSeconds() {
+        return gameConfig.getGameTime() - getElapsedMillis() / 1000;
     }
 
     private void stopGame() {

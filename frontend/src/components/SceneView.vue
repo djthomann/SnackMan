@@ -134,9 +134,8 @@ export default defineComponent({
       } else if (message.startsWith('DISAPPEAR')) {
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
-        updateCalories(100);
       } else if (message.startsWith('GAME_START')) {
-        handleStartEvent();
+        handleStartEvent(message.split(';')[1]);
         if (startPromiseResolve) {
           startPromiseResolve();
         }
@@ -145,17 +144,19 @@ export default defineComponent({
       }
     };
 
-    const updateCalories = (amount: number) => {
-      gameStore.addCalories(amount);
-    };
-
-    const updateTime = (sec: number) => {
-      gameStore.setRemainingTime(sec);
-    };
-
     const handleGameStateEvent = (message: string) => {
+
+      
       const parsedData = JSON.parse(message);
+      
+      gameStore.setRemainingTime(parsedData.remainingSeconds);
+
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
+
+        if(snackman.objectId === userStore.id) {
+          gameStore.setCalories(snackman.gainedCalories);
+        }
+
         meshes
           .get(snackman.objectId)!
           .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
@@ -167,8 +168,20 @@ export default defineComponent({
           .position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
       });
     };
-    const handleStartEvent = () => {
+    const handleStartEvent = (message: string) => {
       console.log('handle start event');
+
+      const parsedData = JSON.parse(message);
+      gameStore.setRemainingTime(parsedData.gameTime);
+
+      parsedData.snackMen.forEach((snackman: Snackman) => {
+
+      if(snackman.objectId === userStore.id) {
+        gameStore.setCalories(snackman.gainedCalories);
+      }
+
+      });
+
       loadMap(map.value);
     };
 
@@ -381,8 +394,6 @@ export default defineComponent({
     }
 
     function makeDisappear(id: number) {
-      updateCalories(100);
-      updateTime(id);
       foodGroup.children.forEach((food) => {
         if (food.userData.id == id) {
           scene.remove(food);
