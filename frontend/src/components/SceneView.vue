@@ -440,7 +440,7 @@ export default defineComponent({
       const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
       const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
       const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
-      ghostMesh.position.set(16 * mapScale, 0, 20 * mapScale)
+      ghostMesh.position.set((16 + 0.5) * mapScale, 0, (20 + 0.5) * mapScale)
       scene.add(ghostMesh)
 
 
