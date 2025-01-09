@@ -80,7 +80,7 @@ class ModelService {
         this.modelCache.set(name, modelData); // Store scene in cache
         if (modelData.animations.length > 0) {
           this.animationCache.set(name, modelData);
-          console.log('Animation added to Cache');
+          this.logger.info('Animation added to Cache');
         }
       }),
     );
@@ -223,13 +223,13 @@ class ModelService {
 
   public createChicken(id: number, x: number, z: number) {
     const chickenModel = this.getModel('chicken');
-    console.log('ChickenModel loaded');
+    this.logger.info('ChickenModel loaded');
     chickenModel.userData.id = id; 
     const chicken = chickenModel.clone();
     chicken.castShadow = true;
     chicken.scale.set(3.25,3,3);     // Radius 0.1 -> (3.25,3,3), Radius 0.2 -> (6.5,6,6)
     chicken.position.set(x, 0, z);
-    console.log('Chicken at:', chicken.position)
+    this.logger.info('Chicken at:', chicken.position)
     chicken.rotation.y = 0; // Degrees * Math.PI / 180
     return chicken;
   }
