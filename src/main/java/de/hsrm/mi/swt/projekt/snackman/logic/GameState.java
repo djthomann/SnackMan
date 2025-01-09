@@ -38,7 +38,7 @@ public class GameState {
                     if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
                             || !eatenFoods.isEmpty()) {
                         GameStateEvent gameStateEvent = new GameStateEvent(changedGhosts, changedSnackMen,
-                                changedChicken, eatenFoods);
+                                changedChicken, eatenFoods, game.getRemainingSeconds());
                         game.getGameManager().notifyChange(gameStateEvent);
                         changedGhosts.clear();
                         changedSnackMen.clear();

@@ -146,9 +146,11 @@ export default defineComponent({
 
     const handleGameStateEvent = (message: string) => {
 
-      console.log("Handling Game State Event");
-
+      
       const parsedData = JSON.parse(message);
+      
+      gameStore.setRemainingTime(parsedData.remainingSeconds);
+
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
 
         if(snackman.objectId === userStore.id) {
