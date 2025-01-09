@@ -18,12 +18,12 @@ import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
+
 /**
  * The `Chicken` class represents a NPC in the game.
  * 
  * 
  */
-
 public class Chicken extends GameObject implements CanEat, MovableAndSubscribable {
 
     private Logger logger = LoggerFactory.getLogger(Chicken.class);
@@ -31,16 +31,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private GameManager gameManager;
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
-    /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
-
-    /** The current direction of the Chicken (N, NE, E, SE, S, SW, W, NW) */
     private String direction;
-
     private List<List<String>> surroundings;
-
     private Boolean wallCollision;
-
     /** Jython-Interpreter for the script logic */
     private final PythonInterpreter scriptInterpreter;
 
@@ -53,7 +47,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * @param scriptPath the path of the associated behavior script
      * @param gameConfig the configuration of the game
      */
-
     public Chicken(long id, long gameId, float x, float y, float z, String script, GameManager gameManager,
             GameConfig gameConfig, CollisionManager collisionManager) {
         super(id, gameId, x, y, z, gameConfig.getChickenMinRadius());
@@ -69,14 +62,14 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     private void initScriptInterpreter(String script) {
         String scriptFile;
-        switch (script) {
-            case "TEST", "test", "Test": // TO BE DELETED : TEST SCRIPT
+        switch (script.toLowerCase()) {
+            case "test":
                 scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/chickenTestScript.py";
                 break;
-            case "ONE", "one", "One":
+            case "one":
                 scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/ChickenPersonalityOne.py";
                 break;
-            case "TWO", "two", "Two":
+            case "two":
                 scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/ChickenPersonalityTwo.py";
                 break;
             default:
@@ -85,34 +78,29 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         }
         this.scriptInterpreter.execfile(scriptFile); 
         new Thread(() -> {
-            try {     
+            try {   
                     Thread.sleep(50); // 1000 = 1 sec
                     surroundings = gameManager.getGameById(gameId).generateSurroundings(this.x, this.z);
-                    //logger.info(surroundings.toString());
+                    logger.info(surroundings.toString());
                     executeScript(surroundings); 
-                
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }).start();
-
     }
-
-    
 
     /**
      * executes the behavior of the chicken, controlled by the script
      *
-     * @param map the map, on which the chicken navigates
+     * @param pythonCompatibleSurroundings 3x3 part of the map, on which the chicken navigates
      */    
     public void executeScript(List<List<String>> pythonCompatibleSurroundings) {
-
         scriptInterpreter.set("environment", pythonCompatibleSurroundings);
         scriptInterpreter.set("direction", direction);
         scriptInterpreter.set("wall_collision", wallCollision );
         scriptInterpreter.set("x", x);
         scriptInterpreter.set("z", z);
-
         try {
 
             scriptInterpreter.exec("result = run_behavior(environment, direction, wall_collision,x,z)");
@@ -148,7 +136,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                         }
                 }
                 move((movementX), (movementY), (movementZ));
-                //logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
+                logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
                 
             }
@@ -201,20 +189,18 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     @Override
-    public void handle(Event event) {
-
-        if (event.getObjectID() != this.objectId) {
-            return;
-        }
-
-        // logger.info("Event arrived at chicken: " + event.toString());
-
+public void handle(Event event) {
+    if (event == null || event.getObjectID() != this.objectId) {
+        return;
     }
+    logger.info("Event received for object ID {}: {}", this.objectId, event);
+}
 
     public ChickenRecord toRecord() {
         return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories);
     }
 
+    // String representation used for chickenssurroundings
     public String toString() {
         return "Chicken";
     }

@@ -50,7 +50,6 @@ public class GameManager {
      * @param event
      */
     public void handleEvent(Event event) {
-
         logger.info("handleEvent\n");
 
         if (WebSocketHandler.testingMode && allGames.values().size() == 1) {
@@ -58,9 +57,7 @@ public class GameManager {
         }
 
         if (allGames.containsKey(event.getGameID())) {
-
             allGames.get(event.getGameID()).receiveEvent(event);
-
         }
     }
 

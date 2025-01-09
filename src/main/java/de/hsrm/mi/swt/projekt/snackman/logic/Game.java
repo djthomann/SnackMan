@@ -18,7 +18,6 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
-import org.springframework.context.ApplicationListener;
 
 /**
  * The Game class contains all the information and logic necessary within an individual game.
@@ -28,7 +27,7 @@ import org.springframework.context.ApplicationListener;
  * 
  */
 
-public class Game implements ApplicationListener<InternalMoveEvent> {
+public class Game {
 
     Logger logger = LoggerFactory.getLogger(Game.class);
 
@@ -44,29 +43,28 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
     private int numSnackmen = 0;
     private GameStartEvent gameStartEvent;
 
-    
-
+    // Constructor for Game with no Lobby
     public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
-        this.init(null);
+        this.Initialize(null);
         this.timer = new Timer();
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);
     }
 
+    // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
         this.id = lobby.getId();
         this.gameConfig = lobby.getGameConfig();
         this.map = lobby.getMap();
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables);
-
-        init(lobby.getClientsAsList()); 
+        Initialize(lobby.getClientsAsList()); 
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);
@@ -134,25 +132,31 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
      * TODO: This method will be expanded to create all game objects and add them to
      * the game object list.
      */
-    public void init(List<Client> clients) {
+    public void Initialize(List<Client> clients) {
 
-        // for testing clients is null
-        if (clients != null) createMovables(clients);
-        createFood();
+        if (clients != null) {
+            createMovables(clients);
+        } else {
+            // for testing setup test SnackMan
+            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.5f, 1.1f, 20.5f, 
+            gameManager, gameConfig, collisionManager));
 
-        // for testing setup test SnackMan
-        if (clients == null && allMovables.size() < 1) {
-            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager, gameConfig, collisionManager));
-
-            // Ghost to test collision
-            Ghost debugGhost = new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.0f, 1.1f, 20.0f, gameConfig, gameManager, collisionManager);
-            allMovables.add(debugGhost);
+            allMovables.add(new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.5f, 1.1f, 20.5f, 
+            gameConfig, gameManager, collisionManager));
         }
+
+        // Initialize food and chicken
+        createFood();
         createChicken();
+
+        // Setup Event Bus and Subscribers
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
 
-        if (clients != null) this.gameManager.notifyChange(createGameStartEvent());
+        // Notify Game Start if clients are provided
+        if (clients != null) {
+            this.gameManager.notifyChange(createGameStartEvent());
+        }
     }
 
     private GameStartEvent createGameStartEvent() {
@@ -191,7 +195,8 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         }
     }
 
-    private void createChicken() {
+    // TODO:adjust the spawning chicken depending on the gameconfig
+    private void createChicken() { 
         Tile tile = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
         if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
             Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX()+0.5f, 0.0f,
@@ -285,28 +290,6 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         return gameManager;
     }
 
-    @Override
-    public void onApplicationEvent(InternalMoveEvent event) {
-        if (event.getSource() instanceof SnackMan) {
-            this.gameState.addChangedSnackMan(((SnackMan) event.getSource()));
-        } else if (event.getSource() instanceof Ghost) {
-            this.gameState.addChangedGhost((Ghost) event.getSource());
-        } else if (event.getSource() instanceof Chicken) {
-            this.gameState.addChangedChicken((Chicken) event.getSource());
-        } else {
-            logger.warn("Something unknown moved: " + event.getClass().getSimpleName());
-        }
-    }
-
-    @Override
-    public boolean supportsAsyncExecution() {
-        return ApplicationListener.super.supportsAsyncExecution();
-    }
-
-    public SnackManMap getMap() {
-        return this.map; 
-    }
-
     public GameStartEvent getGameStartEvent() {
         return gameStartEvent;
     }
@@ -346,6 +329,5 @@ public class Game implements ApplicationListener<InternalMoveEvent> {
         }
         return pythonCompatibleSurroundings;
     }
-
 
 }
