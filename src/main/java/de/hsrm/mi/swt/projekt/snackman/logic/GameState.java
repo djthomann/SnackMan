@@ -42,6 +42,9 @@ public class GameState {
                         GameStateEvent gameStateEvent = new GameStateEvent(changedGhosts, changedSnackMen,
                                 changedChicken, eatenFoods, game.getRemainingSeconds());
                         game.getGameManager().notifyChange(gameStateEvent);
+                        if(firstSend) {
+                            firstSend = false;
+                        }
                         changedGhosts.clear();
                         changedSnackMen.clear();
                         changedChicken.clear();
