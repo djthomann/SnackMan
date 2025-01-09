@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import Scene from './Scene.vue';
+import SceneView from './SceneView.vue';
 import FetchMap from './FetchMap.vue';
 </script>
 
 <template>
   <RouterLink to="/title">To The Title Screen </RouterLink>
   <FetchMap />
-  <Scene />
+  <SceneView />
 </template>
 
 <style scoped>

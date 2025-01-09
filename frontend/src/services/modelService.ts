@@ -6,9 +6,14 @@ import orangeModelUrl from '@/assets/models/orange.glb';
 import cakeModelUrl from '@/assets/models/cake.glb';
 import chickenModelUrl from '@/assets/models/chicken.glb';
 import brokkoliModelUrl from '@/assets/models/brokkoli.glb';
+import snackmanModelUrl from '@/assets/models/snackmouse.glb';
 import skybox_dnURL from '@/assets/images/skybox/floor.png';
+import playerModelUrl from '@/assets/models/player.glb';
+
+
 
 import { Logger } from '../util/logger';
+
 
 class ModelService {
   private loader: GLTFLoader;
@@ -30,6 +35,8 @@ class ModelService {
       cake: cakeModelUrl,
       chicken: chickenModelUrl,
       brokkoli: brokkoliModelUrl,
+      snackman: snackmanModelUrl,
+      player: playerModelUrl
     };
     this.scales = {
       banana: 0.02,
@@ -38,6 +45,8 @@ class ModelService {
       cake: 0.175,
       chicken: 1,
       brokkoli: 1,
+      snackman: 0.012,
+      player: 0.012
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
@@ -148,6 +157,8 @@ class ModelService {
     });
   }
 
+
+
   // Creates small floor tiles
   public createFloorTile(x: number, z: number, scale: number) {
     const planeGeometry = new THREE.PlaneGeometry(scale, scale, 1, 1);
@@ -156,7 +167,7 @@ class ModelService {
     });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
-    plane.position.set(x * scale, -1, z * scale);
+    plane.position.set((x + 0.5) * scale, -1, (z + 0.5) * scale);
     plane.receiveShadow = true;
 
     return plane;
@@ -167,12 +178,34 @@ class ModelService {
     const boxGeometry = new THREE.BoxGeometry(1 * scale, wallHeight, 1 * scale);
     const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
     const box = new THREE.Mesh(boxGeometry, boxMaterial);
-    box.position.set(x * scale, 0, z * scale);
+    box.position.set((x  + 0.5) * scale, 0, (z + 0.5) * scale);
     box.castShadow = true;
 
     return box;
   }
 
+  public createPlayer(id: number | undefined, x: number, z: number) {
+    const newModel = this.getModel('player').clone();
+    newModel.userData.id = id;
+    newModel.position.set(x,0,z );
+    return newModel;
+  }
+
+  //Creates Snackman and positions it
+  public createSnackman(id: number, x: number, z: number) {
+    const newModel = this.getModel('snackman').clone();
+    newModel.userData.id = id;
+    newModel.position.set(x,0,z );
+    return newModel;
+  }
+
+    //Creates Ghost and positions it
+  public createGhost(id: number, x: number, z: number) {
+    const newModel = this.getModel('snackman').clone();
+    newModel.userData.id = id;
+    newModel.position.set(x,0,z );
+    return newModel;
+  }
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
   public createFood(id: number, x: number, z: number, calories: number, scale: number) {
     let newModel;
@@ -184,7 +217,7 @@ class ModelService {
       newModel = this.getModel('cake').clone();
     }
     newModel.userData.id = id;
-    newModel.position.set(x * scale, 10, z * scale);
+    newModel.position.set((x + 0.5) * scale, 10, (z + 0.5) * scale);
     return newModel;
   }
 
@@ -194,7 +227,7 @@ class ModelService {
     const chicken = chickenModel.clone();
     chicken.castShadow = true;
     chicken.scale.set(5, 5, 5);
-    chicken.position.set(x, 0, z);
+    chicken.position.set(x + 0.5, 0, z + 0.5);
     this.logger.info('Chicken at:', chicken.position);
     chicken.rotation.y = -45;
     return chicken;

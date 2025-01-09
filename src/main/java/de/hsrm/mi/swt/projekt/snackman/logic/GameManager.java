@@ -57,7 +57,7 @@ public class GameManager {
             allGames.values().iterator().next().receiveEvent(event);
         }
 
-        if (allGames.containsKey(event.getGameID())) {
+        if (!WebSocketHandler.testingMode && allGames.containsKey(event.getGameID())) {
 
             allGames.get(event.getGameID()).receiveEvent(event);
 
