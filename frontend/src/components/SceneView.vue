@@ -134,28 +134,32 @@ export default defineComponent({
       } else if (message.startsWith('DISAPPEAR')) {
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
-        updateCalories(100);
       } else if (message.startsWith('GAME_START')) {
-        handleStartEvent();
-        if (startPromiseResolve) startPromiseResolve();
+        handleStartEvent(message.split(';')[1]);
+        if (startPromiseResolve) {
+          startPromiseResolve();
+        }
       } else if (message.startsWith('GAME_STATE')) {
         handleGameStateEvent(message.split(';')[1]);
       }
     };
 
-    const updateCalories = (amount: number) => {
-      gameStore.addCalories(amount);
-    };
-
-    const updateTime = (sec: number) => {
-      gameStore.setRemainingTime(sec);
-    };
-
     const handleGameStateEvent = (message: string) => {
+
+      
       const parsedData = JSON.parse(message);
+      
+      gameStore.setRemainingTime(parsedData.remainingSeconds);
 
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
-        meshes.get(snackman.objectId)!.position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+
+        if(snackman.objectId === userStore.id) {
+          gameStore.setCalories(snackman.gainedCalories);
+        }
+
+        meshes
+          .get(snackman.objectId)!
+          .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
@@ -166,9 +170,20 @@ export default defineComponent({
           move(chicken.objectId, chicken.x, chicken.y, chicken.z);
       });
     };
-
-    const handleStartEvent = () => {
+    const handleStartEvent = (message: string) => {
       console.log('handle start event');
+
+      const parsedData = JSON.parse(message);
+      gameStore.setRemainingTime(parsedData.gameTime);
+
+      parsedData.snackMen.forEach((snackman: Snackman) => {
+
+      if(snackman.objectId === userStore.id) {
+        gameStore.setCalories(snackman.gainedCalories);
+      }
+
+      });
+
       loadMap(map.value);
     };
 
@@ -297,7 +312,7 @@ export default defineComponent({
 
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
-      
+
         if (!testingMode && snackMan.objectId == userStore.id) {
           //snackManMesh.add(camera);
           const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x, snackMan.z );
@@ -310,7 +325,7 @@ export default defineComponent({
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
           // Add to snackMen group
-          snackMenGroup.add(snackManMesh); 
+          snackMenGroup.add(snackManMesh);
           meshes.set(snackMan.objectId, snackManMesh);
           console.log(`placed Snackman ${snackMan.objectId} on Scene`);
         }
@@ -318,6 +333,7 @@ export default defineComponent({
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
+    
         const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
@@ -385,15 +401,13 @@ export default defineComponent({
       );
 
       player.position.set(
-        (newPlayerPositionX+0.5) * mapScale,
+        (newPlayerPositionX + 0.5) * mapScale,
         newPlayerPositionY,
-        (newPlayerPositionZ+0.5) * mapScale,
+        (newPlayerPositionZ + 0.5) * mapScale,
       );
     }
 
     function makeDisappear(id: number) {
-      updateCalories(100);
-      updateTime(id);
       foodGroup.children.forEach((food) => {
         if (food.userData.id == id) {
           scene.remove(food);

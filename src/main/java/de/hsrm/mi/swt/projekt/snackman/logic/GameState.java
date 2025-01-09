@@ -18,6 +18,8 @@ public class GameState {
     private List<SnackManRecord> changedSnackMen;
     private List<ChickenRecord> changedChicken;
     private List<FoodRecord> eatenFoods;
+    private long lastSentTime;
+    private boolean firstSend = true;
 
     /**
      * synchronized (chnages to gamestate variables need to be declared to all
@@ -36,14 +38,18 @@ public class GameState {
                         e.printStackTrace();
                     }
                     if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
-                            || !eatenFoods.isEmpty()) {
+                            || !eatenFoods.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
                         GameStateEvent gameStateEvent = new GameStateEvent(changedGhosts, changedSnackMen,
-                                changedChicken, eatenFoods);
+                                changedChicken, eatenFoods, game.getRemainingSeconds());
                         game.getGameManager().notifyChange(gameStateEvent);
+                        if(firstSend) {
+                            firstSend = false;
+                        }
                         changedGhosts.clear();
                         changedSnackMen.clear();
                         changedChicken.clear();
                         eatenFoods.clear();
+                        lastSentTime = game.getRemainingSeconds();
                     }
                 }
             }

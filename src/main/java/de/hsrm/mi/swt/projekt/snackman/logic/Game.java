@@ -42,6 +42,7 @@ public class Game {
     private final GameState gameState;
     private int numSnackmen = 0;
     private GameStartEvent gameStartEvent;
+    private long startTime;
 
     // Constructor for Game with no Lobby
     public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
@@ -59,6 +60,7 @@ public class Game {
 
     // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
+        logger.info("in Game Constructor");
         this.id = lobby.getId();
         this.gameConfig = lobby.getGameConfig();
         this.map = lobby.getMap();
@@ -140,12 +142,11 @@ public class Game {
             // for testing setup test SnackMan
             allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.5f, 1.1f, 20.5f, 
             gameManager, gameConfig, collisionManager));
-
+            // Ghost to test collision
             allMovables.add(new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.5f, 1.1f, 20.5f, 
             gameConfig, gameManager, collisionManager));
         }
 
-        // Initialize food and chicken
         createFood();
         createChicken();
 
@@ -169,6 +170,7 @@ public class Game {
             }
         }
         res.setMap(map.toRecord());
+        res.setGameTime(gameConfig.getGameTime());
 
         this.gameStartEvent = res;
 
@@ -252,6 +254,16 @@ public class Game {
         long delay = gameConfig.getGameTime() * 1000L;
 
         timer.schedule(task, delay);
+
+        startTime = System.currentTimeMillis();
+    }
+
+    public long getElapsedMillis() {
+        return System.currentTimeMillis() - startTime;
+    }
+
+    public long getRemainingSeconds() {
+        return gameConfig.getGameTime() - getElapsedMillis() / 1000;
     }
 
     private void stopGame() {

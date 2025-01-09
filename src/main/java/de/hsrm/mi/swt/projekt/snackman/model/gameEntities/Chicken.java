@@ -2,6 +2,8 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.python.core.PyObject;
 import org.python.core.PyTuple;
@@ -31,6 +33,26 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private GameManager gameManager;
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
+
+    // Variables for passive calorie gain
+    private int passiveCalorieGain;
+    private int passiveCalorieGainDelay;
+    private TimerTask passiveCaloriesTask = new TimerTask() {
+            
+        @Override
+        public void run() {
+
+            //logger.info("\n \nChicken with id " + objectId + " has passively gained calories");
+            //logger.info(objectId + " previous calories: " + gainedCalories);
+
+            gainedCalories += passiveCalorieGain;
+
+            //logger.info(objectId + " current calories: " + gainedCalories);
+        }
+    };
+    private transient Timer passiveCaloriesTimer;
+
+    /** The gainedCalorie count of the Chicken */
     private int gainedCalories;
     private String direction;
     private List<List<String>> surroundings;
@@ -56,6 +78,12 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.collisionManager = collisionManager;
         this.gameManager = gameManager;
         this.gainedCalories = 0;
+        //Timer for constant passive calorie gain
+        this.passiveCalorieGain = 10;
+        this.passiveCalorieGainDelay = 1000; //in ms
+        this.passiveCaloriesTimer = new Timer();
+        this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
+        // choose script file
         this.scriptInterpreter = new PythonInterpreter();
         initScriptInterpreter(script);
         logger.info("created Chicken with id: " + id);

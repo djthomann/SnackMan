@@ -167,7 +167,7 @@ class ModelService {
     });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
-    plane.position.set((x+0.5) * scale, 0, (z+0.5) * scale);
+    plane.position.set((x + 0.5) * scale, 0, (z + 0.5) * scale);
     plane.receiveShadow = true;
 
     return plane;
@@ -178,7 +178,7 @@ class ModelService {
     const boxGeometry = new THREE.BoxGeometry(1 * scale, wallHeight, 1 * scale);
     const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f ,depthTest: true,});
     const box = new THREE.Mesh(boxGeometry, boxMaterial);
-    box.position.set((x+0.5) * scale, 0.5 * scale, (z+0.5) * scale);
+    box.position.set((x + 0.5) * scale, 0.5 * scale, (z + 0.5) * scale);
     box.castShadow = true;
 
     return box;
@@ -190,7 +190,7 @@ class ModelService {
     newModel.position.set(x,0,z );
     return newModel;
   }
-  
+
   //Creates Snackman and positions it
   public createSnackman(id: number, x: number, z: number) {
     const newModel = this.getModel('snackman').clone();
@@ -217,7 +217,7 @@ class ModelService {
       newModel = this.getModel('cake').clone();
     }
     newModel.userData.id = id; 
-    newModel.position.set((x+0.5) * scale, 0.5, (z+0.5) * scale);
+    newModel.position.set((x + 0.5) * scale, 0.5, (z + 0.5) * scale);
     return newModel;
   }
 
