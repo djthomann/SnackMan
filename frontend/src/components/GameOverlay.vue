@@ -12,12 +12,11 @@
     </div>
     <div class="info-box timer">
       <img class="timer-icon" src="@/assets/icons/clock.svg" alt="Clock Icon" />
-      <p v-text="seconds" class="timer-info"></p>
+      <p v-text="seconds" class="overlay-info timer-info"></p>
     </div>
     <div class="info-box calories">
-      <!-- Insert Icon here pls :) -->
-      <p>Calories:</p>
-      <p class="calories-info">{{ calories }}</p>
+      <img class="timer-icon" src="@/assets/icons/calories.svg" alt="Clock Icon" />
+      <p class="overlay-info calories-info">{{ calories }}</p>
     </div>
   </div>
 </template>
@@ -81,14 +80,17 @@ onUnmounted(() => {
   flex-direction: row;
   align-items: center;
 }
-p {
-}
 .overlay-container {
   position: absolute;
   width: 100%;
   height: 100%;
   z-index: 1;
 }
+
+.overlay-info {
+  user-select: none;
+}
+
 .info-box {
   margin: 2%;
   height: 5vh;
