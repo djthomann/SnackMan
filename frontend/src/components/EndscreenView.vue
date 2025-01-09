@@ -30,16 +30,25 @@
   </div>
   -->
   <div>
-    <BackgroundComponent>
+    <BackgroundComponent :title="`Congrats! Snackman Won!`">
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent avatar="snackman" variant="white">
             <template #button>Insert Button Component</template>
             <template #content>Snacko<br><strong>123456789 CAL</strong></template>
           </PlayerPanelComponent>
+          <div>
+            <button>Save Map</button>
+          </div>
+          <div>
+            <button>Back to Lobby</button>
+          </div>
         </div>
         <div class="recipe-grid">
           <ReceiptComponent></ReceiptComponent>
+        </div>
+        <div class="lobby-grid__column">
+          <GhostPanelComponent></GhostPanelComponent>
         </div>
       </div>
     </BackgroundComponent>
@@ -54,6 +63,7 @@ import eventBus from '@/services/eventBus';
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import ReceiptComponent from './layout/ReceiptComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
+import GhostPanelComponent from './layout/GhostPanelComponent.vue';
 // TODO: Testdata, delete later
 // import testData from '@/assets/testData.json';
 
@@ -133,7 +143,7 @@ const toLobby = () => {
   grid-template-rows: 1fr auto;
   gap: 40px 60px;
   padding: 4dvw;
-  box-sizing:border-box;
+  box-sizing: border-box;
 }
 
 .recipe-grid {
@@ -150,5 +160,24 @@ const toLobby = () => {
 .lobby-grid__column--span-all {
   grid-column: 1/4;
   text-align: center;
+}
+
+button {
+  color: var(--colorTextDark);
+  background-color: var(--colorTertiary);
+  width: 100%;
+  border-style: solid;
+  border-width: 5px;
+  border-color: white;
+  border-radius: 10px;
+  font-family: "Lilita One", "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  padding: 5%;
+  margin-top: 15px;
+  transition-duration: 0.4s;
+}
+
+button:hover {
+  background-color: var(--colorTertiary);
+  box-shadow: 10px 10px var(--colorShadow);
 }
 </style>

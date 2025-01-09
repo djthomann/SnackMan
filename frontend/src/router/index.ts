@@ -4,7 +4,6 @@ import Main from '@/components/Main.vue';
 import TitleView from '@/components/TitleView.vue';
 import HomeView from '@/components/HomeView.vue';
 import LobbyView from '@/components/LobbyView.vue';
-import Username from '@/components/Username.vue';
 
 import EndscreenView from '@/components/EndscreenView.vue';
 
