@@ -19,6 +19,19 @@
     <input type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
     <button @click="joinLobby(lobbyCode)">Join Lobby</button>
   </div>
+  <BackgroundComponent :title="`JOIN A LOBBY`">
+    <div class="home-grid">
+      <div class="player-box">
+        <img class="player-picture" src="@/assets/icons/player_icon.png"/>
+        <img class="pin" src="@/assets/icons/pin.png"/>
+          <p>{{ name }}</p>
+      </div>
+      <div class="home-view-row lobbies">
+       
+        <LobbyPanelComponent height-behaviour="stretch"></LobbyPanelComponent>
+      </div>
+    </div>
+  </BackgroundComponent>
 </template>
 
 <script setup lang="ts">
@@ -26,8 +39,10 @@ import {ref, computed, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
+import BackgroundComponent from './layout/BackgroundComponent.vue';
 
 import { Logger } from '../util/logger';
+import LobbyPanelComponent from './layout/LobbyPanelComponent.vue';
 
 const logger = new Logger();
 
@@ -87,4 +102,42 @@ const fetchLobbies = () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.home-grid {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid; 
+  grid-template-columns: 1fr; 
+  grid-template-rows: 1fr 1fr 1fr; 
+  
+  gap: 40px 60px;
+  padding: 2dvw 4dvw 7dvw 4dvw;
+  box-sizing:border-box;
+}
+
+.player-box {
+  position: absolute;
+  width: auto;
+  top: 5%;
+  right: 10%;
+  padding: 2%;
+  background-color: blue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pin {
+  width: 20px;
+}
+
+.home-view-row {
+  
+
+}
+
+.lobbies {
+  grid-row: 3/4;
+}
+</style>
