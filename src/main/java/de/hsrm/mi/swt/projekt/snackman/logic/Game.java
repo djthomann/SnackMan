@@ -2,12 +2,12 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.*;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -294,6 +294,7 @@ public class Game {
         return gameStartEvent;
     }
 
+    // TODO: adjust this by changing ocupation to records or else.
     public List<List<String>> generateSurroundings(float x, float z) {
         Tile positionTile = this.map.getTileAt((int) (x), (int) (z));
         Tile[][] surroundings = this.map.getSurroundingTiles(positionTile);
@@ -311,17 +312,29 @@ public class Game {
                             rowList.add("WALL");
                             break;
                         case ITEM:
-                            rowList.add(tile.getOccupation().toString());
+                            if (tile.getOccupation().getClass().getSimpleName().equals("Food")) {
+                                rowList.add("FOOD");
+                            } else {
+                                rowList.add("Unknown ITEM");
+                            }
                             break;
                         case FREE:
                             if (tile.getOccupation() != null) {
-                                rowList.add(tile.getOccupation().toString());
+                                switch (tile.getOccupation().getClass().getSimpleName()) {
+                                    case "ChickenRecord":
+                                        rowList.add("CHICKEN");
+                                        break;
+                                    case "Ghost":
+                                        rowList.add("GHOST");
+                                        break;
+                                    case "SnackMan":
+                                        rowList.add("SNACKMAN");
+                                        break;
+                                }
                             } else {
                                 rowList.add("FREE");
                             }
                             break;
-                        default:
-                            rowList.add("UNKNOWN");
                     }
                 }
             }

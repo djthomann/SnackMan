@@ -49,7 +49,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      */
     public Chicken(long id, long gameId, float x, float y, float z, String script, GameManager gameManager,
             GameConfig gameConfig, CollisionManager collisionManager) {
-        super(id, gameId, x, y, z, gameConfig.getChickenMinRadius());
+        super(id, gameId, x, y, z, gameConfig.getChickenMinRadius(), gameConfig.getChickenHeight());
         this.direction = "N";
         this.wallCollision = false;
         this.gameConfig = gameConfig;
@@ -58,6 +58,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.gainedCalories = 0;
         this.scriptInterpreter = new PythonInterpreter();
         initScriptInterpreter(script);
+        logger.info("created Chicken with id: " + id);
     }
 
     private void initScriptInterpreter(String script) {
@@ -78,12 +79,18 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         }
         this.scriptInterpreter.execfile(scriptFile); 
         new Thread(() -> {
-            try {   
+            try {
+                while(!Thread.currentThread().isInterrupted()) {
+                if (gameManager.getGameById(gameId) == null) {
+                    logger.info("in if game id : " +gameId);
+                    Thread.sleep(1000);
+                } else {
                     Thread.sleep(50); // 1000 = 1 sec
                     surroundings = gameManager.getGameById(gameId).generateSurroundings(this.x, this.z);
                     logger.info(surroundings.toString());
-                    executeScript(surroundings); 
-
+                    executeScript(surroundings);
+                }
+            }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
