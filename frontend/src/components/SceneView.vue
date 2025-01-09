@@ -134,7 +134,6 @@ export default defineComponent({
       } else if (message.startsWith('DISAPPEAR')) {
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
-        updateCalories(100);
       } else if (message.startsWith('GAME_START')) {
         handleStartEvent();
         if (startPromiseResolve) {
@@ -145,17 +144,17 @@ export default defineComponent({
       }
     };
 
-    const updateCalories = (amount: number) => {
-      gameStore.addCalories(amount);
-    };
-
-    const updateTime = (sec: number) => {
-      gameStore.setRemainingTime(sec);
-    };
-
     const handleGameStateEvent = (message: string) => {
+
+      console.log("Handling Game State Event");
+
       const parsedData = JSON.parse(message);
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
+
+        if(snackman.objectId === userStore.id) {
+          gameStore.setCalories(snackman.gainedCalories);
+        }
+
         meshes
           .get(snackman.objectId)!
           .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
@@ -381,8 +380,6 @@ export default defineComponent({
     }
 
     function makeDisappear(id: number) {
-      updateCalories(100);
-      updateTime(id);
       foodGroup.children.forEach((food) => {
         if (food.userData.id == id) {
           scene.remove(food);

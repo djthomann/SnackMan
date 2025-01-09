@@ -9,12 +9,9 @@ export const useGameStore = defineStore('game', {
     setRemainingTime(time: number) {
       this.remainingTime = time;
     },
-    addCalories(amount: number) {
-      this.calories += amount;
+    setCalories(amount: number) {
+      this.calories = amount;
       console.log(this.calories);
-    },
-    removeCalories(amount: number) {
-      this.calories = Math.max(0, this.calories - amount);
-    },
+    }
   },
 });
