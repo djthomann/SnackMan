@@ -146,17 +146,13 @@ export default defineComponent({
 
     const handleGameStateEvent = (message: string) => {
 
-      
       const parsedData = JSON.parse(message);
-      
       gameStore.setRemainingTime(parsedData.remainingSeconds);
 
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
-
         if(snackman.objectId === userStore.id) {
           gameStore.setCalories(snackman.gainedCalories);
         }
-
         meshes
           .get(snackman.objectId)!
           .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);

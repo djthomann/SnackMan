@@ -110,7 +110,7 @@ public class CollisionManager {
             if (aktMovable instanceof SnackMan && aktMovable != collisionPartner) {
 
                 float distance = calculateDistance(wishedX, ((SnackMan)aktMovable).getX() + TRANSLATION, wishedZ, ((SnackMan)aktMovable).getZ() + TRANSLATION);
-                logger.info("\nDistance between SnackMen: " + distance + "\n");
+                //logger.info("\nDistance between SnackMen: " + distance + "\n");
 
                 // Get tile of aktMovable
                 Tile aktMovableTile = snackManMap.getTileAt((int)((SnackMan)aktMovable).getX(), (int)((SnackMan)aktMovable).getZ());
