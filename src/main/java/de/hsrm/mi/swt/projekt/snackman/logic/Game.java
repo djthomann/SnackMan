@@ -199,19 +199,46 @@ public class Game {
 
     // TODO:adjust the spawning chicken depending on the gameconfig
     private void createChicken() { 
-        Tile tile = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
-        if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
-            Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX()+0.5f, 0.0f,
-                    (float) tile.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-            tile.setOccupation(chickenOne.toRecord());
-            allMovables.add(chickenOne);
-        }   
-        Tile secTile = map.getTileAt((map.getW() / 2) - 3, (map.getH() / 2) - 3);
-         if (secTile.getOccupationType() == OccupationType.FREE && secTile.getOccupation() == null) {
-            Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) secTile.getX()+0.5f, 0.0f,
-                    (float) secTile.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-            secTile.setOccupation(chickenTwo.toRecord());
-            allMovables.add(chickenTwo);
+        int chickenCount = gameConfig.getChickenCount();
+        if (chickenCount < 0 || chickenCount > 4) {
+            logger.info("Invalid chickenCount in GameConfig: " + chickenCount + ". Allowed range is [0-4]. Setting to 4.");
+            chickenCount = 4;
+        }
+        if (chickenCount >= 1) {
+            Tile tileOne = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
+            if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupation() == null) {
+                Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
+                0.0f, (float) tileOne.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileOne.setOccupation(chickenOne.toRecord());
+                allMovables.add(chickenOne);
+            }
+        }
+        if (chickenCount >= 2) {
+            Tile tileTwo = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) - 4);
+            if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupation() == null) {
+                Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileTwo.getX()+0.5f,
+                0.0f, (float) tileTwo.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileTwo.setOccupation(chickenTwo.toRecord());
+                allMovables.add(chickenTwo);
+            }
+        }
+        if (chickenCount >= 3) {
+            Tile tileThree = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) - 4);
+            if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupation() == null) {
+                Chicken chickenThree = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileThree.getX()+0.5f,
+                0.0f, (float) tileThree.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileThree.setOccupation(chickenThree.toRecord());
+                allMovables.add(chickenThree);
+            }
+        }
+        if (chickenCount >= 4) {
+            Tile tileFour = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) + 3);   
+            if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupation() == null) {
+                Chicken chickenFour = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileFour.getX()+0.5f,
+                0.0f, (float) tileFour.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileFour.setOccupation(chickenFour.toRecord());
+                allMovables.add(chickenFour);
+            }
         }
     }
 
@@ -306,7 +333,7 @@ public class Game {
         return gameStartEvent;
     }
 
-    // TODO: adjust this by changing ocupation to records or else.
+    //adjust the cases,in case of changing the Occupation in the Tile of the map to records!
     public List<List<String>> generateSurroundings(float x, float z) {
         Tile positionTile = this.map.getTileAt((int) x, (int) z);
         Tile[][] surroundings = this.map.getSurroundingTiles(positionTile);

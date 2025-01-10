@@ -52,8 +52,8 @@ public class CollisionManager {
 
         switch (wishedTile.getOccupationType()) {
             case WALL:
-                logger.info(
-                        "snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                //logger.info(
+                    //collisionPartner.toString() + " and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 collisions.add(CollisionType.WALL);
             case ITEM:
                //logger.info(
