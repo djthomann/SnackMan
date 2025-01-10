@@ -308,7 +308,7 @@ public class Game {
 
     // TODO: adjust this by changing ocupation to records or else.
     public List<List<String>> generateSurroundings(float x, float z) {
-        Tile positionTile = this.map.getTileAt((int) (x), (int) (z));
+        Tile positionTile = this.map.getTileAt((int) x, (int) z);
         Tile[][] surroundings = this.map.getSurroundingTiles(positionTile);
         List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
 
@@ -324,7 +324,7 @@ public class Game {
                             rowList.add("WALL");
                             break;
                         case ITEM:
-                            if (tile.getOccupation().getClass().getSimpleName().equals("Food")) {
+                            if ( tile.getOccupation() != null && tile.getOccupation().getClass().getSimpleName().equals("Food")) {
                                 rowList.add("FOOD");
                             } else {
                                 rowList.add("Unknown ITEM");
@@ -342,10 +342,16 @@ public class Game {
                                     case "SnackMan":
                                         rowList.add("SNACKMAN");
                                         break;
+                                    default:
+                                        rowList.add("FREE");
+                                        break;
                                 }
                             } else {
                                 rowList.add("FREE");
                             }
+                            break;
+                        default:
+                            rowList.add("Unknown");
                             break;
                     }
                 }
