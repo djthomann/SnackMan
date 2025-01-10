@@ -107,6 +107,9 @@ const fetchLobbies = () => {
 </script>
 
 <style scoped>
+* {
+  user-select: none;
+}
 .home-grid {
   position: relative;
   width: 100%;

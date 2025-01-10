@@ -62,7 +62,12 @@ p {
 
 .lobbypanel:hover {
     cursor: pointer;
-    transform: translate(-10px, -10px);
+    transform: translate(10px, -10px);
+    z-index: 10;
+}
+
+.lobbypanel:hover .playerpanel__sheet {
+    filter: drop-shadow(-10px 10px 0 rgba(0, 0, 0, 0.2));
 }
 
 .playerpanel--height-auto,
@@ -109,7 +114,8 @@ p {
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: 100%;
-    filter: drop-shadow(10px 10px 0 rgba(0,0,0,0.2));
+    filter: none;
+    transition: filter 0.2s ease;
     user-select: none;
     pointer-events: none;
 }
