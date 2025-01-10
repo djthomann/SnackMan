@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue';
+import type { Lobby } from '@/types/lobby';
+
+const maxPlayers = 8;
 
     type Props = {
+        lobby: Lobby,
         heightBehaviour?: 'auto' | 'stretch'
     }
 
@@ -30,17 +34,14 @@ import { computed, useSlots } from 'vue';
                     <img class="playerpanel__sheet-image" src="@/assets/images/backgrounds/playerpanel_bottom.png">
                 </div>
             </div>
-            <div class="playerpanel__content">
-                <div class="playerpanel__content-header">
-                    <div class="playerpanel__content-headline" v-if="slots.counter">
-                        <div class="playerpanel__content-counter" v-if="slots.counter">
-                            <slot name="counter"></slot>
-                        </div>
-                    </div>
+            <div class="lobbypanel__content">
+                <div class="lobbypanel__content-header">
+                    <p>LOBBY #{{ lobby.lobbyCode }}</p>
                     
                 </div>
-                <div class="playerpanel__content-body" v-if="slots.content">
-                    <slot name="content"></slot>
+                <div class="lobbypanel__content-body">
+                    <img class="num-player-icon" src="@/assets/icons/person.svg" />
+                    <p>{{ lobby.numPlayers }}/{{ maxPlayers }}</p>
                 </div>
             </div>
         </div>
@@ -49,9 +50,19 @@ import { computed, useSlots } from 'vue';
 </template>
 
 <style scoped lang="css">
-
+p {
+    color: white;
+}
 .lobbypanel {
     width:200px;
+    margin: 10px;
+    user-select: none;
+    transition: transform 200ms;
+}
+
+.lobbypanel:hover {
+    cursor: pointer;
+    transform: translate(-10px, -10px);
 }
 
 .playerpanel--height-auto,
@@ -66,10 +77,12 @@ import { computed, useSlots } from 'vue';
 
 .playerpanel__container {
     width: 100%;
+    height: 100%;
     max-width: 340px;
     position: relative;
     z-index: 3;
 }
+
 .playerpanel--selected .playerpanel__container::before {
     position: absolute;
     content: '';
@@ -85,6 +98,9 @@ import { computed, useSlots } from 'vue';
     z-index: 1;
 }
 
+.num-player-icon {
+    height: 50px;
+}
 
 .playerpanel__sheet {
     width: 100%;
@@ -126,66 +142,67 @@ import { computed, useSlots } from 'vue';
     height: 100%;
 }
 
-.playerpanel__content {
+.lobbypanel__content {
     position: relative;
     width: 100%;
-    display: grid;
-    grid-template-columns: 100%;
-    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-.playerpanel--height-auto .playerpanel__content {
+.playerpanel--height-auto .lobbypanel__content {
     height: auto;
     grid-template-rows: auto auto;
 }
 
-.playerpanel--height-stretch .playerpanel__content {
+.playerpanel--height-stretch .lobbypanel__content {
     height: 100%;
     grid-template-rows: auto 1fr;
 }
 
-.playerpanel__content-header {
-    padding: 25px 30px 15px;
-    box-sizing: border-box;
+.lobbypanel__content-header {
+    color: white;
+    font-size: 16pt;
+    text-align: center;
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    
 }
 
-.playerpanel__content-counter {
+.lobbypanel__content-header p {
+    margin: 0;
+}
+
+.lobbypanel__content-counter {
     width: 100%;
     text-align: right;
     color: var(--colorLight);
     user-select: none;
 }
 
-.playerpanel__content-image {
+.lobbypanel__content-image {
     width: 100%;
     height: 100px;
     user-select: none;
     pointer-events: none;
 }
 
-.playerpanel__content-image img {
+.lobbypanel__content-image img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     object-position: center;
 }
 
-.playerpanel__content-body {
-    padding: 15px 30px 30px;
+.lobbypanel__content-body {
+    margin: 0 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-sizing: border-box;
     position: relative;
-}
-
-.playerpanel__content-header + .playerpanel__content-body::before {
-    position: absolute;
-    content: '';
-    width: calc(100% - 60px);
-    height: 0px;
-    border-top: 3px dashed var(--colorLight);
-    inset: -1.5px 0 auto;
-    margin: 0 auto;
 }
 </style>

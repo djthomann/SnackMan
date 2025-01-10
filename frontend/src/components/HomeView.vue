@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h1>Home</h1>
+    <!--<h1>Home</h1>-->
     <p>Welcome, {{ name }} with the ID {{ id }}</p>
-
+<!--
     <h2>Lobbies</h2>
     <ul>
       <li v-for="lobby in lobbies" :key="lobby.lobbyCode ?? 'default-key'">
@@ -12,9 +12,9 @@
       </li>
     </ul>
 
-    <button @click="createLobby">Create Lobby</button>
     <button @click="fetchLobbies">Refresh Lobbies</button>
-
+    -->
+    <button @click="createLobby">Create Lobby</button>
     <h2>Enter Lobby Code</h2>
     <input type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
     <button @click="joinLobby(lobbyCode)">Join Lobby</button>
@@ -27,8 +27,12 @@
           <p>{{ name }}</p>
       </div>
       <div class="home-view-row lobbies">
-       
-        <LobbyPanelComponent height-behaviour="stretch"></LobbyPanelComponent>
+        <LobbyPanelComponent @click="joinLobby(lobby.lobbyCode?.toString() ?? '')" v-for="lobby in lobbies" :lobby="lobby" height-behaviour="stretch"></LobbyPanelComponent>
+        <div class="refresh-button">
+          <button @click="fetchLobbies">
+            <img class="num-player-icon" src="@/assets/icons/refresh.svg" />
+          </button>
+        </div>
       </div>
     </div>
   </BackgroundComponent>
@@ -43,6 +47,7 @@ import BackgroundComponent from './layout/BackgroundComponent.vue';
 
 import { Logger } from '../util/logger';
 import LobbyPanelComponent from './layout/LobbyPanelComponent.vue';
+import type { Lobby } from '@/types/lobby';
 
 const logger = new Logger();
 
@@ -54,11 +59,6 @@ const name = computed(() => userStore.username || 'Guest');
 const id = computed(() => userStore.id || 0);
 const maxPlayers = 8;
 const userStore = useUserStore();
-
-interface Lobby {
-  lobbyCode: number | null;
-  numPlayers: number;
-}
 
 const lobbies = ref<Lobby[]>([]);
 
@@ -85,6 +85,10 @@ const createLobby = () => {
   const newLobbyCode = 'NEW759';
   router.push({ path: `/lobby/${newLobbyCode}` }); */
 };
+
+const clickComponent = () => {
+  console.log("Lobby clicked")
+}
 
 const joinLobby = (code: string) => {
   logger.info(`Joining lobby with code: ${code}`);
@@ -133,11 +137,35 @@ const fetchLobbies = () => {
 }
 
 .home-view-row {
-  
-
+  display: flex;
 }
 
 .lobbies {
   grid-row: 3/4;
+}
+
+.refresh-button {
+  margin: auto 0 auto auto;
+  user-select: none;
+}
+
+.refresh-button img {
+  height: 100px;
+  transition: transform 0.5s ease;
+  user-select: none;
+}
+
+.refresh-button button {
+  background: 0;
+  border: 0;
+  user-select: none;
+}
+
+.refresh-button button:hover {
+  cursor: pointer;
+}
+
+.refresh-button img:hover  {
+  transform: rotate(360deg);
 }
 </style>
