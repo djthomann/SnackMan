@@ -14,17 +14,17 @@ public class GameStateEvent extends Event {
 
     private List<GhostRecord> updatesGhosts;
     private List<SnackManRecord> updatesSnackMen;
-    private List<ChickenRecord> updatesChicken;
+    private List<ChickenRecord> updatesChickens;
     private List<FoodRecord> eatenFoods;
     private long remainingSeconds;
 
     // gameStateEvent sends any Object or Food where soemthin has changed.
-    public GameStateEvent(List<GhostRecord> updatesGhosts, List<SnackManRecord> updatesSnackMen, List<ChickenRecord> updatesChicken,
+    public GameStateEvent(List<GhostRecord> updatesGhosts, List<SnackManRecord> updatesSnackMen, List<ChickenRecord> updatesChickens,
             List<FoodRecord> updatesFoods, long remainingSeconds) {
         this.setType(EventType.GAME_STATE);
         this.updatesGhosts = updatesGhosts;
         this.updatesSnackMen = updatesSnackMen;
-        this.updatesChicken = updatesChicken;
+        this.updatesChickens = updatesChickens;
         this.eatenFoods = updatesFoods;
         this.remainingSeconds = remainingSeconds;
     }
@@ -53,12 +53,13 @@ public class GameStateEvent extends Event {
         this.updatesSnackMen = updatesSnackMen;
     }
 
-    public List<ChickenRecord> getUpdatesChicken() {
-        return updatesChicken;
+    public List<ChickenRecord> getUpdatesChickens() {
+        return updatesChickens;
     }
 
-    public void setUpdatesChicken(List<ChickenRecord> updatesChicken) {
-        this.updatesChicken = updatesChicken;
+
+    public void setUpdatesChickens(List<ChickenRecord> updatesChickens) {
+        this.updatesChickens = updatesChickens;
     }
 
     public long getRemainingSeconds() {

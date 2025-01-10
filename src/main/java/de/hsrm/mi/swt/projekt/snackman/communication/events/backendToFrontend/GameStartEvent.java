@@ -18,15 +18,15 @@ public class GameStartEvent extends Event {
 
     private List<SnackManRecord> snackMen;
     private List<GhostRecord> ghosts;
-    private List<ChickenRecord> chicken;
+    private List<ChickenRecord> chickens;
     private SnackManMapRecord map;
     private long gameTime;
 
-    public GameStartEvent(List<SnackManRecord> snackMen, List<GhostRecord> ghosts, List<ChickenRecord> chicken, SnackManMapRecord map, long gameTime) {
+    public GameStartEvent(List<SnackManRecord> snackMen, List<GhostRecord> ghosts, List<ChickenRecord> chickens, SnackManMapRecord map, long gameTime) {
         this.setType(EventType.GAME_START);
         this.snackMen = snackMen;
         this.ghosts = ghosts;
-        this.chicken = chicken;
+        this.chickens = chickens;
         this.map = map;
         this.gameTime = gameTime;
     }
@@ -34,7 +34,7 @@ public class GameStartEvent extends Event {
     public GameStartEvent() {
         this.setType(EventType.GAME_START);
         this.snackMen = new ArrayList<>();
-        this.chicken = new ArrayList<>();
+        this.chickens = new ArrayList<>();
         this.ghosts = new ArrayList<>();
     }
 
@@ -47,7 +47,7 @@ public class GameStartEvent extends Event {
     }
 
     public void addChicken(Chicken c) {
-        this.chicken.add(c.toRecord());
+        this.chickens.add(c.toRecord());
     }
 
     public List<SnackManRecord> getSnackMen() {
@@ -66,12 +66,12 @@ public class GameStartEvent extends Event {
         this.ghosts = ghosts;
     }
 
-    public List<ChickenRecord> getChicken() {
-        return chicken;
+    public List<ChickenRecord> getChickens() {
+        return chickens;
     }
 
-    public void setChicken(List<ChickenRecord> chicken) {
-        this.chicken = chicken;
+    public void setChickens(List<ChickenRecord> chickens) {
+        this.chickens = chickens;
     }
 
     public SnackManMapRecord getMap() {

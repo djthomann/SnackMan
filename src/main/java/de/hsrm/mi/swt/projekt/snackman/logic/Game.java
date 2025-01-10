@@ -2,7 +2,6 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.*;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
@@ -18,7 +17,6 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
-import org.springframework.context.ApplicationListener;
 
 /**
  * The Game class contains all the information and logic necessary within an individual game.
@@ -45,21 +43,21 @@ public class Game {
     private GameStartEvent gameStartEvent;
     private long startTime;
 
-    
-
+    // Constructor for Game with no Lobby
     public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
-        init(null);
+        this.Initialize(null);
         this.timer = new Timer();
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);
     }
 
+    // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
         logger.info("in Game Constructor");
         this.id = lobby.getId();
@@ -67,10 +65,7 @@ public class Game {
         this.map = lobby.getMap();
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables);
-
-        createMovables(lobby.getClientsAsList());
-        init(lobby.getClientsAsList());
-
+        Initialize(lobby.getClientsAsList()); 
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);
@@ -138,23 +133,31 @@ public class Game {
      * TODO: This method will be expanded to create all game objects and add them to
      * the game object list.
      */
-    public void init(List<Client> clients) {
+    public void Initialize(List<Client> clients) {
 
-        createFood();
-
-        // for testing setup test SnackMan
-        if (clients == null && allMovables.size() < 1) {
-            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager, gameConfig, collisionManager));
-
+        if (clients != null) {
+            createMovables(clients);
+        } else {
+            // for testing setup test SnackMan
+            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.5f, 1.1f, 20.5f, 
+            gameManager, gameConfig, collisionManager));
             // Ghost to test collision
-            Ghost debugGhost = new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.0f, 1.1f, 20.0f, gameConfig, gameManager, collisionManager);
-            allMovables.add(debugGhost);
+            allMovables.add(new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.5f, 1.1f, 20.5f, 
+            gameConfig, gameManager, collisionManager));
         }
+
+        // Initialize food and chicken
+        createFood();
         createChicken();
+
+        // Setup Event Bus and Subscribers
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
 
-        if (clients != null) this.gameManager.notifyChange(createGameStartEvent());
+        // Notify Game Start if clients are provided
+        if (clients != null) {
+            this.gameManager.notifyChange(createGameStartEvent());
+        }
     }
 
     private GameStartEvent createGameStartEvent() {
@@ -194,13 +197,48 @@ public class Game {
         }
     }
 
-    private void createChicken() {
-        Tile tile = map.getTileAt(map.getW() / 2, map.getH() / 2);  // HARD CODED IN THE MIDDLE OF THE MAP FOR TEST PORPOSES
-        if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
-            Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX(), 0.0f,
-                    (float) tile.getZ(), "test", gameManager, gameConfig, collisionManager);
-            tile.setOccupation(chickenOne.toRecord());
-            allMovables.add(chickenOne);
+    // TODO:adjust the spawning chicken depending on the gameconfig
+    private void createChicken() { 
+        int chickenCount = gameConfig.getChickenCount();
+        if (chickenCount < 0 || chickenCount > 4) {
+            logger.info("Invalid chickenCount in GameConfig: " + chickenCount + ". Allowed range is [0-4]. Setting to 4.");
+            chickenCount = 4;
+        }
+        if (chickenCount >= 1) {
+            Tile tileOne = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
+            if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupation() == null) {
+                Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
+                0.0f, (float) tileOne.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileOne.setOccupation(chickenOne.toRecord());
+                allMovables.add(chickenOne);
+            }
+        }
+        if (chickenCount >= 2) {
+            Tile tileTwo = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) - 4);
+            if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupation() == null) {
+                Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileTwo.getX()+0.5f,
+                0.0f, (float) tileTwo.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileTwo.setOccupation(chickenTwo.toRecord());
+                allMovables.add(chickenTwo);
+            }
+        }
+        if (chickenCount >= 3) {
+            Tile tileThree = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) - 4);
+            if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupation() == null) {
+                Chicken chickenThree = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileThree.getX()+0.5f,
+                0.0f, (float) tileThree.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileThree.setOccupation(chickenThree.toRecord());
+                allMovables.add(chickenThree);
+            }
+        }
+        if (chickenCount >= 4) {
+            Tile tileFour = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) + 3);   
+            if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupation() == null) {
+                Chicken chickenFour = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileFour.getX()+0.5f,
+                0.0f, (float) tileFour.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileFour.setOccupation(chickenFour.toRecord());
+                allMovables.add(chickenFour);
+            }
         }
     }
 
@@ -294,4 +332,60 @@ public class Game {
     public GameStartEvent getGameStartEvent() {
         return gameStartEvent;
     }
+
+    //adjust the cases,in case of changing the Occupation in the Tile of the map to records!
+    public List<List<String>> generateSurroundings(float x, float z) {
+        Tile positionTile = this.map.getTileAt((int) x, (int) z);
+        Tile[][] surroundings = this.map.getSurroundingTiles(positionTile);
+        List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
+
+        for (int row = 1; row >= -1; row--) {
+            List<String> rowList = new ArrayList<>();
+            for (int col = -1; col <= 1; col++) {
+                Tile tile = surroundings[row + 1][col + 1];
+                if (tile == null) {
+                    rowList.add("OUT");
+                } else {
+                    switch (tile.getOccupationType()) {
+                        case WALL:
+                            rowList.add("WALL");
+                            break;
+                        case ITEM:
+                            if ( tile.getOccupation() != null && tile.getOccupation().getClass().getSimpleName().equals("Food")) {
+                                rowList.add("FOOD");
+                            } else {
+                                rowList.add("Unknown ITEM");
+                            }
+                            break;
+                        case FREE:
+                            if (tile.getOccupation() != null) {
+                                switch (tile.getOccupation().getClass().getSimpleName()) {
+                                    case "ChickenRecord":
+                                        rowList.add("CHICKEN");
+                                        break;
+                                    case "Ghost":
+                                        rowList.add("GHOST");
+                                        break;
+                                    case "SnackMan":
+                                        rowList.add("SNACKMAN");
+                                        break;
+                                    default:
+                                        rowList.add("FREE");
+                                        break;
+                                }
+                            } else {
+                                rowList.add("FREE");
+                            }
+                            break;
+                        default:
+                            rowList.add("Unknown");
+                            break;
+                    }
+                }
+            }
+            pythonCompatibleSurroundings.add(rowList);
+        }
+        return pythonCompatibleSurroundings;
+    }
+
 }

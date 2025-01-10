@@ -48,4 +48,9 @@ public class Food extends GameObject {
         return new FoodRecord(gameId, objectId, x, y, z, calories, foodType);
     }
 
+    // String representation used for chickenssurroundings
+    public String toString() {
+        return "FOOD";
+    }
+
 }

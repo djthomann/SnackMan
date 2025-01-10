@@ -269,7 +269,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         if (!WebSocketHandler.testingMode) EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManger));
     }
 
-    /**
+   /**
      * Method to implement jumping
      */
     public void jump() {
@@ -394,8 +394,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 logger.info("Wished Z: " + wishedZ);
 
                 if(!collisionManager.positionIsWithinMapBounds(wishedX, wishedZ)) {
-                    vector.x = 0;
-                    vector.z = 0;
+                    vector.x = 0.0f;
+                    vector.z = 0.0f;
                     return;
                 }
 
@@ -418,8 +418,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 if (wishedX != this.getX() || wishedZ != this.getZ()) {
                     if (this.getY() < gameConfig.getWallHeight()) {
                         if (collisions.contains(CollisionType.WALL)) {
-                            vector.x = 0;
-                            vector.z = 0;
+                            vector.x = 0.0f;
+                            vector.z = 0.0f;
                         } else if (collisions.contains(CollisionType.ITEM)) {
                             logger.info("MMMMMM delicious ");
                         }
@@ -449,8 +449,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     }
 
                     logger.info("Kollision mit Snack Man, aktuelle Kalorien: " + this.gainedCalories);
-                    vector.x = 0;
-                    vector.z = 0;
+                    vector.x = 0.0f;
+                    vector.z = 0.0f;
                 }
 
                 this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
@@ -474,11 +474,16 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         }
 
-        // logger.info("Event arrived at SnackMan :" + event.toString());
+        logger.info("Event arrived at SnackMan :" + event.toString());
     }
 
     public SnackManRecord toRecord() {
         return new SnackManRecord(gameId, objectId, getUsername(), x, y, z, gainedCalories);
+    }
+
+    // String representation used for chickenssurroundings
+    public String toString() {
+        return "SNACKMAN";
     }
 
     public boolean isInvincible() {
