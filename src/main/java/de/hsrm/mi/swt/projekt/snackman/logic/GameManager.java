@@ -50,7 +50,6 @@ public class GameManager {
      * @param event
      */
     public void handleEvent(Event event) {
-
         logger.info("handleEvent\n");
 
         if (WebSocketHandler.testingMode && allGames.values().size() == 1) {
@@ -60,7 +59,6 @@ public class GameManager {
         if (!WebSocketHandler.testingMode && allGames.containsKey(event.getGameID())) {
 
             allGames.get(event.getGameID()).receiveEvent(event);
-
         }
     }
 
@@ -97,7 +95,6 @@ public class GameManager {
         // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH + "testFile.csv", true);
 
         Game newGame = new Game(id, gameConfig, map, this);
-        newGame.init(null); // Add Objects
         allGames.put(newGame.id, newGame);
     }
 

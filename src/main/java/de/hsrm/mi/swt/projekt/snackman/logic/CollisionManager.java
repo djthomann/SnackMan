@@ -52,12 +52,12 @@ public class CollisionManager {
 
         switch (wishedTile.getOccupationType()) {
             case WALL:
-                logger.info(
-                        "snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                //logger.info(
+                    //collisionPartner.toString() + " and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 collisions.add(CollisionType.WALL);
             case ITEM:
-                logger.info(
-                        "snackman and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+               //logger.info(
+                        //collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
                 if (collisionPartner instanceof SnackMan) {
 
@@ -110,7 +110,7 @@ public class CollisionManager {
             if (aktMovable instanceof SnackMan && aktMovable != collisionPartner) {
 
                 float distance = calculateDistance(wishedX, ((SnackMan)aktMovable).getX() + TRANSLATION, wishedZ, ((SnackMan)aktMovable).getZ() + TRANSLATION);
-                logger.info("\nDistance between SnackMen: " + distance + "\n");
+                //logger.info("\nDistance between SnackMen: " + distance + "\n");
 
                 // Get tile of aktMovable
                 Tile aktMovableTile = snackManMap.getTileAt((int)((SnackMan)aktMovable).getX(), (int)((SnackMan)aktMovable).getZ());

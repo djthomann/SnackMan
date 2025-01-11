@@ -285,7 +285,6 @@ public class SnackManMap {
                 }
             }
         }
-
         return surroudings;
     }
 

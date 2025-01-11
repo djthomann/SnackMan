@@ -80,7 +80,7 @@ class ModelService {
         this.modelCache.set(name, modelData); // Store scene in cache
         if (modelData.animations.length > 0) {
           this.animationCache.set(name, modelData);
-          console.log('Animation added to Cache');
+          this.logger.info('Animation added to Cache');
         }
       }),
     );
@@ -167,7 +167,7 @@ class ModelService {
     });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
-    plane.position.set((x + 0.5) * scale, -1, (z + 0.5) * scale);
+    plane.position.set((x + 0.5) * scale, 0, (z + 0.5) * scale);
     plane.receiveShadow = true;
 
     return plane;
@@ -176,9 +176,9 @@ class ModelService {
   // Creates one cube per wall tile
   public createWall(x: number, z: number, scale: number, wallHeight: number) {
     const boxGeometry = new THREE.BoxGeometry(1 * scale, wallHeight, 1 * scale);
-    const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f });
+    const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f ,depthTest: true,});
     const box = new THREE.Mesh(boxGeometry, boxMaterial);
-    box.position.set((x  + 0.5) * scale, 0, (z + 0.5) * scale);
+    box.position.set((x + 0.5) * scale, 0.5 * scale, (z + 0.5) * scale);
     box.castShadow = true;
 
     return box;
@@ -216,20 +216,21 @@ class ModelService {
     } else {
       newModel = this.getModel('cake').clone();
     }
-    newModel.userData.id = id;
-    newModel.position.set((x + 0.5) * scale, 10, (z + 0.5) * scale);
+    newModel.userData.id = id; 
+    newModel.position.set((x + 0.5) * scale, 0.5, (z + 0.5) * scale);
     return newModel;
   }
 
-  public createChicken(x: number, z: number) {
+  public createChicken(id: number, x: number, z: number) {
     const chickenModel = this.getModel('chicken');
     this.logger.info('ChickenModel loaded');
+    chickenModel.userData.id = id; 
     const chicken = chickenModel.clone();
     chicken.castShadow = true;
-    chicken.scale.set(5, 5, 5);
-    chicken.position.set(x + 0.5, 0, z + 0.5);
-    this.logger.info('Chicken at:', chicken.position);
-    chicken.rotation.y = -45;
+    chicken.scale.set(3.25,3,3);     // Radius 0.1 -> (3.25,3,3), Radius 0.2 -> (6.5,6,6)
+    chicken.position.set(x, 0, z);
+    this.logger.info('Chicken at:', chicken.position)
+    chicken.rotation.y = 0; // Degrees * Math.PI / 180
     return chicken;
   }
 }

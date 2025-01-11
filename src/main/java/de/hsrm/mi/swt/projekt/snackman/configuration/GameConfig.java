@@ -62,7 +62,7 @@ public class GameConfig {
 
         this.ghostSpeed = 1;
         this.chickenSpeed = 1;
-        this.gameTime = 10;
+        this.gameTime = 300;
         this.mapWidth = 40;
         this.mapHeight = 40;
         this.wallHeight = 3;

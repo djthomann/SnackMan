@@ -12,7 +12,7 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import type { Ghost, Snackman } from '@/types/SceneTypes';
+import type { Ghost, Snackman, Chicken } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
@@ -70,7 +70,7 @@ console.log('textures found', texture_ft.image); // Should not be null or undefi
 let box: THREE.Mesh;
 
 const mapScale = 5;
-const wallHeight = 1.5 * mapScale;
+const wallHeight = 1 * mapScale;
 
 export default defineComponent({
   components: {
@@ -97,7 +97,7 @@ export default defineComponent({
     let controls: PointerLockControls;
     let mouseMovement = false;
     let nameTag: NameTag;
-    let animationMixer: THREE.AnimationMixer;
+    const animationMixers: THREE.AnimationMixer[] = [];
     const nameTags: NameTag[] = [];
     let gameID = 2;
     let startPromiseResolve: () => void;
@@ -108,7 +108,7 @@ export default defineComponent({
     //GameStart
     const entityStore = useEntityStore();
     const gameStore = useGameStore();
-    const { snackMen, ghosts, chicken, map } = storeToRefs(entityStore);
+    const { snackMen, ghosts, chickens, map } = storeToRefs(entityStore);
     const meshes: Map<number, THREE.Group> = new Map<number, THREE.Group>();
 
     logger.info(
@@ -134,9 +134,8 @@ export default defineComponent({
       } else if (message.startsWith('DISAPPEAR')) {
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
-        updateCalories(100);
       } else if (message.startsWith('GAME_START')) {
-        handleStartEvent();
+        handleStartEvent(message.split(';')[1]);
         if (startPromiseResolve) {
           startPromiseResolve();
         }
@@ -145,30 +144,42 @@ export default defineComponent({
       }
     };
 
-    const updateCalories = (amount: number) => {
-      gameStore.addCalories(amount);
-    };
-
-    const updateTime = (sec: number) => {
-      gameStore.setRemainingTime(sec);
-    };
-
     const handleGameStateEvent = (message: string) => {
+
       const parsedData = JSON.parse(message);
+      gameStore.setRemainingTime(parsedData.remainingSeconds);
+
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
+        if(snackman.objectId === userStore.id) {
+          gameStore.setCalories(snackman.gainedCalories);
+        }
         meshes
           .get(snackman.objectId)!
           .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
-        meshes
-          .get(ghost.objectId)!
-          .position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+        meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+      });
+
+      parsedData.updatesChickens.forEach((chicken: Chicken) => {
+          move(chicken.objectId, chicken.x, chicken.y, chicken.z);
       });
     };
-    const handleStartEvent = () => {
+    const handleStartEvent = (message: string) => {
       console.log('handle start event');
+
+      const parsedData = JSON.parse(message);
+      gameStore.setRemainingTime(parsedData.gameTime);
+
+      parsedData.snackMen.forEach((snackman: Snackman) => {
+
+      if(snackman.objectId === userStore.id) {
+        gameStore.setCalories(snackman.gainedCalories);
+      }
+
+      });
+
       loadMap(map.value);
     };
 
@@ -187,6 +198,27 @@ export default defineComponent({
       sendMessage(JSON.stringify(requestData));
     };
 
+    function move(id: number, x: number, y: number, z: number) {
+      chickenGroup.children.forEach((chicken) => {
+        if(chicken.userData.id === id) {
+          // Calculate the movement vector
+          const moveX = x - chicken.position.x / mapScale;
+          const moveZ = z - chicken.position.z / mapScale;
+          // Update position
+          chicken.position.set(
+            x * mapScale, 
+            y * mapScale, 
+            z * mapScale
+          ); 
+          // Calculate and apply rotation
+          if (moveX !== 0 || moveZ !== 0) {
+            const rotationY = Math.atan2(moveX, moveZ);
+            chicken.rotation.y = rotationY;
+          }
+        }
+      })
+    }
+
     onMounted(async () => {
       await nextTick();
       console.log(gameOverlayRef.value);
@@ -203,6 +235,7 @@ export default defineComponent({
 
       await waitForStartMessage();
 
+      loadChickens([...chickens.value.values()]);
       loadPlayerEntities([...snackMen.value.values()], [...ghosts.value.values()], scene);
 
       window.addEventListener('resize', onWindowResize);
@@ -240,6 +273,30 @@ export default defineComponent({
       }
     }
 
+
+
+
+    function loadChickens(chickens: Chicken[]) {
+      chickens.forEach(newChicken => {
+        const chicken = modelService.createChicken(newChicken.objectId, newChicken.x * mapScale, newChicken.z * mapScale); 
+        chickenGroup.add(chicken); 
+
+        const chickenMixer = new THREE.AnimationMixer(chicken);
+        const chickenAnimations = modelService.getAnimations('chicken');
+
+        if (chickenAnimations.length > 0) {
+          const action = chickenMixer.clipAction(chickenAnimations[0]);
+          action.play();
+        } else {
+          console.log('Animation not found');
+        }
+
+        // Mixer is stored in a global list, so that it can be used in the update-loop 
+        animationMixers.push(chickenMixer);
+      });
+      scene.add(chickenGroup);
+    }
+
     /*
       Ghosts and Snackmen are spawned on the correct position
     */
@@ -252,8 +309,6 @@ export default defineComponent({
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
 
-
-
         if (!testingMode && snackMan.objectId == userStore.id) {
           //snackManMesh.add(camera);
           const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x, snackMan.z );
@@ -265,28 +320,23 @@ export default defineComponent({
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
-
           // Add to snackMen group
           snackMenGroup.add(snackManMesh);
           meshes.set(snackMan.objectId, snackManMesh);
           console.log(`placed Snackman ${snackMan.objectId} on Scene`);
         }
-
       });
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
-
+    
         const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
-
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
-
         // Add to ghosts group
         ghostsGroup.add(ghostMesh);
         meshes.set(ghost.objectId, ghostMesh);
       });
-
       // Add groups to the scene
       scene.add(snackMenGroup);
       scene.add(ghostsGroup);
@@ -304,41 +354,16 @@ export default defineComponent({
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(
-              tile.food.objectId,
-              tile.x,
-              tile.z,
-              Math.random() * 400 + 100,
-              mapScale,
-            );
+            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
             food.userData.id = tile.food.objectId;
             foodGroup.add(food);
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
           } else if (occupationType == 'FREE') {
             const occupation = tile.occupation;
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
-
-            if (occupation != null) {
-              // TODO: have to be fixed .any added object in "FREE" Teil gets ein Chicken MODEL
-              const chicken = modelService.createChicken(tile.x * mapScale, tile.z * mapScale);
-              chickenGroup.add(chicken);
-            }
           }
         }
-      }
-
-      scene.add(chickenGroup);
-
-      animationMixer = new THREE.AnimationMixer(chickenGroup);
-      const chickenAnimations = modelService.getAnimations('chicken');
-
-      if (chickenAnimations.length > 0) {
-        const action = animationMixer.clipAction(chickenAnimations[0]);
-        action.play();
-      } else {
-        logger.info('Animation not found');
-      }
-
+      }      
       scene.add(wallsGroup);
       scene.add(foodGroup);
       scene.add(floorGroup);
@@ -348,17 +373,15 @@ export default defineComponent({
         skyboxTextures[i].side = THREE.BackSide;
         skyboxTextures[i].transparent = true;
       }
-      const skyboxGeo = new THREE.BoxGeometry(w, w / 4, w);
-      //const skyboxGeo = new THREE.BoxGeometry(500,(250/2),500);
+      const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
-      //console.log('skybox position', skybox.position)
-      skybox.position.y = w / 4 / 2;
-      skybox.position.x = w / 2 - 0.5 * mapScale;
-      skybox.position.z = w / 2 - 0.5 * mapScale;
-      //skybox.position.y = (w/4);
+      console.log('skybox position', skybox.position)
+      skybox.position.y = ((w/4)/2);
+      skybox.position.x = w/2;
+      skybox.position.z = w/2;
       scene.add(skybox);
 
-      player.position.set(w / 2, mapScale, h / 2);
+      player.position.set(w/2, mapScale, h/2);
     }
 
     /**
@@ -381,8 +404,6 @@ export default defineComponent({
     }
 
     function makeDisappear(id: number) {
-      updateCalories(100);
-      updateTime(id);
       foodGroup.children.forEach((food) => {
         if (food.userData.id == id) {
           scene.remove(food);
@@ -436,13 +457,19 @@ export default defineComponent({
       //meshes.add(playerObj);
       scene.add(playerObj);
 
-      // TODO For testing, take out later
-      const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
-      const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
-      const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
-      ghostMesh.position.set(16 * mapScale, 0, 20 * mapScale)
-      scene.add(ghostMesh)
+      // TODO: For testing, take out later
+      //const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
+      //const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
+      //const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
+      //ghostMesh.position.set(16.5 * mapScale, 0, 20.5 * mapScale)
+      //scene.add(ghostMesh)
 
+      // Dummy Cylinder in the Center to test the Measurements of the Models.
+      //const geometry = new THREE.CylinderGeometry(0.2 * mapScale, 0.2 * mapScale, 3, 32);
+      //const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+      //const cylinder = new THREE.Mesh(geometry, material);
+      //cylinder.position.set( 20.5 * mapScale , 0, 20.5 * mapScale );
+      //scene.add(cylinder);
 
       // Player Object
       scene.add(player);
@@ -562,14 +589,15 @@ export default defineComponent({
         nameTag.update(player);
       });
 
-      if (animationMixer) {
-        animationMixer.update(0.01);
-      }
+      //update all animations
+      animationMixers.forEach((mixer) => {
+        mixer.update(0.01); 
+      }); 
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {
         element.rotation.y += 0.01;
-        element.position.y = Math.sin(time * 2 + index) * 0.1;
+        element.position.y = (Math.sin(time * 2 + index) * 0.1) + 0.1 * mapScale;
       });
 
       renderer.render(scene, camera);
