@@ -121,7 +121,7 @@ public class SnackManMap {
                     occupationType = OccupationType.ITEM;
                 }
                 allTiles[z][x] = new Tile(x, z, occupationType);
-                allTiles[z][x].setOccupation(null);
+                allTiles[z][x].addOccupation(null);
             }
         }
     }

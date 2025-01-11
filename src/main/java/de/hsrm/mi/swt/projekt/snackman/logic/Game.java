@@ -90,7 +90,9 @@ public class Game {
      * @param id said id
      */
     private void spawnGhost(long id, String username) {
-        allMovables.add(new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0.5f, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager, this.collisionManager));
+        Ghost ghost = new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0.5f, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager, this.collisionManager);
+        allMovables.add(ghost);
+        map.getTileAt((int) ghost.getX(), (int) ghost.getZ()).setOccupation(ghost);
     }
 
     private void spawnSnackMan(long id, String username) {
@@ -122,7 +124,9 @@ public class Game {
         x += 0.5f;
         z += 0.5f;
 
-        allMovables.add(new SnackMan(username, id, this.id, x, 0.5f, z, this.gameManager, this.gameConfig, this.collisionManager));
+        SnackMan snackMan = new SnackMan(username, id, this.id, x, 0.5f, z, this.gameManager, this.gameConfig, this.collisionManager); 
+        allMovables.add(snackMan);
+        map.getTileAt((int) x, (int) z).setOccupation(snackMan);
         numSnackmen++;
     }
 
@@ -209,7 +213,7 @@ public class Game {
             if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupation() == null) {
                 Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
                 0.0f, (float) tileOne.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-                tileOne.setOccupation(chickenOne.toRecord());
+                tileOne.setOccupation(chickenOne);
                 allMovables.add(chickenOne);
             }
         }
@@ -218,7 +222,7 @@ public class Game {
             if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupation() == null) {
                 Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileTwo.getX()+0.5f,
                 0.0f, (float) tileTwo.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-                tileTwo.setOccupation(chickenTwo.toRecord());
+                tileTwo.setOccupation(chickenTwo);
                 allMovables.add(chickenTwo);
             }
         }
@@ -227,7 +231,7 @@ public class Game {
             if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupation() == null) {
                 Chicken chickenThree = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileThree.getX()+0.5f,
                 0.0f, (float) tileThree.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-                tileThree.setOccupation(chickenThree.toRecord());
+                tileThree.setOccupation(chickenThree);
                 allMovables.add(chickenThree);
             }
         }
@@ -236,7 +240,7 @@ public class Game {
             if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupation() == null) {
                 Chicken chickenFour = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileFour.getX()+0.5f,
                 0.0f, (float) tileFour.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-                tileFour.setOccupation(chickenFour.toRecord());
+                tileFour.setOccupation(chickenFour);
                 allMovables.add(chickenFour);
             }
         }
@@ -354,13 +358,13 @@ public class Game {
                             if ( tile.getOccupation() != null && tile.getOccupation().getClass().getSimpleName().equals("Food")) {
                                 rowList.add("FOOD");
                             } else {
-                                rowList.add("Unknown ITEM");
+                                rowList.add("UNKOWN ITEM");
                             }
                             break;
-                        case FREE:
+                        case OCCUPIED:
                             if (tile.getOccupation() != null) {
                                 switch (tile.getOccupation().getClass().getSimpleName()) {
-                                    case "ChickenRecord":
+                                    case "Chicken":
                                         rowList.add("CHICKEN");
                                         break;
                                     case "Ghost":
@@ -370,15 +374,18 @@ public class Game {
                                         rowList.add("SNACKMAN");
                                         break;
                                     default:
-                                        rowList.add("FREE");
+                                        rowList.add("UNKOWN OCCUPIED");
                                         break;
                                 }
                             } else {
-                                rowList.add("FREE");
+                                rowList.add("NULL OCCUPIED");
                             }
                             break;
+                        case FREE:
+                            rowList.add("FREE");
+                            break;
                         default:
-                            rowList.add("Unknown");
+                            rowList.add("UNKOWN");
                             break;
                     }
                 }
@@ -388,4 +395,11 @@ public class Game {
         return pythonCompatibleSurroundings;
     }
 
+    public void updateTileOccupation(GameObject gameObject, float oldX, float oldZ, float newX, float newZ) {
+        if ((int) oldX != (int) newX || (int) oldZ != (int) newZ ) { 
+        map.getTileAt((int) oldX, (int) oldZ).setOccupation(null);
+        map.getTileAt((int) newX, (int) newZ).setOccupation(gameObject);
+        }
+    }
+    
 }

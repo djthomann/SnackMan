@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
 
@@ -11,8 +12,8 @@ public class Tile {
     private OccupationType occupationType;
     private Food foodOnTile;
 
+    //private GameObject occupation;
     private Object occupation;
-
 
     /**
      * Constructor, creates Tile with given parameters:
@@ -46,11 +47,25 @@ public class Tile {
         return occupation;
     }
 
-    public void setOccupation(Object occupation) {
+    public void addOccupation(Object occupation) {
         this.occupation = occupation;
         if (occupation instanceof Food) {
             this.foodOnTile = (Food)occupation;
         }
+    }
+
+    public void setOccupation(GameObject occupation) {
+        this.occupation = occupation;
+        if (occupation == null && occupationType == OccupationType.OCCUPIED) {
+            occupationType = OccupationType.FREE;
+            return;
+        } 
+        if (occupation instanceof Food) {
+            this.foodOnTile = (Food)occupation;
+            occupationType = OccupationType.ITEM;
+            return;
+        }
+        occupationType = OccupationType.OCCUPIED;
     }
 
     public TileRecord toRecord () {

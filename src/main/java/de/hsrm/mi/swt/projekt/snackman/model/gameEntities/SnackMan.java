@@ -68,7 +68,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     private ScheduledFuture<?> fallTaskFuture;
     private Runnable fallTask;
 
-    private GameManager gameManger;
+    private GameManager gameManager;
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
 
@@ -102,7 +102,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         // TODO Initial calories to make jumping possible, change back to 0 later
         this.gainedCalories = 1000000;
-        this.gameManger = gameManager;
+        this.gameManager = gameManager;
 
         this.invincible = false;
         this.stunned = false;
@@ -166,7 +166,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
                 
-                gameManger.notifyChange(moveEvent);
+                gameManager.notifyChange(moveEvent);
 
                 // If the jump is done, the task is not repeated anymore
                 if (!jumping) {
@@ -199,7 +199,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
                 
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                gameManger.notifyChange(moveEvent);
+                gameManager.notifyChange(moveEvent);
 
                 // If the resolve is done, the task is not repeated anymore
                 if (!needsResolving) {
@@ -234,7 +234,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
                 
-                gameManger.notifyChange(moveEvent);
+                gameManager.notifyChange(moveEvent);
 
                 // If the fall is done, the task is not repeated anymore
                 if (!falling) {
@@ -262,11 +262,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
      */
     @Override
     public void move(float newX, float newY, float newZ) {
+        this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
         this.x += newX;
         this.y += newY;
         this.z += newZ;
         logger.info("Snackman " + objectId + " moved to " + x + ", " + y + ", " + z);
-        if (!WebSocketHandler.testingMode) EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManger));
+        if (!WebSocketHandler.testingMode) EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
    /**
@@ -381,7 +382,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 // The SnackMan is unable to move when stunned
                 if(this.stunned) {
                     MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                    gameManger.notifyChange(moveEvent);
+                    gameManager.notifyChange(moveEvent);
                     return;
                 }
 
@@ -457,7 +458,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
 
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                if (WebSocketHandler.testingMode) gameManger.notifyChange(moveEvent);
+                if (WebSocketHandler.testingMode) gameManager.notifyChange(moveEvent);
 
 
 

@@ -188,6 +188,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      */
     @Override
     public void move(float newX, float newY, float newZ) {
+        this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
         this.x += newX;
         this.y += newY;
         this.z += newZ;
