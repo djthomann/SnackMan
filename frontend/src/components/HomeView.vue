@@ -1,8 +1,7 @@
 <template>
   <div>
-    <!--<h1>Home</h1>-->
+    <!--<h1>Home</h1>
     <p>Welcome, {{ name }} with the ID {{ id }}</p>
-<!--
     <h2>Lobbies</h2>
     <ul>
       <li v-for="lobby in lobbies" :key="lobby.lobbyCode ?? 'default-key'">
@@ -13,9 +12,9 @@
     </ul>
 
     <button @click="fetchLobbies">Refresh Lobbies</button>
-    -->
-    <!--<button @click="createLobby">Create Lobby</button>-->
-    <h2>Enter Lobby Code</h2>
+    
+    <button @click="createLobby">Create Lobby</button>
+    <h2>Enter Lobby Code</h2>-->
   </div>
   <BackgroundComponent :title="`JOIN A LOBBY`">
     <div class="home-grid">
@@ -23,6 +22,7 @@
         <img class="player-picture" src="@/assets/icons/player_icon.png"/>
         <img class="pin" src="@/assets/icons/pin.png"/>
           <p>{{ name }}</p>
+          <p>{{ id }}</p>
       </div>
       <div class="home-view-row bottom">
         <div class="lobbies-headline">
