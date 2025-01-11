@@ -3,9 +3,12 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import eventBus from '@/services/eventBus';
 
+import { Logger } from '../util/logger';
+
 export const useEntityStore = defineStore('entityStore', () => {
 
   const serverMessage = ref<string>('');
+  const logger = new Logger();
 
   const handleServerMessage = (message: string) => {
     serverMessage.value = message;
@@ -17,7 +20,7 @@ export const useEntityStore = defineStore('entityStore', () => {
       map.value = parsedData.map;
 
       parsedData.snackMen.forEach((snackman: Snackman) => {
-        console.log(`Snackman ${snackman.username} found`)
+        logger.info(`Snackman ${snackman.username} found`)
         snackMen.value.set(Number(snackman.objectId), {
           gameId: Number(snackman.gameId),
           objectId: Number(snackman.objectId),
@@ -29,7 +32,7 @@ export const useEntityStore = defineStore('entityStore', () => {
         })
       })
       parsedData.ghosts.forEach((ghost: Ghost) => {
-        console.log(`ghost ${ghost.username} found`)
+        logger.info(`ghost ${ghost.username} found`)
         ghosts.value.set(Number(ghost.objectId), {
           gameId: Number(ghost.gameId),
           objectId: Number(ghost.objectId),

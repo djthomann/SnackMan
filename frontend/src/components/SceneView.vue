@@ -288,7 +288,7 @@ export default defineComponent({
           const action = chickenMixer.clipAction(chickenAnimations[0]);
           action.play();
         } else {
-          console.log('Animation not found');
+          logger.error('Animation not found');
         }
 
         // Mixer is stored in a global list, so that it can be used in the update-loop 
@@ -375,7 +375,7 @@ export default defineComponent({
       }
       const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
-      console.log('skybox position', skybox.position)
+      logger.info('skybox position', skybox.position)
       skybox.position.y = ((w/4)/2);
       skybox.position.x = w/2;
       skybox.position.z = w/2;
