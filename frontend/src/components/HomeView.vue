@@ -19,16 +19,19 @@
   <BackgroundComponent :title="`JOIN A LOBBY`">
     <div class="home-grid">
       <div class="player-box">
-        <img class="player-picture" src="@/assets/icons/player_icon.png"/>
-        <img class="pin" src="@/assets/icons/pin.png"/>
-          <p>{{ name }}</p>
-          <p>{{ id }}</p>
+        
+        <UserPanelComponent></UserPanelComponent>
       </div>
       <div class="home-view-row bottom">
         <div class="lobbies-headline">
-          <!--<div class="background__title">
-                <h1 class="background__headline">EXISTING LOBBIES</h1>
-            </div>-->
+          <div>
+            <input class="custom-lobby" type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
+          </div>
+          <div class="icon-button join-button">
+            <button @click="joinLobby(lobbyCode)">
+              <img src="@/assets/icons/join.svg" />
+            </button>
+          </div>
             <div class="icon-button refresh-button button">
             <button @click="fetchLobbies">
               <img src="@/assets/icons/refresh.svg" />
@@ -39,15 +42,8 @@
               <img src="@/assets/icons/add.svg" />
             </button>
           </div>
-          <div>
-            <input class="custom-lobby" type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
-            
-          </div>
-          <div class="icon-button join-button">
-            <button @click="joinLobby(lobbyCode)">
-              <img src="@/assets/icons/join.svg" />
-            </button>
-          </div>
+          
+          
         </div>
         <div class="lobbies">
 
@@ -69,6 +65,7 @@ import BackgroundComponent from './layout/BackgroundComponent.vue';
 import { Logger } from '../util/logger';
 import LobbyPanelComponent from './layout/LobbyPanelComponent.vue';
 import type { Lobby } from '@/types/lobby';
+import UserPanelComponent from './layout/UserPanelComponent.vue';
 
 const logger = new Logger();
 
@@ -146,13 +143,13 @@ const fetchLobbies = () => {
 .player-box {
   position: absolute;
   width: auto;
-  top: 5%;
-  right: 10%;
+  top: 1%;
+  right: 2%;
   padding: 2%;
-  background-color: blue;
   display: flex;
   flex-direction: column;
   align-items: center;
+  transform: rotate(10deg)
 }
 
 .pin {
@@ -189,6 +186,7 @@ const fetchLobbies = () => {
 .lobbies {
   position: relative;
   height: 500px;
+  width: 90%;
   display: flex;
   flex-wrap: wrap;
   overflow: scroll;
@@ -244,14 +242,20 @@ const fetchLobbies = () => {
 }
 
 .custom-lobby {
-  background-color: var(--colorPrimary);
-    border: 8px solid var(--colorLight);
-    color: white;
-    padding: 5px;
+  background-color: var(--colorTextMuted);
+  border: 8px solid var(--colorLight);
+  color: white;
+  padding: 7px;
   margin-left: 1%;
   height: 40px;
   font-size: 18pt;
-    font-weight: normal;
-    font-family: "Lilita One"
+  font-weight: normal;
+  font-family: "Lilita One";
+  transition: background-color 200ms;  
+}
+
+.custom-lobby:focus {
+  background-color: var(--colorPrimary);
+  outline: none;
 }
 </style>
