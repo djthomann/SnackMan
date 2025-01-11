@@ -55,6 +55,7 @@ p {
 }
 .lobbypanel {
     width:200px;
+    height: 150px;
     margin: 10px;
     user-select: none;
     transition: transform 200ms;
@@ -62,12 +63,12 @@ p {
 
 .lobbypanel:hover {
     cursor: pointer;
-    transform: translate(10px, -10px);
+    transform: translate(-10px, -10px);
     z-index: 10;
 }
 
 .lobbypanel:hover .playerpanel__sheet {
-    filter: drop-shadow(-10px 10px 0 rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(10px 10px 0 rgba(0, 0, 0, 0.2));
 }
 
 .playerpanel--height-auto,

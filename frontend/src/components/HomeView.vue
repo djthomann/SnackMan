@@ -14,10 +14,8 @@
 
     <button @click="fetchLobbies">Refresh Lobbies</button>
     -->
-    <button @click="createLobby">Create Lobby</button>
+    <!--<button @click="createLobby">Create Lobby</button>-->
     <h2>Enter Lobby Code</h2>
-    <input type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
-    <button @click="joinLobby(lobbyCode)">Join Lobby</button>
   </div>
   <BackgroundComponent :title="`JOIN A LOBBY`">
     <div class="home-grid">
@@ -26,13 +24,36 @@
         <img class="pin" src="@/assets/icons/pin.png"/>
           <p>{{ name }}</p>
       </div>
-      <div class="home-view-row lobbies">
-        <LobbyPanelComponent @click="joinLobby(lobby.lobbyCode?.toString() ?? '')" v-for="lobby in lobbies" :lobby="lobby" height-behaviour="stretch"></LobbyPanelComponent>
-        <div class="refresh-button">
-          <button @click="fetchLobbies">
-            <img class="num-player-icon" src="@/assets/icons/refresh.svg" />
-          </button>
+      <div class="home-view-row bottom">
+        <div class="lobbies-headline">
+          <!--<div class="background__title">
+                <h1 class="background__headline">EXISTING LOBBIES</h1>
+            </div>-->
+            <div class="icon-button refresh-button button">
+            <button @click="fetchLobbies">
+              <img src="@/assets/icons/refresh.svg" />
+            </button>
+          </div>
+          <div class="icon-button add-button button">
+            <button @click="createLobby">
+              <img src="@/assets/icons/add.svg" />
+            </button>
+          </div>
+          <div>
+            <input class="custom-lobby" type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
+            
+          </div>
+          <div class="icon-button join-button">
+            <button @click="joinLobby(lobbyCode)">
+              <img src="@/assets/icons/join.svg" />
+            </button>
+          </div>
         </div>
+        <div class="lobbies">
+
+          <LobbyPanelComponent @click="joinLobby(lobby.lobbyCode?.toString() ?? '')" v-for="lobby in lobbies" :lobby="lobby" height-behaviour="stretch"></LobbyPanelComponent>
+        </div>
+        
       </div>
     </div>
   </BackgroundComponent>
@@ -114,12 +135,11 @@ const fetchLobbies = () => {
   position: relative;
   width: 100%;
   height: 100%;
-  display: grid; 
   grid-template-columns: 1fr; 
-  grid-template-rows: 1fr 1fr 1fr; 
+  grid-template-rows: 1fr 1fr; 
   
   gap: 40px 60px;
-  padding: 2dvw 4dvw 7dvw 4dvw;
+  padding: 4dvw;
   box-sizing:border-box;
 }
 
@@ -141,34 +161,97 @@ const fetchLobbies = () => {
 
 .home-view-row {
   display: flex;
+  flex-direction: column;
+}
+
+.background__title {
+    width: max-content;
+    height: 90px;
+    background-color: var(--colorPrimary);
+    border: 9px solid var(--colorLight);
+    border-radius: 2px;
+    box-sizing: border-box;
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+    padding: 10px 25px;
+}
+
+.background__headline {
+    color: var(--colorLight);
+    margin: 0;
+    font-size: 45px;
+    font-weight: normal;
+}
+
+.bottom {
+  grid-row: 2/3;
 }
 
 .lobbies {
-  grid-row: 3/4;
+  position: relative;
+  height: 500px;
+  display: flex;
+  flex-wrap: wrap;
+  overflow: scroll;
 }
 
-.refresh-button {
-  margin: auto 0 auto auto;
+.lobbies-headline {
+  display: flex;
+  align-items: center;
+  margin: 2% 0;
+}
+
+.button {
   user-select: none;
+  margin-left: 1%;
 }
 
-.refresh-button img {
-  height: 100px;
+.icon-button img {
+  height: 60px;
   transition: transform 0.5s ease;
   user-select: none;
 }
 
-.refresh-button button {
+.icon-button button {
   background: 0;
   border: 0;
   user-select: none;
 }
 
-.refresh-button button:hover {
+.icon-button button:hover {
   cursor: pointer;
 }
 
 .refresh-button img:hover  {
   transform: rotate(360deg);
+}
+
+.add-button img {
+  transition: transform 0.2s ease;
+}
+
+.add-button img:hover {
+  transform: scale(1.3);
+}
+
+.join-button img {
+  
+  transform: translateX(-10px);
+  transition: transform 0.2s ease;
+}
+
+.join-button:hover img {
+  transform: translateX(0);
+}
+
+.custom-lobby {
+  background-color: var(--colorPrimary);
+    border: 8px solid var(--colorLight);
+    color: white;
+    padding: 5px;
+  margin-left: 1%;
+  height: 40px;
+  font-size: 18pt;
+    font-weight: normal;
+    font-family: "Lilita One"
 }
 </style>
