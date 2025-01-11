@@ -1,4 +1,15 @@
 <script setup lang="ts">
+
+    type Props = {
+        name: string
+        id: number,
+    }
+
+    const props = withDefaults(defineProps<Props>(), {
+        name: "Default",
+        id: 0
+    })
+
 </script>
 
 <template>
@@ -20,12 +31,11 @@
                     
                     <div class="playerpanel__content-image">
                         <img src="@/assets/images/avatars/avatar_snackman.svg">
-
                     </div>
                     
                 </div>
                 <div class="playerpanel__content-body">
-                    <slot name="content"></slot>
+                    <p>{{ name }}(#{{ id }})</p>
                 </div>
             </div>
         </div>
@@ -34,10 +44,6 @@
 </template>
 
 <style scoped lang="css">
-
-.playerpanel {
-    width:250px;
-}
 
 .playerpanel--height-auto,
 .playerpanel--height-auto .playerpanel__container {
@@ -147,5 +153,10 @@
     padding: 15px 30px 30px;
     box-sizing: border-box;
     position: relative;
+}
+
+.playerpanel__content-body p {
+    color: white;
+    margin: 0;
 }
 </style>

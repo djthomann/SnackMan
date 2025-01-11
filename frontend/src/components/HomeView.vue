@@ -20,7 +20,7 @@
     <div class="home-grid">
       <div class="player-box">
         
-        <UserPanelComponent></UserPanelComponent>
+        <UserPanelComponent :name="name" :id="id"></UserPanelComponent>
       </div>
       <div class="home-view-row bottom">
         <div class="lobbies-headline">
@@ -143,8 +143,8 @@ const fetchLobbies = () => {
 .player-box {
   position: absolute;
   width: auto;
-  top: 1%;
-  right: 2%;
+  top: 0.5%;
+  right: 4%;
   padding: 2%;
   display: flex;
   flex-direction: column;
@@ -186,7 +186,7 @@ const fetchLobbies = () => {
 .lobbies {
   position: relative;
   height: 500px;
-  width: 90%;
+  width: 1100px;
   display: flex;
   flex-wrap: wrap;
   overflow: scroll;
