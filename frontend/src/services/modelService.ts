@@ -229,7 +229,7 @@ class ModelService {
     chicken.castShadow = true;
     chicken.scale.set(3.25,3,3);     // Radius 0.1 -> (3.25,3,3), Radius 0.2 -> (6.5,6,6)
     chicken.position.set(x, 0, z);
-    this.logger.info('Chicken at:', chicken.position)
+    this.logger.info('Chicken at:', chicken.position);
     chicken.rotation.y = 0; // Degrees * Math.PI / 180
     return chicken;
   }

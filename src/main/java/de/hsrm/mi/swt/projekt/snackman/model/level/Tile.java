@@ -1,6 +1,10 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
 
@@ -11,8 +15,8 @@ public class Tile {
     private OccupationType occupationType;
     private Food foodOnTile;
 
-    private Object occupation;
-
+    //private GameObject occupation;
+    private List<GameObject> occupations;
 
     /**
      * Constructor, creates Tile with given parameters:
@@ -24,6 +28,7 @@ public class Tile {
         this.x = x;
         this.z = z;
         this.occupationType = occupationType;
+        this.occupations = new ArrayList<GameObject>(); 
     }
 
     public OccupationType getOccupationType() {
@@ -42,14 +47,24 @@ public class Tile {
         return z;
     }
 
-    public Object getOccupation() {
-        return occupation;
+    public List <GameObject> getOccupations() {
+        return occupations;
     }
-
-    public void setOccupation(Object occupation) {
-        this.occupation = occupation;
+    public void addToOccupation(GameObject occupation) {
+        if (occupation == null) {
+            return;
+        } 
+        this.occupations.add(occupation);
         if (occupation instanceof Food) {
-            this.foodOnTile = (Food)occupation;
+            this.foodOnTile = (Food) occupation;
+            occupationType = OccupationType.ITEM;
+            return;
+        }
+    }
+    
+    public void removeFromOccupation(GameObject occupation) {
+        if (occupations.contains(occupation) && occupation != null) {
+            occupations.remove(occupation); 
         }
     }
 
@@ -59,5 +74,9 @@ public class Tile {
             foodRecord = foodOnTile.toRecord();
         }
         return new TileRecord(x, z, occupationType, foodRecord);
+    }
+
+    public Food getFoodOnTile() {
+        return foodOnTile;
     }
 }
