@@ -121,7 +121,6 @@ public class SnackManMap {
                     occupationType = OccupationType.ITEM;
                 }
                 allTiles[z][x] = new Tile(x, z, occupationType);
-                allTiles[z][x].setOccupation(null);
             }
         }
     }
@@ -313,7 +312,7 @@ public class SnackManMap {
     }
 
     public Food getFoodOfTile(Tile tile) {
-        Food food = (Food) tile.getOccupation();
+        Food food = (Food) tile.getFoodOnTile();
         return food;
     }
 
