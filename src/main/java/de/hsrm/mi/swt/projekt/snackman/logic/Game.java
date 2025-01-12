@@ -92,7 +92,7 @@ public class Game {
     private void spawnGhost(long id, String username) {
         Ghost ghost = new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0.5f, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager, this.collisionManager);
         allMovables.add(ghost);
-        map.getTileAt((int) ghost.getX(), (int) ghost.getZ()).setOccupation(ghost);
+        map.getTileAt((int) ghost.getX(), (int) ghost.getZ()).addToOccupation(ghost);
     }
 
     private void spawnSnackMan(long id, String username) {
@@ -126,7 +126,7 @@ public class Game {
 
         SnackMan snackMan = new SnackMan(username, id, this.id, x, 0.5f, z, this.gameManager, this.gameConfig, this.collisionManager); 
         allMovables.add(snackMan);
-        map.getTileAt((int) x, (int) z).setOccupation(snackMan);
+        map.getTileAt((int) x, (int) z).addToOccupation(snackMan);
         numSnackmen++;
     }
 
@@ -195,7 +195,7 @@ public class Game {
                             foodType = FoodType.UNHEALTHY;
                         }
                     }
-                    allTiles[row][col].setOccupation(new Food(id, col, row, foodType, gameConfig));
+                    allTiles[row][col].addToOccupation(new Food(id, col, row, foodType, gameConfig));
                 }
             }
         }
@@ -213,7 +213,7 @@ public class Game {
             if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupations().size() == 0) {
                 Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
                 0.0f, (float) tileOne.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-                tileOne.setOccupation(chickenOne);
+                tileOne.addToOccupation(chickenOne);
                 allMovables.add(chickenOne);
             }
         }
@@ -223,7 +223,7 @@ public class Game {
             if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupations().size() == 0) {
                 Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileTwo.getX()+0.5f,
                 0.0f, (float) tileTwo.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-                tileTwo.setOccupation(chickenTwo);
+                tileTwo.addToOccupation(chickenTwo);
                 allMovables.add(chickenTwo);
             }
         }
@@ -233,7 +233,7 @@ public class Game {
             if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupations().size() == 0) {
                 Chicken chickenThree = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileThree.getX()+0.5f,
                 0.0f, (float) tileThree.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-                tileThree.setOccupation(chickenThree);
+                tileThree.addToOccupation(chickenThree);
                 allMovables.add(chickenThree);
             }
         }
@@ -243,7 +243,7 @@ public class Game {
             if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupations().size() == 0) {
                 Chicken chickenFour = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileFour.getX()+0.5f,
                 0.0f, (float) tileFour.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
-                tileFour.setOccupation(chickenFour);
+                tileFour.addToOccupation(chickenFour);
                 allMovables.add(chickenFour);
             }
         }
@@ -395,11 +395,6 @@ public class Game {
                                             }
                                             break;
                                     }
-                            
-                                    // as soon as ghost is found, we can cancel switch-case 
-                                    if (highestPriority.equals("GHOST")) {
-                                        break;
-                                    }
                                 }
                                 rowList.add(highestPriority);
                             }
@@ -419,8 +414,8 @@ public class Game {
         if ((int) oldX != (int) newX || (int) oldZ != (int) newZ ) { 
             Tile oldTile = map.getTileAt((int) oldX, (int) oldZ); 
             Tile newTile = map.getTileAt((int) newX, (int) newZ); 
-            newTile.setOccupation(gameObject);
-            oldTile.getOccupations().remove(gameObject); 
+            newTile.addToOccupation(gameObject);
+            oldTile.removeFromOccupation(gameObject); 
 
             // Item-occupationType should only be changed in collisionManager to make sure collision with food works
             if (newTile.getOccupationType() == OccupationType.ITEM) {

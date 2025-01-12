@@ -50,7 +50,7 @@ public class Tile {
     public List <GameObject> getOccupations() {
         return occupations;
     }
-    public void setOccupation(GameObject occupation) {
+    public void addToOccupation(GameObject occupation) {
         if (occupation == null) {
             return;
         } 
@@ -59,6 +59,12 @@ public class Tile {
             this.foodOnTile = (Food) occupation;
             occupationType = OccupationType.ITEM;
             return;
+        }
+    }
+    
+    public void removeFromOccupation(GameObject occupation) {
+        if (occupations.contains(occupation) && occupation != null) {
+            occupations.remove(occupation); 
         }
     }
 
