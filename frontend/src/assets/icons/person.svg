@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="800px"
+   height="800px"
+   viewBox="0 0 16 16"
+   fill="#000000"
+   class="bi bi-person"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="person.svg"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs8" />
+  <sodipodi:namedview
+     id="namedview6"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="0.805"
+     inkscape:cx="399.37888"
+     inkscape:cy="400"
+     inkscape:window-width="1920"
+     inkscape:window-height="1007"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <path
+     id="path975"
+     style="stroke-width:50;fill:#fefefe;fill-opacity:1"
+     d="M 400 450 C 150 450 100 600 100 650 C 100 700 150 700 150 700 L 650 700 C 650 700 700 700 700 650 C 700 600 650 450 400 450 z M 400 500 C 514.45 500 575.80039 533.99961 608.40039 566.59961 C 642.30039 600.49961 649.95 637.50078 650 649.80078 L 150 649.80078 C 150.1 637.50078 157.69961 600.49961 191.59961 566.59961 C 224.19961 533.99961 285.5 500 400 500 z "
+     transform="scale(0.02)" />
+  <path
+     id="path971"
+     style="stroke-width:50;fill:#ffffff;fill-opacity:1"
+     d="M 400 100 A 150 150 0 0 0 400 400 A 150 150 0 0 0 400 100 z M 400 150 A 100 100 0 0 1 500 250 A 100 100 0 0 1 300 250 A 100 100 0 0 1 400 150 z "
+     transform="scale(0.02)" />
+</svg>

@@ -60,7 +60,7 @@
     
     
     
-    <!--
+    
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
       <div class="lobby-grid">
         <div class="lobby-grid__column">
@@ -102,7 +102,7 @@
         </div>
       </div>
     </BackgroundComponent>
-  -->
+  
   
   </div>
 </template>
