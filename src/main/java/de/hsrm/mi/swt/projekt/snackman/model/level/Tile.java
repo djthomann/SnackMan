@@ -1,5 +1,8 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
@@ -13,7 +16,7 @@ public class Tile {
     private Food foodOnTile;
 
     //private GameObject occupation;
-    private Object occupation;
+    private List<GameObject> occupations;
 
     /**
      * Constructor, creates Tile with given parameters:
@@ -25,6 +28,7 @@ public class Tile {
         this.x = x;
         this.z = z;
         this.occupationType = occupationType;
+        this.occupations = new ArrayList<GameObject>(); 
     }
 
     public OccupationType getOccupationType() {
@@ -43,29 +47,19 @@ public class Tile {
         return z;
     }
 
-    public Object getOccupation() {
-        return occupation;
+    public List <GameObject> getOccupations() {
+        return occupations;
     }
-
-    public void addOccupation(Object occupation) {
-        this.occupation = occupation;
-        if (occupation instanceof Food) {
-            this.foodOnTile = (Food)occupation;
-        }
-    }
-
     public void setOccupation(GameObject occupation) {
-        this.occupation = occupation;
-        if (occupation == null && occupationType == OccupationType.OCCUPIED) {
-            occupationType = OccupationType.FREE;
+        if (occupation == null) {
             return;
         } 
+        this.occupations.add(occupation);
         if (occupation instanceof Food) {
-            this.foodOnTile = (Food)occupation;
+            this.foodOnTile = (Food) occupation;
             occupationType = OccupationType.ITEM;
             return;
         }
-        occupationType = OccupationType.OCCUPIED;
     }
 
     public TileRecord toRecord () {
@@ -74,5 +68,9 @@ public class Tile {
             foodRecord = foodOnTile.toRecord();
         }
         return new TileRecord(x, z, occupationType, foodRecord);
+    }
+
+    public Food getFoodOnTile() {
+        return foodOnTile;
     }
 }

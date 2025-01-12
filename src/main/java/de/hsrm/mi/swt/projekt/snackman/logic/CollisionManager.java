@@ -56,11 +56,12 @@ public class CollisionManager {
                     //collisionPartner.toString() + " and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 collisions.add(CollisionType.WALL);
             case ITEM:
-               //logger.info(
-                        //collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
-                Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
+                // logger.info(
+                //         collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 if (collisionPartner instanceof SnackMan) {
-
+                    logger.info(
+                        collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                    Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
                     try {
                         // currently food gets exact the same coord as tile
                         float foodPosX = (float) (nearbyFood.getX() + 0.3);
@@ -78,7 +79,6 @@ public class CollisionManager {
                     } catch(NullPointerException e) {
 
                     }
-
                 }
                 break;
         }

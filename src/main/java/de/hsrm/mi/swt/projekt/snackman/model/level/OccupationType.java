@@ -7,8 +7,7 @@ public enum OccupationType {
 
     FREE('\u2591'),
     WALL('\u2588'),
-    ITEM('\u25CF'),
-    OCCUPIED('\u2591'); // same character as 'FREE' to prevent errors while loading/saving maps from/to files
+    ITEM('\u25CF');
 
     public final char c;
 

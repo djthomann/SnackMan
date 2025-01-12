@@ -358,8 +358,7 @@ export default defineComponent({
             food.userData.id = tile.food.objectId;
             foodGroup.add(food);
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
-          } else if (occupationType == 'FREE' || occupationType == 'OCCUPIED') {
-            const occupation = tile.occupation;
+          } else if (occupationType == 'FREE') {
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
           }
         }
