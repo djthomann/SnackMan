@@ -189,15 +189,6 @@ export default defineComponent({
       });
     };
 
-    const requestMap = () => {
-      console.log('loading map');
-      const requestData = {
-        type: 'MAPREQUEST',
-        id: gameID,
-      };
-      sendMessage(JSON.stringify(requestData));
-    };
-
     function move(id: number, x: number, y: number, z: number) {
       chickenGroup.children.forEach((chicken) => {
         if(chicken.userData.id === id) {
@@ -206,10 +197,10 @@ export default defineComponent({
           const moveZ = z - chicken.position.z / mapScale;
           // Update position
           chicken.position.set(
-            x * mapScale, 
-            y * mapScale, 
+            x * mapScale,
+            y * mapScale,
             z * mapScale
-          ); 
+          );
           // Calculate and apply rotation
           if (moveX !== 0 || moveZ !== 0) {
             const rotationY = Math.atan2(moveX, moveZ);
@@ -278,8 +269,8 @@ export default defineComponent({
 
     function loadChickens(chickens: Chicken[]) {
       chickens.forEach(newChicken => {
-        const chicken = modelService.createChicken(newChicken.objectId, newChicken.x * mapScale, newChicken.z * mapScale); 
-        chickenGroup.add(chicken); 
+        const chicken = modelService.createChicken(newChicken.objectId, newChicken.x * mapScale, newChicken.z * mapScale);
+        chickenGroup.add(chicken);
 
         const chickenMixer = new THREE.AnimationMixer(chicken);
         const chickenAnimations = modelService.getAnimations('chicken');
@@ -291,7 +282,7 @@ export default defineComponent({
           logger.error('Animation not found');
         }
 
-        // Mixer is stored in a global list, so that it can be used in the update-loop 
+        // Mixer is stored in a global list, so that it can be used in the update-loop
         animationMixers.push(chickenMixer);
       });
       scene.add(chickenGroup);
@@ -311,7 +302,7 @@ export default defineComponent({
 
         if (!testingMode && snackMan.objectId == userStore.id) {
           //snackManMesh.add(camera);
-          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x, snackMan.z );
+          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           playerMesh.add(camera)
           camera.position.set(0, 0, 0);
           meshes.set(snackMan.objectId, playerMesh);
@@ -329,7 +320,7 @@ export default defineComponent({
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
-    
+
         const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
@@ -362,7 +353,7 @@ export default defineComponent({
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
           }
         }
-      }      
+      }
       scene.add(wallsGroup);
       scene.add(foodGroup);
       scene.add(floorGroup);
@@ -590,8 +581,8 @@ export default defineComponent({
 
       //update all animations
       animationMixers.forEach((mixer) => {
-        mixer.update(0.01); 
-      }); 
+        mixer.update(0.01);
+      });
 
       // Animates food objects, has to loop over entire group at the moments --> better option avaible if performance sucks
       foodGroup.children.forEach((element, index) => {
