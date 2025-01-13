@@ -128,7 +128,7 @@ export default defineComponent({
       } else if (message.startsWith('GAME_STATE')) {
         handleGameStateEvent(message.split(';')[1]);
       } else {
-        console.log(`FE does not support message starting with ${message.split(";")[0]}`)
+        logger.warn(`FE does not support message starting with ${message.split(";")[0]}`)
       }
     };
 
@@ -155,7 +155,7 @@ export default defineComponent({
       });
     };
     const handleStartEvent = (message: string) => {
-      console.log('handle start event');
+      logger.info('handle start event');
 
       const parsedData = JSON.parse(message);
       gameStore.setRemainingTime(parsedData.gameTime);
@@ -226,9 +226,7 @@ export default defineComponent({
 
       // start Render-loop
       animate()
-      console.log('scene with gameID ' + gameID);
-
-      console.log(scene);
+      logger.info('scene with gameID ' + gameID);
 
     });
 
@@ -307,7 +305,6 @@ export default defineComponent({
           snackMenGroup.add(snackManMesh);
           meshes.set(snackMan.objectId, snackManMesh);
         }
-        console.log(`placed Snackman ${snackMan.objectId} on Scene`);
       });
 
       // Iterate over ghosts and add them to the scene
