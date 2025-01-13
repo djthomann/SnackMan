@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStateEvent;
@@ -35,16 +36,24 @@ public class GameState {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        this.interrupt();
                     }
                     if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
                             || !eatenFoods.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
-                        GameStateEvent gameStateEvent = new GameStateEvent(changedGhosts, changedSnackMen,
-                                changedChicken, eatenFoods, game.getRemainingSeconds());
+
+                        // clone lists to prevent concurrent modification
+                        GameStateEvent gameStateEvent = new GameStateEvent(
+                                new ArrayList<>(changedGhosts),
+                                new ArrayList<>(changedSnackMen),
+                                new ArrayList<>(changedChicken),
+                                new ArrayList<>(eatenFoods),
+                                game.getRemainingSeconds()
+                        );
                         game.getGameManager().notifyChange(gameStateEvent);
                         if(firstSend) {
                             firstSend = false;
                         }
+
                         changedGhosts.clear();
                         changedSnackMen.clear();
                         changedChicken.clear();
@@ -64,10 +73,10 @@ public class GameState {
      */
     public GameState(Game game) {
         this.game = game;
-        this.changedGhosts = new ArrayList<GhostRecord>();
-        this.changedSnackMen = new ArrayList<SnackManRecord>();
-        this.changedChicken = new ArrayList<ChickenRecord>();
-        this.eatenFoods = new ArrayList<FoodRecord>();
+        this.changedGhosts = new ArrayList<>();
+        this.changedSnackMen = new ArrayList<>();
+        this.changedChicken = new ArrayList<>();
+        this.eatenFoods = new ArrayList<>();
         GameStateThread thread = new GameStateThread();
         thread.start();
     }
