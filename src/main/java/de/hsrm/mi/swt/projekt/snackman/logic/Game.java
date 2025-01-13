@@ -2,11 +2,14 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.*;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.PlayerRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -301,7 +304,61 @@ public class Game {
     }
 
     private void stopGame() {
+        logger.info("TIMER ENDED");
+        sendGameEndEvent();
+    }
 
+    /**
+     * Determines the winner based on the highest score.
+     *
+     * @param scores A map of player IDs to their scores.
+     * @return The ID of the player with the highest score.
+     */
+    private long determineWinner(Map<Long, Integer> scores) {
+        long winnerId = -1;
+        int highestScore = Integer.MIN_VALUE;
+        for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
+            if (entry.getValue() > highestScore) {
+                highestScore = entry.getValue();
+                winnerId = entry.getKey();
+            }
+        }
+        return winnerId;
+    }
+
+    private void sendGameEndEvent() {
+        // Calculate scores
+        Map<Long, Integer> scores = new HashMap<>();
+
+        for (SnackManRecord snackManRecord : this.gameState.getChangedSnackMen()){
+            long id = snackManRecord.objectId();
+            int gainedCalories = snackManRecord.gainedCalories();
+            scores.put(id, gainedCalories);
+        }
+
+        // Create content for GameEndEvent
+        Lobby lobby = this.gameManager.getLobbyById(this.id);
+        List<Client> clientsAsList = lobby.getClientsAsList();
+
+        long winnerId = determineWinner(scores);
+        String winnerName = lobby.getClient(winnerId).getUsername();
+        String winnerTeam = lobby.getClient(winnerId).getRole().toString();
+        int winnerCaloryCount = scores.get(winnerId);
+
+        List<PlayerRecord> playerRecords = new ArrayList<>();
+
+        for (Client c : clientsAsList) {
+            long id = c.getClientId();
+            String username = c.getUsername();
+            int score = scores.get(id);
+            playerRecords.add(new PlayerRecord(username, c.getRole().toString(), score));
+        }
+
+        // Create GameEndEvent with winner and scores
+        GameEndEvent gameEndEvent = new GameEndEvent(winnerTeam, winnerName, winnerCaloryCount, playerRecords);
+
+        // Send the event to the frontend
+        gameManager.notifyChange(gameEndEvent);
     }
 
     /**

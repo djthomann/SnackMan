@@ -15,7 +15,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import org.springframework.web.socket.WebSocketSession;
 
 public class Lobby {
-    
+
     Logger logger = LoggerFactory.getLogger(Lobby.class);
     private final long id = IDGenerator.getInstance().getUniqueID();
     private GameConfig gameConfig = new GameConfig();
@@ -24,6 +24,16 @@ public class Lobby {
 
     public List<Client> getClientsAsList() {
         return clientMap.values().stream().toList();
+    }
+
+    /**
+     * Retrieves a client by their ID.
+     *
+     * @param id The ID of the client.
+     * @return The Client object if found, otherwise null.
+     */
+    public Client getClient(long id) {
+        return clientMap.get(id);
     }
 
     public void addClient(Client c) {
@@ -51,9 +61,10 @@ public class Lobby {
     }
 
     public Game startGame(GameManager gameManager) {
-        if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
-        Game game = new Game(this, gameManager); 
-        
+        if (map == null)
+            map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
+        Game game = new Game(this, gameManager);
+
         return game;
     }
 
