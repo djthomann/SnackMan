@@ -23,6 +23,7 @@ import com.google.gson.JsonSyntaxException;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChooseRoleEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
@@ -205,7 +206,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     if (lobbyCreateEvent.getId() == 0) {
                         newLobby = gameManager.createLobby();
                     }
-                    logger.info("Lobby with ID: " + newLobby.getId() + "created");
+                    logger.info("Lobby with ID: " + newLobby.getId() + " created");
                 }
                 case "LOBBY_SHOW_EVENT" -> {
                     ObjectMapper mapper = new ObjectMapper();
@@ -223,6 +224,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     gameManager.createGame(startGameEvent.getGameID());
                 }
 
+                case "END_GAME" -> {
+                    GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
+                    Lobby currLobby = gameManager.getLobbyById(gameEndEvent.getGameID());
+                    logger.info("[CURRENT GAME] : " + gameEndEvent.getGameID());
+                    
+                    logger.info("[WEBSOCKETHANDLER] - currLobby Clients List: " + currLobby.getClientsAsList().get(0));
+
+                    // TODO: current Game ist nicht mehr null -> anhand von client id und game id alle spieler herausfinden
+
+                    for (Client client : clients.values()) {
+
+                        if (currLobby.getClientsAsList().contains(client)) {
+                            logger.info("[WEBSOCKETHANDLER] - Client: " + client.getUsername());
+                        }
+                    }
+                }
             }
         } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON: " + e.getMessage());
