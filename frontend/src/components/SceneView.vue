@@ -227,6 +227,9 @@ export default defineComponent({
       // start Render-loop
       animate()
       console.log('scene with gameID ' + gameID);
+
+      console.log(scene);
+
     });
 
     onUnmounted(() => {
@@ -281,7 +284,9 @@ export default defineComponent({
     function loadPlayerEntities(snackMen: Snackman[], ghosts: Ghost[], scene: any) {
       // Group for snackMen and ghosts
       const snackMenGroup = new THREE.Group();
+      snackMenGroup.name = "snackmen"
       const ghostsGroup = new THREE.Group();
+      ghostsGroup.name = "ghosts";
 
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
@@ -289,11 +294,12 @@ export default defineComponent({
         if (snackMan.objectId == userStore.id) {
           const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           playerMesh.add(camera)
-          camera.position.set(0, 5, 0);
+          camera.position.set(0, mapScale, 0);
           playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
+          snackMenGroup.add(playerMesh);
         } else{
-          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.z * mapScale);
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
@@ -307,7 +313,7 @@ export default defineComponent({
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
 
-        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.z * mapScale);
+        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
         // Add to ghosts group
@@ -316,7 +322,7 @@ export default defineComponent({
       });
       // Add groups to the scene
       scene.add(snackMenGroup);
-      scene.add(ghostsGroup);
+      // scene.add(ghostsGroup);
     }
 
     function loadMap(m: any) {
@@ -351,7 +357,8 @@ export default defineComponent({
       }
       const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
       const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
-      logger.info('skybox position', skybox.position)
+      skybox.name = "skybox";
+      logger.info('skybox position', skybox.position);
       skybox.position.y = ((w/4)/2);
       skybox.position.x = w/2;
       skybox.position.z = w/2;
@@ -378,11 +385,15 @@ export default defineComponent({
       floorGroup = new THREE.Group();
       foodGroup = new THREE.Group();
       chickenGroup = new THREE.Group();
+      wallsGroup.name = "walls";
+      floorGroup.name = "floor";
+      foodGroup.name = "food";
+      chickenGroup.name = "chicken";
 
       // Camera
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
       camera.position.set(0, 0, 0)
-      camera.lookAt(1, 1, 1);
+      // camera.lookAt(1, 1, 1);
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -560,7 +571,6 @@ export default defineComponent({
       const playerForward = new THREE.Vector3();
       camera.getWorldDirection(forward);
 
-      console.log(meshes.get(userStore.id!))
       meshes.get(userStore.id!)!.getWorldDirection(playerForward);
       forward.normalize();
       playerForward.normalize();

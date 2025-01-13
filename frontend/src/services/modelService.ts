@@ -192,18 +192,18 @@ class ModelService {
   }
 
   //Creates Snackman and positions it
-  public createSnackman(id: number, x: number, z: number) {
+  public createSnackman(id: number, x: number, y: number, z: number) {
     const newModel = this.getModel('snackman').clone();
     newModel.userData.id = id;
-    newModel.position.set(x,0,z );
+    newModel.position.set(x,y,z );
     return newModel;
   }
 
     //Creates Ghost and positions it
-  public createGhost(id: number, x: number, z: number) {
+  public createGhost(id: number, x: number, y: number, z: number) {
     const newModel = this.getModel('snackman').clone();
     newModel.userData.id = id;
-    newModel.position.set(x,0,z );
+    newModel.position.set(x,y,z );
     return newModel;
   }
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
