@@ -29,6 +29,7 @@ import { Mesh } from 'three';
 import GameOverlay from './GameOverlay.vue';
 
 import { Logger } from '../util/logger';
+import router from '@/router';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -141,6 +142,9 @@ export default defineComponent({
         }
       } else if (message.startsWith('GAME_STATE')) {
         handleGameStateEvent(message.split(';')[1]);
+      } else if (message.startsWith('GAME_END')) {
+        const code = route.params.code;
+        router.push(`/results/${code}`);
       }
     };
 
