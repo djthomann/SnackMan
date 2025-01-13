@@ -184,10 +184,10 @@ class ModelService {
     return box;
   }
 
-  public createPlayer(id: number | undefined, x: number, y,  z: number) {
+  public createPlayer(id: number | undefined, x: number, y: number,  z: number) {
     const newModel = this.getModel('player').clone();
     newModel.userData.id = id;
-    newModel.position.set(x,y,z );
+    newModel.position.set(x,y,z);
     return newModel;
   }
 

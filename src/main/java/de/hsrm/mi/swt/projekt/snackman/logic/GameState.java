@@ -92,7 +92,7 @@ public class GameState {
     }
 
     public synchronized void addChangedChicken(Chicken chicken) {
-        changedChicken.removeIf(record -> record.objectId() == chicken.getObjectId());
+        changedChicken.removeIf(record -> record == null || record.objectId() == chicken.getObjectId());
         changedChicken.add(chicken.toRecord());
     }
 

@@ -84,13 +84,11 @@ export default defineComponent({
 
     const rendererContainer = ref<HTMLDivElement | null>(null);
     const serverMessage = ref<string>('');
-    const player = new THREE.Mesh();
     const route = useRoute();
     const userStore = useUserStore();
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
-    let playerObj: THREE.Group;
     let plane: THREE.Mesh;
     let ambientLight: THREE.AmbientLight;
     let directionalLight: THREE.DirectionalLight;
@@ -101,7 +99,6 @@ export default defineComponent({
     const nameTags: NameTag[] = [];
     let gameID = 2;
     let startPromiseResolve: () => void;
-    let testingMode = false;
 
     const logger = new Logger();
 
@@ -120,18 +117,7 @@ export default defineComponent({
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
 
-      if (message.startsWith('MOVE')) {
-        testingMode = true;
-        const key: string = message.split(':')[1];
-
-        // Move the player
-        movePlayer(JSON.parse(message.split(';')[1]));
-      } else if (message.startsWith('MAP')) {
-        logger.info('processing map');
-        testingMode = true;
-        const map = JSON.parse(message.split(';')[1]);
-        loadMap(map);
-      } else if (message.startsWith('DISAPPEAR')) {
+      if (message.startsWith('DISAPPEAR')) {
         const food = JSON.parse(message.split(';')[1]);
         makeDisappear(food.food.objectId);
       } else if (message.startsWith('GAME_START')) {
@@ -141,6 +127,8 @@ export default defineComponent({
         }
       } else if (message.startsWith('GAME_STATE')) {
         handleGameStateEvent(message.split(';')[1]);
+      } else {
+        console.log(`FE does not support message starting with ${message.split(";")[0]}`)
       }
     };
 
@@ -235,9 +223,10 @@ export default defineComponent({
       if (/^\d+$/.test(lastSegment)) {
         gameID = Number(lastSegment);
       }
-      console.log('scene with gameID ' + gameID);
 
-      // requestMap();
+      // start Render-loop
+      animate()
+      console.log('scene with gameID ' + gameID);
     });
 
     onUnmounted(() => {
@@ -263,9 +252,6 @@ export default defineComponent({
         console.error('Error initializing or loading model:', error);
       }
     }
-
-
-
 
     function loadChickens(chickens: Chicken[]) {
       chickens.forEach(newChicken => {
@@ -300,28 +286,28 @@ export default defineComponent({
       // Iterate over snackMen and add them to the scene
       snackMen.forEach((snackMan) => {
 
-        if (!testingMode && snackMan.objectId == userStore.id) {
-          //snackManMesh.add(camera);
-          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
+        if (snackMan.objectId == userStore.id) {
+          const playerMesh = modelService.createPlayer(userStore.id ,(snackMan.x + 0.5) * mapScale, snackMan.y * mapScale, (snackMan.z + 0.5) * mapScale);
           playerMesh.add(camera)
-          camera.position.set(0, 0, 0);
+          camera.position.set(0, 5, 0);
+          playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
         } else{
-          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x, snackMan.z);
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, (snackMan.x + 0.5) * mapScale, (snackMan.z + 0.5) * mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
           // Add to snackMen group
           snackMenGroup.add(snackManMesh);
           meshes.set(snackMan.objectId, snackManMesh);
-          console.log(`placed Snackman ${snackMan.objectId} on Scene`);
         }
+        console.log(`placed Snackman ${snackMan.objectId} on Scene`);
       });
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
 
-        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x, ghost.z);
+        const ghostMesh = modelService.createGhost(ghost.objectId, (ghost.x + 0.5) * mapScale, (ghost.z + 0.5) * mapScale);
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
         // Add to ghosts group
@@ -371,26 +357,6 @@ export default defineComponent({
       skybox.position.z = w/2;
       scene.add(skybox);
 
-      player.position.set(w/2, mapScale, h/2);
-    }
-
-    /**
-     * The camera is moved to the updated position when the w-key is pressed
-     */
-    function movePlayer(moveInformation: any) {
-      const newPlayerPositionX = moveInformation.movementVector.x;
-      const newPlayerPositionY = moveInformation.movementVector.y;
-      const newPlayerPositionZ = moveInformation.movementVector.z;
-
-      logger.info(
-        '`New player position after move event was sent back from the server: x = ${newPlayerPositionX}, y = ${newPlayerPositionY}, z = ${newPlayerPositionZ}`',
-      );
-
-      player.position.set(
-        (newPlayerPositionX + 0.5) * mapScale,
-        newPlayerPositionY,
-        (newPlayerPositionZ + 0.5) * mapScale,
-      );
     }
 
     function makeDisappear(id: number) {
@@ -415,6 +381,8 @@ export default defineComponent({
 
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 0)
+      camera.lookAt(1, 1, 1);
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -440,13 +408,6 @@ export default defineComponent({
       directionalLight.castShadow = true;
       scene.add(directionalLight);
 
-      // Player Body
-      camera.position.set(0 - mapScale / 2, 0.5, 0 - mapScale / 2);
-      //TODO: Player ID!
-      playerObj = modelService.createPlayer(userStore.id ,0 - mapScale / 2, 0 - mapScale / 2 );
-      //meshes.add(playerObj);
-      scene.add(playerObj);
-
       // TODO: For testing, take out later
       //const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
       //const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
@@ -461,15 +422,9 @@ export default defineComponent({
       //cylinder.position.set( 20.5 * mapScale , 0, 20.5 * mapScale );
       //scene.add(cylinder);
 
-      // Player Object
-      scene.add(player);
-      player.add(camera);
-      player.add(playerObj);
-
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
       const startButton = document.getElementById('startButton') as HTMLInputElement;
-      player.add(controls.object);
       startButton.addEventListener(
         'click',
         function () {
@@ -565,18 +520,18 @@ export default defineComponent({
       document.addEventListener('mousemove', () => {
         mouseMovement = true;
       });
-      // start Render-Loop
-      animate();
     }
 
     function animate() {
       requestAnimationFrame(animate);
+
+      // was not able to adapt this to not use old player object - sorry
       rotateBody();
       const time = Date.now() * 0.001;
 
       // Update NameTag Orientation
       nameTags.forEach((nameTag) => {
-        nameTag.update(player);
+        nameTag.update(meshes.get(userStore.id!)!);
       });
 
       //update all animations
@@ -604,7 +559,9 @@ export default defineComponent({
       const forward = new THREE.Vector3();
       const playerForward = new THREE.Vector3();
       camera.getWorldDirection(forward);
-      player.getWorldDirection(playerForward);
+
+      console.log(meshes.get(userStore.id!))
+      meshes.get(userStore.id!)!.getWorldDirection(playerForward);
       forward.normalize();
       playerForward.normalize();
 
@@ -617,11 +574,11 @@ export default defineComponent({
 
           // Interpolation for smooth rotation
           const smoothingFactor = 0.1;
-          const currentAngle = playerObj.rotation.y;
+          const currentAngle = meshes.get(userStore.id!)!.rotation.y;
 
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
+            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
           } else if (
@@ -629,11 +586,11 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
+            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
             // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
+            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
           } else if (
@@ -641,7 +598,7 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            playerObj.rotation.y = THREE.MathUtils.lerp(
+            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               -Math.PI / 2 - Math.PI / 4,
               smoothingFactor,
@@ -653,7 +610,7 @@ export default defineComponent({
             angleYCameraDirection < 0.125 &&
             angleYCameraDirection > -0.125
           ) {
-            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
+            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
           } else if (
@@ -661,7 +618,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            playerObj.rotation.y = THREE.MathUtils.lerp(
+            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               Math.PI / 2 + Math.PI / 4,
               smoothingFactor,
@@ -669,7 +626,7 @@ export default defineComponent({
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
+            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
           } else if (
@@ -677,7 +634,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            playerObj.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
+            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
           }
         }
       }
