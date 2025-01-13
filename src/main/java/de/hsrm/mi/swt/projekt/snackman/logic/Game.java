@@ -315,17 +315,6 @@ public class Game {
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
 
         eventBus.sendEventToSubscribers(event);
-
-        // Testing mode means not starting a game via Lobby
-        if (WebSocketHandler.testingMode) {
-            float newX = ((SnackMan) this.allMovables.get(0)).getX();
-            float newY = ((SnackMan) this.allMovables.get(0)).getY();
-            float newZ = ((SnackMan) this.allMovables.get(0)).getZ();
-            MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
-
-            this.gameManager.notifyChange(moveEvent);
-        }
-
     }
 
     public GameState getGameState() {
@@ -336,11 +325,7 @@ public class Game {
         return gameManager;
     }
 
-    public GameStartEvent getGameStartEvent() {
-        return gameStartEvent;
-    }
-
-        //adjust the cases,in case of changing the Occupation in the Tile of the map to records!
+    //adjust the cases,in case of changing the Occupation in the Tile of the map to records!
     public List<List<String>> generateSurroundings(float x, float z) {
         Tile positionTile = this.map.getTileAt((int) x, (int) z);
         Tile[][] surroundings = this.map.getSurroundingTiles(positionTile);
