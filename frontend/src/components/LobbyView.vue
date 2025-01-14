@@ -6,7 +6,7 @@
           <PlayerPanelComponent avatar="ghost">
             <template #counter>{{ ghostPlayers.length }}/4</template>
             <template #button
-              ><button class="chooseRole" type="button" @click="decide(false)">
+              ><button class="chooseRoleButton" type="button" @click="decide(false)">
                 Ghost
               </button></template
             >
@@ -87,7 +87,7 @@
           <PlayerPanelComponent avatar="snackman" selected>
             <template #counter>{{ snackManPlayers.length }}/4</template>
             <template #button
-              ><button class="chooseRole" type="button" @click="decide(true)">
+              ><button class="chooseRoleButton" type="button" @click="decide(true)">
                 SnackMan
               </button></template
             >
@@ -99,7 +99,7 @@
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
-          <button type="button" @click="startGame">Start Game</button>
+          <button class="startGameButton" type="button" @click="startGame">Start Game</button>
         </div>
       </div>
     </BackgroundComponent>
@@ -318,21 +318,58 @@ const choose = (role: string) => {
   gap: 30px;
 }
 
-.chooseRole {
+.startGameButton {
+  width: 25%;
+  background-color: #F39325;
+  color: white;
+  border: 3px solid white;
+  border-radius: 10px;
+}
+
+.chooseRoleButton {
   width: 100%;
-  padding: 10px;
   background-color: white;
   color: #ff8c00;
+  border: none;
+}
+
+Button {
+  padding: 10px;
   font-size: 1.5rem;
   font-weight: bold;
-  border: none;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.chooseRole:hover {
+Button:hover{
   color: black;
   transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.startGameButton:hover {
+  background-color: white;
+  border: 3px solid black;
+}
+
+input[type="number"] {
+  appearance: none;
+  -moz-appearance: textfield;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+label {
+  color: white;
 }
 </style>
