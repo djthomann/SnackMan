@@ -1,45 +1,5 @@
 <template>
   <div>
-    <form
-      @submit.prevent="submitForm"
-      id="gameConfig"
-      :action="`/lobby/${lobbyCode}`"
-      method="POST"
-    >
-      <label for="scoreToWin">Score to Win:</label><br />
-      <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" /><br /><br />
-
-      <label for="speedModifier">Movement-Speed:</label><br />
-      <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" /><br /><br />
-
-      <label for="snackmanSpeed">Snackman Speed:</label><br />
-      <input type="number" id="snackmanSpeed" v-model="gameConfig.snackManSpeed" /><br /><br />
-
-      <label for="ghostSpeed">Ghost Speed:</label><br />
-      <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" /><br /><br />
-
-      <label for="chickenSpeed">Chicken Speed:</label><br />
-      <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" /><br /><br />
-
-      <label for="mapWidth">Map Width in tiles:</label><br />
-      <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" /><br /><br />
-
-      <label for="mapHeight">Map Height in tiles:</label><br />
-      <input type="number" id="mapHeight" v-model="gameConfig.mapHeight" /><br /><br />
-
-      <label for="gameTime">Game Time in seconds:</label><br />
-      <input type="number" id="gameTime" v-model="gameConfig.gameTime" /><br /><br />
-
-      <label for="chickenCount">Number of Chicken:</label><br />
-      <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" /><br /><br />
-
-      <label for="jumpCalories">Calories Burned on Jump:</label><br />
-      <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" /><br /><br />
-
-      <button type="submit">Apply</button>
-      <button type="button" @click="resetForm">Reset</button>
-    </form>
-
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
       <div class="lobby-grid">
         <div class="lobby-grid__column">
@@ -69,48 +29,55 @@
                   <span>Slay</span>
                 </FieldsetComponent>
                 <FieldsetComponent height-behaviour="stretch">
-                  <span>
-                    <label for="scoreToWin">Score to Win:</label>
-                    <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" />
-                  </span>
-                  <label for="speedModifier">Movement-Speed:</label>
-                  <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" />
-                  <span>
-                    <label for="snackmanSpeed">Snackman Speed:</label>
-                    <input type="number" id="snackmanSpeed" v-model="gameConfig.snackManSpeed" />
-                  </span>
-                  <span>
-                    <label for="ghostSpeed">Ghost Speed:</label>
-                    <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" />
-                  </span>
-                  <span>
-                    <label for="chickenSpeed">Chicken Speed:</label>
-                    <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" />
-                  </span>
-                  <span>
-                    <label for="mapWidth">Map Width in tiles:</label>
-                    <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" />
-                  </span>
-                  <span>
-                    <label for="mapHeight">Map Height in tiles:</label>
-                    <input
-                      type="number"
-                      id="mapHeight"
-                      v-model="gameConfig.mapHeight"
-                    />
-                  </span>
-                  <span>
-                    <label for="gameTime">Game Time in seconds:</label>
-                    <input type="number" id="gameTime" v-model="gameConfig.gameTime" />
-                  </span>
-                  <span>
-                    <label for="chickenCount">Number of Chicken:</label>
-                    <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" />
-                  </span>
-                  <span>
-                    <label for="jumpCalories">Calories Burned on Jump:</label>
-                    <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" />
-                  </span>
+                  <form
+                    @submit.prevent="submitForm"
+                    id="gameConfig"
+                    :action="`/lobby/${lobbyCode}`"
+                    method="POST"
+                  >
+                    <span>
+                      <label for="scoreToWin">Score to Win:</label>
+                      <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" />
+                    </span>
+                    <span>
+                      <label for="speedModifier">Movement-Speed:</label>
+                      <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" />
+                    </span>
+                    <span>
+                      <label for="snackmanSpeed">Snackman Speed:</label>
+                      <input type="number" id="snackmanSpeed" v-model="gameConfig.snackManSpeed" />
+                    </span>
+                    <span>
+                      <label for="ghostSpeed">Ghost Speed:</label>
+                      <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" />
+                    </span>
+                    <span>
+                      <label for="chickenSpeed">Chicken Speed:</label>
+                      <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" />
+                    </span>
+                    <span>
+                      <label for="mapWidth">Map Width in tiles:</label>
+                      <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" />
+                    </span>
+                    <span>
+                      <label for="mapHeight">Map Height in tiles:</label>
+                      <input type="number" id="mapHeight" v-model="gameConfig.mapHeight" />
+                    </span>
+                    <span>
+                      <label for="gameTime">Game Time in seconds:</label>
+                      <input type="number" id="gameTime" v-model="gameConfig.gameTime" />
+                    </span>
+                    <span>
+                      <label for="chickenCount">Number of Chicken:</label>
+                      <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" />
+                    </span>
+                    <span>
+                      <label for="jumpCalories">Calories Burned on Jump:</label>
+                      <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" />
+                    </span>
+                    <button type="submit">Apply</button>
+                    <button type="button" @click="resetForm">Reset</button>
+                  </form>
                 </FieldsetComponent>
               </div>
             </template>
