@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.DisappearEvent;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
@@ -58,18 +59,17 @@ public class CollisionManager {
             case ITEM:
                 // logger.info(
                 //         collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
-                if (collisionPartner instanceof SnackMan) {
-                    logger.info(
-                        collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                if (collisionPartner instanceof SnackMan || collisionPartner instanceof Chicken) {
+                    
                     Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
+
                     try {
-                        // currently food gets exact the same coord as tile
-                        float foodPosX = (float) (nearbyFood.getX() + 0.3);
-                        float foodPosZ = (float) (nearbyFood.getZ() + 0.3);
+                        float foodPosX = nearbyFood.getX();
+                        float foodPosZ = nearbyFood.getZ();
                         float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
-                        
                         if (distance < (collisionPartner.getRadius() + nearbyFood.getRadius())) {
-                            ((SnackMan) collisionPartner).eat(nearbyFood);
+                            if (collisionPartner instanceof SnackMan) ((SnackMan) collisionPartner).eat(nearbyFood);
+                            else ((Chicken) collisionPartner).eat(nearbyFood); 
                             GameManager gameManager = game.getGameManager(); 
                             DisappearEvent event = new DisappearEvent(game.id, nearbyFood); 
                             gameManager.notifyChange(event);
@@ -77,7 +77,8 @@ public class CollisionManager {
                             collisions.add(CollisionType.ITEM);
                         }
                     } catch(NullPointerException e) {
-
+                        logger.error(
+                            "no more food on tile: " + wishedTile.getX() + ", " + wishedTile.getZ());
                     }
                 }
                 break;
