@@ -19,12 +19,13 @@
   <BackgroundComponent :title="`JOIN A LOBBY`">
     <div class="home-grid">
       <div class="player-box">
-        
+
         <UserPanelComponent :name="name" :id="id"></UserPanelComponent>
       </div>
       <div class="home-view-row bottom">
         <div class="lobbies-headline">
           <div>
+            <span v-if="info != ''" class="error-text">{{ info }}</span>
             <input class="custom-lobby" type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
           </div>
           <div class="icon-button join-button">
@@ -32,7 +33,7 @@
               <img src="@/assets/icons/join.svg" />
             </button>
           </div>
-            <div class="icon-button refresh-button button">
+          <div class="icon-button refresh-button button">
             <button @click="fetchLobbies">
               <img src="@/assets/icons/refresh.svg" />
             </button>
@@ -42,21 +43,22 @@
               <img src="@/assets/icons/add.svg" />
             </button>
           </div>
-          
-          
+
+
         </div>
         <div class="lobbies">
 
-          <LobbyPanelComponent @click="joinLobby(lobby.lobbyCode?.toString() ?? '')" v-for="lobby in lobbies" :lobby="lobby" height-behaviour="stretch"></LobbyPanelComponent>
+          <LobbyPanelComponent @click="joinLobby(lobby.lobbyCode?.toString() ?? '')" v-for="lobby in lobbies"
+            :lobby="lobby" height-behaviour="stretch"></LobbyPanelComponent>
         </div>
-        
+
       </div>
     </div>
   </BackgroundComponent>
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted} from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
@@ -77,6 +79,7 @@ const name = computed(() => userStore.username || 'Guest');
 const id = computed(() => userStore.id || 0);
 const maxPlayers = 8;
 const userStore = useUserStore();
+const info = ref('');
 
 const lobbies = ref<Lobby[]>([]);
 
@@ -84,7 +87,7 @@ const handleServerMessage = (message: string) => {
   serverMessage.value = message;
   if (message.startsWith('ALL_LOBBIES')) {
     lobbies.value = JSON.parse(message.split(';')[1]);
-    logger.info('ALL LOBBIES' + lobbies.value);
+    logger.info('ALL LOBBIES' + lobbies.value.toString());
   }
 };
 
@@ -109,13 +112,29 @@ const clickComponent = () => {
 }
 
 const joinLobby = (code: string) => {
-  logger.info(`Joining lobby with code: ${code}`);
-  const data = JSON.stringify({
-    type: 'JOIN_LOBBY',
-    lobbyCode: code
-  });
-  sendMessage(data);
-  router.push({ path: `/lobby/${code}` });
+  if (findLobby(parseInt(code))) {
+    info.value = ""
+    logger.info(`Joining lobby with code: ${code}`);
+    const data = JSON.stringify({
+      type: 'JOIN_LOBBY',
+      lobbyCode: code
+    });
+    sendMessage(data);
+    router.push({ path: `/lobby/${code}` });
+  } else {
+    info.value = "Lobby not found!"
+  }
+};
+
+function findLobby(code: number) {
+  for (let lobby of lobbies.value) {
+    if (lobby.lobbyCode == code) {
+      logger.info('Found lobby with code: ${code}');
+      return true;
+    }
+  }
+  logger.info(`Could not find lobby with code: ${code}`);
+  return false;
 };
 
 const fetchLobbies = () => {
@@ -128,16 +147,17 @@ const fetchLobbies = () => {
 * {
   user-select: none;
 }
+
 .home-grid {
   position: relative;
   width: 100%;
   height: 100%;
-  grid-template-columns: 1fr; 
-  grid-template-rows: 1fr 1fr; 
-  
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+
   gap: 40px 60px;
   padding: 4dvw;
-  box-sizing:border-box;
+  box-sizing: border-box;
 }
 
 .player-box {
@@ -162,21 +182,21 @@ const fetchLobbies = () => {
 }
 
 .background__title {
-    width: max-content;
-    height: 90px;
-    background-color: var(--colorPrimary);
-    border: 9px solid var(--colorLight);
-    border-radius: 2px;
-    box-sizing: border-box;
-    box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
-    padding: 10px 25px;
+  width: max-content;
+  height: 90px;
+  background-color: var(--colorPrimary);
+  border: 9px solid var(--colorLight);
+  border-radius: 2px;
+  box-sizing: border-box;
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.2);
+  padding: 10px 25px;
 }
 
 .background__headline {
-    color: var(--colorLight);
-    margin: 0;
-    font-size: 45px;
-    font-weight: normal;
+  color: var(--colorLight);
+  margin: 0;
+  font-size: 45px;
+  font-weight: normal;
 }
 
 .bottom {
@@ -219,7 +239,7 @@ const fetchLobbies = () => {
   cursor: pointer;
 }
 
-.refresh-button img:hover  {
+.refresh-button img:hover {
   transform: rotate(360deg);
 }
 
@@ -232,7 +252,7 @@ const fetchLobbies = () => {
 }
 
 .join-button img {
-  
+
   transform: translateX(-10px);
   transition: transform 0.2s ease;
 }
@@ -251,7 +271,7 @@ const fetchLobbies = () => {
   font-size: 18pt;
   font-weight: normal;
   font-family: "Lilita One";
-  transition: background-color 200ms;  
+  transition: background-color 200ms;
 }
 
 .custom-lobby:focus {

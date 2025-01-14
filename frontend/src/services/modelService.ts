@@ -7,9 +7,14 @@ import cakeModelUrl from '@/assets/models/cake.glb';
 import chickenModelUrl from '@/assets/models/chicken.glb';
 import brokkoliModelUrl from '@/assets/models/brokkoli.glb';
 import snackmanModelUrl from '@/assets/models/snackmouse.glb';
-import skybox_dnURL from '@/assets/images/skybox/floor.png';
+import floorURL from '@/assets/images/skybox/floor.png';
 import playerModelUrl from '@/assets/models/player.glb';
-
+import skybox_ftURL from '@/assets/images/skybox/skybox_ft.png';
+import skybox_bkURL from '@/assets/images/skybox/skybox_bk.png';
+import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
+import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
+import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
+import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
 
 
 import { Logger } from '../util/logger';
@@ -51,7 +56,7 @@ class ModelService {
     this.modelCache = new Map();
     this.animationCache = new Map();
     this.isInitialized = false;
-    this.texture_dn = new THREE.TextureLoader().load(skybox_dnURL);
+    this.texture_dn = new THREE.TextureLoader().load(floorURL);
   }
 
   private scaleModels(globalScale: number): void {
@@ -157,7 +162,51 @@ class ModelService {
     });
   }
 
+  public createSkybox(w: number){
+    // Textures for Skybox
+    const skyboxTextures: THREE.MeshBasicMaterial[] = [];
+    const texture_ft = new THREE.TextureLoader().load(skybox_ftURL);
+    texture_ft.colorSpace = THREE.SRGBColorSpace;
+    const texture_bk = new THREE.TextureLoader().load(skybox_bkURL);
+    texture_bk.colorSpace = THREE.SRGBColorSpace;
+    const texture_up = new THREE.TextureLoader().load(skybox_upURL);
+    texture_up.colorSpace = THREE.SRGBColorSpace;
+    const texture_dn = new THREE.TextureLoader().load(skybox_dnURL);
+    texture_dn.colorSpace = THREE.SRGBColorSpace;
+    const texture_rt = new THREE.TextureLoader().load(skybox_rtURL);
+    texture_rt.colorSpace = THREE.SRGBColorSpace;
+    const texture_lf = new THREE.TextureLoader().load(skybox_lfURL);
+    texture_lf.colorSpace = THREE.SRGBColorSpace;
 
+    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_ft }));
+    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_bk }));
+    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_up }));
+    skyboxTextures.push(
+      new THREE.MeshBasicMaterial({
+        map: texture_dn,
+        transparent: true,
+        opacity: 0,
+      }),
+    );
+    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_rt }));
+    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_lf }));
+
+    console.log('textures found', texture_ft.image); // Should not be null or undefined
+
+    // Skybox
+    for (let i = 0; i < 6; i++) {
+      skyboxTextures[i].side = THREE.BackSide;
+      skyboxTextures[i].transparent = true;
+    }
+    const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
+    const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
+    skybox.name = "skybox";
+    skybox.position.y = 0;
+    skybox.position.x = w/2;
+    skybox.position.z = w/2;
+
+    return skybox;
+  }
 
   // Creates small floor tiles
   public createFloorTile(x: number, z: number, scale: number) {
