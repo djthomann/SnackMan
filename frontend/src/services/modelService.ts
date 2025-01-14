@@ -15,22 +15,16 @@ import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
 import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
 import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
 import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
-import counter_dnURL from '@/assets/images/counter/counter_down.png';
-import counter_lfURL from '@/assets/images/counter/counter_left.png';
-import counter_rtURL from '@/assets/images/counter/counter_right.png';
-import counter_ftURL from '@/assets/images/counter/counter_front.png';
-import counter_bkURL from '@/assets/images/counter/counter_back.png';
-import counter_top1URL from '@/assets/images/counter/counter_top1.png';
-import counter_top2URL from '@/assets/images/counter/counter_top2.png';
-import counter_top3URL from '@/assets/images/counter/counter_top3.png';
-import counter_top4URL from '@/assets/images/counter/counter_top4.png';
-import counter_top5URL from '@/assets/images/counter/counter_top5.png';
-
-
-
-
-
-
+import counter_dnURL from '@/assets/images/counter/counter_down.jpg';
+import counter_lfURL from '@/assets/images/counter/counter_left.jpg';
+import counter_rtURL from '@/assets/images/counter/counter_right.jpg';
+import counter_ftURL from '@/assets/images/counter/counter_front.jpg';
+import counter_bkURL from '@/assets/images/counter/counter_back.jpg';
+import counter_top1URL from '@/assets/images/counter/counter_top1.jpg';
+import counter_top2URL from '@/assets/images/counter/counter_top2.jpg';
+import counter_top3URL from '@/assets/images/counter/counter_top3.jpg';
+import counter_top4URL from '@/assets/images/counter/counter_top4.jpg';
+import counter_top5URL from '@/assets/images/counter/counter_top5.jpg';
 
 import { Logger } from '../util/logger';
 
@@ -44,6 +38,8 @@ class ModelService {
   private isInitialized: boolean;
   private logger: Logger;
   private texture_dn: THREE.Texture;
+  private counterTextures: THREE.MeshBasicMaterial[];
+  private topTextures: THREE.Texture[];
 
   constructor() {
     this.logger = new Logger();
@@ -72,6 +68,22 @@ class ModelService {
     this.animationCache = new Map();
     this.isInitialized = false;
     this.texture_dn = new THREE.TextureLoader().load(floorURL);
+
+    this.counterTextures = [
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_ftURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_bkURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_dnURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_rtURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_lfURL) }),
+  ];
+  
+   this.topTextures = [
+      counter_top1URL,
+      counter_top2URL,
+      counter_top3URL,
+      counter_top4URL,
+      counter_top5URL,
+  ].map(url => this.loadTexture(url));
 
   }
 
@@ -147,6 +159,13 @@ class ModelService {
     return animationData?.animations || [];
   }
 
+  // Helper Function for Loading Textures in the SRGB ColorSpace
+  private loadTexture(url: string): THREE.Texture {
+    const texture = new THREE.TextureLoader().load(url);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  }
+
   /**
    * Tries to load a model from a URL
    */
@@ -176,48 +195,6 @@ class ModelService {
         },
       );
     });
-  }
-
-  public createCounter(){
-
-    const counterTextures: THREE.MeshBasicMaterial[] = [];
-    const counter_texture_ft = new THREE.TextureLoader().load(counter_ftURL);
-    counter_texture_ft.colorSpace = THREE.SRGBColorSpace;
-    const counter_texture_bk = new THREE.TextureLoader().load(counter_bkURL);
-    counter_texture_bk.colorSpace = THREE.SRGBColorSpace;
-    const counter_texture_dn = new THREE.TextureLoader().load(counter_dnURL);
-    counter_texture_dn.colorSpace = THREE.SRGBColorSpace;
-    const counter_texture_rt = new THREE.TextureLoader().load(counter_rtURL);
-    counter_texture_rt.colorSpace = THREE.SRGBColorSpace;
-    const counter_texture_lf = new THREE.TextureLoader().load(counter_lfURL);
-    counter_texture_lf.colorSpace = THREE.SRGBColorSpace;
-
-    //Random top face
-    const topTextures = [
-      counter_top1URL,
-      counter_top2URL,
-      counter_top3URL,
-      counter_top4URL,
-      counter_top5URL
-    ];
-
-    const counter_texture_up = new THREE.TextureLoader().load(topTextures[Math.floor(Math.random() * topTextures.length)]);
-    counter_texture_up.colorSpace = THREE.SRGBColorSpace;
-
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_ft}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_bk}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_dn}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_rt}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_lf}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_ft}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_up}));
-
-   /* 
-    for (let i = 0; i < 6; i++) {
-      //counterTextures[i].side = THREE.BackSide;
-      counterTextures[i].transparent = true;
-    }
-    */
   }
 
 
@@ -281,50 +258,92 @@ class ModelService {
     return plane;
   }
 
-  // Creates one cube per wall tile
-  public createWall(x: number, z: number, scale: number, wallHeight: number) {
-    const counterTextures: THREE.MeshBasicMaterial[] = [];
-    const counter_texture_ft = new THREE.TextureLoader().load(counter_ftURL);
-    counter_texture_ft.colorSpace = THREE.SRGBColorSpace;
-    const counter_texture_bk = new THREE.TextureLoader().load(counter_bkURL);
-    counter_texture_bk.colorSpace = THREE.SRGBColorSpace;
-    const counter_texture_dn = new THREE.TextureLoader().load(counter_dnURL);
-    counter_texture_dn.colorSpace = THREE.SRGBColorSpace;
-    const counter_texture_rt = new THREE.TextureLoader().load(counter_rtURL);
-    counter_texture_rt.colorSpace = THREE.SRGBColorSpace;
-    const counter_texture_lf = new THREE.TextureLoader().load(counter_lfURL);
-    counter_texture_lf.colorSpace = THREE.SRGBColorSpace;
+  // Create Textured Walls
+  public createWall(x: number, z: number, scale: number, wallHeight: number): THREE.Mesh {
+    // Random top texture
+    const counterTextureUp = new THREE.MeshBasicMaterial({
+        map: this.topTextures[Math.floor(Math.random() * this.topTextures.length)],
+    });
 
-    //Random top face
-    const topTextures = [
-      counter_top1URL,
-      counter_top2URL,
-      counter_top3URL,
-      counter_top4URL,
-      counter_top5URL
+    // UV-Mapping
+    const materials = [
+        this.counterTextures[0], // Front
+        this.counterTextures[1], // Back
+        counterTextureUp,        // Top - Random
+        this.counterTextures[2], // Bottom
+        this.counterTextures[3], // Right
+        this.counterTextures[4], // Left
     ];
 
-    const counter_texture_up = new THREE.TextureLoader().load(topTextures[Math.floor(Math.random() * topTextures.length)]);
-    counter_texture_up.colorSpace = THREE.SRGBColorSpace;
-
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_ft}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_bk}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_dn}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_rt}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_lf}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_ft}));
-    counterTextures.push(new THREE.MeshBasicMaterial({ map: counter_texture_up}));
-
     const boxGeometry = new THREE.BoxGeometry(1 * scale, wallHeight, 1 * scale);
-    const box = new THREE.Mesh(boxGeometry, counterTextures);
+    const box = new THREE.Mesh(boxGeometry, materials);
+
     box.position.set((x + 0.5) * scale, 0.5 * scale, (z + 0.5) * scale);
     box.castShadow = true;
 
-    const randomRotation = Math.floor(Math.random() * 4) * Math.PI / 2;
-    box.rotation.y = randomRotation;
-    
+    // Random Rotation
+    box.rotation.y = Math.floor(Math.random() * 4) * Math.PI / 2;
+
     return box;
   }
+
+
+  public createWallsWithAtlas(instances: { x: number, z: number, scale: number, wallHeight: number }[]) {
+    // Prepare a single geometry and material with a texture atlas
+    const geometry = new THREE.BoxGeometry(1, 1, 1); // Base box
+    const textureLoader = new THREE.TextureLoader();
+    const atlasTexture = textureLoader.load(textureAtlasURL);
+    atlasTexture.colorSpace = THREE.SRGBColorSpace;
+
+    // Define UV mapping for a texture atlas
+    const uvMapping = new Float32Array([
+        // Front face (Assume it maps to the first quadrant of the atlas)
+        0, 0,  0.25, 0,  0.25, 0.25,  0, 0.25,
+
+        // Back face
+        0.25, 0,  0.5, 0,  0.5, 0.25,  0.25, 0.25,
+
+        // Top face
+        0.5, 0,  0.75, 0,  0.75, 0.25,  0.5, 0.25,
+
+        // Bottom face
+        0.75, 0,  1, 0,  1, 0.25,  0.75, 0.25,
+
+        // Right face
+        0, 0.25,  0.25, 0.25,  0.25, 0.5,  0, 0.5,
+
+        // Left face
+        0.25, 0.25,  0.5, 0.25,  0.5, 0.5,  0.25, 0.5,
+    ]);
+
+    // Apply UV mapping to the geometry
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvMapping, 2));
+
+    const material = new THREE.MeshBasicMaterial({ map: atlasTexture });
+    const instancedMesh = new THREE.InstancedMesh(geometry, material, instances.length);
+
+    // Apply transformations
+    const dummyMatrix = new THREE.Matrix4();
+    instances.forEach((instance, i) => {
+        const { x, z, scale, wallHeight } = instance;
+        const position = new THREE.Vector3((x + 0.5) * scale, 0.5 * wallHeight, (z + 0.5) * scale);
+        const scaleVector = new THREE.Vector3(scale, wallHeight, scale);
+        const rotationY = Math.floor(Math.random() * 4) * Math.PI / 2;
+
+        dummyMatrix.compose(
+            position,
+            new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rotationY),
+            scaleVector
+        );
+
+        instancedMesh.setMatrixAt(i, dummyMatrix);
+    });
+
+    instancedMesh.instanceMatrix.needsUpdate = true;
+
+    return instancedMesh;
+}
+
 
   public createPlayer(id: number | undefined, x: number, y: number,  z: number) {
     const newModel = this.getModel('player').clone();
