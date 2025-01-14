@@ -22,8 +22,7 @@
 
         <UserPanelComponent :name="name" :id="id"></UserPanelComponent>
       </div>
-      <div class="home-view-row bottom">
-        <div class="lobbies-headline">
+      <div class="lobbies-headline">
           <div>
             <span v-if="info != ''" class="error-text">{{ info }}</span>
             <input class="custom-lobby" type="text" v-model="lobbyCode" placeholder="Enter Lobby Code" />
@@ -48,11 +47,9 @@
         </div>
         <div class="lobbies">
 
-          <LobbyPanelComponent @click="joinLobby(lobby.lobbyCode?.toString() ?? '')" v-for="lobby in lobbies"
-            :lobby="lobby" height-behaviour="stretch"></LobbyPanelComponent>
-        </div>
-
-      </div>
+<LobbyPanelComponent @click="joinLobby(lobby.lobbyCode?.toString() ?? '')" v-for="lobby in lobbies"
+  :lobby="lobby" height-behaviour="stretch"></LobbyPanelComponent>
+</div>
     </div>
   </BackgroundComponent>
 </template>
@@ -149,14 +146,14 @@ const fetchLobbies = () => {
 }
 
 .home-grid {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  width: 90%;
+  height: 90%;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 1fr;
 
   gap: 40px 60px;
-  padding: 4dvw;
+  margin: 5%;
   box-sizing: border-box;
 }
 
@@ -205,8 +202,8 @@ const fetchLobbies = () => {
 
 .lobbies {
   position: relative;
-  height: 500px;
-  width: 1100px;
+  height: 60%;
+  width: 80%;
   display: flex;
   flex-wrap: wrap;
   overflow: scroll;
