@@ -195,7 +195,7 @@ public class Game {
                             foodType = FoodType.UNHEALTHY;
                         }
                     }
-                    allTiles[row][col].addToOccupation(new Food(id, col, row, foodType, gameConfig));
+                    allTiles[row][col].addToOccupation(new Food(id, (float) col +0.5f, (float) row + 0.5f, foodType, gameConfig));
                 }
             }
         }
