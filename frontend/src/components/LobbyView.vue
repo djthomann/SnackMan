@@ -257,6 +257,7 @@ onMounted(async () => {
     logger.info('Failed to fetch Data on load: ', e);
   }
 
+  decide(true); // initial role Snackman
   fetchPlayers();
 });
 
