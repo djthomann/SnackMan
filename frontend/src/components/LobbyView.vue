@@ -3,7 +3,7 @@
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
       <div class="lobby-grid">
         <div class="lobby-grid__column">
-          <PlayerPanelComponent avatar="ghost">
+          <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
             <template #counter>{{ ghostPlayers.length }}/4</template>
             <template #button
               ><button class="chooseRoleButton" type="button" @click="decide(false)">
@@ -84,7 +84,7 @@
           </ConfigPanelComponent>
         </div>
         <div class="lobby-grid__column">
-          <PlayerPanelComponent avatar="snackman" selected>
+          <PlayerPanelComponent avatar="snackman" :selected="selectedRole === 'SNACKMAN'">
             <template #counter>{{ snackManPlayers.length }}/4</template>
             <template #button
               ><button class="chooseRoleButton" type="button" @click="decide(true)">
@@ -135,6 +135,7 @@ const undecidedPlayers = ref<Array<Player>>([
   { id: 1, username: 'Alice' },
   { id: 2, username: 'Bob' },
 ]);
+const selectedRole = ref<'SNACKMAN' | 'GHOST' | null>(null);
 
 // Type definition of GameConfig interface
 interface GameConfig {
@@ -219,6 +220,7 @@ const resetForm = async () => {
 };
 
 const decide = (snackman: boolean) => {
+  selectedRole.value = snackman ? 'SNACKMAN' : 'GHOST';
   const data = JSON.stringify({
     type: 'ROLE',
     snackman: snackman,
