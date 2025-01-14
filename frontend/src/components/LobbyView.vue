@@ -11,7 +11,7 @@
               </button></template
             >
             <template #content>
-              <li v-for="player in ghostPlayers" :key="player.id">
+              <li v-for="player in ghostPlayers" :key="player.id" class="player-list-item">
                 {{ player.username }}
               </li>
             </template>
@@ -92,7 +92,7 @@
               </button></template
             >
             <template #content>
-              <li v-for="player in snackManPlayers" :key="player.id">
+              <li v-for="player in snackManPlayers" :key="player.id" class="player-list-item">
                 {{ player.username }}
               </li>
             </template>
@@ -371,5 +371,11 @@ input[type="number"]::-webkit-inner-spin-button {
 
 label {
   color: white;
+}
+
+.player-list-item {
+  list-style-type: none;
+  text-align: center;
+  padding: 5px 0;
 }
 </style>
