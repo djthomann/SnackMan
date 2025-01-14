@@ -12,7 +12,7 @@ import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import type { Ghost, Snackman, Chicken } from '@/types/SceneTypes';
+import type { Ghost, Snackman, Chicken, Food } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
@@ -117,10 +117,7 @@ export default defineComponent({
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
 
-      if (message.startsWith('DISAPPEAR')) {
-        const food = JSON.parse(message.split(';')[1]);
-        makeDisappear(food.food.objectId);
-      } else if (message.startsWith('GAME_START')) {
+    if (message.startsWith('GAME_START')) {
         handleStartEvent(message.split(';')[1]);
         if (startPromiseResolve) {
           startPromiseResolve();
@@ -136,6 +133,11 @@ export default defineComponent({
 
       const parsedData = JSON.parse(message);
       gameStore.setRemainingTime(parsedData.remainingSeconds);
+
+      console.log("parsedFoods", parsedData.eatenFoods); 
+      parsedData.eatenFoods.forEach((food: Food) => {
+        makeDisappear(food.objectId)
+      }) 
 
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
         if(snackman.objectId === userStore.id) {

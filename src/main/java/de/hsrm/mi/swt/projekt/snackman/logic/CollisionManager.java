@@ -6,7 +6,6 @@ import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.DisappearEvent;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
@@ -44,7 +43,7 @@ public class CollisionManager {
      * @return String of The type of entity/object collided with, or "none" if no
      *         collision is detected.
      */
-    public ArrayList<CollisionType> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
+    public synchronized ArrayList<CollisionType> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
         
         // Changed return type from string to array list as several collisions can happen at once, e.g. ghost and item
         ArrayList<CollisionType> collisions = new ArrayList<>();
@@ -71,8 +70,7 @@ public class CollisionManager {
                             if (collisionPartner instanceof SnackMan) ((SnackMan) collisionPartner).eat(nearbyFood);
                             else ((Chicken) collisionPartner).eat(nearbyFood); 
                             GameManager gameManager = game.getGameManager(); 
-                            DisappearEvent event = new DisappearEvent(game.id, nearbyFood); 
-                            gameManager.notifyChange(event);
+                            gameManager.getGameById(game.id).getGameState().addEatenFood(nearbyFood); 
                             wishedTile.setOccupationType(OccupationType.FREE);
                             collisions.add(CollisionType.ITEM);
                         }
