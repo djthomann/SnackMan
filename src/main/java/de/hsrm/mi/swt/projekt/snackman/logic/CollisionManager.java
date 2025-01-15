@@ -69,8 +69,6 @@ public class CollisionManager {
                         if (distance < (collisionPartner.getRadius() + nearbyFood.getRadius())) {
                             if (collisionPartner instanceof SnackMan) ((SnackMan) collisionPartner).eat(nearbyFood);
                             else ((Chicken) collisionPartner).eat(nearbyFood); 
-                            GameManager gameManager = game.getGameManager(); 
-                            gameManager.getGameById(game.id).getGameState().addEatenFood(nearbyFood); 
                             wishedTile.setOccupationType(OccupationType.FREE);
                             collisions.add(CollisionType.ITEM);
                         }

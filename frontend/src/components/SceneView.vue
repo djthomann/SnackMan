@@ -101,6 +101,11 @@ export default defineComponent({
       parsedData.eatenFoods.forEach((food: Food) => {
         makeDisappear(food.objectId)
       })
+      
+      parsedData.laidEggs.forEach((food: Food) => {
+        logger.info(`Egg gets laid`)
+        makeAppear(food)
+      });
 
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
         if(snackman.objectId === userStore.id) {
@@ -342,6 +347,14 @@ export default defineComponent({
           console.log(`food with Id ${id} disappeared juhu`);
         }
       });
+    }
+
+    function makeAppear(newFood: Food) {
+      const food = modelService.createFood(newFood.objectId, newFood.x, newFood.z, newFood.calories, mapScale);
+      food.userData.id = newFood.objectId;
+      foodGroup.add(food);
+      scene.remove(foodGroup)
+      scene.add(foodGroup)
     }
 
     function initScene() {

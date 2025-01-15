@@ -349,7 +349,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     @Override
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
-        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId, gameManager));
     }
 
     /**
