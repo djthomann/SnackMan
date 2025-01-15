@@ -96,7 +96,6 @@ export default defineComponent({
     const handleGameStateEvent = (message: string) => {
 
       const parsedData = JSON.parse(message);
-      console.log(parsedData);
       gameStore.setRemainingTime(parsedData.remainingSeconds);
 
       parsedData.eatenFoods.forEach((food: Food) => {
@@ -109,7 +108,7 @@ export default defineComponent({
         }
         meshes
           .get(snackman.objectId)!
-          .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+          .position.set(snackman.x * mapScale, snackman.y, snackman.z * mapScale);
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
