@@ -1,5 +1,3 @@
-import random
-
 direction_offsets = {
     "NW": (0, 0), "N": (0, 1), "NE": (0, 2), "W" : (1, 0),           
     "E" : (1, 2), "SW": (2, 0), "S": (2, 1), "SE": (2, 2) 

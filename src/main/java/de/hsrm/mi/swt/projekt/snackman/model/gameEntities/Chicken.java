@@ -2,6 +2,7 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -93,6 +94,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.scriptInterpreter.exec("import sys");
         this.scriptInterpreter.exec("sys.path.insert(0, '.')");
         this.scriptInterpreter.exec("print('Python sys.path ist'+str(sys.path))");
+        this.scriptInterpreter.exec("sys.path.insert(0, '.')");
         // böser *-Import stellt in funktionen.py definierte Fktn für Formel bereit 
         initScriptInterpreter(script);
         this.movementPaused = false; 

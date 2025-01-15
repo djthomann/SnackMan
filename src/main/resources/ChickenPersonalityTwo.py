@@ -1,5 +1,8 @@
 from Utils import *
 
+from java.util import Random
+rand = Random()
+
 def run_behavior(environment, direction, wall_collision,x,z):
     """
     Executes the chicken's behavior based on its surroundings and the last known direction of movement.
@@ -36,8 +39,12 @@ def run_behavior(environment, direction, wall_collision,x,z):
         for new_direction in alternatives[direction]:
             if get_tile(environment,*direction_offsets[new_direction]) != "WALL" and get_tile(environment,*direction_offsets[new_direction]) != "GHOST":
                 valid_directions.append(new_direction)
-        if valid_directions:
-            new_direction = random.choice(valid_directions)  # Randomly select a valid direction
+        if len(valid_directions) > 1:
+            new_direction = valid_directions[int(rand.nextInt(2))]  # Randomly select a valid direction
+            wall_collision = False
+            return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        if len(valid_directions) == 1:
+            new_direction = valid_directions[0]  # Randomly select a valid direction
             wall_collision = False
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
         else:
