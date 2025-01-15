@@ -33,10 +33,6 @@ const players = [
     width: 350px;
     border-radius: 8px;
     padding: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    min-height: 100vh;
     overflow: hidden;
 
 }

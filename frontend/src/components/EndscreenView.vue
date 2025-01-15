@@ -137,10 +137,9 @@ const toLobby = () => {
 <style scoped>
 .lobby-grid {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-rows: 1fr auto;
+  grid-template-columns: auto auto auto;
   gap: 40px 60px;
   padding: 4dvw;
   box-sizing: border-box;
@@ -148,19 +147,13 @@ const toLobby = () => {
 
 .recipe-grid {
   width: 100%;
-  height: 90vh;
   display: grid;
   grid-template-columns: auto 1fr auto;
-  grid-template-rows: 1fr auto;
   gap: 40px 60px;
   box-sizing: border-box;
   overflow: hidden;
 }
 
-.lobby-grid__column--span-all {
-  grid-column: 1/4;
-  text-align: center;
-}
 
 button {
   color: var(--colorTextDark);
@@ -180,4 +173,5 @@ button:hover {
   background-color: var(--colorTertiary);
   box-shadow: 10px 10px var(--colorShadow);
 }
+
 </style>

@@ -50,7 +50,6 @@ hr {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  min-height: 100vh;
   overflow: hidden;
 
 }
@@ -58,9 +57,11 @@ hr {
 .receiptpanel__container {
   position: relative;
   width: 100%;
+  height: 100%;
   max-width: 340px;
   z-index: 3;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .receiptpanel__box {
