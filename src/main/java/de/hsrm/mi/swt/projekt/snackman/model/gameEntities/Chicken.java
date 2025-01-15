@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.LayEggEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
@@ -259,6 +260,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         Food egg = new Food(gameId, x, z, FoodType.EGG, gameConfig);
         logger.info("Ei gelegt");
         gameManager.getGameById(gameId).getMap().getTileAt((int) x, (int) z).addToOccupation(egg);
+        EventService.getInstance().applicationEventPublisher.publishEvent(new LayEggEvent(this, egg, gameId));
     }
 
     /**
