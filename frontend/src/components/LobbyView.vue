@@ -75,11 +75,13 @@
                       <label for="jumpCalories">Calories Burned on Jump:</label>
                       <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" />
                     </span>
-                    <button type="submit">Apply</button>
-                    <button type="button" @click="resetForm">Reset</button>
                   </form>
                 </FieldsetComponent>
               </div>
+            </template>
+            <template #footer>
+              <button class="configButtons" type="button" @click="submitForm">Apply</button>
+              <button class="configButtons" type="button" @click="resetForm">Reset</button>
             </template>
           </ConfigPanelComponent>
         </div>
@@ -332,7 +334,7 @@ const choose = (role: string) => {
 .chooseRoleButton {
   width: 100%;
   background-color: white;
-  color: #ff8c00;
+  color: #F39325;
   border: none;
 }
 
@@ -346,13 +348,32 @@ Button {
 
 Button:hover{
   color: black;
-  transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.chooseRoleButton:hover {
+  transform: scale(1.05);
 }
 
 .startGameButton:hover {
   background-color: white;
   border: 3px solid black;
+}
+
+.configButtons{
+  width: 20%;
+  background-color: #F39325;
+  color: white;
+  border: 1px black;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.configButtons:hover{
+  background-color: white;
 }
 
 input[type="number"] {
