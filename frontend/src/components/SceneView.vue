@@ -98,7 +98,6 @@ export default defineComponent({
       const parsedData = JSON.parse(message);
       gameStore.setRemainingTime(parsedData.remainingSeconds);
 
-      console.log("parsedFoods", parsedData.eatenFoods); 
       parsedData.eatenFoods.forEach((food: Food) => {
         makeDisappear(food.objectId)
       }) 
@@ -117,6 +116,7 @@ export default defineComponent({
       });
 
       parsedData.updatesChickens.forEach((chicken: Chicken) => {
+          resizeChicken(chicken.objectId, chicken.radius); 
           move(chicken.objectId, chicken.x, chicken.y, chicken.z);
       });
     };
@@ -143,6 +143,21 @@ export default defineComponent({
       });
     };
 
+    function resizeChicken(id: number, radius: number) {
+      logger.info('chicken with radius: ' + radius);
+
+      chickenGroup.children.forEach((chicken) => {
+        if(chicken.userData.id === id) {
+          // Update scale
+          chicken.scale.set(
+            radius * 32.5,
+            radius * 32,
+            radius * 32
+          ); 
+        }
+      })
+    }
+
     function move(id: number, x: number, y: number, z: number) {
       chickenGroup.children.forEach((chicken) => {
         if(chicken.userData.id === id) {
@@ -154,7 +169,8 @@ export default defineComponent({
             x * mapScale,
             y * mapScale,
             z * mapScale
-          );
+          )
+
           // Calculate and apply rotation
           if (moveX !== 0 || moveZ !== 0) {
             const rotationY = Math.atan2(moveX, moveZ);

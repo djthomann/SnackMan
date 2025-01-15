@@ -38,8 +38,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     // Variables for passive calorie gain
     private int passiveCalorieGain;
     private int passiveCalorieGainDelay;
+    Chicken thisChicken = this;    
+
     private TimerTask passiveCaloriesTask = new TimerTask() {
-            
         @Override
         public void run() {
 
@@ -47,10 +48,12 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             //logger.info(objectId + " previous calories: " + gainedCalories);
 
             gainedCalories += passiveCalorieGain;
+            gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
 
             updateRadius();
 
-            logger.info(objectId + " current calories: " + gainedCalories);        }
+            // logger.info(objectId + " current calories: " + gainedCalories);        
+        }
     };
     private transient Timer passiveCaloriesTimer;
 
@@ -211,6 +214,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
         updateRadius(); 
+        gameManager.getGameById(gameId).getGameState().addChangedChicken(this);
         EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
     }
 
@@ -221,15 +225,14 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private void updateRadius() {
         float minRadius = gameConfig.getChickenMinRadius(); 
         float maxRadius = gameConfig.getChickenMaxRadius(); 
-        float maxCalories = 5000; 
+        float maxCalories = gameConfig.getChickenMaxCalories(); 
         this.radius = minRadius + (maxRadius - minRadius) * Math.min((float) gainedCalories / maxCalories, 1.0f);
 
         if(radius >= maxRadius) {
-            radius = minRadius; 
             stopMovementTemporarily(minRadius);
         }
     }
-    
+
     /**
      * skale the radius of chicken based on calories linearly between minRadius and maxRadius
      *
@@ -273,7 +276,7 @@ public void handle(Event event) {
 }
 
     public ChickenRecord toRecord() {
-        return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories);
+        return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories, radius);
     }
 
     // String representation used for chickenssurroundings
