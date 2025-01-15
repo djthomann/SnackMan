@@ -84,27 +84,18 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
         // choose script file
         this.scriptInterpreter = new PythonInterpreter();
+        this.scriptInterpreter.exec("import sys");
+        this.scriptInterpreter.exec("sys.path.insert(0, '.')");
+        this.scriptInterpreter.exec("print('Python sys.path ist'+str(sys.path))");
+        this.scriptInterpreter.exec("import random");
+        // böser *-Import stellt in funktionen.py definierte Fktn für Formel bereit 
         initScriptInterpreter(script);
         logger.info("created Chicken with id: " + id);
     }
 
     private void initScriptInterpreter(String script) {
-        String scriptFile;
-        switch (script.toLowerCase()) {
-            case "test":
-                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/chickenTestScript.py";
-                break;
-            case "one":
-                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/ChickenPersonalityOne.py";
-                break;
-            case "two":
-                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/ChickenPersonalityTwo.py";
-                break;
-            default:
-                scriptFile = script;
-                break;
-        }
-        this.scriptInterpreter.execfile(scriptFile); 
+        this.scriptInterpreter.exec("from ChickenPersonalityOne import *");
+        this.scriptInterpreter.execfile("ChickenPersonalityOne.py"); 
         new Thread(() -> {
             try {
                 while(!Thread.currentThread().isInterrupted()) {
