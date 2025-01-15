@@ -300,7 +300,7 @@ export default defineComponent({
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
+            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, tile.food.calories, mapScale);
             food.userData.id = tile.food.objectId;
             foodGroup.add(food);
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
