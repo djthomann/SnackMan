@@ -10,7 +10,7 @@ import de.hsrm.mi.swt.projekt.snackman.logic.GameState;
 
 public class LayEggEventListener implements ApplicationListener <LayEggEvent> {
 
-    Logger logger = LoggerFactory.getLogger(EatEventListener.class);
+    Logger logger = LoggerFactory.getLogger(LayEggEventListener.class);
 
     @Autowired
     GameManager gameManager;

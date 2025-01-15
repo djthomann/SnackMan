@@ -102,7 +102,7 @@ export default defineComponent({
         makeDisappear(food.objectId)
       })
       
-      parsedData.eatenFoods.forEach((food: Food) => {
+      parsedData.laidEggs.forEach((food: Food) => {
         logger.info(`Egg gets laid`)
         makeAppear(food)
       });

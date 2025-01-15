@@ -106,8 +106,8 @@ public class GameState {
     }
 
     public synchronized void addLaidEgg(Food food) {
-        eatenFoods.removeIf(record -> record.objectId() == food.getObjectId());
-        eatenFoods.add(food.toRecord());
+        laidEggs.removeIf(record -> record.objectId() == food.getObjectId());
+        laidEggs.add(food.toRecord());
     }
 
     public List<GhostRecord> getChangedGhosts() {
