@@ -108,7 +108,7 @@ export default defineComponent({
         }
         meshes
           .get(snackman.objectId)!
-          .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+          .position.set(snackman.x * mapScale, snackman.y, snackman.z * mapScale);
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
