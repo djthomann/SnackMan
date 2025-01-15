@@ -53,6 +53,8 @@ public class GameConfig {
     private float foodRadius;
     @Positive
     private int ghostCollisionCalories;
+    @Positive 
+    private int chickenMaxCalories; 
 
     public GameConfig() {
         // Placeholder default values for the beginning -> change later to reasonable default values
@@ -80,6 +82,7 @@ public class GameConfig {
         this.chickenCount = 4;
         this.jumpCalories = 100;
         this.ghostCollisionCalories = 10;
+        this.chickenMaxCalories = 5000; 
     }
 
     public float getSnackManHeight() {
@@ -100,6 +103,14 @@ public class GameConfig {
 
     public int getWallHeight() {
         return wallHeight;
+    }
+
+    public int getChickenMaxCalories() {
+        return chickenMaxCalories;
+    }
+
+    public void setChickenMaxCalories(int chickenMaxCalories) {
+        this.chickenMaxCalories = chickenMaxCalories;
     }
 
     public void setWallHeight(int wallHeight) {

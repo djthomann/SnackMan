@@ -24,6 +24,7 @@ export type Snackman = {
     y: number;
     z: number;
     gainedCalories: number;
+    radius: number;
   }
 
   export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY';
