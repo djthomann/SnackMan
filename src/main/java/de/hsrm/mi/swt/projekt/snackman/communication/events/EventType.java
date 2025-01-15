@@ -16,5 +16,8 @@ public enum EventType {
     CLIENT_ID,
     START_GAME,
     DISAPPEAR,
-    REQUEST_GAMESTART
+    REQUEST_GAMESTART,
+    NEW_LOBBY_CREATE,
+    NEW_LOBBY_JOIN,
+    LOBBY_ID
 }

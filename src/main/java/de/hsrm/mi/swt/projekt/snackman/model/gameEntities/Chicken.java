@@ -33,12 +33,14 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private GameManager gameManager;
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
+    private boolean movementPaused;   
 
     // Variables for passive calorie gain
     private int passiveCalorieGain;
     private int passiveCalorieGainDelay;
+    Chicken thisChicken = this;    
+
     private TimerTask passiveCaloriesTask = new TimerTask() {
-            
         @Override
         public void run() {
 
@@ -46,8 +48,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             //logger.info(objectId + " previous calories: " + gainedCalories);
 
             gainedCalories += passiveCalorieGain;
+            gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
 
-            //logger.info(objectId + " current calories: " + gainedCalories);
+            updateRadius();
+
+            // logger.info(objectId + " current calories: " + gainedCalories);        
         }
     };
     private transient Timer passiveCaloriesTimer;
@@ -85,20 +90,20 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
         // choose script file
         this.scriptInterpreter = new PythonInterpreter();
+        this.scriptInterpreter.exec("import sys");
+        this.scriptInterpreter.exec("sys.path.insert(0, '.')");
+        this.scriptInterpreter.exec("print('Python sys.path ist'+str(sys.path))");
+        this.scriptInterpreter.exec("import random");
+        // böser *-Import stellt in funktionen.py definierte Fktn für Formel bereit 
         initScriptInterpreter(script);
+        this.movementPaused = false; 
         logger.info("created Chicken with id: " + id);
+
     }
 
     private void initScriptInterpreter(String script) {
-        String scriptFile = SCRIPTS_BASE_DIR + switch (script.toLowerCase()) {
-            case "test" -> "ChickenTestScript.py";
-            case "one" -> "ChickenPersonalityOne.py";
-            case "two" -> "ChickenPersonalityTwo.py";
-            default -> script;
-        };
-        scriptInterpreter.exec("import sys");
-        scriptInterpreter.exec("sys.path.append('" + SCRIPTS_BASE_DIR + "')");
-        scriptInterpreter.execfile(scriptFile); 
+        this.scriptInterpreter.exec("from ChickenPersonalityOne import *");
+        this.scriptInterpreter.execfile("ChickenPersonalityOne.py"); 
         new Thread(() -> {
             try {
                 while(!Thread.currentThread().isInterrupted()) {
@@ -123,6 +128,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * @param pythonCompatibleSurroundings 3x3 part of the map, on which the chicken navigates
      */    
     public void executeScript(List<List<String>> pythonCompatibleSurroundings) {
+        
+        if(movementPaused) {
+            return; 
+        }
         scriptInterpreter.set("environment", pythonCompatibleSurroundings);
         scriptInterpreter.set("direction", direction);
         scriptInterpreter.set("wall_collision", wallCollision );
@@ -196,8 +205,42 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     @Override
     public void eat(Food food) {
         this.gainedCalories += food.getCalories();
+        updateRadius(); 
+        gameManager.getGameById(gameId).getGameState().addChangedChicken(this);
         EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
     }
+
+    /**
+     * skale the radius of chicken based on calories linearly between minRadius and maxRadius
+     *
+     */
+    private void updateRadius() {
+        float minRadius = gameConfig.getChickenMinRadius(); 
+        float maxRadius = gameConfig.getChickenMaxRadius(); 
+        float maxCalories = gameConfig.getChickenMaxCalories(); 
+        this.radius = minRadius + (maxRadius - minRadius) * Math.min((float) gainedCalories / maxCalories, 1.0f);
+
+        if(radius >= maxRadius) {
+            stopMovementTemporarily(minRadius);
+        }
+    }
+
+    /**
+     * skale the radius of chicken based on calories linearly between minRadius and maxRadius
+     *
+     * @param minRadius the minimum radius to reset to
+     */
+    private void stopMovementTemporarily(float minRadius) {
+        this.movementPaused = true; 
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                movementPaused = false; 
+                radius = minRadius; 
+                gainedCalories = 0;
+            }
+        }, 5000); // paused for 5 seconds 
+    } 
 
     /**
      * Resets the gainedCalories for the Chicken to 0.
@@ -225,7 +268,7 @@ public void handle(Event event) {
 }
 
     public ChickenRecord toRecord() {
-        return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories);
+        return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories, radius);
     }
 
     // String representation used for chickenssurroundings
