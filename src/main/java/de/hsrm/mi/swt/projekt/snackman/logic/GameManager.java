@@ -95,6 +95,17 @@ public class GameManager {
         return lobby;
     }
 
+    public Lobby getLobbyFromClient(Client c) {
+        for (Lobby lobby: allLobbies.values()) {
+            for (Client client: lobby.getClientsAsList()) {
+                if (client.getClientId() == c.getClientId()) {
+                    return lobby;
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Lobby> getAllLobbies() {
         return new ArrayList<>(allLobbies.values());
     }

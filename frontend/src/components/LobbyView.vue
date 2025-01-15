@@ -1,6 +1,7 @@
 <template>
   <div>
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
+      <FetchMap></FetchMap>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
@@ -120,6 +121,7 @@ import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 import { Logger } from '../util/logger';
 import ConfigPanelComponent from './layout/ConfigPanelComponent.vue';
 import FieldsetComponent from './layout/FieldsetComponent.vue';
+import FetchMap from "@/components/FetchMap.vue";
 
 const logger = new Logger();
 
