@@ -102,7 +102,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 if (gameManager.getGameById(gameId) == null) {
                     Thread.sleep(1000);
                 } else {
-                    Thread.sleep(50); // 1000 = 1 sec
+                    Thread.sleep(100); // 1000 = 1 sec
                     surroundings = gameManager.getGameById(gameId).generateSurroundings(this.x, this.z);
                     //logger.info(surroundings.toString());
                     executeScript(surroundings);
