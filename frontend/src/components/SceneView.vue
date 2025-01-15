@@ -108,7 +108,7 @@ export default defineComponent({
         }
         meshes
           .get(snackman.objectId)!
-          .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+          .position.set(snackman.x * mapScale, snackman.y, snackman.z * mapScale);
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
@@ -278,8 +278,8 @@ export default defineComponent({
           playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
           snackMenGroup.add(playerMesh);
-        } else{
-          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
+        } else {
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale, mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
@@ -292,16 +292,26 @@ export default defineComponent({
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
 
-        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
-        const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
-        nameTags.push(ghostTag);
-        // Add to ghosts group
-        ghostsGroup.add(ghostMesh);
-        meshes.set(ghost.objectId, ghostMesh);
+        if(ghost.objectId == userStore.id){
+          const playerMesh = modelService.createGhost(userStore.id ,ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
+          playerMesh.add(camera)
+          camera.position.set(0, mapScale, 0);
+          playerMesh.add(controls.object);
+          meshes.set(ghost.objectId, playerMesh);
+          snackMenGroup.add(playerMesh);
+        } else {
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
+          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
+          nameTags.push(ghostTag);
+          // Add to ghosts group
+          ghostsGroup.add(ghostMesh);
+          meshes.set(ghost.objectId, ghostMesh);
+        }
+        
       });
       // Add groups to the scene
       scene.add(snackMenGroup);
-      // scene.add(ghostsGroup);
+      scene.add(ghostsGroup);
     }
 
     function loadMap(m: any) {
