@@ -93,7 +93,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.scriptInterpreter.exec("import sys");
         this.scriptInterpreter.exec("sys.path.insert(0, '.')");
         this.scriptInterpreter.exec("print('Python sys.path ist'+str(sys.path))");
-        this.scriptInterpreter.exec("import random");
         // böser *-Import stellt in funktionen.py definierte Fktn für Formel bereit 
         initScriptInterpreter(script);
         this.movementPaused = false; 
@@ -103,7 +102,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     private void initScriptInterpreter(String script) {
         this.scriptInterpreter.exec("from ChickenPersonalityOne import *");
-        this.scriptInterpreter.execfile("ChickenPersonalityOne.py"); 
         new Thread(() -> {
             try {
                 while(!Thread.currentThread().isInterrupted()) {
