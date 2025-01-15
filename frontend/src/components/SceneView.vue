@@ -274,7 +274,7 @@ export default defineComponent({
         if (snackMan.objectId == userStore.id) {
           const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           playerMesh.add(camera)
-          camera.position.set(0, mapScale, 0);
+          camera.position.set(0, mapScale * 2, 0);
           playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
           scene.add(playerMesh);
@@ -294,7 +294,7 @@ export default defineComponent({
         if (ghost.objectId == userStore.id) {
           const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
           ghostMesh.add(camera)
-          camera.position.set(0, mapScale, 0);
+          camera.position.set(0, mapScale * 2, 0);
           ghostMesh.add(controls.object);
           meshes.set(ghost.objectId, ghostMesh);
           const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
