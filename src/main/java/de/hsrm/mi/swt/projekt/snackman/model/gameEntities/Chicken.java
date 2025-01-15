@@ -207,7 +207,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.gainedCalories += food.getCalories();
         updateRadius(); 
         gameManager.getGameById(gameId).getGameState().addChangedChicken(this);
-        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId, gameManager));
     }
 
     /**
