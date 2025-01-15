@@ -353,7 +353,8 @@ export default defineComponent({
       const food = modelService.createFood(newFood.objectId, newFood.x, newFood.z, newFood.calories, mapScale);
       food.userData.id = newFood.objectId;
       foodGroup.add(food);
-      scene.add(food)
+      scene.remove(foodGroup)
+      scene.add(foodGroup)
     }
 
     function initScene() {

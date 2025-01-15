@@ -248,7 +248,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * lays an egg
      */
     private void layEgg() {
-        Food egg = new Food(gameId, x, z, FoodType.EGG, gameConfig);
+        Food egg = new Food(gameId, (int) x, (int) z, FoodType.EGG, gameConfig);
         logger.info("Ei gelegt");
         gameManager.getGameById(gameId).getMap().getTileAt((int) x, (int) z).addToOccupation(egg);
         EventService.getInstance().applicationEventPublisher.publishEvent(new LayEggEvent(this, egg, gameId, gameManager));
