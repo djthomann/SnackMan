@@ -58,6 +58,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private List<List<String>> surroundings;
     private Boolean wallCollision;
     /** Jython-Interpreter for the script logic */
+    private static final String SCRIPTS_BASE_DIR = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/";
     private final PythonInterpreter scriptInterpreter;
 
     /**
@@ -89,22 +90,15 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     private void initScriptInterpreter(String script) {
-        String scriptFile;
-        switch (script.toLowerCase()) {
-            case "test":
-                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/chickenTestScript.py";
-                break;
-            case "one":
-                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/ChickenPersonalityOne.py";
-                break;
-            case "two":
-                scriptFile = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/ChickenPersonalityTwo.py";
-                break;
-            default:
-                scriptFile = script;
-                break;
-        }
-        this.scriptInterpreter.execfile(scriptFile); 
+        String scriptFile = SCRIPTS_BASE_DIR + switch (script.toLowerCase()) {
+            case "test" -> "chickenTestScript.py";
+            case "one" -> "ChickenPersonalityOne.py";
+            case "two" -> "ChickenPersonalityTwo.py";
+            default -> script;
+        };
+        scriptInterpreter.exec("import sys");
+        scriptInterpreter.exec("sys.path.append('" + SCRIPTS_BASE_DIR + "')");
+        scriptInterpreter.execfile(scriptFile); 
         new Thread(() -> {
             try {
                 while(!Thread.currentThread().isInterrupted()) {
@@ -174,7 +168,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error executing Python script: ", e);
         }
     }
 
