@@ -113,10 +113,33 @@ const props = defineProps<Props>();
   height: 100%;
 }
 
+.background__title {
+    position: absolute;
+    width: max-content;
+    height: 90px;
+    left: 4dvw;
+    top: -32px;
+    z-index: 2;
+    background-color: var(--colorPrimary);
+    border: 9px solid var(--colorLight);
+    border-radius: 2px;
+    box-sizing: border-box;
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+    padding: 10px 25px;
+}
+
+.background__headline {
+    color: var(--colorLight);
+    margin: 0;
+    font-size: 45px;
+    font-weight: normal;
+}
+
 .background__content {
     position: relative;
     width: 100%;
     height: 100%;
+    padding-top: 2dvw;
 }
 
 </style>
