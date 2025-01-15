@@ -1,7 +1,8 @@
 <template>
   <div>
-    
+
     <h1>Lobby {{ lobbyCode }}</h1>
+    <FetchMap></FetchMap>
       <button @click="choose('SnackMan')">Choose SnackMan</button>
       <button @click="choose('Ghost')">Choose Ghost</button>
       <h3>SnackMan</h3>
@@ -57,10 +58,10 @@
         <button type="button" @click="resetForm">Reset</button>
         <button type="button" @click="startGame">Start Game</button>
       </form>
-    
-    
-    
-    
+
+
+
+
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
       <div class="lobby-grid">
         <div class="lobby-grid__column">
@@ -102,8 +103,8 @@
         </div>
       </div>
     </BackgroundComponent>
-  
-  
+
+
   </div>
 </template>
 
@@ -117,6 +118,7 @@ import type {Player} from "@/types/SceneTypes";
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 import { Logger } from '../util/logger';
+import FetchMap from "@/components/FetchMap.vue";
 
 const logger = new Logger();
 

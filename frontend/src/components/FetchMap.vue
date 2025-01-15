@@ -7,7 +7,6 @@
     @change="handleFileUpload($event)"
   />
   <button v-show="!mapLoaded" class="my-cool-style" @click="uploadMap">Map hochladen</button>
-  <button v-show="!mapLoaded" class="my-cool-style" @click="requestMap">Map anfordern</button>
   <button class="my-cool-style" @click="testLogging">Test Logging</button>
 </template>
 
@@ -22,19 +21,6 @@ const file = ref<File | null>();
 import { Logger } from '../util/logger';
 
 const logger = new Logger();
-
-const requestMap = () => {
-  if (!mapLoaded.value) {
-    logger.info('loading map');
-    const map = {
-      type: 'MAPREQUEST'
-    };
-    sendMessage(JSON.stringify(map));
-    mapLoaded.value = true;
-  } else {
-    logger.info('loaded map already');
-  }
-};
 
 const testLogging = () => {
   logger.info('Das ist ein Logging Test');

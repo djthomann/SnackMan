@@ -98,10 +98,10 @@ export default defineComponent({
       const parsedData = JSON.parse(message);
       gameStore.setRemainingTime(parsedData.remainingSeconds);
 
-      console.log("parsedFoods", parsedData.eatenFoods); 
+      console.log("parsedFoods", parsedData.eatenFoods);
       parsedData.eatenFoods.forEach((food: Food) => {
         makeDisappear(food.objectId)
-      }) 
+      })
 
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
         if(snackman.objectId === userStore.id) {
@@ -261,14 +261,14 @@ export default defineComponent({
           camera.position.set(0, mapScale, 0);
           playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
-          snackMenGroup.add(playerMesh);
+          scene.add(playerMesh);
         } else{
           const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
           // Add to snackMen group
-          snackMenGroup.add(snackManMesh);
+          scene.add(snackManMesh);
           meshes.set(snackMan.objectId, snackManMesh);
         }
       });
@@ -280,11 +280,11 @@ export default defineComponent({
         const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
         nameTags.push(ghostTag);
         // Add to ghosts group
-        ghostsGroup.add(ghostMesh);
+        scene.add(ghostMesh);
         meshes.set(ghost.objectId, ghostMesh);
       });
       // Add groups to the scene
-      scene.add(snackMenGroup);
+      // scene.add(snackMenGroup);
       // scene.add(ghostsGroup);
     }
 
@@ -343,7 +343,7 @@ export default defineComponent({
       chickenGroup.name = "chicken";
 
       // Camera
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, mapScale * 1000);
       camera.position.set(0, 0, 0)
       // camera.lookAt(1, 1, 1);
 
