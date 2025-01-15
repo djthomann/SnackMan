@@ -7,7 +7,6 @@
     @change="handleFileUpload($event)"
   />
   <button v-show="!mapLoaded" class="my-cool-style" @click="uploadMap">Map hochladen</button>
-  <button class="my-cool-style" @click="testLogging">Test Logging</button>
 </template>
 
 <script setup lang="ts">
