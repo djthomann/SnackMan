@@ -279,7 +279,7 @@ export default defineComponent({
           meshes.set(snackMan.objectId, playerMesh);
           scene.add(playerMesh);
         } else {
-          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale, mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
@@ -292,16 +292,16 @@ export default defineComponent({
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
         if (ghost.objectId == userStore.id) {
-          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
           ghostMesh.add(camera)
-          camera.position.set(0, mapScale + 5, 0);
+          camera.position.set(0, mapScale, 0);
           ghostMesh.add(controls.object);
           meshes.set(ghost.objectId, ghostMesh);
           const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
           nameTags.push(ghostTag);
           scene.add(ghostMesh);
         } else {
-          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
           const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
           nameTags.push(ghostTag);
           // Add to ghosts group
