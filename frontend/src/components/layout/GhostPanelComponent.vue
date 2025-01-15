@@ -17,10 +17,12 @@ const players = [
     <div class="ghostpanel">
         <div class="ghostpanel__container">
             <div class="ghostpanel__box">
+                <ul>
                 <li v-for="(player, index) in players" :key="index" class="ghostpanel__item">
                     <img src="@/assets/images/avatars/avatar_ghost.svg">
                     <h3>{{ player.name }}</h3>
                 </li>
+            </ul>
             </div>
         </div>
     </div>
@@ -67,5 +69,12 @@ const players = [
 .ghostpanel__item:last-child {
     border-bottom: none;
 }
-
+ul {
+    columns: 2;
+}
+li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 </style>
