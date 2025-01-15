@@ -98,16 +98,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "MAPUPLOAD" -> {
                     SnackManMap map = new SnackManMap(jsonObject.get("content").getAsString(), false);
 
-                    ObjectMapper mapper = new ObjectMapper();
-                    String returnString = "";
-                    try {
-                        String json = mapper.writeValueAsString(map);
-                        returnString = "MAP;" + json;
-                        // logger.info("Final JSON: " + returnString);
-                        session.sendMessage(new TextMessage(returnString));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                    Lobby lobby = gameManager.getLobbyFromClient(clients.get(session));
+                    if (lobby != null) {
+                        lobby.setMap(map);
                     }
+
                 }
                 case "MOVE" -> {
                     MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);
