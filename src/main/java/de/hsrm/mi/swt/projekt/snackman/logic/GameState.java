@@ -1,7 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStateEvent;
@@ -9,7 +8,10 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.ChickenRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.GhostRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord;
 
 public class GameState {
 

@@ -15,7 +15,16 @@ import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
 import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
 import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
 import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
-
+import counter_dnURL from '@/assets/images/counter/counter_down.png';
+import counter_lfURL from '@/assets/images/counter/counter_left.png';
+import counter_rtURL from '@/assets/images/counter/counter_right.png';
+import counter_ftURL from '@/assets/images/counter/counter_front.png';
+import counter_bkURL from '@/assets/images/counter/counter_back.png';
+import counter_top1URL from '@/assets/images/counter/counter_top1.png';
+import counter_top2URL from '@/assets/images/counter/counter_top2.png';
+import counter_top3URL from '@/assets/images/counter/counter_top3.png';
+import counter_top4URL from '@/assets/images/counter/counter_top4.png';
+import counter_top5URL from '@/assets/images/counter/counter_top5.png';
 
 import { Logger } from '../util/logger';
 
@@ -29,6 +38,9 @@ class ModelService {
   private isInitialized: boolean;
   private logger: Logger;
   private texture_dn: THREE.Texture;
+  private skyBoxTextures: THREE.MeshBasicMaterial[];
+  private counterTextures: THREE.MeshBasicMaterial[];
+  private topTextures: THREE.Texture[];
 
   constructor() {
     this.logger = new Logger();
@@ -57,6 +69,32 @@ class ModelService {
     this.animationCache = new Map();
     this.isInitialized = false;
     this.texture_dn = new THREE.TextureLoader().load(floorURL);
+
+    this.skyBoxTextures = [
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_ftURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_bkURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_upURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_dnURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_rtURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_lfURL) })
+    ]
+
+    this.counterTextures = [
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_ftURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_bkURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_dnURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_rtURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_lfURL) }),
+  ];
+  
+   this.topTextures = [
+      counter_top1URL,
+      counter_top2URL,
+      counter_top3URL,
+      counter_top4URL,
+      counter_top5URL,
+  ].map(url => this.loadTexture(url));
+
   }
 
   private scaleModels(globalScale: number): void {
@@ -131,6 +169,13 @@ class ModelService {
     return animationData?.animations || [];
   }
 
+  // Helper Function for Loading Textures in the SRGB ColorSpace
+  private loadTexture(url: string): THREE.Texture {
+    const texture = new THREE.TextureLoader().load(url);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  }
+
   /**
    * Tries to load a model from a URL
    */
@@ -162,44 +207,16 @@ class ModelService {
     });
   }
 
+
   public createSkybox(w: number){
-    // Textures for Skybox
-    const skyboxTextures: THREE.MeshBasicMaterial[] = [];
-    const texture_ft = new THREE.TextureLoader().load(skybox_ftURL);
-    texture_ft.colorSpace = THREE.SRGBColorSpace;
-    const texture_bk = new THREE.TextureLoader().load(skybox_bkURL);
-    texture_bk.colorSpace = THREE.SRGBColorSpace;
-    const texture_up = new THREE.TextureLoader().load(skybox_upURL);
-    texture_up.colorSpace = THREE.SRGBColorSpace;
-    const texture_dn = new THREE.TextureLoader().load(skybox_dnURL);
-    texture_dn.colorSpace = THREE.SRGBColorSpace;
-    const texture_rt = new THREE.TextureLoader().load(skybox_rtURL);
-    texture_rt.colorSpace = THREE.SRGBColorSpace;
-    const texture_lf = new THREE.TextureLoader().load(skybox_lfURL);
-    texture_lf.colorSpace = THREE.SRGBColorSpace;
-
-    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_ft }));
-    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_bk }));
-    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_up }));
-    skyboxTextures.push(
-      new THREE.MeshBasicMaterial({
-        map: texture_dn,
-        transparent: true,
-        opacity: 0,
-      }),
-    );
-    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_rt }));
-    skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_lf }));
-
-    console.log('textures found', texture_ft.image); // Should not be null or undefined
 
     // Skybox
     for (let i = 0; i < 6; i++) {
-      skyboxTextures[i].side = THREE.BackSide;
-      skyboxTextures[i].transparent = true;
+      this.skyBoxTextures[i].side = THREE.BackSide;
+      this.skyBoxTextures[i].transparent = true;
     }
     const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
-    const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
+    const skybox = new THREE.Mesh(skyboxGeo, this.skyBoxTextures);
     skybox.name = "skybox";
     skybox.position.y = 0;
     skybox.position.x = w/2;
@@ -222,16 +239,35 @@ class ModelService {
     return plane;
   }
 
-  // Creates one cube per wall tile
-  public createWall(x: number, z: number, scale: number, wallHeight: number) {
+  // Create Textured Walls
+  public createWall(x: number, z: number, scale: number, wallHeight: number): THREE.Mesh {
+    // Random top texture
+    const counterTextureUp = new THREE.MeshBasicMaterial({
+        map: this.topTextures[Math.floor(Math.random() * this.topTextures.length)],
+    });
+
+    // UV-Mapping
+    const materials = [
+        this.counterTextures[0], // Front
+        this.counterTextures[1], // Back
+        counterTextureUp,        // Top - Random
+        this.counterTextures[2], // Bottom
+        this.counterTextures[3], // Right
+        this.counterTextures[4], // Left
+    ];
+
     const boxGeometry = new THREE.BoxGeometry(1 * scale, wallHeight, 1 * scale);
-    const boxMaterial = new THREE.MeshToonMaterial({ color: 0x4f4f4f ,depthTest: true,});
-    const box = new THREE.Mesh(boxGeometry, boxMaterial);
+    const box = new THREE.Mesh(boxGeometry, materials);
+
     box.position.set((x + 0.5) * scale, 0.5 * scale, (z + 0.5) * scale);
     box.castShadow = true;
 
+    // Random Rotation
+    box.rotation.y = Math.floor(Math.random() * 4) * Math.PI / 2;
+
     return box;
   }
+
 
   public createPlayer(id: number | undefined, x: number, y: number,  z: number) {
     const newModel = this.getModel('player').clone();
