@@ -1,14 +1,12 @@
 <template>
   <input
-    v-show="!mapLoaded"
     class="my-cool-style"
     accept=".csv"
     type="file"
+    id="fileInput"
     @change="handleFileUpload($event)"
   />
-  <button v-show="!mapLoaded" class="my-cool-style" @click="uploadMap">Map hochladen</button>
-  <button v-show="!mapLoaded" class="my-cool-style" @click="requestMap">Map anfordern</button>
-  <button class="my-cool-style" @click="testLogging">Test Logging</button>
+  <button class="my-cool-style" @click="uploadMap">Map hochladen</button>
 </template>
 
 <script setup lang="ts">
@@ -17,51 +15,35 @@ import { ref } from 'vue';
 
 const { sendMessage } = useWebSocket();
 
-const mapLoaded = ref<boolean>(false);
 const file = ref<File | null>();
 import { Logger } from '../util/logger';
 
 const logger = new Logger();
-
-const requestMap = () => {
-  if (!mapLoaded.value) {
-    logger.info('loading map');
-    const map = {
-      type: 'MAPREQUEST'
-    };
-    sendMessage(JSON.stringify(map));
-    mapLoaded.value = true;
-  } else {
-    logger.info('loaded map already');
-  }
-};
 
 const testLogging = () => {
   logger.info('Das ist ein Logging Test');
 };
 
 const uploadMap = () => {
-  if (!mapLoaded.value) {
-    if (file.value != null) {
-      const reader = new FileReader();
+  if (file.value != null) {
+    const reader = new FileReader();
 
-      reader.readAsText(file.value);
+    reader.readAsText(file.value);
 
-      reader.onload = () => {
-        const fileContent = reader.result as string;
+    reader.onload = () => {
+      const fileContent = reader.result as string;
 
-        const map = {
-          type: 'MAPUPLOAD',
-          content: fileContent,
-        };
-        sendMessage(JSON.stringify(map));
-        mapLoaded.value = true;
+      const map = {
+        type: 'MAPUPLOAD',
+        content: fileContent,
       };
+      sendMessage(JSON.stringify(map));
     }
-  } else {
-    logger.info('loaded map already');
   }
-};
+  file.value = null;
+  const inputElement = document.getElementById("fileInput") as HTMLInputElement
+  inputElement.value = '';
+}
 
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;

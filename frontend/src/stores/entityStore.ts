@@ -3,9 +3,12 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import eventBus from '@/services/eventBus';
 
+import { Logger } from '../util/logger';
+
 export const useEntityStore = defineStore('entityStore', () => {
 
   const serverMessage = ref<string>('');
+  const logger = new Logger();
 
   const handleServerMessage = (message: string) => {
     serverMessage.value = message;
@@ -13,10 +16,11 @@ export const useEntityStore = defineStore('entityStore', () => {
       const parsedData = JSON.parse(message.split(';')[1]);
       snackMen.value.clear();
       ghosts.value.clear();
+      chickens.value.clear();
       map.value = parsedData.map;
 
       parsedData.snackMen.forEach((snackman: Snackman) => {
-        console.log(`Snackman ${snackman.username} found`)
+        logger.info(`Snackman ${snackman.username} found`)
         snackMen.value.set(Number(snackman.objectId), {
           gameId: Number(snackman.gameId),
           objectId: Number(snackman.objectId),
@@ -28,7 +32,7 @@ export const useEntityStore = defineStore('entityStore', () => {
         })
       })
       parsedData.ghosts.forEach((ghost: Ghost) => {
-        console.log(`Snackman ${ghost.username} found`)
+        logger.info(`ghost ${ghost.username} found`)
         ghosts.value.set(Number(ghost.objectId), {
           gameId: Number(ghost.gameId),
           objectId: Number(ghost.objectId),
@@ -38,6 +42,17 @@ export const useEntityStore = defineStore('entityStore', () => {
           z: Number(ghost.z)
         })
       })
+      parsedData.chickens.forEach((chicken: Chicken) => {
+        chickens.value.set(Number(chicken.objectId), {
+          gameId: Number(chicken.gameId),
+          objectId: Number(chicken.objectId),
+          x: Number(chicken.x),
+          y: Number(chicken.y),
+          z: Number(chicken.z),
+          gainedCalories: Number(chicken.gainedCalories)
+        })
+      })
+
     } else if (message.startsWith('GAME_STATE')) {
 
     }
@@ -58,13 +73,13 @@ export const useEntityStore = defineStore('entityStore', () => {
     [201, { gameId: 1, objectId: 201, username: "SnackMan1", x: 110, y: 0, z: 102, gainedCalories: 0 }],
     [202, { gameId: 1, objectId: 202, username: "SnackMan2", x: 117, y: 0, z: 102, gainedCalories: 100 }],
   ]));
-  const chicken = ref<Map<number, Chicken>>(new Map([]));
+  const chickens = ref<Map<number, Chicken>>(new Map([]));
   const map = ref();
 
   return {
     snackMen,
     ghosts,
-    chicken,
+    chickens,
     map
   }
 })

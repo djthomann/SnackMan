@@ -42,9 +42,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     Map<WebSocketSession, Client> clients = new HashMap<>();
 
-    // true when game is not properly started via a Lobby
-    public static boolean testingMode = false;
-
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         logger.info("New WebSocket Connection: " + session.getId());
@@ -98,47 +95,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     // logger.info("Final JSON for event" + event.getType().toString() + "; " + json);
                     session.sendMessage(new TextMessage(event.getType().toString() + ";" + json));
                 }
-                case "MAPREQUEST" -> {
-                    // Generate or Load a new Map Object, Map it to JSON and send it to frontend
-
-                    //TODO: delete once map always comes with GameStartEvent
-                    long gameId = 2L;
-                    SnackManMap map = new SnackManMap("map_2024-11-26_19_17_39.csv", true);
-                    // SnackManMap map = new SnackManMap(20, 40);
-                    testingMode = true;
-                    gameManager.createGame(new GameConfig(), gameId, map);
-                    
-                    // SnackManMap map = new SnackManMap(MapGenerationConfig.SAVED_MAPS_PATH +
-                    // "testFile.csv");
-                    // map.saveAsCSV();
-
-                    // logger.info("Map Data:" + map.toString());
-
-                    // JSON-Conversion
-                    ObjectMapper mapper = new ObjectMapper();
-                    String returnString = "";
-                    try {
-                        String json = mapper.writeValueAsString(map.toRecord());
-                        returnString = "MAP;" + json;
-                        // logger.info("Final JSON: " + returnString);
-                        session.sendMessage(new TextMessage(returnString));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
-                }
                 case "MAPUPLOAD" -> {
                     SnackManMap map = new SnackManMap(jsonObject.get("content").getAsString(), false);
 
-                    ObjectMapper mapper = new ObjectMapper();
-                    String returnString = "";
-                    try {
-                        String json = mapper.writeValueAsString(map);
-                        returnString = "MAP;" + json;
-                        // logger.info("Final JSON: " + returnString);
-                        session.sendMessage(new TextMessage(returnString));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                    Lobby lobby = gameManager.getLobbyFromClient(clients.get(session));
+                    if (lobby != null) {
+                        lobby.setMap(map);
                     }
+
                 }
                 case "MOVE" -> {
                     MoveEvent moveEvent = gson.fromJson(jsonString, MoveEvent.class);
@@ -180,6 +144,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
                 case "JOIN_LOBBY" -> {
                     gameManager.addClientToLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
+                    broadcastMessage("NEW_LOBBY_JOIN");
                 }
                 case "GET_PLAYERS" -> {
                     JsonObject jo = new JsonObject();
@@ -206,6 +171,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
                         newLobby = gameManager.createLobby();
                     }
                     logger.info("Lobby with ID: " + newLobby.getId() + "created");
+
+                    // Inform everyone
+                    broadcastMessage("NEW_LOBBY_CREATE");
+
+                    // TODO: Send Lobby ID to the creator of the lobby so that he can join the right lobby
+                    // session.sendMessage(new TextMessage("LOBBY_ID;" + newLobby.getId()));
                 }
                 case "LOBBY_SHOW_EVENT" -> {
                     ObjectMapper mapper = new ObjectMapper();
@@ -222,6 +193,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                     gameManager.createGame(startGameEvent.getGameID());
                 }
+
+                default -> logger.warn("unknown message from FE: " + type);
 
             }
         } catch (JsonSyntaxException e) {
@@ -248,7 +221,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * Right now, only the new position after a move event is sent back to the
      * frontend
      * 
-     * @param event
+     * @param event said event
      */
     public void notifyFrontend(Event event) {
 
@@ -257,13 +230,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
         Gson gson = builder.create();
         String json;
 
-        // TODO This is a temporary solution, clarify to which sessions events are sent
-        // back
+        // TODO This is a temporary solution, clarify to which sessions events are sent back
         for (WebSocketSession session : this.clients.keySet()) {
             try {
                 json = gson.toJson(event);
-                // logger.info("Final JSON for event" + event.getType().toString() + ": " + json);
-
+                // logger.info("Final JSON for event " + event.getType().toString() + ": " + json);
                 // Synchronize this block to avoid sending messages during invalid states (e.g.
                 // enables moving while jumping)
                 synchronized (session) {
@@ -279,39 +250,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     /**
-     * Send information of connected Clients to all Clients --> TODO: should be
-     * handed to different class (GameStartEvent/LobbyEvent)
-     * 
-     * @throws Exception
-     */
-    public void sendClientInfo() throws Exception {
-
-        if (clients.size() < 2) {
-            logger.info("Less than 2 connections, not informing clients");
-            return;
-        }
-
-        logger.info("Informing Clients: " + clientsString());
-        String returnString = "";
-
-        for (Client client : clients.values()) {
-
-            // All Clients except themselves
-            for (Client c : clients.values()) {
-                logger.info("User: " + c.getUsername());
-                if (!c.getSession().equals(client.getSession()) && !c.getUsername().equals("")) {
-                    logger.info("Fügt hinzu: " + client.getUsername());
-                    returnString += (":" + c.getUsername());
-                }
-            }
-
-            client.getSession().sendMessage(new TextMessage("OTHERPLAYERINFO" + returnString));
-            returnString = "";
-        }
-
-    }
-
-    /**
      * Removes Client from Client Set and informs other Clients
      */
     @Override
@@ -320,12 +258,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
         clients.remove(session);
     }
 
-    public String clientsString() {
-        return clients.toString();
-    }
-
     public Map<WebSocketSession, Client> getClients() {
         return clients;
     }
 
+    /**
+     * Send a message to all connected clients
+     * 
+     * @param message The message to send
+     */
+    public void broadcastMessage(String message) {
+        for (WebSocketSession session : clients.keySet()) {
+            try {
+                session.sendMessage(new TextMessage(message));
+            } catch (IOException e) {
+                logger.error("Error sending message " + session.getId(), e);
+            }
+        }
+    }
 }

@@ -1,24 +1,30 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
-import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
-
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
-import org.springframework.context.ApplicationListener;
 
 /**
  * The Game class contains all the information and logic necessary within an individual game.
@@ -43,22 +49,23 @@ public class Game {
     private final GameState gameState;
     private int numSnackmen = 0;
     private GameStartEvent gameStartEvent;
+    private long startTime;
 
-    
-
+    // Constructor for Game with no Lobby
     public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
         this.id = id;
         this.gameConfig = gameConfig;
         this.map = map;
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
-        init(null);
+        this.initialize(null);
         this.timer = new Timer();
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);
     }
 
+    // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
         logger.info("in Game Constructor");
         this.id = lobby.getId();
@@ -66,10 +73,7 @@ public class Game {
         this.map = lobby.getMap();
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables);
-
-        createMovables(lobby.getClientsAsList());
-        init(lobby.getClientsAsList());
-
+        initialize(lobby.getClientsAsList()); 
         startTimer();
         gameState = new GameState(this);
         logger.info("created Game with id: " + id);
@@ -94,7 +98,9 @@ public class Game {
      * @param id said id
      */
     private void spawnGhost(long id, String username) {
-        allMovables.add(new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0.5f, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager, this.collisionManager));
+        Ghost ghost = new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0.5f, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager, this.collisionManager);
+        allMovables.add(ghost);
+        map.getTileAt((int) ghost.getX(), (int) ghost.getZ()).addToOccupation(ghost);
     }
 
     private void spawnSnackMan(long id, String username) {
@@ -126,7 +132,9 @@ public class Game {
         x += 0.5f;
         z += 0.5f;
 
-        allMovables.add(new SnackMan(username, id, this.id, x, 0.5f, z, this.gameManager, this.gameConfig, this.collisionManager));
+        SnackMan snackMan = new SnackMan(username, id, this.id, x, 0.5f, z, this.gameManager, this.gameConfig, this.collisionManager); 
+        allMovables.add(snackMan);
+        map.getTileAt((int) x, (int) z).addToOccupation(snackMan);
         numSnackmen++;
     }
 
@@ -137,23 +145,31 @@ public class Game {
      * TODO: This method will be expanded to create all game objects and add them to
      * the game object list.
      */
-    public void init(List<Client> clients) {
+    public void initialize(List<Client> clients) {
 
-        createFood();
-
-        // for testing setup test SnackMan
-        if (clients == null && allMovables.size() < 1) {
-            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.0f, 1.1f, 20.0f, gameManager, gameConfig, collisionManager));
-
+        if (clients != null) {
+            createMovables(clients);
+        } else {
+            // for testing setup test SnackMan
+            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.5f, 1.1f, 20.5f, 
+            gameManager, gameConfig, collisionManager));
             // Ghost to test collision
-            Ghost debugGhost = new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.0f, 1.1f, 20.0f, gameConfig, gameManager, collisionManager);
-            allMovables.add(debugGhost);
+            allMovables.add(new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.5f, 1.1f, 20.5f, 
+            gameConfig, gameManager, collisionManager));
         }
+
+        // Initialize food and chicken
+        createFood();
         createChicken();
+
+        // Setup Event Bus and Subscribers
         ArrayList<Subscribable> subscribers = createSubscriberList();
         this.eventBus = new GameEventBus(subscribers);
 
-        if (clients != null) this.gameManager.notifyChange(createGameStartEvent());
+        // Notify Game Start if clients are provided
+        if (clients != null) {
+            this.gameManager.notifyChange(createGameStartEvent());
+        }
     }
 
     private GameStartEvent createGameStartEvent() {
@@ -166,6 +182,7 @@ public class Game {
             }
         }
         res.setMap(map.toRecord());
+        res.setGameTime(gameConfig.getGameTime());
 
         this.gameStartEvent = res;
 
@@ -186,19 +203,57 @@ public class Game {
                             foodType = FoodType.UNHEALTHY;
                         }
                     }
-                    allTiles[row][col].setOccupation(new Food(id, col, row, foodType, gameConfig));
+                    allTiles[row][col].addToOccupation(new Food(id, (float) col +0.5f, (float) row + 0.5f, foodType, gameConfig));
                 }
             }
         }
     }
 
-    private void createChicken() {
-        Tile tile = map.getTileAt(map.getW() / 2, map.getH() / 2);  // HARD CODED IN THE MIDDLE OF THE MAP FOR TEST PORPOSES
-        if (tile.getOccupationType() == OccupationType.FREE && tile.getOccupation() == null) {
-            Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tile.getX(), 0.0f,
-                    (float) tile.getZ(), "test", gameManager, gameConfig, collisionManager);
-            tile.setOccupation(chickenOne.toRecord());
-            allMovables.add(chickenOne);
+    private void createChicken() { 
+        int chickenCount = gameConfig.getChickenCount();
+        if (chickenCount < 0 || chickenCount > 4) {
+            logger.info("Invalid chickenCount in GameConfig: " + chickenCount + ". Allowed range is [0-4]. Setting to 4.");
+            chickenCount = 4;
+        }
+        if (chickenCount >= 1) {
+
+            Tile tileOne = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
+            if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupations().size() == 0) {
+                Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
+                0.0f, (float) tileOne.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileOne.addToOccupation(chickenOne);
+                allMovables.add(chickenOne);
+            }
+        }
+        if (chickenCount >= 2) {
+
+            Tile tileTwo = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) - 4);
+            if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupations().size() == 0) {
+                Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileTwo.getX()+0.5f,
+                0.0f, (float) tileTwo.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileTwo.addToOccupation(chickenTwo);
+                allMovables.add(chickenTwo);
+            }
+        }
+        if (chickenCount >= 3) {
+
+            Tile tileThree = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) - 4);
+            if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupations().size() == 0) {
+                Chicken chickenThree = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileThree.getX()+0.5f,
+                0.0f, (float) tileThree.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileThree.addToOccupation(chickenThree);
+                allMovables.add(chickenThree);
+            }
+        }
+        if (chickenCount >= 4) {
+
+            Tile tileFour = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) + 3);   
+            if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupations().size() == 0) {
+                Chicken chickenFour = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileFour.getX()+0.5f,
+                0.0f, (float) tileFour.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                tileFour.addToOccupation(chickenFour);
+                allMovables.add(chickenFour);
+            }
         }
     }
 
@@ -241,6 +296,16 @@ public class Game {
         long delay = gameConfig.getGameTime() * 1000L;
 
         timer.schedule(task, delay);
+
+        startTime = System.currentTimeMillis();
+    }
+
+    public long getElapsedMillis() {
+        return System.currentTimeMillis() - startTime;
+    }
+
+    public long getRemainingSeconds() {
+        return gameConfig.getGameTime() - getElapsedMillis() / 1000;
     }
 
     private void stopGame() {
@@ -258,17 +323,6 @@ public class Game {
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
 
         eventBus.sendEventToSubscribers(event);
-
-        // Testing mode means not starting a game via Lobby
-        if (WebSocketHandler.testingMode) {
-            float newX = ((SnackMan) this.allMovables.get(0)).getX();
-            float newY = ((SnackMan) this.allMovables.get(0)).getY();
-            float newZ = ((SnackMan) this.allMovables.get(0)).getZ();
-            MoveEvent moveEvent = new MoveEvent(new Vector3f(newX, newY, newZ));
-
-            this.gameManager.notifyChange(moveEvent);
-        }
-
     }
 
     public GameState getGameState() {
@@ -279,7 +333,95 @@ public class Game {
         return gameManager;
     }
 
-    public GameStartEvent getGameStartEvent() {
-        return gameStartEvent;
+    //adjust the cases,in case of changing the Occupation in the Tile of the map to records!
+    public List<List<String>> generateSurroundings(float x, float z) {
+        Tile positionTile = this.map.getTileAt((int) x, (int) z);
+        Tile[][] surroundings = this.map.getSurroundingTiles(positionTile);
+        List<List<String>> pythonCompatibleSurroundings = new ArrayList<>();
+
+        for (int row = 1; row >= -1; row--) {
+            List<String> rowList = new ArrayList<>();
+            for (int col = -1; col <= 1; col++) {
+                Tile tile = surroundings[row + 1][col + 1];
+                if (tile == null) {
+                    rowList.add("OUT");
+                } else {
+                    switch (tile.getOccupationType()) {
+                        case WALL:
+                            rowList.add("WALL");
+                            break;
+                        case ITEM:
+                        case FREE:
+                            if (tile.getOccupations().size() > 0) {
+                                String highestPriority = "UNKNOWN OCCUPATION"; // default priority 
+    
+                                for (GameObject go : tile.getOccupations()) {
+                                    String className = go.getClass().getSimpleName();
+
+                                    // priority from top to bottom (Ghost > SnackMan > Chicken > Food)
+                                    switch (className) {
+                                        case "Ghost":
+                                            highestPriority = "GHOST";
+                                            break; 
+                            
+                                        case "SnackMan":
+                                            if (!highestPriority.equals("GHOST")) {
+                                                highestPriority = "SNACKMAN";
+                                            }
+                                            break;
+                            
+                                        case "Chicken":
+                                            if (!highestPriority.equals("GHOST") && !highestPriority.equals("SNACKMAN")) {
+                                                highestPriority = "CHICKEN";
+                                            }
+                                            break;
+                            
+                                        case "Food":
+                                            if (!highestPriority.equals("GHOST") && !highestPriority.equals("SNACKMAN") && !highestPriority.equals("CHICKEN")) {
+                                                highestPriority = "FOOD";
+                                            }
+                                            break;
+                            
+                                        default:
+                                            if (highestPriority.equals("UNKNOWN OCCUPATION")) {
+                                                highestPriority = "UNKNOWN OCCUPATION";
+                                            }
+                                            break;
+                                    }
+                                }
+                                rowList.add(highestPriority);
+                            }
+                            else {
+                                rowList.add("FREE"); 
+                            }
+                            break;
+                    }
+                }
+            }
+            pythonCompatibleSurroundings.add(rowList);
+        }
+        return pythonCompatibleSurroundings;
     }
+
+    public void updateTileOccupation(GameObject gameObject, float oldX, float oldZ, float newX, float newZ) {
+        if ((int) oldX != (int) newX || (int) oldZ != (int) newZ ) { 
+            Tile oldTile = map.getTileAt((int) oldX, (int) oldZ); 
+            Tile newTile = map.getTileAt((int) newX, (int) newZ); 
+            newTile.addToOccupation(gameObject);
+            oldTile.removeFromOccupation(gameObject); 
+
+            // Item-occupationType should only be changed in collisionManager to make sure collision with food works
+            if (newTile.getOccupationType() == OccupationType.ITEM) {
+                return; 
+            }
+            // when snackman's entered the old tile but did not collide with food on it
+            if (oldTile.getOccupationType() == OccupationType.ITEM) {
+                return; 
+            }
+            else {
+                oldTile.setOccupationType(OccupationType.FREE);
+            }
+        }
+    }
+    
 }

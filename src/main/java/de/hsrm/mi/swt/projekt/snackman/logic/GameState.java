@@ -8,7 +8,10 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.ChickenRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.GhostRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord;
 
 public class GameState {
 
@@ -18,6 +21,8 @@ public class GameState {
     private List<SnackManRecord> changedSnackMen;
     private List<ChickenRecord> changedChicken;
     private List<FoodRecord> eatenFoods;
+    private long lastSentTime;
+    private boolean firstSend = true;
 
     /**
      * synchronized (chnages to gamestate variables need to be declared to all
@@ -33,17 +38,29 @@ public class GameState {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        this.interrupt();
                     }
                     if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
-                            || !eatenFoods.isEmpty()) {
-                        GameStateEvent gameStateEvent = new GameStateEvent(changedGhosts, changedSnackMen,
-                                changedChicken, eatenFoods);
+                            || !eatenFoods.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
+
+                        // clone lists to prevent concurrent modification
+                        GameStateEvent gameStateEvent = new GameStateEvent(
+                                new ArrayList<>(changedGhosts),
+                                new ArrayList<>(changedSnackMen),
+                                new ArrayList<>(changedChicken),
+                                new ArrayList<>(eatenFoods),
+                                game.getRemainingSeconds()
+                        );
                         game.getGameManager().notifyChange(gameStateEvent);
+                        if(firstSend) {
+                            firstSend = false;
+                        }
+
                         changedGhosts.clear();
                         changedSnackMen.clear();
                         changedChicken.clear();
                         eatenFoods.clear();
+                        lastSentTime = game.getRemainingSeconds();
                     }
                 }
             }
@@ -58,30 +75,30 @@ public class GameState {
      */
     public GameState(Game game) {
         this.game = game;
-        this.changedGhosts = new ArrayList<GhostRecord>();
-        this.changedSnackMen = new ArrayList<SnackManRecord>();
-        this.changedChicken = new ArrayList<ChickenRecord>();
-        this.eatenFoods = new ArrayList<FoodRecord>();
+        this.changedGhosts = new ArrayList<>();
+        this.changedSnackMen = new ArrayList<>();
+        this.changedChicken = new ArrayList<>();
+        this.eatenFoods = new ArrayList<>();
         GameStateThread thread = new GameStateThread();
         thread.start();
     }
 
-    public void addChangedGhost(Ghost ghost) {
+    public synchronized void addChangedGhost(Ghost ghost) {
         changedGhosts.removeIf(record -> record.objectId() == ghost.getObjectId());
         changedGhosts.add(ghost.toRecord());
     }
 
-    public void addChangedSnackMan(SnackMan snackman) {
+    public synchronized void addChangedSnackMan(SnackMan snackman) {
         changedSnackMen.removeIf(record -> record.objectId() == snackman.getObjectId());
         changedSnackMen.add(snackman.toRecord());
     }
 
-    public void addChangedChicken(Chicken chicken) {
-        changedChicken.removeIf(record -> record.objectId() == chicken.getObjectId());
+    public synchronized void addChangedChicken(Chicken chicken) {
+        changedChicken.removeIf(record -> record == null || record.objectId() == chicken.getObjectId());
         changedChicken.add(chicken.toRecord());
     }
 
-    public void addEatenFood(Food food) {
+    public synchronized void addEatenFood(Food food) {
         eatenFoods.removeIf(record -> record.objectId() == food.getObjectId());
         eatenFoods.add(food.toRecord());
     }

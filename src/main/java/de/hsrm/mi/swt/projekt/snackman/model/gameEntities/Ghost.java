@@ -56,6 +56,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
      */
     @Override
     public void move(float newX, float newY, float newZ) {
+        this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
         x = newX;
         y = newY;
         z = newZ;
@@ -106,6 +107,11 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
     public GhostRecord toRecord() {
         return new GhostRecord(gameId, objectId, getUsername(), x, y, z);
+    }
+
+    // String representation used for chickenssurroundings
+    public String toString() {
+        return "GHOST";
     }
 
 }
