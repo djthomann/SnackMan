@@ -1,18 +1,25 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManMapRecord;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 
-import org.python.antlr.ast.Index;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManMapRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
 
 public class SnackManMap {
 
@@ -114,7 +121,6 @@ public class SnackManMap {
                     occupationType = OccupationType.ITEM;
                 }
                 allTiles[z][x] = new Tile(x, z, occupationType);
-                allTiles[z][x].setOccupation(null);
             }
         }
     }
@@ -278,7 +284,6 @@ public class SnackManMap {
                 }
             }
         }
-
         return surroudings;
     }
 
@@ -307,7 +312,7 @@ public class SnackManMap {
     }
 
     public Food getFoodOfTile(Tile tile) {
-        Food food = (Food) tile.getOccupation();
+        Food food = (Food) tile.getFoodOnTile();
         return food;
     }
 

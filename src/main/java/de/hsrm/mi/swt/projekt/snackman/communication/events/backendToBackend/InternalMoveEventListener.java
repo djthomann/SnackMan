@@ -1,17 +1,15 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend;
 
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
-import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameState;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
-import org.springframework.stereotype.Component;
 
 @Component
 public class InternalMoveEventListener implements ApplicationListener <InternalMoveEvent> {

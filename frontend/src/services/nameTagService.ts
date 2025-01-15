@@ -38,7 +38,7 @@ class NameTag {
             depthWrite: false
         })
         usernameMaterial.transparent = true;
-        
+
         // Create NameTag Object
         const nameTagObj = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.3), usernameMaterial);
         scene.add(nameTagObj);
@@ -54,7 +54,7 @@ class NameTag {
     this.nameTagObj = nameTagObj;
   }
 
-  update(player: THREE.Mesh) {
+  update(player: THREE.Group) {
     this.nameTagObj?.lookAt(player.position);
   }
 }

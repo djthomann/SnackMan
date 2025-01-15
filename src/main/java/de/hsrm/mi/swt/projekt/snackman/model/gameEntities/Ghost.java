@@ -11,6 +11,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Int
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
+import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
@@ -55,6 +56,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
      */
     @Override
     public void move(float newX, float newY, float newZ) {
+        this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
         x = newX;
         y = newY;
         z = newZ;
@@ -74,7 +76,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
                 Vector3f vector = ((MoveEvent) event).getMovementVector();
                 logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
-                ArrayList<String> collisions;
+                ArrayList<CollisionType> collisions;
                 float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
                 logger.info("Wished X: " + wishedX);
                 float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
@@ -82,7 +84,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
                 collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
                 if (wishedX != this.getX() || wishedZ != this.getZ()) {
                     if (this.getY() < gameConfig.getWallHeight()) {
-                        if (collisions.contains("wall")) {
+                        if (collisions.contains(CollisionType.WALL)) {
                             vector.x = 0;
                             vector.z = 0;
                         } 
@@ -105,6 +107,11 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
     public GhostRecord toRecord() {
         return new GhostRecord(gameId, objectId, getUsername(), x, y, z);
+    }
+
+    // String representation used for chickenssurroundings
+    public String toString() {
+        return "GHOST";
     }
 
 }

@@ -1,6 +1,6 @@
 import { createWebHistory, createRouter } from 'vue-router';
 
-import Main from '@/components/Main.vue';
+import MainView from '@/components/MainView.vue';
 import TitleView from '@/components/TitleView.vue';
 import HomeView from '@/components/HomeView.vue';
 import LobbyView from '@/components/LobbyView.vue';
@@ -12,7 +12,7 @@ const routes = [
   { path: '/title', component: TitleView },
   { path: '/home', component: HomeView },
   { path: '/lobby/:code', component: LobbyView },
-  { path: '/game/:code', component: Main },
+  { path: '/game/:code', component: MainView },
   { path: '/results/:code', component: EndscreenView },
 ];
 

@@ -19,6 +19,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Int
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
+import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 /**
@@ -46,6 +47,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     private float currentVelocity;
     private boolean jumping;
     private float initialY;
+    private boolean falling;
     private float heightGain;
     private int boosts;
     private long jumpStartTime;
@@ -58,10 +60,15 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
     private ScheduledExecutorService jumpExecutor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> jumpTaskFuture;
+    private Runnable jumpTask;
     private ScheduledExecutorService resolveExecutor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> resolveTaskFuture;
+    private Runnable resolveTask;
+    private ScheduledExecutorService fallExecutor = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> fallTaskFuture;
+    private Runnable fallTask;
 
-    private GameManager gameManger;
+    private GameManager gameManager;
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
 
@@ -95,7 +102,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         // TODO Initial calories to make jumping possible, change back to 0 later
         this.gainedCalories = 1000000;
-        this.gameManger = gameManager;
+        this.gameManager = gameManager;
 
         this.invincible = false;
         this.stunned = false;
@@ -103,7 +110,139 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         this.stunnedTimer = new Timer();
         this.invincibleTimer = new Timer();
 
+        init();
+
         logger.info("created SnackMan with id: " + id);
+    }
+
+    public void init() {
+        this.jumpTask = new Runnable() {
+
+            @Override
+            public void run() {
+
+                logger.info("Jumping");
+
+                /**
+                 * The gravity (a negative constant) is applied to the SnackMan's velocity
+                 * The velocity starts at a positive value
+                 * It is 0 when the SnackMan is at its highest position
+                 * It is negative during the falling phase
+                 * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between
+                 * position updates and G the gravity constant
+                 */
+                currentVelocity += deltaTime * GRAVITY;
+
+                /**
+                 * Updating the SnackMan's position by applying the velocity to the current
+                 * position
+                 * Formula: y = y + deltaT * v where y is the position, deltaT the time between
+                 * position updates and v the SnackMan's current velocity
+                 */
+                heightGain = deltaTime * currentVelocity;
+
+                move(0, heightGain, 0);
+
+                /**
+                 * Check if the SnackMan has landed at its initial y-position
+                 * If so, the jump is done
+                 */
+                if(collisionManager.positionInWall(x, z)) {
+                    if (y < GameConfig.WALL_HEIGHT) {
+                        y = GameConfig.WALL_HEIGHT;
+                        jumping = false;
+                        needsResolving = true;
+                        resolveOnTopOfWall();
+                    }
+                } else {
+                    // Check if SnackMan has landed on food
+                    collisionManager.checkCollision(x, z, SnackMan.this);
+                    if (y < 0.8f) {
+                        y = 0.8f;
+                        jumping = false;
+                    }
+                }
+                
+
+                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                
+                gameManager.notifyChange(moveEvent);
+
+                // If the jump is done, the task is not repeated anymore
+                if (!jumping) {
+                    boosts = 0;
+                    jumpTaskFuture.cancel(false);
+                }
+            }
+
+        };
+
+        this.resolveTask = new Runnable() {
+
+            @Override
+            public void run() {
+
+                if(resolveVector == null) {
+                    resolveVector = collisionManager.getResolveVector(x, z);
+                }
+                
+                // logger.info("Trying to resolve");
+                logger.info(resolveVector.toString());
+
+                move(resolveVector.x * RESOLVE_SPEED, 0, resolveVector.z * RESOLVE_SPEED);
+
+                /**
+                 * Check if the SnackMan is not over a wall anymore
+                 */
+                if(!collisionManager.positionInWall(x, z)) {
+                    needsResolving = false;
+                }
+                
+                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                gameManager.notifyChange(moveEvent);
+
+                // If the resolve is done, the task is not repeated anymore
+                if (!needsResolving) {
+                    resolveVector = null;
+                    resolveTaskFuture.cancel(false);
+                    fall();
+                }
+            }
+
+        };
+
+        this.fallTask = new Runnable() {
+
+            @Override
+            public void run() {
+
+                
+                currentVelocity += deltaTime * GRAVITY;
+                
+                heightGain = deltaTime * currentVelocity;
+                
+                // logger.info("Falling" + currentVelocity);
+                move(0, heightGain, 0);
+                
+                
+
+                collisionManager.checkCollision(x, z, SnackMan.this);
+                if (y < 0.8f) {
+                    y = 0.8f;
+                    falling = false;
+                }
+
+                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                
+                gameManager.notifyChange(moveEvent);
+
+                // If the fall is done, the task is not repeated anymore
+                if (!falling) {
+                    fallTaskFuture.cancel(false);
+                }
+            }
+
+        };
     }
 
     /**
@@ -123,19 +262,21 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
      */
     @Override
     public void move(float newX, float newY, float newZ) {
+        this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
         this.x += newX;
         this.y += newY;
         this.z += newZ;
-        if (!WebSocketHandler.testingMode) EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManger));
+        logger.info("Snackman " + objectId + " moved to " + x + ", " + y + ", " + z);
+        EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
-    /**
+   /**
      * Method to implement jumping
      */
     public void jump() {
 
         // If we are not jumping and have enough calories, start new jump
-        if (!jumping && gainedCalories >= this.gameConfig.getJumpCalories()) {
+        if (!falling && !jumping && !needsResolving && gainedCalories >= this.gameConfig.getJumpCalories()) {
 
             this.jumpStartTime = System.currentTimeMillis();
 
@@ -148,65 +289,6 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             this.boosts = 0;
 
             this.needsResolving = false;
-
-            Runnable jumpTask = new Runnable() {
-
-                @Override
-                public void run() {
-
-                    /**
-                     * The gravity (a negative constant) is applied to the SnackMan's velocity
-                     * The velocity starts at a positive value
-                     * It is 0 when the SnackMan is at its highest position
-                     * It is negative during the falling phase
-                     * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between
-                     * position updates and G the gravity constant
-                     */
-                    currentVelocity += deltaTime * GRAVITY;
-
-                    /**
-                     * Updating the SnackMan's position by applying the velocity to the current
-                     * position
-                     * Formula: y = y + deltaT * v where y is the position, deltaT the time between
-                     * position updates and v the SnackMan's current velocity
-                     */
-                    heightGain = deltaTime * currentVelocity;
-
-                    move(0, heightGain, 0);
-
-                    /**
-                     * Check if the SnackMan has landed at its initial y-position
-                     * If so, the jump is done
-                     */
-                    if(collisionManager.positionInWall(x, z)) {
-                        if (y < GameConfig.WALL_HEIGHT) {
-                            y = GameConfig.WALL_HEIGHT;
-                            jumping = false;
-                            needsResolving = true;
-                            resolveOnTopOfWall();
-                        }
-                    } else {
-                        // Check if SnackMan has landed on food
-                        collisionManager.checkCollision(x, z, SnackMan.this);
-                        if (y < 0.8f) {
-                            y = 0.8f;
-                            jumping = false;
-                        }
-                    }
-                    
-
-                    MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                    
-                    gameManger.notifyChange(moveEvent);
-
-                    // If the jump is done, the task is not repeated anymore
-                    if (!jumping) {
-                        boosts = 0;
-                        jumpTaskFuture.cancel(false);
-                    }
-                }
-
-            };
 
             // Repeat task every time the specified time period has passed until cancelled
             jumpTaskFuture = jumpExecutor.scheduleAtFixedRate(jumpTask, 0, (long) (deltaTime * 300),
@@ -241,42 +323,22 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     }
 
     public void resolveOnTopOfWall() {
-        Runnable resolveTask = new Runnable() {
-
-            @Override
-            public void run() {
-
-                if(resolveVector == null) {
-                    resolveVector = collisionManager.getResolveVector(x, z);
-                }
-                
-
-                logger.info("Trying to resolve");
-
-                move(resolveVector.x * RESOLVE_SPEED, 0, resolveVector.z * RESOLVE_SPEED);
-
-                /**
-                 * Check if the SnackMan is not over a wall anymore
-                 */
-                if(!collisionManager.positionInWall(x, z)) {
-                    needsResolving = false;
-                }
-                
-                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                gameManger.notifyChange(moveEvent);
-
-                // If the resolve is done, the task is not repeated anymore
-                if (!needsResolving) {
-                    resolveVector = null;
-                    resolveTaskFuture.cancel(false);
-                    jump();
-                }
-            }
-
-        };
 
         resolveTaskFuture = resolveExecutor.scheduleAtFixedRate(resolveTask, 0, (long) (deltaTime * 300),
             TimeUnit.MILLISECONDS);
+        
+    }
+
+    public void fall() {
+
+        
+        if (!jumping && !falling && !needsResolving) {
+            this.currentVelocity = 0;
+            falling = true;
+            fallTaskFuture = fallExecutor.scheduleAtFixedRate(fallTask, 0, (long) (deltaTime * 300),
+            TimeUnit.MILLISECONDS);
+        }
+
     }
 
     /**
@@ -308,10 +370,11 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     @Override
     public void handle(Event event) {
 
-        if (!WebSocketHandler.testingMode && event.getObjectID() != this.objectId) {
+        if (event.getObjectID() != this.objectId) {
             return;
         }
 
+        logger.info("Event " + event.getType() + " in Snackman " + objectId);
         switch (event.getType()) {
 
             case MOVE:
@@ -319,7 +382,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 // The SnackMan is unable to move when stunned
                 if(this.stunned) {
                     MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                    gameManger.notifyChange(moveEvent);
+                    gameManager.notifyChange(moveEvent);
                     return;
                 }
 
@@ -332,12 +395,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 logger.info("Wished Z: " + wishedZ);
 
                 if(!collisionManager.positionIsWithinMapBounds(wishedX, wishedZ)) {
-                    vector.x = 0;
-                    vector.z = 0;
+                    vector.x = 0.0f;
+                    vector.z = 0.0f;
                     return;
                 }
 
-                if(needsResolving) {
+                if(needsResolving || falling) {
                     logger.info("Can't move during resolving");
                     vector.x = 0;
                     vector.z = 0;
@@ -351,14 +414,14 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
 
                 // Logic for collision with wall side and food
-                ArrayList<String> collisions;
+                ArrayList<CollisionType> collisions;
                 collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
                 if (wishedX != this.getX() || wishedZ != this.getZ()) {
                     if (this.getY() < gameConfig.getWallHeight()) {
-                        if (collisions.contains("wall")) {
-                            vector.x = 0;
-                            vector.z = 0;
-                        } else if (collisions.contains("item")) {
+                        if (collisions.contains(CollisionType.WALL)) {
+                            vector.x = 0.0f;
+                            vector.z = 0.0f;
+                        } else if (collisions.contains(CollisionType.ITEM)) {
                             logger.info("MMMMMM delicious ");
                         }
                     }
@@ -370,14 +433,14 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                  * is stunned and unable to move for a certain time period
                  * and invincible for a certain time period
                  */
-                if(collisions.contains("ghost") && !this.invincible) {
+                if(collisions.contains(CollisionType.GHOST) && !this.invincible) {
                     reactToGhostCollision();
                 }
 
                 /**
                  * In case of a SnackMan collision the SnackMan is unable to move through the other SnackMan
                  */
-                if(collisions.contains("snackman")) {
+                if(collisions.contains(CollisionType.SNACKMAN)) {
 
                     // If the SnackMan is mid-jump, it has landed on another SnackMan
                     if(this.jumping) {
@@ -387,17 +450,11 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     }
 
                     logger.info("Kollision mit Snack Man, aktuelle Kalorien: " + this.gainedCalories);
-                    vector.x = 0;
-                    vector.z = 0;
+                    vector.x = 0.0f;
+                    vector.z = 0.0f;
                 }
 
                 this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
-
-
-                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                if (WebSocketHandler.testingMode) gameManger.notifyChange(moveEvent);
-
-
 
                 // checks if the movementVector is from a jump action or not
                 if (vector.y != 0.0) {
@@ -412,11 +469,16 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         }
 
-        // logger.info("Event arrived at SnackMan :" + event.toString());
+        logger.info("Event arrived at SnackMan :" + event.toString());
     }
 
     public SnackManRecord toRecord() {
         return new SnackManRecord(gameId, objectId, getUsername(), x, y, z, gainedCalories);
+    }
+
+    // String representation used for chickenssurroundings
+    public String toString() {
+        return "SNACKMAN";
     }
 
     public boolean isInvincible() {

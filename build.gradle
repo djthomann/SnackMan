@@ -74,6 +74,7 @@ sonar {
 		property "sonar.token", "sqa_a1805cab0b66dc430efa030810147120b93b9871"
 		property "sonar.organization", "SWT-Projekt Gruppe 01"
 		property "sonar.host.url", "http://localhost:9000/sonar"
+		property "sonar.python.version", "3.13"
 	}
 }
 

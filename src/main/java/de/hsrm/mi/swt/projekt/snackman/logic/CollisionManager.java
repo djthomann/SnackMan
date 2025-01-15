@@ -1,13 +1,12 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.DisappearEvent;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
@@ -44,42 +43,41 @@ public class CollisionManager {
      * @return String of The type of entity/object collided with, or "none" if no
      *         collision is detected.
      */
-    public ArrayList<String> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
+    public synchronized ArrayList<CollisionType> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
         
         // Changed return type from string to array list as several collisions can happen at once, e.g. ghost and item
-        ArrayList<String> collisions = new ArrayList<>();
+        ArrayList<CollisionType> collisions = new ArrayList<>();
         collisions.clear();
         Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
 
         switch (wishedTile.getOccupationType()) {
             case WALL:
-                logger.info(
-                        "snackman and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
-                collisions.add("wall");
+                //logger.info(
+                    //collisionPartner.toString() + " and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                collisions.add(CollisionType.WALL);
             case ITEM:
-                logger.info(
-                        "snackman and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
-                Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
-                if (collisionPartner instanceof SnackMan) {
+                // logger.info(
+                //         collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
+                if (collisionPartner instanceof SnackMan || collisionPartner instanceof Chicken) {
+                    
+                    Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
 
                     try {
-                        // currently food gets exact the same coord as tile
-                        float foodPosX = (float) (nearbyFood.getX() + 0.3);
-                        float foodPosZ = (float) (nearbyFood.getZ() + 0.3);
+                        float foodPosX = nearbyFood.getX();
+                        float foodPosZ = nearbyFood.getZ();
                         float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
-                        
                         if (distance < (collisionPartner.getRadius() + nearbyFood.getRadius())) {
-                            ((SnackMan) collisionPartner).eat(nearbyFood);
+                            if (collisionPartner instanceof SnackMan) ((SnackMan) collisionPartner).eat(nearbyFood);
+                            else ((Chicken) collisionPartner).eat(nearbyFood); 
                             GameManager gameManager = game.getGameManager(); 
-                            DisappearEvent event = new DisappearEvent(game.id, nearbyFood); 
-                            gameManager.notifyChange(event);
+                            gameManager.getGameById(game.id).getGameState().addEatenFood(nearbyFood); 
                             wishedTile.setOccupationType(OccupationType.FREE);
-                            collisions.add("item");
+                            collisions.add(CollisionType.ITEM);
                         }
                     } catch(NullPointerException e) {
-
+                        logger.error(
+                            "no more food on tile: " + wishedTile.getX() + ", " + wishedTile.getZ());
                     }
-
                 }
                 break;
         }
@@ -101,7 +99,7 @@ public class CollisionManager {
                     // Heights /2 because the y-coordinate is in the middle of the object
                     if (heightDistance <= collisionPartner.getHeight()/2 + ((Ghost)aktMovable).getHeight()/2){
                         logger.info("Collision with Ghost!");
-                        collisions.add("ghost");
+                        collisions.add(CollisionType.GHOST);
                     }
                 }
                 
@@ -111,7 +109,7 @@ public class CollisionManager {
             if (aktMovable instanceof SnackMan && aktMovable != collisionPartner) {
 
                 float distance = calculateDistance(wishedX, ((SnackMan)aktMovable).getX() + TRANSLATION, wishedZ, ((SnackMan)aktMovable).getZ() + TRANSLATION);
-                logger.info("\nDistance between SnackMen: " + distance + "\n");
+                //logger.info("\nDistance between SnackMen: " + distance + "\n");
 
                 // Get tile of aktMovable
                 Tile aktMovableTile = snackManMap.getTileAt((int)((SnackMan)aktMovable).getX(), (int)((SnackMan)aktMovable).getZ());
@@ -128,7 +126,7 @@ public class CollisionManager {
                         if (heightDistance <= collisionPartner.getHeight()/2 + ((SnackMan)aktMovable).getHeight()/2){
                             logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
                             logger.info("This SnackMan: " + collisionPartner.getObjectId());
-                            collisions.add("snackman");
+                            collisions.add(CollisionType.SNACKMAN);
                         }
 
                     // When collisionPartner is an instanceof Ghost check if SnackMan is invincible
@@ -137,7 +135,7 @@ public class CollisionManager {
                     } else if(collisionPartner instanceof Ghost && !((SnackMan)aktMovable).isInvincible()){
                         logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
                         logger.info("This Ghost: " + collisionPartner.getObjectId());
-                        collisions.add("snackman");
+                        collisions.add(CollisionType.SNACKMAN);
                         ((SnackMan)aktMovable).reactToGhostCollision();;
                     }
 
@@ -168,6 +166,8 @@ public class CollisionManager {
 
         Vector3f vec = new Vector3f(0, 0, 0);
     
+        boolean vectorFound = false;
+
         // Koordinaten des aktuellen Tiles
         int coordX = (int) x;
         int coordZ = (int) z;
@@ -190,36 +190,65 @@ public class CollisionManager {
         } catch(IndexOutOfBoundsException e) {}
               
     
-        // Berechne Distanzen zu den Kanten
-        float[] distances = distancesToEdges(x, z); // [links, rechts, unten, oben]
-    
-        // Initialisiere die Richtung und die kürzeste Distanz
+        float[] distances = distancesToEdges(x, z);
+        
         Vector3f direction = new Vector3f(0, 0, 0);
         float minDistance = Float.MAX_VALUE;
     
-        // Überprüfe jede Kante und ob sie begehbar ist
+        // Check whether a Tile is Free
         if (leftTile != null && leftTile.getOccupationType() != OccupationType.WALL && distances[0] < minDistance) {
             minDistance = distances[0];
-            direction.set(-1, 0, 0); // Richtung nach links
+            direction.set(-1, 0, 0);
+            vectorFound = true;
         }
     
         if (rightTile != null && rightTile.getOccupationType() != OccupationType.WALL && distances[1] < minDistance) {
             minDistance = distances[1];
-            direction.set(1, 0, 0); // Richtung nach rechts
+            direction.set(1, 0, 0);
+            vectorFound = true;
         }
     
         if (bottomTile != null && bottomTile.getOccupationType() != OccupationType.WALL && distances[2] < minDistance) {
             minDistance = distances[2];
-            direction.set(0, 0, 1); // Richtung nach unten
+            direction.set(0, 0, 1);
+            vectorFound = true;
         }
     
         if (topTile != null && topTile.getOccupationType() != OccupationType.WALL && distances[3] < minDistance) {
             minDistance = distances[3];
-            direction.set(0, 0, -1); // Richtung nach oben
+            direction.set(0, 0, -1);
+            vectorFound = true;
         }
     
-        // Gib den Vektor zurück
+        if(!vectorFound) {
+            // If no Tile is Free, Move to a WALL Tile
+            if (leftTile != null) {
+                minDistance = distances[0];
+                direction.add(-1, 0, 0);
+                vectorFound = true;
+            }
+        
+            if (rightTile != null) {
+                minDistance = distances[1];
+                direction.add(1, 0, 0);
+                vectorFound = true;
+            }
+        
+            if (bottomTile != null) {
+                minDistance = distances[2];
+                direction.add(0, 0, 1);
+                vectorFound = true;
+            }
+        
+            if (topTile != null) {
+                minDistance = distances[3];
+                direction.add(0, 0, -1);
+                vectorFound = true;
+            }
+        } 
+
         return direction;
+        
     }
 
     public float[] distancesToEdges(float x, float z) {
