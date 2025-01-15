@@ -149,6 +149,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
                 case "JOIN_LOBBY" -> {
                     gameManager.addClientToLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
+                    broadcastMessage("NEW_LOBBY_JOIN");
                 }
                 case "GET_PLAYERS" -> {
                     JsonObject jo = new JsonObject();
@@ -175,6 +176,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
                         newLobby = gameManager.createLobby();
                     }
                     logger.info("Lobby with ID: " + newLobby.getId() + "created");
+
+                    // Inform everyone
+                    broadcastMessage("NEW_LOBBY_CREATE");
+
+                    // TODO: Send Lobby ID to the creator of the lobby so that he can join the right lobby
+                    // session.sendMessage(new TextMessage("LOBBY_ID;" + newLobby.getId()));
                 }
                 case "LOBBY_SHOW_EVENT" -> {
                     ObjectMapper mapper = new ObjectMapper();
@@ -260,4 +267,18 @@ public class WebSocketHandler extends TextWebSocketHandler {
         return clients;
     }
 
+    /**
+     * Send a message to all connected clients
+     * 
+     * @param message The message to send
+     */
+    public void broadcastMessage(String message) {
+        for (WebSocketSession session : clients.keySet()) {
+            try {
+                session.sendMessage(new TextMessage(message));
+            } catch (IOException e) {
+                logger.error("Error sending message " + session.getId(), e);
+            }
+        }
+    }
 }

@@ -8,7 +8,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord;
 /**
  * The `SnackMan` class represents a player character in the game who has an
  * initial position on a plane and has a calorie count.

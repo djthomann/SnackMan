@@ -1,19 +1,27 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
-import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
-import de.hsrm.mi.swt.projekt.snackman.communication.websocket.WebSocketHandler;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.*;
-
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
@@ -195,7 +203,7 @@ public class Game {
                             foodType = FoodType.UNHEALTHY;
                         }
                     }
-                    allTiles[row][col].addToOccupation(new Food(id, col, row, foodType, gameConfig));
+                    allTiles[row][col].addToOccupation(new Food(id, (float) col +0.5f, (float) row + 0.5f, foodType, gameConfig));
                 }
             }
         }
