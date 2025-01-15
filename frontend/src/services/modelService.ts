@@ -64,8 +64,8 @@ class ModelService {
       cake: 0.175,
       chicken: 1,
       brokkoli: 1,
-      snackman: 0.012,
-      player: 0.012,
+      snackman: 0.14,
+      player: 0.02,
       ghost: 0.05
     };
     this.modelCache = new Map();
@@ -280,15 +280,15 @@ class ModelService {
   }
 
   //Creates Snackman and positions it
-  public createSnackman(id: number, x: number, y: number, z: number) {
+  public createSnackman(id: number, x: number, y: number, z: number, scale: number) {
     const newModel = this.getModel('snackman').clone();
     newModel.userData.id = id;
-    newModel.position.set(x,y,z );
+    newModel.position.set(x,0,z );
     return newModel;
   }
 
     //Creates Ghost and positions it
-  public createGhost(id: number, x: number, y: number, z: number) {
+  public createGhost(id: number, x: number, y: number, z: number, scale: number) {
     const newModel = this.getModel('ghost').clone();
     newModel.userData.id = id;
     newModel.position.set(x, y, z);

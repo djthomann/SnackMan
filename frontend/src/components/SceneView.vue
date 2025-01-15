@@ -108,7 +108,7 @@ export default defineComponent({
         }
         meshes
           .get(snackman.objectId)!
-          .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+          .position.set(snackman.x * mapScale, snackman.y, snackman.z * mapScale);
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
@@ -279,7 +279,7 @@ export default defineComponent({
           meshes.set(snackMan.objectId, playerMesh);
           snackMenGroup.add(playerMesh);
         } else {
-          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale, mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
@@ -293,14 +293,14 @@ export default defineComponent({
       ghosts.forEach((ghost) => {
 
         if(ghost.objectId == userStore.id){
-          const playerMesh = modelService.createGhost(userStore.id ,ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          const playerMesh = modelService.createGhost(userStore.id ,ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
           playerMesh.add(camera)
           camera.position.set(0, mapScale, 0);
           playerMesh.add(controls.object);
           meshes.set(ghost.objectId, playerMesh);
           snackMenGroup.add(playerMesh);
         } else {
-          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
           const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
           nameTags.push(ghostTag);
           // Add to ghosts group
