@@ -415,5 +415,9 @@ public class Game {
             }
         }
     }
+
+    public SnackManMap getMap() {
+        return map;
+    }
     
 }

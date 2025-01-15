@@ -46,11 +46,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
             //logger.info("\n \nChicken with id " + objectId + " has passively gained calories");
             //logger.info(objectId + " previous calories: " + gainedCalories);
-
-            gainedCalories += passiveCalorieGain;
-            gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
-
-            updateRadius();
+            if(!movementPaused) {
+                gainedCalories += passiveCalorieGain;
+                gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
+                updateRadius();            
+            }
 
             // logger.info(objectId + " current calories: " + gainedCalories);        
         }
@@ -83,7 +83,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.gameManager = gameManager;
         this.gainedCalories = 0;
         //Timer for constant passive calorie gain
-        this.passiveCalorieGain = 10;
+        this.passiveCalorieGain = 500;
         this.passiveCalorieGainDelay = 1000; //in ms
         this.passiveCaloriesTimer = new Timer();
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
@@ -246,9 +246,20 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 movementPaused = false; 
                 radius = minRadius; 
                 gainedCalories = 0;
+                layEgg();
             }
-        }, 5000); // paused for 5 seconds 
-    } 
+        }, 5000); // paused for 5 seconds
+
+    }
+    
+    /**
+     * lays an egg
+     */
+    private void layEgg() {
+        Food egg = new Food(gameId, x, z, FoodType.EGG, gameConfig);
+        logger.info("Ei gelegt");
+        gameManager.getGameById(gameId).getMap().getTileAt((int) x, (int) z).addToOccupation(egg);
+    }
 
     /**
      * Resets the gainedCalories for the Chicken to 0.
