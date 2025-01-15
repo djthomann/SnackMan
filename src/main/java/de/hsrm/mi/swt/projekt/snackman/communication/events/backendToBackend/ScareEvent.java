@@ -2,10 +2,12 @@ package de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend;
 
 import org.springframework.context.ApplicationEvent;
 
+import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 
 public class ScareEvent extends ApplicationEvent {
 
+    private final GameManager gameManager;
     private SnackMan scaredSnackMan;
     private long gameId;
 
@@ -15,10 +17,11 @@ public class ScareEvent extends ApplicationEvent {
      * @param scaredSnackMan the snackman that collided with the ghost.
      * * @param gameId objectId of the game the event belongs to.
      */
-    public ScareEvent(Object source, SnackMan scaredSnackMan, long id) {
+    public ScareEvent(Object source, SnackMan scaredSnackMan, long id, GameManager gameManager) {
         super(source);
         this.scaredSnackMan = scaredSnackMan;
         this.gameId = id;
+        this.gameManager = gameManager;
     }
 
     public long getGameId() {
@@ -27,6 +30,10 @@ public class ScareEvent extends ApplicationEvent {
 
     public SnackMan getScaredSnackMan() {
         return scaredSnackMan;
+    }
+
+    public GameManager getGameManager() {
+        return gameManager;
     }
 
 }

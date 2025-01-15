@@ -21,6 +21,7 @@ public class GameState {
     private List<SnackManRecord> changedSnackMen;
     private List<ChickenRecord> changedChicken;
     private List<FoodRecord> eatenFoods;
+    private List<FoodRecord> laidEggs;
     private long lastSentTime;
     private boolean firstSend = true;
 
@@ -41,7 +42,7 @@ public class GameState {
                         this.interrupt();
                     }
                     if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
-                            || !eatenFoods.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
+                            || !eatenFoods.isEmpty() || !laidEggs.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
 
                         // clone lists to prevent concurrent modification
                         GameStateEvent gameStateEvent = new GameStateEvent(
@@ -49,6 +50,7 @@ public class GameState {
                                 new ArrayList<>(changedSnackMen),
                                 new ArrayList<>(changedChicken),
                                 new ArrayList<>(eatenFoods),
+                                new ArrayList<>(laidEggs),
                                 game.getRemainingSeconds()
                         );
                         game.getGameManager().notifyChange(gameStateEvent);
@@ -60,6 +62,7 @@ public class GameState {
                         changedSnackMen.clear();
                         changedChicken.clear();
                         eatenFoods.clear();
+                        laidEggs.clear();
                         lastSentTime = game.getRemainingSeconds();
                     }
                 }
@@ -79,6 +82,7 @@ public class GameState {
         this.changedSnackMen = new ArrayList<>();
         this.changedChicken = new ArrayList<>();
         this.eatenFoods = new ArrayList<>();
+        this.laidEggs = new ArrayList<>();
         GameStateThread thread = new GameStateThread();
         thread.start();
     }
@@ -101,6 +105,11 @@ public class GameState {
     public synchronized void addEatenFood(Food food) {
         eatenFoods.removeIf(record -> record.objectId() == food.getObjectId());
         eatenFoods.add(food.toRecord());
+    }
+
+    public synchronized void addLaidEgg(Food food) {
+        laidEggs.removeIf(record -> record.objectId() == food.getObjectId());
+        laidEggs.add(food.toRecord());
     }
 
     public List<GhostRecord> getChangedGhosts() {
@@ -133,6 +142,14 @@ public class GameState {
 
     public void setEatenFoods(List<FoodRecord> eatenFoods) {
         this.eatenFoods = eatenFoods;
+    }
+
+    public List<FoodRecord> getLaidEggs() {
+        return laidEggs;
+    }
+
+    public void setLaidEggs(List<FoodRecord> laidEggs) {
+        this.laidEggs = laidEggs;
     }
 
 }
