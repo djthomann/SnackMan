@@ -1,15 +1,8 @@
 <script setup lang="ts">
-    type Props = {
-    visible: boolean
-    }
-
-    const props = withDefaults(defineProps<Props>(), {
-        visible: false,
-    })
 </script>
 
 <template>
-    <div class="loadingoverlay" v-if="props.visible">
+    <div class="loadingoverlay">
         <div class="loadingoverlay__content">
             <img class="loadingoverlay__content-gif" src="@/assets/images/decorations/chicken.gif"/>
         </div>
@@ -26,9 +19,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: var(--colorSecondary);
+        background-color: var(--colorShadow);
         z-index: 1000;
     }
+
 
     .loadingoverlay__content-gif {
         width: 700px;

@@ -1,5 +1,6 @@
 <template>
     <div class="titleview">
+      <LoadingOverlay></LoadingOverlay>
       <div class="titleview__titleimage"></div>
       <div class="titleview__panel">
         <label for="username__inputfield">Player-Username:</label>
@@ -15,6 +16,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import useWebSocket from '@/services/socketService';
 import { Logger } from '../util/logger';
+import LoadingOverlay from './layout/LoadingOverlayComponent.vue';
 
 const logger = new Logger();
 
