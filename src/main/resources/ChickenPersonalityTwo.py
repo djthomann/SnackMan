@@ -34,19 +34,23 @@ def run_behavior(environment, direction, wall_collision,x,z):
          return (0.0, 0.0, 0.0, direction, wall_collision)
     
     # If the current direction is blocked, check if an alternative is available
-    if wall_collision or (next_tile == "WALL" and ((direction == "N" or direction == "S") and (x % 1.0 > 0.49 and x % 1.0 < 0.51)) or ((direction == "E" or direction == "W") and (z % 1.0 > 0.49 and z % 1.0 < 0.51))):
+    if wall_collision or (next_tile == "WALL" and ((direction in ["N", "S"] and 0.49 < x % 1.0 < 0.51) or (direction in ["E", "W"] and 0.49 < z % 1.0 < 0.51))):
         valid_directions = []
+
         for new_direction in alternatives[direction]:
             if get_tile(environment,*direction_offsets[new_direction]) != "WALL" and get_tile(environment,*direction_offsets[new_direction]) != "GHOST":
                 valid_directions.append(new_direction)
+
         if len(valid_directions) > 1:
-            new_direction = valid_directions[int(rand.nextInt(2))]  # Randomly select a valid direction
             wall_collision = False
+            new_direction = valid_directions[int(rand.nextInt(len(valid_directions)))]
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        
         if len(valid_directions) == 1:
-            new_direction = valid_directions[0]  # Randomly select a valid direction
             wall_collision = False
+            new_direction = valid_directions[0]
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        
         else:
             wall_collision = False
             new_direction = opposite_directions[direction]

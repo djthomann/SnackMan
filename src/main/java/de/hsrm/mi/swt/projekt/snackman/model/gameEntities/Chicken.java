@@ -2,7 +2,6 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -64,7 +63,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private List<List<String>> surroundings;
     private Boolean wallCollision;
     /** Jython-Interpreter for the script logic */
-    private static final String SCRIPTS_BASE_DIR = "src/main/java/de/hsrm/mi/swt/projekt/snackman/logic/scripts/";
     private final PythonInterpreter scriptInterpreter;
 
     /**
@@ -93,9 +91,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.scriptInterpreter = new PythonInterpreter();
         this.scriptInterpreter.exec("import sys");
         this.scriptInterpreter.exec("sys.path.insert(0, '.')");
-        this.scriptInterpreter.exec("print('Python sys.path ist'+str(sys.path))");
-        this.scriptInterpreter.exec("sys.path.insert(0, '.')");
-        // böser *-Import stellt in funktionen.py definierte Fktn für Formel bereit 
         initScriptInterpreter(script);
         this.movementPaused = false; 
         logger.info("created Chicken with id: " + id);
@@ -103,7 +98,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     private void initScriptInterpreter(String script) {
-        this.scriptInterpreter.exec("from ChickenPersonalityOne import *");
+        this.scriptInterpreter.exec("from "+script+" import *");
         new Thread(() -> {
             try {
                 while(!Thread.currentThread().isInterrupted()) {
