@@ -18,11 +18,13 @@ def run_behavior(environment, direction, wall_collision,x,z):
     # If the current direction is blocked, turn around and set wall_collision to True , should not happen!
     if current_tile == "WALL":
         wall_collision = True
-        return move_vectors[opposite_directions[direction]] + (direction,) + (wall_collision,)
+        new_direction = opposite_directions[direction]
+        return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
     
     # If there is a ghost in the way, Turn around.
     if next_tile == "GHOST":
-        return move_vectors[opposite_directions[direction]] + (direction,) + (wall_collision,)
+        new_direction = opposite_directions[direction]
+        return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
     
     # if the Ghost is on the same tile, freeze.
     if  current_tile == "GHOST":
@@ -40,10 +42,6 @@ def run_behavior(environment, direction, wall_collision,x,z):
                 return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
             else:
                 return move_vectors[direction] + (direction,) + (wall_collision,)
-        
-    # If the current direction is not blocked or has food in it, continue moving in that direction
-    if (next_tile == "FOOD" or next_tile == "FREE") and wall_collision == False: 
-        return move_vectors[direction] + (direction,) + (wall_collision,)
     
     # If the current direction is blocked, check if an alternative is available
     if wall_collision or (next_tile == "WALL" and ((direction == "N" or direction == "S") and (x % 1.0 > 0.49 and x % 1.0 < 0.51)) or ((direction == "E" or direction == "W") and (z % 1.0 > 0.49 and z % 1.0 < 0.51))):
@@ -57,7 +55,8 @@ def run_behavior(environment, direction, wall_collision,x,z):
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
         else:
             wall_collision = False
-            return move_vectors[opposite_directions[direction]] + (opposite_directions[direction],) + (wall_collision,)
-
-    # If no alternative is available, stay in place
-    return (0.0, 0.0, 0.0, direction, wall_collision)
+            new_direction = opposite_directions[direction]
+            return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        
+    # no reason to do any action, continue moving in that direction
+    return move_vectors[direction] + (direction,) + (wall_collision,)
