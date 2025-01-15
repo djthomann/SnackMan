@@ -7,6 +7,7 @@ import cakeModelUrl from '@/assets/models/cake.glb';
 import chickenModelUrl from '@/assets/models/chicken.glb';
 import brokkoliModelUrl from '@/assets/models/brokkoli.glb';
 import snackmanModelUrl from '@/assets/models/snackmouse.glb';
+import ghostModelUrl from '@/assets/models/ghost.glb';
 import floorURL from '@/assets/images/skybox/floor.png';
 import playerModelUrl from '@/assets/models/player.glb';
 import skybox_ftURL from '@/assets/images/skybox/skybox_ft.png';
@@ -53,7 +54,8 @@ class ModelService {
       chicken: chickenModelUrl,
       brokkoli: brokkoliModelUrl,
       snackman: snackmanModelUrl,
-      player: playerModelUrl
+      player: playerModelUrl,
+      ghost: ghostModelUrl
     };
     this.scales = {
       banana: 0.02,
@@ -63,7 +65,8 @@ class ModelService {
       chicken: 1,
       brokkoli: 1,
       snackman: 0.012,
-      player: 0.012
+      player: 0.012,
+      ghost: 0.05
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
@@ -286,7 +289,7 @@ class ModelService {
 
     //Creates Ghost and positions it
   public createGhost(id: number, x: number, y: number, z: number) {
-    const newModel = this.getModel('snackman').clone();
+    const newModel = this.getModel('ghost').clone();
     newModel.userData.id = id;
     newModel.position.set(x, y, z);
     return newModel;
