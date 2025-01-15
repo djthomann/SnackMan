@@ -100,8 +100,8 @@ public class Game {
         float z;
         switch (numSnackmen) {
             case 0 -> {
-                x = 20;
-                z = 20;
+                x = 1;
+                z = 1;
             }
             case 1 -> {
                 x = map.getW() - 2;
