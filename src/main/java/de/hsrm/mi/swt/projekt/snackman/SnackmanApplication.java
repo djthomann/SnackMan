@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SnackmanApplication {
 
 	public static void main(String[] args) {
+		System.setProperty("python.import.site", "false");
 		SpringApplication.run(SnackmanApplication.class, args);
 	}
 
