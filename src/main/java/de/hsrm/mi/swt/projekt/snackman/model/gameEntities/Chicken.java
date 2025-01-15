@@ -91,7 +91,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     private void initScriptInterpreter(String script) {
         String scriptFile = SCRIPTS_BASE_DIR + switch (script.toLowerCase()) {
-            case "test" -> "chickenTestScript.py";
+            case "test" -> "ChickenTestScript.py";
             case "one" -> "ChickenPersonalityOne.py";
             case "two" -> "ChickenPersonalityTwo.py";
             default -> script;
