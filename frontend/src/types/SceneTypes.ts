@@ -27,7 +27,7 @@ export type Snackman = {
     radius: number;
   }
 
-  export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY';
+  export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY'|'EGG';
 
   export type Food = {
     gameId: number;

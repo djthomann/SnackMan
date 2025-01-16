@@ -11,5 +11,6 @@ public class MapGenerationConfig {
     public static final int UNHEALTHY_CALORIES = 500;
     public static final int OKAY_CALORIES = 250;
     public static final int HEALTHY_CALORIES = 100;
+    public static final int EGG_CALORIES = 700;
 
 }
