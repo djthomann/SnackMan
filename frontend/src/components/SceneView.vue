@@ -297,12 +297,22 @@ export default defineComponent({
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
 
-        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
-        const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
-        nameTags.push(ghostTag);
-        // Add to ghosts group
-        scene.add(ghostMesh);
-        meshes.set(ghost.objectId, ghostMesh);
+        if (ghost.objectId == userStore.id) {
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          ghostMesh.visible = false;
+          ghostMesh.add(camera)
+          camera.position.set(0, mapScale, 0);
+          ghostMesh.add(controls.object);
+          meshes.set(ghost.objectId, ghostMesh);
+          scene.add(ghostMesh);
+        } else {
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
+          nameTags.push(ghostTag);
+          // Add to ghosts group
+          scene.add(ghostMesh);
+          meshes.set(ghost.objectId, ghostMesh);
+        }
       });
       // Add groups to the scene
       // scene.add(snackMenGroup);
