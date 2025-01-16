@@ -29,10 +29,15 @@
     <p>Loading Results...</p>
   </div>
   -->
-  <div>
-    <BackgroundComponent :title="`Congrats! Snackman Won!`">
+  <div class="lobby-grid-wrapper">
+
+    <div class="background-component">
+    <BackgroundComponent :title="`Congrats! Snackman Won!`"></BackgroundComponent>
+    </div>
+
       <div class="lobby-grid">
-        <div class="lobby-grid__column">
+
+        <div class="player-panel">
           <PlayerPanelComponent avatar="snackman" variant="white">
             <template #button>Insert Button Component</template>
             <template #content>Snacko<br><strong>123456789 CAL</strong></template>
@@ -44,14 +49,17 @@
             <button>Back to Lobby</button>
           </div>
         </div>
-        <div class="recipe-grid">
-          <ReceiptComponent></ReceiptComponent>
-        </div>
-        <div class="lobby-grid__column">
+
+        <div class="ghost-panel">
           <GhostPanelComponent></GhostPanelComponent>
         </div>
+
       </div>
-    </BackgroundComponent>
+
+      <div class="recipe-grid">
+        <ReceiptComponent></ReceiptComponent>
+      </div>
+    
   </div>
 </template>
 
@@ -135,25 +143,63 @@ const toLobby = () => {
 </script>
 
 <style scoped>
-.lobby-grid {
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+} 
+.lobby-grid-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.background-component {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
+  z-index: 0;
+}
+
+.lobby-grid {
+  position: relative;
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: 1fr;
   gap: 40px 60px;
-  padding: 4dvw;
-  box-sizing: border-box;
+  padding: calc(11%) calc(10%);
+  z-index: 1;
 }
 
 .recipe-grid {
-  width: 100%;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 40px 60px;
+  position: fixed;
+  bottom: 0;
+  left: calc(40%);
+  width: 400px;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   box-sizing: border-box;
-  overflow: hidden;
+  z-index: 10;
+  overflow-y: auto;
+  margin-bottom: -15px;
 }
 
+.player-panel {
+  padding-left: 200px;
+  grid-column: 1;
+  z-index: 2;
+}
+.ghost-panel{
+  padding-right: 100px;
+  grid-column: 3;
+  z-index: 2;
+}
 
 button {
   color: var(--colorTextDark);

@@ -44,22 +44,19 @@ hr {
 }
 
 .receiptpanel {
-  width: 350px;
-  border-radius: 8px;
-  padding: 16px;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  overflow: hidden;
-
+  justify-content: space-between;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .receiptpanel__container {
-  position: relative;
   width: 100%;
   height: 100%;
-  max-width: 340px;
-  z-index: 3;
   display: flex;
   flex-direction: column;
 }
