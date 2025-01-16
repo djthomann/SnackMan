@@ -89,7 +89,7 @@ class ModelService {
       new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_rtURL) }),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_lfURL) }),
   ];
-  
+
    this.topTextures = [
       counter_top1URL,
       counter_top2URL,
@@ -291,7 +291,7 @@ class ModelService {
   public createGhost(id: number, x: number, y: number, z: number, scale: number) {
     const newModel = this.getModel('ghost').clone();
     newModel.userData.id = id;
-    newModel.position.set(x, y, z);
+    newModel.position.set(x, 0, z);
     return newModel;
   }
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
