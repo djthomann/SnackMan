@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.LayEggEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
@@ -46,11 +47,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
             //logger.info("\n \nChicken with id " + objectId + " has passively gained calories");
             //logger.info(objectId + " previous calories: " + gainedCalories);
-
-            gainedCalories += passiveCalorieGain;
-            gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
-
-            updateRadius();
+            if(!movementPaused) {
+                gainedCalories += passiveCalorieGain;
+                gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
+                updateRadius();            
+            }
 
             // logger.info(objectId + " current calories: " + gainedCalories);        
         }
@@ -83,7 +84,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.gameManager = gameManager;
         this.gainedCalories = 0;
         //Timer for constant passive calorie gain
-        this.passiveCalorieGain = 10;
+        this.passiveCalorieGain = 500;
         this.passiveCalorieGainDelay = 1000; //in ms
         this.passiveCaloriesTimer = new Timer();
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
@@ -206,7 +207,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.gainedCalories += food.getCalories();
         updateRadius(); 
         gameManager.getGameById(gameId).getGameState().addChangedChicken(this);
-        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId));
+        EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId, gameManager));
     }
 
     /**
@@ -237,9 +238,21 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 movementPaused = false; 
                 radius = minRadius; 
                 gainedCalories = 0;
+                layEgg();
             }
-        }, 5000); // paused for 5 seconds 
-    } 
+        }, 5000); // paused for 5 seconds
+
+    }
+    
+    /**
+     * lays an egg
+     */
+    private void layEgg() {
+        Food egg = new Food(gameId, (int) x, (int) z, FoodType.EGG, gameConfig);
+        logger.info("Ei gelegt");
+        gameManager.getGameById(gameId).getMap().getTileAt((int) x, (int) z).addToOccupation(egg);
+        EventService.getInstance().applicationEventPublisher.publishEvent(new LayEggEvent(this, egg, gameId, gameManager));
+    }
 
     /**
      * Resets the gainedCalories for the Chicken to 0.
