@@ -57,9 +57,9 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
     @Override
     public void move(float newX, float newY, float newZ) {
         this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
-        x = newX;
-        y = newY;
-        z = newZ;
+        x += newX;
+        y += newY;
+        z += newZ;
         EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
@@ -93,8 +93,6 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
                 }
 
                 this.move(vector.x * gameConfig.getGhostStep(), 0, vector.z * gameConfig.getGhostStep());
-                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                gameManager.notifyChange(moveEvent);
 
             default:
                 break;
