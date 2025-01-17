@@ -277,7 +277,7 @@ export default defineComponent({
       snackMen.forEach((snackMan) => {
 
         if (snackMan.objectId == userStore.id) {
-          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
+          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y, snackMan.z * mapScale);
           playerMesh.add(camera)
           camera.position.set(0, mapScale, 0);
           playerMesh.add(controls.object);
@@ -298,10 +298,10 @@ export default defineComponent({
       ghosts.forEach((ghost) => {
 
         if (ghost.objectId == userStore.id) {
-          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          const ghostMesh = modelService.createGhostPlayer(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
           ghostMesh.visible = false;
           ghostMesh.add(camera)
-          camera.position.set(0, mapScale, 0);
+          camera.position.set(0, mapScale / 2, 0);
           ghostMesh.add(controls.object);
           meshes.set(ghost.objectId, ghostMesh);
           scene.add(ghostMesh);
@@ -579,7 +579,7 @@ export default defineComponent({
       const playerForward = new THREE.Vector3();
       camera.getWorldDirection(forward);
 
-      meshes.get(userStore.id!)!.getWorldDirection(playerForward);
+      meshes.get(userStore.id!)!.getObjectByName("model")!.getWorldDirection(playerForward);
       forward.normalize();
       playerForward.normalize();
 
@@ -596,7 +596,7 @@ export default defineComponent({
 
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
           } else if (
@@ -604,11 +604,11 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
             // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
           } else if (
@@ -616,7 +616,7 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               -Math.PI / 2 - Math.PI / 4,
               smoothingFactor,
@@ -628,7 +628,7 @@ export default defineComponent({
             angleYCameraDirection < 0.125 &&
             angleYCameraDirection > -0.125
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
           } else if (
@@ -636,7 +636,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               Math.PI / 2 + Math.PI / 4,
               smoothingFactor,
@@ -644,7 +644,7 @@ export default defineComponent({
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
           } else if (
@@ -652,7 +652,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
           }
         }
       }
