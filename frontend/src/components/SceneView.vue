@@ -1,7 +1,6 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
     <GameOverlay ref="gameOverlayRef" />
-    <button id="startButton">play</button>
   </div>
 </template>
 
@@ -426,23 +425,13 @@ export default defineComponent({
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
-      const startButton = document.getElementById('startButton') as HTMLInputElement;
-      startButton.addEventListener(
+      renderer.domElement.addEventListener(
         'click',
         function () {
           controls.lock();
         },
         false,
       );
-
-      // Hide and unhide start button
-      controls.addEventListener('lock', () => {
-        startButton.classList.add('hidden'); // Button verstecken
-      });
-
-      controls.addEventListener('unlock', () => {
-        startButton.classList.remove('hidden'); // Button anzeigen
-      });
 
       // TODO When entering a user name no move event should be sent to the backend
 
@@ -663,23 +652,8 @@ body {
   overflow: hidden;
 }
 
-#startButton {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  z-index: 10;
-  display: block;
-}
-
-#startButton.hidden {
-  display: none;
+#clickable-container {
+  width: 100vw;
+  height: 100vh;
 }
 </style>
