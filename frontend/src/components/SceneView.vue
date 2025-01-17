@@ -529,22 +529,6 @@ export default defineComponent({
     function animate() {
       requestAnimationFrame(animate);
 
-      if (
-        lastRotation.x !== camera.rotation.x ||
-        lastRotation.y !== camera.rotation.y ||
-        lastRotation.z !== camera.rotation.z
-      ) {
-        console.log("Camera Rotation geändert:", camera.rotation);
-
-        // Neue Rotation speichern
-        lastRotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
-
-        // Optional: Blickrichtung ausgeben
-        const wd = new THREE.Vector3();
-        camera.getWorldDirection(wd);
-        console.log("Blickrichtung:", wd);
-      }
-
       rotateBody();
       const time = Date.now() * 0.001;
 
