@@ -545,7 +545,7 @@ export default defineComponent({
         console.log("Blickrichtung:", wd);
       }
 
-      // rotateBody();
+      rotateBody();
       const time = Date.now() * 0.001;
 
       // Update NameTag Orientation
@@ -575,7 +575,6 @@ export default defineComponent({
 
     // Method to turn the player body according to camera forward direction
     function rotateBody() {
-      const cameraRotation = camera.rotation;
       const forward = new THREE.Vector3();
       const playerForward = new THREE.Vector3();
       camera.getWorldDirection(forward);
@@ -657,7 +656,6 @@ export default defineComponent({
           }
         }
       }
-      camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
     }
 
     return {
