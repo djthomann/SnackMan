@@ -63,6 +63,7 @@ export default defineComponent({
     const nameTags: NameTag[] = [];
     let gameID = 2;
     let startPromiseResolve: () => void;
+    let lastRotation: THREE.Vector3 = new THREE.Vector3();
 
     const logger = new Logger();
 
@@ -101,7 +102,7 @@ export default defineComponent({
       parsedData.eatenFoods.forEach((food: Food) => {
         makeDisappear(food.objectId)
       })
-      
+
       parsedData.laidEggs.forEach((food: Food) => {
         logger.info(`Egg gets laid`)
         makeAppear(food)
@@ -149,7 +150,7 @@ export default defineComponent({
     };
 
     function resizeChicken(id: number, radius: number) {
-      logger.info('chicken with radius: ' + radius);
+      // logger.info('chicken with radius: ' + radius);
 
       chickenGroup.children.forEach((chicken) => {
         if(chicken.userData.id === id) {
@@ -214,7 +215,6 @@ export default defineComponent({
       // start Render-loop
       animate()
       logger.info('scene with gameID ' + gameID);
-
     });
 
     onUnmounted(() => {
@@ -384,6 +384,7 @@ export default defineComponent({
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, mapScale * 1000);
       camera.position.set(0, 0, 0)
+      camera.getWorldDirection(lastRotation);
       // camera.lookAt(1, 1, 1);
 
       // Vectors
@@ -442,6 +443,7 @@ export default defineComponent({
 
       controls.addEventListener('unlock', () => {
         startButton.classList.remove('hidden'); // Button anzeigen
+        camera.rotation.set(0, 0, 0);
       });
 
       // TODO When entering a user name no move event should be sent to the backend
@@ -527,8 +529,23 @@ export default defineComponent({
     function animate() {
       requestAnimationFrame(animate);
 
-      // was not able to adapt this to not use old player object - sorry
-      rotateBody();
+      if (
+        lastRotation.x !== camera.rotation.x ||
+        lastRotation.y !== camera.rotation.y ||
+        lastRotation.z !== camera.rotation.z
+      ) {
+        console.log("Camera Rotation geändert:", camera.rotation);
+
+        // Neue Rotation speichern
+        lastRotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z);
+
+        // Optional: Blickrichtung ausgeben
+        const wd = new THREE.Vector3();
+        camera.getWorldDirection(wd);
+        console.log("Blickrichtung:", wd);
+      }
+
+      // rotateBody();
       const time = Date.now() * 0.001;
 
       // Update NameTag Orientation
@@ -558,6 +575,7 @@ export default defineComponent({
 
     // Method to turn the player body according to camera forward direction
     function rotateBody() {
+      const cameraRotation = camera.rotation;
       const forward = new THREE.Vector3();
       const playerForward = new THREE.Vector3();
       camera.getWorldDirection(forward);
@@ -639,6 +657,7 @@ export default defineComponent({
           }
         }
       }
+      camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
     }
 
     return {
