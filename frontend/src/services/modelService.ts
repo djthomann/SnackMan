@@ -276,10 +276,13 @@ class ModelService {
 
 
   public createPlayer(id: number | undefined, x: number, y: number,  z: number) {
+    const res = new THREE.Group();
     const newModel = this.getModel('player').clone();
     newModel.userData.id = id;
-    newModel.position.set(x,y,z);
-    return newModel;
+    res.position.set(x,y,z);
+    newModel.name = "model";
+    res.add(newModel);
+    return res;
   }
 
   //Creates Snackman and positions it
@@ -288,6 +291,16 @@ class ModelService {
     newModel.userData.id = id;
     newModel.position.set(x,0,z );
     return newModel;
+  }
+
+  public createGhostPlayer(id: number | undefined, x: number, y: number,  z: number) {
+    const res = new THREE.Group();
+    const newModel = this.getModel('ghost').clone();
+    newModel.userData.id = id;
+    res.position.set(x,y,z);
+    newModel.name = "model";
+    res.add(newModel);
+    return res;
   }
 
     //Creates Ghost and positions it
