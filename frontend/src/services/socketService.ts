@@ -30,7 +30,7 @@ export default function useWebSocket() {
     };
 
     websocket.value.onmessage = (event: MessageEvent) => {
-      logger.info('Received message from server:', event.data);
+      // logger.info('Received message from server:', event.data);
       serverResponse.value = event.data;
       eventBus.emit('serverMessage', event.data);
       messageCallbacks.value.forEach((callback) => callback(event.data));

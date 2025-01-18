@@ -4,8 +4,8 @@
       <LoadingOverlayComponent v-if="isLoading"></LoadingOverlayComponent>
     </Transition>
     <GameOverlay ref="gameOverlayRef" />
-    <button id="startButton">play</button>
   </div>
+  <div id="clickable-container"></div>
 </template>
 
 <script setup lang="ts">
@@ -62,6 +62,7 @@ const wallHeight = 1 * mapScale;
     const nameTags: NameTag[] = [];
     let gameID = 2;
     let startPromiseResolve: () => void;
+    let lastRotation: THREE.Vector3 = new THREE.Vector3();
 
     const logger = new Logger();
 
@@ -103,7 +104,7 @@ const wallHeight = 1 * mapScale;
       parsedData.eatenFoods.forEach((food: Food) => {
         makeDisappear(food.objectId)
       })
-      
+
       parsedData.laidEggs.forEach((food: Food) => {
         logger.info(`Egg gets laid`)
         makeAppear(food)
@@ -150,7 +151,7 @@ const wallHeight = 1 * mapScale;
     };
 
     function resizeChicken(id: number, radius: number) {
-      logger.info('chicken with radius: ' + radius);
+      // logger.info('chicken with radius: ' + radius);
 
       chickenGroup.children.forEach((chicken) => {
         if(chicken.userData.id === id) {
@@ -215,7 +216,6 @@ const wallHeight = 1 * mapScale;
       // start Render-loop
       animate()
       logger.info('scene with gameID ' + gameID);
-
     });
 
     onUnmounted(() => {
@@ -278,14 +278,14 @@ const wallHeight = 1 * mapScale;
       snackMen.forEach((snackMan) => {
 
         if (snackMan.objectId == userStore.id) {
-          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
+          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y, snackMan.z * mapScale);
           playerMesh.add(camera)
-          camera.position.set(0, mapScale * 2, 0);
+          camera.position.set(0, mapScale / 2, 0);
           playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
           scene.add(playerMesh);
         } else {
-          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale, mapScale);
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
@@ -297,17 +297,17 @@ const wallHeight = 1 * mapScale;
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
+
         if (ghost.objectId == userStore.id) {
-          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
+          const ghostMesh = modelService.createGhostPlayer(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          ghostMesh.visible = false;
           ghostMesh.add(camera)
-          camera.position.set(0, mapScale * 2, 0);
+          camera.position.set(0, mapScale, 0);
           ghostMesh.add(controls.object);
           meshes.set(ghost.objectId, ghostMesh);
-          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
-          nameTags.push(ghostTag);
           scene.add(ghostMesh);
         } else {
-          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
           const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
           nameTags.push(ghostTag);
           // Add to ghosts group
@@ -384,6 +384,7 @@ const wallHeight = 1 * mapScale;
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, mapScale * 1000);
       camera.position.set(0, 0, 0)
+      camera.getWorldDirection(lastRotation);
       // camera.lookAt(1, 1, 1);
 
       // Vectors
@@ -426,8 +427,8 @@ const wallHeight = 1 * mapScale;
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
-      const startButton = document.getElementById('startButton') as HTMLInputElement;
-      startButton.addEventListener(
+      const clickableContainer = document.getElementById('clickable-container') as HTMLInputElement;
+      clickableContainer.addEventListener(
         'click',
         function () {
           controls.lock();
@@ -437,11 +438,10 @@ const wallHeight = 1 * mapScale;
 
       // Hide and unhide start button
       controls.addEventListener('lock', () => {
-        startButton.classList.add('hidden'); // Button verstecken
       });
 
       controls.addEventListener('unlock', () => {
-        startButton.classList.remove('hidden'); // Button anzeigen
+        camera.rotation.set(0, 0, 0);
       });
 
       // TODO When entering a user name no move event should be sent to the backend
@@ -527,7 +527,6 @@ const wallHeight = 1 * mapScale;
     function animate() {
       requestAnimationFrame(animate);
 
-      // was not able to adapt this to not use old player object - sorry
       rotateBody();
       const time = Date.now() * 0.001;
 
@@ -562,7 +561,7 @@ const wallHeight = 1 * mapScale;
       const playerForward = new THREE.Vector3();
       camera.getWorldDirection(forward);
 
-      meshes.get(userStore.id!)!.getWorldDirection(playerForward);
+      meshes.get(userStore.id!)!.getObjectByName("model")!.getWorldDirection(playerForward);
       forward.normalize();
       playerForward.normalize();
 
@@ -579,7 +578,7 @@ const wallHeight = 1 * mapScale;
 
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
           } else if (
@@ -587,11 +586,11 @@ const wallHeight = 1 * mapScale;
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
             // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
           } else if (
@@ -599,7 +598,7 @@ const wallHeight = 1 * mapScale;
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               -Math.PI / 2 - Math.PI / 4,
               smoothingFactor,
@@ -611,7 +610,7 @@ const wallHeight = 1 * mapScale;
             angleYCameraDirection < 0.125 &&
             angleYCameraDirection > -0.125
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
           } else if (
@@ -619,7 +618,7 @@ const wallHeight = 1 * mapScale;
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               Math.PI / 2 + Math.PI / 4,
               smoothingFactor,
@@ -627,7 +626,7 @@ const wallHeight = 1 * mapScale;
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
           } else if (
@@ -635,7 +634,7 @@ const wallHeight = 1 * mapScale;
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
           }
         }
       }
@@ -666,23 +665,14 @@ body {
   overflow: hidden;
 }
 
-#startButton {
+#clickable-container {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  z-index: 10;
-  display: block;
-}
-
-#startButton.hidden {
-  display: none;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 0;
+  opacity: 0;
+  z-index: 2;
 }
 </style>
