@@ -4,6 +4,7 @@ export const useGameStore = defineStore('game', {
   state: () => ({
     remainingTime: 0,
     calories: 0,
+    collisions: 0
   }),
   actions: {
     setRemainingTime(time: number) {
@@ -11,7 +12,9 @@ export const useGameStore = defineStore('game', {
     },
     setCalories(amount: number) {
       this.calories = amount;
-      console.log(this.calories);
+    },
+    setCollisions(amount: number) {
+      this.collisions = amount;
     }
   },
 });

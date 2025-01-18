@@ -118,6 +118,9 @@ export default defineComponent({
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
+        if(ghost.objectId === userStore.id) {
+          gameStore.setCollisions(ghost.collisions)
+        }
         meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
       });
 
@@ -438,12 +441,9 @@ export default defineComponent({
 
       // Hide and unhide start button
       controls.addEventListener('lock', () => {
-        startButton.classList.add('hidden'); // Button verstecken
       });
 
       controls.addEventListener('unlock', () => {
-        startButton.classList.remove('hidden'); // Button anzeigen
-        camera.rotation.set(0, 0, 0);
       });
 
       // TODO When entering a user name no move event should be sent to the backend
