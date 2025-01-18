@@ -120,6 +120,9 @@ const wallHeight = 1 * mapScale;
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
+        if(ghost.objectId === userStore.id) {
+          gameStore.setCollisions(ghost.collisions)
+        }
         meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
       });
 
@@ -441,7 +444,6 @@ const wallHeight = 1 * mapScale;
       });
 
       controls.addEventListener('unlock', () => {
-        camera.rotation.set(0, 0, 0);
       });
 
       // TODO When entering a user name no move event should be sent to the backend
