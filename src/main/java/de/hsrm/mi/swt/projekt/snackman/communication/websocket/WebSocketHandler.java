@@ -24,12 +24,15 @@ import com.google.gson.JsonSyntaxException;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChooseRoleEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.StartGameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
+import de.hsrm.mi.swt.projekt.snackman.logic.Game;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
@@ -194,6 +197,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     gameManager.createGame(startGameEvent.getGameID());
                 }
 
+                case "END_GAME" -> {
+                    GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
+                    Lobby currLobby = gameManager.getLobbyById(gameEndEvent.getGameID());
+                    logger.info("[CURRENT GAME] : " + gameEndEvent.getGameID());
+                    
+                    logger.info("[WEBSOCKETHANDLER] - currLobby Clients List: " + currLobby.getClientsAsList().get(0));
+
+                    // TODO: current Game ist nicht mehr null -> anhand von client id und game id alle spieler herausfinden
+
+                    for (Client client : clients.values()) {
+
+                        if (currLobby.getClientsAsList().contains(client)) {
+                            logger.info("[WEBSOCKETHANDLER] - Client: " + client.getUsername());
+                        }
+                    }
+                }
                 default -> logger.warn("unknown message from FE: " + type);
 
             }

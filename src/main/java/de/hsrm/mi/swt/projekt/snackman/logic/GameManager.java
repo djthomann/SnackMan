@@ -107,6 +107,14 @@ public class GameManager {
         return new ArrayList<>(allLobbies.values());
     }
 
+    public Lobby getLobbyById(Long id) {
+        if (allLobbies.containsKey(id)) {
+            return allLobbies.get(id);
+        } else {
+            return null;
+        }
+    }
+
     public Map<Long, Lobby> getLobbyMap() {
         return allLobbies;
     }

@@ -40,9 +40,9 @@ const props = defineProps<Props>();
 
 <style scoped lang="css">
 .background {
-    width: 100dvw;
-    height: 100dvh;
-    position: relative;
+  width: 100dvw;
+  height: 100dvh;
+  position: relative;
 }
 
 .background__image {
@@ -86,8 +86,7 @@ const props = defineProps<Props>();
 }
 
 .background__sheet-tile {
-    height: 100%;
-
+  height: 100%;
 }
 
 .background__sheet-tile--left,
@@ -110,8 +109,8 @@ const props = defineProps<Props>();
 }
 
 .background__sheet-tile--stretch .background__sheet-image {
-    width:100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .background__title {
