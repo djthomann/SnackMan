@@ -203,7 +203,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     /**
-     * skale the radius of chicken based on calories linearly between minRadius and maxRadius
+     * scale the radius of chicken based on calories linearly between minRadius and maxRadius
      *
      */
     private void updateRadius() {
@@ -218,7 +218,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     /**
-     * skale the radius of chicken based on calories linearly between minRadius and maxRadius
+     * scale the radius of chicken based on calories linearly between minRadius and maxRadius
      *
      * @param minRadius the minimum radius to reset to
      */
@@ -264,18 +264,13 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     @Override
-    public void handle(Event event) {
-        if (event == null || event.getObjectID() != this.objectId) {
-            return;
-        }
-        //logger.info("Event received for object ID {}: {}", this.objectId, event);
-    }
+    public void handle(Event event) {}
 
     public ChickenRecord toRecord() {
         return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories, radius);
     }
 
-    // String representation used for chickenssurroundings
+    // String representation used for chickens surroundings
     public String toString() {
         return "Chicken";
     }
