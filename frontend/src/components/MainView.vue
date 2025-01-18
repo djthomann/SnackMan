@@ -5,7 +5,6 @@ import FetchMap from './FetchMap.vue';
 
 <template>
   <RouterLink to="/title">To The Title Screen </RouterLink>
-  <FetchMap />
   <SceneView />
 </template>
 

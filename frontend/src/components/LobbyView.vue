@@ -1,109 +1,109 @@
 <template>
   <div>
-    
-    <h1>Lobby {{ lobbyCode }}</h1>
-      <button @click="choose('SnackMan')">Choose SnackMan</button>
-      <button @click="choose('Ghost')">Choose Ghost</button>
-      <h3>SnackMan</h3>
-      <ul>
-        <li v-for="player in snackManPlayers" :key="player.id">
-          {{ player.username }}
-        </li>
-      </ul>
-      <h3>Ghosts</h3>
-      <ul>
-        <li v-for="player in ghostPlayers" :key="player.id">
-          {{ player.username }}
-        </li>
-      </ul>
-      <h3>Undecided Players</h3>
-      <ul>
-        <li v-for="player in undecidedPlayers" :key="player.id">
-          {{ player.username }}
-        </li>
-      </ul>
-      <form @submit.prevent="submitForm" id="gameConfig" :action="`/lobby/${lobbyCode}`" method="POST">
-        <label for="scoreToWin">Score to Win:</label><br />
-        <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" /><br /><br />
-
-        <label for="speedModifier">Movement-Speed:</label><br />
-        <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" /><br /><br />
-
-        <label for="snackmanSpeed">Snackman Speed:</label><br />
-        <input type="number" id="snackmanSpeed" v-model="gameConfig.snackManSpeed" /><br /><br />
-
-        <label for="ghostSpeed">Ghost Speed:</label><br />
-        <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" /><br /><br />
-
-        <label for="chickenSpeed">Chicken Speed:</label><br />
-        <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" /><br /><br />
-
-        <label for="mapWidth">Map Width in tiles:</label><br />
-        <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" /><br /><br />
-
-        <label for="mapHeight">Map Height in tiles:</label><br />
-        <input type="number" id="mapHeight" v-model="gameConfig.mapHeight" /><br /><br />
-
-        <label for="gameTime">Game Time in seconds:</label><br />
-        <input type="number" id="gameTime" v-model="gameConfig.gameTime" /><br /><br />
-
-        <label for="chickenCount">Number of Chicken:</label><br />
-        <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" /><br /><br />
-
-        <label for="jumpCalories">Calories Burned on Jump:</label><br />
-        <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" /><br /><br />
-
-        <button type="submit">Apply</button>
-        <button type="button" @click="resetForm">Reset</button>
-        <button type="button" @click="startGame">Start Game</button>
-      </form>
-    
-    
-    
-    
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
+      <FetchMap></FetchMap>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
-          <PlayerPanelComponent  avatar="ghost">
+          <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
             <template #counter>{{ ghostPlayers.length }}/4</template>
-            <template #button><button type="button" @click="decide(false)"></button>be Ghost</template>
+            <template #button
+              ><button class="chooseRoleButton" type="button" @click="decide(false)">
+                Ghost
+              </button></template
+            >
             <template #content>
-              <li v-for="player in ghostPlayers" :key="player.id">
+              <li v-for="player in ghostPlayers" :key="player.id" class="player-list-item">
                 {{ player.username }}
               </li>
             </template>
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column">
-          <PlayerPanelComponent avatar="ghost">
-            <template #counter>{{ undecidedPlayers.length }}/8</template>
+          <ConfigPanelComponent
+            headline="Game Settings:"
+            :counter="{ current: undecidedPlayers.length, max: 8 }"
+          >
             <template #content>
-              Undecided Players
-              <li v-for="player in undecidedPlayers" :key="player.id">
-                {{ player.username }}
-              </li>
+              <div class="config-panel-grid">
+                <FieldsetComponent height-behaviour="stretch">
+                  <span>Slay</span>
+                  <span>Slay</span>
+                </FieldsetComponent>
+                <FieldsetComponent height-behaviour="stretch">
+                  <form
+                    @submit.prevent="submitForm"
+                    id="gameConfig"
+                    :action="`/lobby/${lobbyCode}`"
+                    method="POST"
+                  >
+                    <span>
+                      <label for="scoreToWin">Score to Win:</label>
+                      <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" />
+                    </span>
+                    <span>
+                      <label for="speedModifier">Movement-Speed:</label>
+                      <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" />
+                    </span>
+                    <span>
+                      <label for="snackmanSpeed">Snackman Speed:</label>
+                      <input type="number" id="snackmanSpeed" v-model="gameConfig.snackManSpeed" />
+                    </span>
+                    <span>
+                      <label for="ghostSpeed">Ghost Speed:</label>
+                      <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" />
+                    </span>
+                    <span>
+                      <label for="chickenSpeed">Chicken Speed:</label>
+                      <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" />
+                    </span>
+                    <span>
+                      <label for="mapWidth">Map Width in tiles:</label>
+                      <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" />
+                    </span>
+                    <span>
+                      <label for="mapHeight">Map Height in tiles:</label>
+                      <input type="number" id="mapHeight" v-model="gameConfig.mapHeight" />
+                    </span>
+                    <span>
+                      <label for="gameTime">Game Time in seconds:</label>
+                      <input type="number" id="gameTime" v-model="gameConfig.gameTime" />
+                    </span>
+                    <span>
+                      <label for="chickenCount">Number of Chicken:</label>
+                      <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" />
+                    </span>
+                    <span>
+                      <label for="jumpCalories">Calories Burned on Jump:</label>
+                      <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" />
+                    </span>
+                    <button type="submit">Apply</button>
+                    <button type="button" @click="resetForm">Reset</button>
+                  </form>
+                </FieldsetComponent>
+              </div>
             </template>
-          </PlayerPanelComponent>
+          </ConfigPanelComponent>
         </div>
         <div class="lobby-grid__column">
-          <PlayerPanelComponent  avatar="snackman" selected>
+          <PlayerPanelComponent avatar="snackman" :selected="selectedRole === 'SNACKMAN'">
             <template #counter>{{ snackManPlayers.length }}/4</template>
-            <template #button><button type="button" @click="decide(true)"></button>be Snackman</template>
+            <template #button
+              ><button class="chooseRoleButton" type="button" @click="decide(true)">
+                SnackMan
+              </button></template
+            >
             <template #content>
-              <li v-for="player in snackManPlayers" :key="player.id">
+              <li v-for="player in snackManPlayers" :key="player.id" class="player-list-item">
                 {{ player.username }}
               </li>
             </template>
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
-          Merry Crisis
-          <button type="button" @click="startGame">Start Game</button>
+          <button class="startGameButton" type="button" @click="startGame">Start Game</button>
         </div>
       </div>
     </BackgroundComponent>
-  
-  
   </div>
 </template>
 
@@ -113,10 +113,13 @@ import { computed, onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 import { useUserStore } from '@/stores/userStore';
-import type {Player} from "@/types/SceneTypes";
+import type { Player } from '@/types/SceneTypes';
 import BackgroundComponent from './layout/BackgroundComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 import { Logger } from '../util/logger';
+import ConfigPanelComponent from './layout/ConfigPanelComponent.vue';
+import FieldsetComponent from './layout/FieldsetComponent.vue';
+import FetchMap from "@/components/FetchMap.vue";
 
 const logger = new Logger();
 
@@ -134,6 +137,7 @@ const undecidedPlayers = ref<Array<Player>>([
   { id: 1, username: 'Alice' },
   { id: 2, username: 'Bob' },
 ]);
+const selectedRole = ref<'SNACKMAN' | 'GHOST' | null>(null);
 
 // Type definition of GameConfig interface
 interface GameConfig {
@@ -170,9 +174,9 @@ const handleServerMessage = (message: string) => {
   } else if (message.startsWith('GAME_START')) {
     //TODO: get this event into scene
     router.push('/game/' + lobbyCode.value);
-  } else if (message.startsWith("PLAYERS")) {
+  } else if (message.startsWith('PLAYERS')) {
     buildPlayerArrays(message);
-  } else if (message.startsWith("FOREIGN_GAMESTART")) {
+  } else if (message.startsWith('FOREIGN_GAMESTART')) {
     router.push('/game/' + lobbyCode.value);
   }
 };
@@ -183,19 +187,22 @@ const buildPlayerArrays = (message: string) => {
   const ghostArray: Array<Player> = [];
   const undecidedArray: Array<Player> = [];
   parsedData.players.forEach((player: string[]) => {
-    console.log(`Username: ${player[0]}, Client ID: ${player[1]}`);
-    if (player[2] === "SNACKMAN") {
-      snackmanArray.push({id: Number(player[1]), username: player[0]})
-    } else if (player[2] === "GHOST") {
-      ghostArray.push({id: Number(player[1]), username: player[0]})
-    } else {
-      undecidedArray.push({id: Number(player[1]), username: player[0]})
+    if(Number(player[1]) == userStore.id) {
+      userStore.setRole(player[2])
     }
-  })
+    console.log(`Username: ${player[0]}, Client ID: ${player[1]}`);
+    if (player[2] === 'SNACKMAN') {
+      snackmanArray.push({ id: Number(player[1]), username: player[0] });
+    } else if (player[2] === 'GHOST') {
+      ghostArray.push({ id: Number(player[1]), username: player[0] });
+    } else {
+      undecidedArray.push({ id: Number(player[1]), username: player[0] });
+    }
+  });
   snackManPlayers.value = snackmanArray;
   undecidedPlayers.value = undecidedArray;
   ghostPlayers.value = ghostArray;
-}
+};
 
 // Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
@@ -218,15 +225,16 @@ const resetForm = async () => {
 };
 
 const decide = (snackman: boolean) => {
+  selectedRole.value = snackman ? 'SNACKMAN' : 'GHOST';
   const data = JSON.stringify({
     type: 'ROLE',
     snackman: snackman,
-    id: userStore.id
+    id: userStore.id,
   });
   sendMessage(data);
 
   fetchPlayers();
-}
+};
 
 // Automatic call on load
 onMounted(async () => {
@@ -254,16 +262,17 @@ onMounted(async () => {
     logger.info('Failed to fetch Data on load: ', e);
   }
 
+  decide(true); // initial role Snackman
   fetchPlayers();
 });
 
 const fetchPlayers = () => {
-  const requestData = JSON.stringify( {
-    type: "GET_PLAYERS",
-    lobbyCode: lobbyCode.value
-  })
+  const requestData = JSON.stringify({
+    type: 'GET_PLAYERS',
+    lobbyCode: lobbyCode.value,
+  });
   sendMessage(requestData);
-}
+};
 
 // Method, to start the game
 const startGame = () => {
@@ -276,20 +285,18 @@ const startGame = () => {
 };
 
 const choose = (role: string) => {
-    const message = JSON.stringify({
-      type: "CHOOSEROLE",
-      clientID: clientID.value,
-      username: name.value,
-      gameID: lobbyCode.value,
-      isSnackMan: role === 'SnackMan' ? true : false,
-    });
-    sendMessage(message);
-  };
-
+  const message = JSON.stringify({
+    type: 'CHOOSEROLE',
+    clientID: clientID.value,
+    username: name.value,
+    gameID: lobbyCode.value,
+    isSnackMan: role === 'SnackMan' ? true : false,
+  });
+  sendMessage(message);
+};
 </script>
 
 <style scoped>
-
 .lobby-grid {
   width: 100%;
   height: 100%;
@@ -298,11 +305,11 @@ const choose = (role: string) => {
   grid-template-rows: 1fr auto;
   gap: 40px 60px;
   padding: 4dvw;
-  box-sizing:border-box;
+  box-sizing: border-box;
 }
 
 .lobby-grid__column {
-  min-height:0;
+  min-height: 0;
 }
 
 .lobby-grid__column--span-all {
@@ -311,11 +318,72 @@ const choose = (role: string) => {
 }
 
 .config-panel-grid {
-  width:100%;
-  height:100%;
-  display:grid;
+  width: 100%;
+  height: 100%;
+  display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 100%;
   gap: 30px;
+}
+
+.startGameButton {
+  width: 25%;
+  background-color: #F39325;
+  color: white;
+  border: 3px solid white;
+  border-radius: 10px;
+}
+
+.chooseRoleButton {
+  width: 100%;
+  background-color: white;
+  color: #ff8c00;
+  border: none;
+}
+
+Button {
+  padding: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+Button:hover{
+  color: black;
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.startGameButton:hover {
+  background-color: white;
+  border: 3px solid black;
+}
+
+input[type="number"] {
+  appearance: none;
+  -moz-appearance: textfield;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+label {
+  color: white;
+}
+
+.player-list-item {
+  list-style-type: none;
+  text-align: center;
+  padding: 5px 0;
 }
 </style>

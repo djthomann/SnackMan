@@ -12,6 +12,7 @@ export type Snackman = {
     gameId: number;
     objectId: number;
     username: string;
+    collisions: number;
     x: number;
     y: number;
     z: number;
@@ -27,7 +28,7 @@ export type Snackman = {
     radius: number;
   }
 
-  export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY';
+  export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY'|'EGG';
 
   export type Food = {
     gameId: number;

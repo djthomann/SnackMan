@@ -2,11 +2,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import bananaModelUrl from '@/assets/models/banana.glb';
 import appleModelUrl from '@/assets/models/apple.glb';
+import cheeseModelUrl from '@/assets/models/cheese.glb';
 import orangeModelUrl from '@/assets/models/orange.glb';
 import cakeModelUrl from '@/assets/models/cake.glb';
 import chickenModelUrl from '@/assets/models/chicken.glb';
 import brokkoliModelUrl from '@/assets/models/brokkoli.glb';
 import snackmanModelUrl from '@/assets/models/snackmouse.glb';
+import ghostModelUrl from '@/assets/models/ghost.glb';
 import floorURL from '@/assets/images/skybox/floor.png';
 import playerModelUrl from '@/assets/models/player.glb';
 import skybox_ftURL from '@/assets/images/skybox/skybox_ft.png';
@@ -48,22 +50,26 @@ class ModelService {
     this.models = {
       banana: bananaModelUrl,
       apple: appleModelUrl,
+      cheese: cheeseModelUrl,
       orange: orangeModelUrl,
       cake: cakeModelUrl,
       chicken: chickenModelUrl,
       brokkoli: brokkoliModelUrl,
       snackman: snackmanModelUrl,
-      player: playerModelUrl
+      player: playerModelUrl,
+      ghost: ghostModelUrl
     };
     this.scales = {
       banana: 0.02,
       apple: 0.1,
+      cheese: 0.12,
       orange: 0.0025,
       cake: 0.175,
       chicken: 1,
       brokkoli: 1,
-      snackman: 0.012,
-      player: 0.012
+      snackman: 0.12,
+      player: 0.12,
+      ghost: 0.11
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
@@ -74,7 +80,7 @@ class ModelService {
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_ftURL) }),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_bkURL) }),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_upURL) }),
-      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_dnURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_dnURL), transparent: true, opacity: 0}),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_rtURL) }),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_lfURL) })
     ]
@@ -86,7 +92,7 @@ class ModelService {
       new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_rtURL) }),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(counter_lfURL) }),
   ];
-  
+
    this.topTextures = [
       counter_top1URL,
       counter_top2URL,
@@ -218,7 +224,7 @@ class ModelService {
     const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
     const skybox = new THREE.Mesh(skyboxGeo, this.skyBoxTextures);
     skybox.name = "skybox";
-    skybox.position.y = 0;
+    skybox.position.y = w/4/2;
     skybox.position.x = w/2;
     skybox.position.z = w/2;
 
@@ -270,25 +276,38 @@ class ModelService {
 
 
   public createPlayer(id: number | undefined, x: number, y: number,  z: number) {
+    const res = new THREE.Group();
     const newModel = this.getModel('player').clone();
     newModel.userData.id = id;
-    newModel.position.set(x,y,z);
-    return newModel;
+    res.position.set(x,y,z);
+    newModel.name = "model";
+    res.add(newModel);
+    return res;
   }
 
   //Creates Snackman and positions it
   public createSnackman(id: number, x: number, y: number, z: number) {
     const newModel = this.getModel('snackman').clone();
     newModel.userData.id = id;
-    newModel.position.set(x,y,z );
+    newModel.position.set(x,0,z );
     return newModel;
+  }
+
+  public createGhostPlayer(id: number | undefined, x: number, y: number,  z: number) {
+    const res = new THREE.Group();
+    const newModel = this.getModel('ghost').clone();
+    newModel.userData.id = id;
+    res.position.set(x,y,z);
+    newModel.name = "model";
+    res.add(newModel);
+    return res;
   }
 
     //Creates Ghost and positions it
   public createGhost(id: number, x: number, y: number, z: number) {
-    const newModel = this.getModel('snackman').clone();
+    const newModel = this.getModel('ghost').clone();
     newModel.userData.id = id;
-    newModel.position.set(x, y, z);
+    newModel.position.set(x, 0, z);
     return newModel;
   }
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
@@ -297,7 +316,7 @@ class ModelService {
     if (calories > 300) {
       newModel = this.getModel('brokkoli').clone();
     } else if (calories > 200) {
-      newModel = this.getModel('apple').clone();
+      newModel = this.getModel('cheese').clone();
     } else {
       newModel = this.getModel('cake').clone();
     }
