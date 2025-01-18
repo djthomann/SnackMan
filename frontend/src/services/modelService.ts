@@ -67,9 +67,9 @@ class ModelService {
       cake: 0.175,
       chicken: 1,
       brokkoli: 1,
-      snackman: 0.14,
-      player: 0.02,
-      ghost: 0.05
+      snackman: 0.12,
+      player: 0.12,
+      ghost: 0.11
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
@@ -80,7 +80,7 @@ class ModelService {
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_ftURL) }),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_bkURL) }),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_upURL) }),
-      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_dnURL) }),
+      new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_dnURL), transparent: true, opacity: 0}),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_rtURL) }),
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_lfURL) })
     ]
@@ -224,7 +224,7 @@ class ModelService {
     const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
     const skybox = new THREE.Mesh(skyboxGeo, this.skyBoxTextures);
     skybox.name = "skybox";
-    skybox.position.y = 0;
+    skybox.position.y = w/4/2;
     skybox.position.x = w/2;
     skybox.position.z = w/2;
 
@@ -283,7 +283,7 @@ class ModelService {
   }
 
   //Creates Snackman and positions it
-  public createSnackman(id: number, x: number, y: number, z: number, scale: number) {
+  public createSnackman(id: number, x: number, y: number, z: number) {
     const newModel = this.getModel('snackman').clone();
     newModel.userData.id = id;
     newModel.position.set(x,0,z );
@@ -291,7 +291,7 @@ class ModelService {
   }
 
     //Creates Ghost and positions it
-  public createGhost(id: number, x: number, y: number, z: number, scale: number) {
+  public createGhost(id: number, x: number, y: number, z: number) {
     const newModel = this.getModel('ghost').clone();
     newModel.userData.id = id;
     newModel.position.set(x, 0, z);
