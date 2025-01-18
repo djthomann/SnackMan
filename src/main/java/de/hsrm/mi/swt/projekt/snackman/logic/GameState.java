@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStateEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
@@ -53,7 +54,9 @@ public class GameState {
                                 new ArrayList<>(laidEggs),
                                 game.getRemainingSeconds()
                         );
-                        game.getGameManager().notifyChange(gameStateEvent);
+                        for(Client client : game.getClients()) {
+                            game.getGameManager().notifyChange(client, gameStateEvent);
+                        }
                         if(firstSend) {
                             firstSend = false;
                         }

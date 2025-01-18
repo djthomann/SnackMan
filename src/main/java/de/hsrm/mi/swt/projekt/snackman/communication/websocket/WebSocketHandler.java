@@ -223,7 +223,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * 
      * @param event said event
      */
-    public void notifyFrontend(Event event) {
+    public void notifyFrontend(Client client, Event event) {
 
         // JSON-Conversion
         GsonBuilder builder = new GsonBuilder();
@@ -231,21 +231,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String json;
 
         // TODO This is a temporary solution, clarify to which sessions events are sent back
-        for (WebSocketSession session : this.clients.keySet()) {
-            try {
-                json = gson.toJson(event);
-                // logger.info("Final JSON for event " + event.getType().toString() + ": " + json);
-                // Synchronize this block to avoid sending messages during invalid states (e.g.
-                // enables moving while jumping)
-                synchronized (session) {
-                    session.sendMessage(new TextMessage(event.getType().toString() + ";" + json));
-                }
-
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            json = gson.toJson(event);
+            // logger.info("Final JSON for event " + event.getType().toString() + ": " + json);
+            // Synchronize this block to avoid sending messages during invalid states (e.g.
+            // enables moving while jumping)
+            synchronized (client.getSession()) {
+                client.getSession().sendMessage(new TextMessage(event.getType().toString() + ";" + json));
             }
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
