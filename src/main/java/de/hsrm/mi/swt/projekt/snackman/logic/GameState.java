@@ -1,7 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStateEvent;
@@ -9,7 +8,10 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.ChickenRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.GhostRecord;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord;
 
 public class GameState {
 
@@ -19,6 +21,7 @@ public class GameState {
     private List<SnackManRecord> changedSnackMen;
     private List<ChickenRecord> changedChicken;
     private List<FoodRecord> eatenFoods;
+    private List<FoodRecord> laidEggs;
     private long lastSentTime;
     private boolean firstSend = true;
 
@@ -39,7 +42,7 @@ public class GameState {
                         this.interrupt();
                     }
                     if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
-                            || !eatenFoods.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
+                            || !eatenFoods.isEmpty() || !laidEggs.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
 
                         // clone lists to prevent concurrent modification
                         GameStateEvent gameStateEvent = new GameStateEvent(
@@ -47,6 +50,7 @@ public class GameState {
                                 new ArrayList<>(changedSnackMen),
                                 new ArrayList<>(changedChicken),
                                 new ArrayList<>(eatenFoods),
+                                new ArrayList<>(laidEggs),
                                 game.getRemainingSeconds()
                         );
                         game.getGameManager().notifyChange(gameStateEvent);
@@ -58,6 +62,7 @@ public class GameState {
                         changedSnackMen.clear();
                         changedChicken.clear();
                         eatenFoods.clear();
+                        laidEggs.clear();
                         lastSentTime = game.getRemainingSeconds();
                     }
                 }
@@ -77,6 +82,7 @@ public class GameState {
         this.changedSnackMen = new ArrayList<>();
         this.changedChicken = new ArrayList<>();
         this.eatenFoods = new ArrayList<>();
+        this.laidEggs = new ArrayList<>();
         GameStateThread thread = new GameStateThread();
         thread.start();
     }
@@ -99,6 +105,11 @@ public class GameState {
     public synchronized void addEatenFood(Food food) {
         eatenFoods.removeIf(record -> record.objectId() == food.getObjectId());
         eatenFoods.add(food.toRecord());
+    }
+
+    public synchronized void addLaidEgg(Food food) {
+        laidEggs.removeIf(record -> record.objectId() == food.getObjectId());
+        laidEggs.add(food.toRecord());
     }
 
     public List<GhostRecord> getChangedGhosts() {
@@ -131,6 +142,14 @@ public class GameState {
 
     public void setEatenFoods(List<FoodRecord> eatenFoods) {
         this.eatenFoods = eatenFoods;
+    }
+
+    public List<FoodRecord> getLaidEggs() {
+        return laidEggs;
+    }
+
+    public void setLaidEggs(List<FoodRecord> laidEggs) {
+        this.laidEggs = laidEggs;
     }
 
 }

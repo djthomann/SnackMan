@@ -30,6 +30,8 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
     private CollisionManager collisionManager;
     private final Logger logger = LoggerFactory.getLogger(Ghost.class);
 
+    private int numCollisions = 0;
+
     /**
      * Constructs a new `Ghost` with the specified starting position.
      *
@@ -57,9 +59,9 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
     @Override
     public void move(float newX, float newY, float newZ) {
         this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
-        x = newX;
-        y = newY;
-        z = newZ;
+        x += newX;
+        y += newY;
+        z += newZ;
         EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
@@ -93,8 +95,6 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
                 }
 
                 this.move(vector.x * gameConfig.getGhostStep(), 0, vector.z * gameConfig.getGhostStep());
-                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                gameManager.notifyChange(moveEvent);
 
             default:
                 break;
@@ -105,8 +105,20 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
     }
 
+    public int getNumCollisions() {
+        return numCollisions;
+    }
+
+    public void setNumCollisions(int numCollisions) {
+        this.numCollisions = numCollisions;
+    }
+
+    public void addCollision() {
+        numCollisions += 1;
+    }
+
     public GhostRecord toRecord() {
-        return new GhostRecord(gameId, objectId, getUsername(), x, y, z);
+        return new GhostRecord(gameId, objectId, getUsername(), numCollisions, x, y, z);
     }
 
     // String representation used for chickenssurroundings

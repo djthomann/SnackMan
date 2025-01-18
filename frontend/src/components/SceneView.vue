@@ -1,34 +1,31 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
+    <Transition name="fade" mode="out-in">
+      <LoadingOverlayComponent v-if="isLoading"></LoadingOverlayComponent>
+    </Transition>
     <GameOverlay ref="gameOverlayRef" />
-    <button id="startButton">play</button>
   </div>
+  <div id="clickable-container"></div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { defineComponent, onUnmounted, ref, onMounted, nextTick } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import type { Ghost, Snackman, Chicken } from '@/types/SceneTypes';
+import type { Ghost, Snackman, Chicken, Food } from '@/types/SceneTypes';
 import { useEntityStore } from '@/stores/entityStore';
 import { useGameStore } from '@/stores/gameStore';
 import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
-import skybox_ftURL from '@/assets/images/skybox/skybox_ft.png';
-import skybox_bkURL from '@/assets/images/skybox/skybox_bk.png';
-import skybox_upURL from '@/assets/images/skybox/skybox_up.png';
-import skybox_dnURL from '@/assets/images/skybox/skybox_dn.png';
-import skybox_lfURL from '@/assets/images/skybox/skybox_lf.png';
-import skybox_rtURL from '@/assets/images/skybox/skybox_rt.png';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { Mesh } from 'three';
 import GameOverlay from './GameOverlay.vue';
-
 import { Logger } from '../util/logger';
+import LoadingOverlayComponent from './layout/LoadingOverlayComponent.vue';
 import router from '@/router';
 
 // Groups of different map objects
@@ -37,49 +34,15 @@ let floorGroup: THREE.Group;
 let foodGroup: THREE.Group;
 let chickenGroup: THREE.Group;
 
-// Textures for Skybox
-const skyboxTextures: THREE.MeshBasicMaterial[] = [];
-const texture_ft = new THREE.TextureLoader().load(skybox_ftURL);
-texture_ft.colorSpace = THREE.SRGBColorSpace;
-const texture_bk = new THREE.TextureLoader().load(skybox_bkURL);
-texture_bk.colorSpace = THREE.SRGBColorSpace;
-const texture_up = new THREE.TextureLoader().load(skybox_upURL);
-texture_up.colorSpace = THREE.SRGBColorSpace;
-const texture_dn = new THREE.TextureLoader().load(skybox_dnURL);
-texture_dn.colorSpace = THREE.SRGBColorSpace;
-const texture_rt = new THREE.TextureLoader().load(skybox_rtURL);
-texture_rt.colorSpace = THREE.SRGBColorSpace;
-const texture_lf = new THREE.TextureLoader().load(skybox_lfURL);
-texture_lf.colorSpace = THREE.SRGBColorSpace;
-
-skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_ft }));
-skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_bk }));
-skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_up }));
-skyboxTextures.push(
-  new THREE.MeshBasicMaterial({
-    map: texture_dn,
-    transparent: true,
-    opacity: 0,
-  }),
-);
-skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_rt }));
-skyboxTextures.push(new THREE.MeshBasicMaterial({ map: texture_lf }));
-
-console.log('textures found', texture_ft.image); // Should not be null or undefined
-
 // mesh for walls
 let box: THREE.Mesh;
 
 const mapScale = 5;
 const wallHeight = 1 * mapScale;
 
-export default defineComponent({
-  components: {
-    GameOverlay,
-  },
-  name: 'SceneView',
-  setup() {
+
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
+    const isLoading = ref<boolean>(true);
 
     const { sendMessage } = useWebSocket();
 
@@ -100,6 +63,7 @@ export default defineComponent({
     const nameTags: NameTag[] = [];
     let gameID = 2;
     let startPromiseResolve: () => void;
+    let lastRotation: THREE.Vector3 = new THREE.Vector3();
 
     const logger = new Logger();
 
@@ -118,15 +82,15 @@ export default defineComponent({
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
 
-      if (message.startsWith('DISAPPEAR')) {
-        const food = JSON.parse(message.split(';')[1]);
-        makeDisappear(food.food.objectId);
-      } else if (message.startsWith('GAME_START')) {
+      if (message.startsWith('GAME_START')) {
         handleStartEvent(message.split(';')[1]);
         if (startPromiseResolve) {
           startPromiseResolve();
         }
       } else if (message.startsWith('GAME_STATE')) {
+        if(isLoading.value){
+          isLoading.value = false;
+        }
         handleGameStateEvent(message.split(';')[1]);
       } else if (message.startsWith('GAME_END')) {
         const code = route.params.code;
@@ -141,20 +105,33 @@ export default defineComponent({
       const parsedData = JSON.parse(message);
       gameStore.setRemainingTime(parsedData.remainingSeconds);
 
+      parsedData.eatenFoods.forEach((food: Food) => {
+        makeDisappear(food.objectId)
+      })
+
+      parsedData.laidEggs.forEach((food: Food) => {
+        logger.info(`Egg gets laid`)
+        makeAppear(food)
+      });
+
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
         if(snackman.objectId === userStore.id) {
           gameStore.setCalories(snackman.gainedCalories);
         }
         meshes
           .get(snackman.objectId)!
-          .position.set(snackman.x * mapScale, snackman.y * mapScale, snackman.z * mapScale);
+          .position.set(snackman.x * mapScale, snackman.y, snackman.z * mapScale);
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
+        if(ghost.objectId === userStore.id) {
+          gameStore.setCollisions(ghost.collisions)
+        }
         meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
       });
 
       parsedData.updatesChickens.forEach((chicken: Chicken) => {
+          resizeChicken(chicken.objectId, chicken.radius);
           move(chicken.objectId, chicken.x, chicken.y, chicken.z);
       });
     };
@@ -171,7 +148,6 @@ export default defineComponent({
       }
 
       });
-
       loadMap(map.value);
     };
 
@@ -180,6 +156,21 @@ export default defineComponent({
         startPromiseResolve = resolve;
       });
     };
+
+    function resizeChicken(id: number, radius: number) {
+      // logger.info('chicken with radius: ' + radius);
+
+      chickenGroup.children.forEach((chicken) => {
+        if(chicken.userData.id === id) {
+          // Update scale
+          chicken.scale.set(
+            radius * 32.5,
+            radius * 32,
+            radius * 32
+          );
+        }
+      })
+    }
 
     function move(id: number, x: number, y: number, z: number) {
       chickenGroup.children.forEach((chicken) => {
@@ -192,7 +183,8 @@ export default defineComponent({
             x * mapScale,
             y * mapScale,
             z * mapScale
-          );
+          )
+
           // Calculate and apply rotation
           if (moveX !== 0 || moveZ !== 0) {
             const rotationY = Math.atan2(moveX, moveZ);
@@ -231,7 +223,6 @@ export default defineComponent({
       // start Render-loop
       animate()
       logger.info('scene with gameID ' + gameID);
-
     });
 
     onUnmounted(() => {
@@ -294,19 +285,19 @@ export default defineComponent({
       snackMen.forEach((snackMan) => {
 
         if (snackMan.objectId == userStore.id) {
-          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
+          const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y, snackMan.z * mapScale);
           playerMesh.add(camera)
-          camera.position.set(0, mapScale, 0);
+          camera.position.set(0, mapScale / 2, 0);
           playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
-          snackMenGroup.add(playerMesh);
-        } else{
+          scene.add(playerMesh);
+        } else {
           const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
           // Add to snackMen group
-          snackMenGroup.add(snackManMesh);
+          scene.add(snackManMesh);
           meshes.set(snackMan.objectId, snackManMesh);
         }
       });
@@ -314,15 +305,25 @@ export default defineComponent({
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
 
-        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
-        const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
-        nameTags.push(ghostTag);
-        // Add to ghosts group
-        ghostsGroup.add(ghostMesh);
-        meshes.set(ghost.objectId, ghostMesh);
+        if (ghost.objectId == userStore.id) {
+          const ghostMesh = modelService.createGhostPlayer(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          ghostMesh.visible = false;
+          ghostMesh.add(camera)
+          camera.position.set(0, mapScale, 0);
+          ghostMesh.add(controls.object);
+          meshes.set(ghost.objectId, ghostMesh);
+          scene.add(ghostMesh);
+        } else {
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
+          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
+          nameTags.push(ghostTag);
+          // Add to ghosts group
+          scene.add(ghostMesh);
+          meshes.set(ghost.objectId, ghostMesh);
+        }
       });
       // Add groups to the scene
-      scene.add(snackMenGroup);
+      // scene.add(snackMenGroup);
       // scene.add(ghostsGroup);
     }
 
@@ -338,7 +339,7 @@ export default defineComponent({
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, Math.random() * 400 + 100, mapScale);
+            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, tile.food.calories, mapScale);
             food.userData.id = tile.food.objectId;
             foodGroup.add(food);
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
@@ -351,20 +352,8 @@ export default defineComponent({
       scene.add(foodGroup);
       scene.add(floorGroup);
 
-      // Skybox
-      for (let i = 0; i < 6; i++) {
-        skyboxTextures[i].side = THREE.BackSide;
-        skyboxTextures[i].transparent = true;
-      }
-      const skyboxGeo = new THREE.BoxGeometry(w, w/4, w)
-      const skybox = new THREE.Mesh(skyboxGeo, skyboxTextures);
-      skybox.name = "skybox";
-      logger.info('skybox position', skybox.position);
-      skybox.position.y = ((w/4)/2);
-      skybox.position.x = w/2;
-      skybox.position.z = w/2;
-      scene.add(skybox);
-
+      const skyBox = modelService.createSkybox(w);
+      scene.add(skyBox);
     }
 
     function makeDisappear(id: number) {
@@ -375,6 +364,14 @@ export default defineComponent({
           console.log(`food with Id ${id} disappeared juhu`);
         }
       });
+    }
+
+    function makeAppear(newFood: Food) {
+      const food = modelService.createFood(newFood.objectId, newFood.x, newFood.z, newFood.calories, mapScale);
+      food.userData.id = newFood.objectId;
+      foodGroup.add(food);
+      scene.remove(foodGroup)
+      scene.add(foodGroup)
     }
 
     function initScene() {
@@ -392,8 +389,9 @@ export default defineComponent({
       chickenGroup.name = "chicken";
 
       // Camera
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, mapScale * 1000);
       camera.position.set(0, 0, 0)
+      camera.getWorldDirection(lastRotation);
       // camera.lookAt(1, 1, 1);
 
       // Vectors
@@ -436,8 +434,8 @@ export default defineComponent({
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
-      const startButton = document.getElementById('startButton') as HTMLInputElement;
-      startButton.addEventListener(
+      const clickableContainer = document.getElementById('clickable-container') as HTMLInputElement;
+      clickableContainer.addEventListener(
         'click',
         function () {
           controls.lock();
@@ -447,11 +445,9 @@ export default defineComponent({
 
       // Hide and unhide start button
       controls.addEventListener('lock', () => {
-        startButton.classList.add('hidden'); // Button verstecken
       });
 
       controls.addEventListener('unlock', () => {
-        startButton.classList.remove('hidden'); // Button anzeigen
       });
 
       // TODO When entering a user name no move event should be sent to the backend
@@ -537,7 +533,6 @@ export default defineComponent({
     function animate() {
       requestAnimationFrame(animate);
 
-      // was not able to adapt this to not use old player object - sorry
       rotateBody();
       const time = Date.now() * 0.001;
 
@@ -572,7 +567,7 @@ export default defineComponent({
       const playerForward = new THREE.Vector3();
       camera.getWorldDirection(forward);
 
-      meshes.get(userStore.id!)!.getWorldDirection(playerForward);
+      meshes.get(userStore.id!)!.getObjectByName("model")!.getWorldDirection(playerForward);
       forward.normalize();
       playerForward.normalize();
 
@@ -589,7 +584,7 @@ export default defineComponent({
 
           // Player body facing forward
           if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
 
             // Player body facing forward-right
           } else if (
@@ -597,11 +592,11 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
 
             // Player body facing right
           } else if (angleYCameraDirection < -0.375) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
 
             // Player body facing backwards-right
           } else if (
@@ -609,7 +604,7 @@ export default defineComponent({
             angleYCameraDirection < -0.125 &&
             angleYCameraDirection > -0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               -Math.PI / 2 - Math.PI / 4,
               smoothingFactor,
@@ -621,7 +616,7 @@ export default defineComponent({
             angleYCameraDirection < 0.125 &&
             angleYCameraDirection > -0.125
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
 
             // Player body facing backwards-left
           } else if (
@@ -629,7 +624,7 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(
               currentAngle,
               Math.PI / 2 + Math.PI / 4,
               smoothingFactor,
@@ -637,7 +632,7 @@ export default defineComponent({
 
             // Player body facing left
           } else if (angleYCameraDirection > 0.375) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
 
             // Player body facing forward-left
           } else if (
@@ -645,21 +640,24 @@ export default defineComponent({
             angleYCameraDirection > 0.125 &&
             angleYCameraDirection < 0.375
           ) {
-            meshes.get(userStore.id!)!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
+            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
           }
         }
       }
     }
-
-    return {
-      rendererContainer,
-      serverMessage,
-    };
-  },
-});
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 html,
 body {
   margin: 0;
@@ -673,23 +671,14 @@ body {
   overflow: hidden;
 }
 
-#startButton {
+#clickable-container {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  z-index: 10;
-  display: block;
-}
-
-#startButton.hidden {
-  display: none;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 0;
+  opacity: 0;
+  z-index: 2;
 }
 </style>
