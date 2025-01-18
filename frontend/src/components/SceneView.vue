@@ -131,6 +131,11 @@ export default defineComponent({
       parsedData.eatenFoods.forEach((food: Food) => {
         makeDisappear(food.objectId)
       })
+      
+      parsedData.laidEggs.forEach((food: Food) => {
+        logger.info(`Egg gets laid`)
+        makeAppear(food)
+      });
 
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
         if(snackman.objectId === userStore.id) {
@@ -304,12 +309,12 @@ export default defineComponent({
         if (snackMan.objectId == userStore.id) {
           const playerMesh = modelService.createPlayer(userStore.id ,snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           playerMesh.add(camera)
-          camera.position.set(0, mapScale, 0);
+          camera.position.set(0, mapScale * 2, 0);
           playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
           scene.add(playerMesh);
-        } else{
-          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
+        } else {
+          const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale, mapScale);
           // Attach a NameTag
           const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
           nameTags.push(snackManTag);
@@ -321,13 +326,23 @@ export default defineComponent({
 
       // Iterate over ghosts and add them to the scene
       ghosts.forEach((ghost) => {
-
-        const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
-        const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
-        nameTags.push(ghostTag);
-        // Add to ghosts group
-        scene.add(ghostMesh);
-        meshes.set(ghost.objectId, ghostMesh);
+        if (ghost.objectId == userStore.id) {
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
+          ghostMesh.add(camera)
+          camera.position.set(0, mapScale * 2, 0);
+          ghostMesh.add(controls.object);
+          meshes.set(ghost.objectId, ghostMesh);
+          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
+          nameTags.push(ghostTag);
+          scene.add(ghostMesh);
+        } else {
+          const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale, mapScale);
+          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
+          nameTags.push(ghostTag);
+          // Add to ghosts group
+          scene.add(ghostMesh);
+          meshes.set(ghost.objectId, ghostMesh);
+        }
       });
       // Add groups to the scene
       // scene.add(snackMenGroup);
@@ -372,6 +387,14 @@ export default defineComponent({
           console.log(`food with Id ${id} disappeared juhu`);
         }
       });
+    }
+
+    function makeAppear(newFood: Food) {
+      const food = modelService.createFood(newFood.objectId, newFood.x, newFood.z, newFood.calories, mapScale);
+      food.userData.id = newFood.objectId;
+      foodGroup.add(food);
+      scene.remove(foodGroup)
+      scene.add(foodGroup)
     }
 
     function initScene() {
