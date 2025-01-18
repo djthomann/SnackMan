@@ -98,7 +98,7 @@ public class Game {
      * @param id said id
      */
     private void spawnGhost(long id, String username) {
-        Ghost ghost = new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0.5f, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager, this.collisionManager);
+        Ghost ghost = new Ghost(username, id, this.id, (float) map.getW() / 2.0f, 0, (float) map.getH() / 2.0f, this.gameConfig, this.gameManager, this.collisionManager);
         allMovables.add(ghost);
         map.getTileAt((int) ghost.getX(), (int) ghost.getZ()).addToOccupation(ghost);
     }
@@ -132,7 +132,7 @@ public class Game {
         x += 0.5f;
         z += 0.5f;
 
-        SnackMan snackMan = new SnackMan(username, id, this.id, x, 0.5f, z, this.gameManager, this.gameConfig, this.collisionManager); 
+        SnackMan snackMan = new SnackMan(username, id, this.id, x, 0, z, this.gameManager, this.gameConfig, this.collisionManager);
         allMovables.add(snackMan);
         map.getTileAt((int) x, (int) z).addToOccupation(snackMan);
         numSnackmen++;
@@ -220,7 +220,7 @@ public class Game {
             Tile tileOne = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
             if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupations().size() == 0) {
                 Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
-                0.0f, (float) tileOne.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileOne.getZ()+0.5f, "ChickenPersonalityOne", gameManager, gameConfig, collisionManager);
                 tileOne.addToOccupation(chickenOne);
                 allMovables.add(chickenOne);
             }
@@ -230,7 +230,7 @@ public class Game {
             Tile tileTwo = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) - 4);
             if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupations().size() == 0) {
                 Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileTwo.getX()+0.5f,
-                0.0f, (float) tileTwo.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileTwo.getZ()+0.5f, "ChickenPersonalityTwo", gameManager, gameConfig, collisionManager);
                 tileTwo.addToOccupation(chickenTwo);
                 allMovables.add(chickenTwo);
             }
@@ -240,7 +240,7 @@ public class Game {
             Tile tileThree = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) - 4);
             if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupations().size() == 0) {
                 Chicken chickenThree = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileThree.getX()+0.5f,
-                0.0f, (float) tileThree.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileThree.getZ()+0.5f, "ChickenPersonalityOne", gameManager, gameConfig, collisionManager);
                 tileThree.addToOccupation(chickenThree);
                 allMovables.add(chickenThree);
             }
@@ -250,7 +250,7 @@ public class Game {
             Tile tileFour = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) + 3);   
             if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupations().size() == 0) {
                 Chicken chickenFour = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileFour.getX()+0.5f,
-                0.0f, (float) tileFour.getZ()+0.5f, "one", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileFour.getZ()+0.5f, "ChickenPersonalityTwo", gameManager, gameConfig, collisionManager);
                 tileFour.addToOccupation(chickenFour);
                 allMovables.add(chickenFour);
             }
@@ -410,6 +410,9 @@ public class Game {
             newTile.addToOccupation(gameObject);
             oldTile.removeFromOccupation(gameObject); 
 
+            if(newTile.getOccupationType() == OccupationType.WALL || oldTile.getOccupationType() == OccupationType.WALL) {
+                return;
+            }
             // Item-occupationType should only be changed in collisionManager to make sure collision with food works
             if (newTile.getOccupationType() == OccupationType.ITEM) {
                 return; 
