@@ -1,7 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -22,8 +21,8 @@ public class CollisionManager {
     // Translation added to x- and z-values for correct depiction in frontend
     private final float TRANSLATION = 0.5f;
 
-    private final SnackManMap snackManMap;
-    private final ArrayList<MovableAndSubscribable> allMovables;
+    private SnackManMap snackManMap;
+    private ArrayList<MovableAndSubscribable> allMovables;
     Logger logger = LoggerFactory.getLogger(GameManager.class);
     private Game game;
     
@@ -41,19 +40,24 @@ public class CollisionManager {
      * 
      * @param wishedX The x-coordinate of the tile to check for collisions.
      * @param wishedZ The z-coordinate of the tile to check for collisions.
-     * @return List of The types of entity/object collided with, or "none" if no
+     * @return String of The type of entity/object collided with, or "none" if no
      *         collision is detected.
      */
     public synchronized ArrayList<CollisionType> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
         
         // Changed return type from string to array list as several collisions can happen at once, e.g. ghost and item
         ArrayList<CollisionType> collisions = new ArrayList<>();
+        collisions.clear();
         Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
 
         switch (wishedTile.getOccupationType()) {
             case WALL:
+                //logger.info(
+                    //collisionPartner.toString() + " and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 collisions.add(CollisionType.WALL);
             case ITEM:
+                // logger.info(
+                //         collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 if (collisionPartner instanceof SnackMan || collisionPartner instanceof Chicken) {
                     
                     Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
@@ -130,7 +134,8 @@ public class CollisionManager {
                         logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
                         logger.info("This Ghost: " + collisionPartner.getObjectId());
                         collisions.add(CollisionType.SNACKMAN);
-                        ((SnackMan)aktMovable).reactToGhostCollision();
+                        ((Ghost)collisionPartner).addCollision();
+                        ((SnackMan)aktMovable).reactToGhostCollision();;
                     }
 
                 }  
@@ -148,7 +153,12 @@ public class CollisionManager {
 
     public boolean positionInWall(float x, float z) {
         Tile tileAtPosition = snackManMap.getTileAt((int)x, (int)z);
-        return Objects.requireNonNull(tileAtPosition.getOccupationType()) == OccupationType.WALL;
+        switch(tileAtPosition.getOccupationType()) {
+            case WALL:
+                return true;
+            default:
+                return false;   
+        }
     }
 
     public Vector3f getResolveVector(float x, float z) {
@@ -183,7 +193,8 @@ public class CollisionManager {
         float dBottom = z;
         float dTop = 1 - z;
 
-        return new float[]{dLeft, dRight, dBottom, dTop};
+        float[] dist = {dLeft, dRight, dBottom, dTop};
+        return dist;
     }
 
     public Vector3f getUnitVectorToEdgeInUnitSquare(float x, float z) {
@@ -223,6 +234,8 @@ public class CollisionManager {
 
         /**
      * Calculates the difference in between two coordinates
+     * @param y1
+     * @param y2
      * @return heightDifference
      */
     private float calculateHeightDifference(float y1, float y2) {

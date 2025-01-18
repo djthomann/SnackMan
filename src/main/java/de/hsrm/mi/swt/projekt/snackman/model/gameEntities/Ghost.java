@@ -32,6 +32,8 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
     private final CollisionManager collisionManager;
     private final Logger logger = LoggerFactory.getLogger(Ghost.class);
 
+    private int numCollisions = 0;
+
     /**
      * Constructs a new `Ghost` with the specified starting position.
      *
@@ -98,8 +100,20 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
     }
 
+    public int getNumCollisions() {
+        return numCollisions;
+    }
+
+    public void setNumCollisions(int numCollisions) {
+        this.numCollisions = numCollisions;
+    }
+
+    public void addCollision() {
+        numCollisions += 1;
+    }
+
     public GhostRecord toRecord() {
-        return new GhostRecord(gameId, objectId, getUsername(), x, y, z);
+        return new GhostRecord(gameId, objectId, getUsername(), numCollisions, x, y, z);
     }
 
     // String representation used for chickenssurroundings

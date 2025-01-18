@@ -1,27 +1,31 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
+    <Transition name="fade" mode="out-in">
+      <LoadingOverlayComponent v-if="isLoading"></LoadingOverlayComponent>
+    </Transition>
     <GameOverlay ref="gameOverlayRef" />
   </div>
   <div id="clickable-container"></div>
 </template>
 
-<script lang="ts">
-import {defineComponent, nextTick, onMounted, onUnmounted, ref} from 'vue';
+<script setup lang="ts">
+import { defineComponent, onUnmounted, ref, onMounted, nextTick } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
-import {PointerLockControls} from 'three/examples/jsm/Addons.js';
+import { PointerLockControls } from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import type {Chicken, Food, Ghost, Snackman} from '@/types/SceneTypes';
-import {useEntityStore} from '@/stores/entityStore';
-import {useGameStore} from '@/stores/gameStore';
-import {storeToRefs} from 'pinia';
+import type { Ghost, Snackman, Chicken, Food } from '@/types/SceneTypes';
+import { useEntityStore } from '@/stores/entityStore';
+import { useGameStore } from '@/stores/gameStore';
+import { storeToRefs } from 'pinia';
 import NameTag from '@/services/nameTagService';
-import {useRoute} from 'vue-router';
-import {useUserStore} from '@/stores/userStore';
+import { useRoute } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
+import { Mesh } from 'three';
 import GameOverlay from './GameOverlay.vue';
-
-import {Logger} from '@/util/logger';
+import { Logger } from '../util/logger';
+import LoadingOverlayComponent from './layout/LoadingOverlayComponent.vue';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -33,15 +37,11 @@ let chickenGroup: THREE.Group;
 let box: THREE.Mesh;
 
 const mapScale = 5;
-const wallHeight = mapScale;
+const wallHeight = 1 * mapScale;
 
-export default defineComponent({
-  components: {
-    GameOverlay,
-  },
-  name: 'SceneView',
-  setup() {
+
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
+    const isLoading = ref<boolean>(true);
 
     const { sendMessage } = useWebSocket();
 
@@ -52,10 +52,12 @@ export default defineComponent({
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
+    let plane: THREE.Mesh;
     let ambientLight: THREE.AmbientLight;
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
+    let nameTag: NameTag;
     const animationMixers: THREE.AnimationMixer[] = [];
     const nameTags: NameTag[] = [];
     let gameID = 2;
@@ -79,12 +81,15 @@ export default defineComponent({
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
 
-    if (message.startsWith('GAME_START')) {
+      if (message.startsWith('GAME_START')) {
         handleStartEvent(message.split(';')[1]);
         if (startPromiseResolve) {
           startPromiseResolve();
         }
       } else if (message.startsWith('GAME_STATE')) {
+        if(isLoading.value){
+          isLoading.value = false;
+        }
         handleGameStateEvent(message.split(';')[1]);
       } else {
         logger.warn(`FE does not support message starting with ${message.split(";")[0]}`)
@@ -115,6 +120,9 @@ export default defineComponent({
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
+        if(ghost.objectId === userStore.id) {
+          gameStore.setCollisions(ghost.collisions)
+        }
         meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
       });
 
@@ -136,7 +144,6 @@ export default defineComponent({
       }
 
       });
-
       loadMap(map.value);
     };
 
@@ -176,7 +183,8 @@ export default defineComponent({
 
           // Calculate and apply rotation
           if (moveX !== 0 || moveZ !== 0) {
-            chicken.rotation.y = Math.atan2(moveX, moveZ);
+            const rotationY = Math.atan2(moveX, moveZ);
+            chicken.rotation.y = rotationY;
           }
         }
       })
@@ -340,9 +348,8 @@ export default defineComponent({
       scene.add(foodGroup);
       scene.add(floorGroup);
 
-      const skyTest = modelService.createSkybox(w);
-      scene.add(skyTest);
-
+      const skyBox = modelService.createSkybox(w);
+      scene.add(skyBox);
     }
 
     function makeDisappear(id: number) {
@@ -407,6 +414,20 @@ export default defineComponent({
       directionalLight.castShadow = true;
       scene.add(directionalLight);
 
+      // TODO: For testing, take out later
+      //const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
+      //const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
+      //const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
+      //ghostMesh.position.set(16.5 * mapScale, 0, 20.5 * mapScale)
+      //scene.add(ghostMesh)
+
+      // Dummy Cylinder in the Center to test the Measurements of the Models.
+      //const geometry = new THREE.CylinderGeometry(0.2 * mapScale, 0.2 * mapScale, 3, 32);
+      //const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+      //const cylinder = new THREE.Mesh(geometry, material);
+      //cylinder.position.set( 20.5 * mapScale , 0, 20.5 * mapScale );
+      //scene.add(cylinder);
+
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
       const clickableContainer = document.getElementById('clickable-container') as HTMLInputElement;
@@ -423,7 +444,6 @@ export default defineComponent({
       });
 
       controls.addEventListener('unlock', () => {
-        camera.rotation.set(0, 0, 0);
       });
 
       // TODO When entering a user name no move event should be sent to the backend
@@ -621,16 +641,19 @@ export default defineComponent({
         }
       }
     }
-
-    return {
-      rendererContainer,
-      serverMessage,
-    };
-  },
-});
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 html,
 body {
   margin: 0;
