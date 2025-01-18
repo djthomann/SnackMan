@@ -134,6 +134,7 @@ public class CollisionManager {
                         logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
                         logger.info("This Ghost: " + collisionPartner.getObjectId());
                         collisions.add(CollisionType.SNACKMAN);
+                        ((Ghost)collisionPartner).addCollision();
                         ((SnackMan)aktMovable).reactToGhostCollision();;
                     }
 
