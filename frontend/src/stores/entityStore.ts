@@ -49,7 +49,8 @@ export const useEntityStore = defineStore('entityStore', () => {
           x: Number(chicken.x),
           y: Number(chicken.y),
           z: Number(chicken.z),
-          gainedCalories: Number(chicken.gainedCalories)
+          gainedCalories: Number(chicken.gainedCalories),
+          radius: chicken.radius
         })
       })
 
