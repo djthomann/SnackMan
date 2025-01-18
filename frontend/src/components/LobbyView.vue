@@ -109,7 +109,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 import { useUserStore } from '@/stores/userStore';
@@ -120,6 +120,9 @@ import { Logger } from '../util/logger';
 import ConfigPanelComponent from './layout/ConfigPanelComponent.vue';
 import FieldsetComponent from './layout/FieldsetComponent.vue';
 import FetchMap from "@/components/FetchMap.vue";
+
+// TODO find and replace with similar free music because these songs are copyrighted
+import lobbyMusic from '@/assets/sounds/music/Lobby-music.mp3';
 
 const logger = new Logger();
 
@@ -138,6 +141,7 @@ const undecidedPlayers = ref<Array<Player>>([
   { id: 2, username: 'Bob' },
 ]);
 const selectedRole = ref<'SNACKMAN' | 'GHOST' | null>(null);
+const audio = new Audio(lobbyMusic);
 
 // Type definition of GameConfig interface
 interface GameConfig {
@@ -235,6 +239,10 @@ const decide = (snackman: boolean) => {
 
 // Automatic call on load
 onMounted(async () => {
+
+  // Start background music on load of the lobby view
+  audio.play();
+
   // Method, to wait until Connection is established
   const awaitConnection = () => {
     return new Promise((resolve) => {
@@ -243,6 +251,11 @@ onMounted(async () => {
       }, 1000);
     });
   };
+
+  //Stops the background music when leaving the lobby view
+  onBeforeUnmount(() => {
+    audio.pause();
+  });
 
   // Registration of EventBus
   eventBus.on('serverMessage', handleServerMessage);
@@ -291,6 +304,7 @@ const choose = (role: string) => {
   });
   sendMessage(message);
 };
+
 </script>
 
 <style scoped>

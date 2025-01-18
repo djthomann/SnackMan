@@ -34,8 +34,8 @@
     },
     methods: {
       initAudio() {
+
         this.listener = new THREE.AudioListener();
-  
         this.sound = new THREE.Audio(this.listener);
   
         // Lade die Audio-Datei

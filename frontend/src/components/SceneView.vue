@@ -2,7 +2,7 @@
   <div ref="rendererContainer" class="canvas-container">
     <GameOverlay ref="gameOverlayRef" />
     <button id="startButton">play</button>
-    <AudioPlayer ref="audioPlayer" :audioFile="'@/assets/sounds/'" :loop="true" :volume="0.5" />
+    <AudioPlayer  ref="audioPlayerRef" :audioFile="'@/assets/sounds/music/Game-music.mp3'" :loop="true" :volume="0.5" />
   </div>
 </template>
 
@@ -26,6 +26,9 @@ import AudioPlayer from './AudioPlayer.vue';
 
 import { Logger } from '../util/logger';
 
+// TODO find and replace with similar free music because these songs are copyrighted
+import gameMusic from '@/assets/sounds/music/Game-music.mp3';
+
 // Groups of different map objects
 let wallsGroup: THREE.Group;
 let floorGroup: THREE.Group;
@@ -40,10 +43,16 @@ const wallHeight = 1 * mapScale;
 
 export default defineComponent({
   components: {
+    AudioPlayer
   },
   name: 'SceneView',
   setup() {
+
+    // Background music
+    let sound: THREE.Audio<GainNode>;
+
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
+    const audioPlayerRef = ref<InstanceType<typeof AudioPlayer> | null>(null);
 
     const { sendMessage } = useWebSocket();
 
@@ -68,7 +77,7 @@ export default defineComponent({
     const logger = new Logger();
 
     // Sound stuff
-    const sounds = [];
+    /* const sounds = [];
     let foodSound1: THREE.Audio, foodSound2: THREE.Audio, collisionSound: THREE.Audio;
     const manager = new THREE.LoadingManager();
     manager.onLoad = () => console.log('sounds loaded');
@@ -91,10 +100,10 @@ export default defineComponent({
         sound.setVolume(0.5);
       }
       sounds.push(sound);
-      audioLoader.load(`src/assets/sounds/${name}.mp3`, function (buffer) {
+      audioLoader.load(`src/assets/sounds/soundeffects/${name}.mp3`, function (buffer) {
         sound.setBuffer(buffer);
       });
-    });
+    }); */
 
     //GameStart
     const entityStore = useEntityStore();
@@ -257,6 +266,8 @@ export default defineComponent({
         rendererContainer.value.removeChild(renderer.domElement);
       }
 
+      stopBackgroundMusic();
+
       window.removeEventListener('resize', onWindowResize);
     });
 
@@ -398,6 +409,8 @@ export default defineComponent({
     }
 
     function initScene() {
+
+
       // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x111111);
@@ -415,6 +428,8 @@ export default defineComponent({
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, mapScale * 1000);
       camera.position.set(0, 0, 0)
       // camera.lookAt(1, 1, 1);
+
+      startBackgroundMusic();
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -669,6 +684,25 @@ export default defineComponent({
           }
         }
       }
+    }
+
+    function startBackgroundMusic() {
+      const listener = new THREE.AudioListener();
+      camera.add(listener);
+
+      sound = new THREE.Audio(listener);
+
+      const audioLoader = new THREE.AudioLoader();
+      audioLoader.load( gameMusic, function( buffer ) {
+        sound.setBuffer(buffer);
+        sound.setLoop(true);
+        sound.setVolume( 0.5 );
+        sound.play();
+      });
+    }
+
+    function stopBackgroundMusic() {
+      sound.stop();
     }
 
     return {
