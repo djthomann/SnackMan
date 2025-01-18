@@ -8,8 +8,8 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 public class ScareEvent extends ApplicationEvent {
 
     private final GameManager gameManager;
-    private SnackMan scaredSnackMan;
-    private long gameId;
+    private final SnackMan scaredSnackMan;
+    private final long gameId;
 
     /**
      * Event that is called upon when a ghost collides with a snackman.

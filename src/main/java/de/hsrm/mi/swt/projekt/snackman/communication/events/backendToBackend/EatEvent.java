@@ -8,8 +8,8 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 public class EatEvent extends ApplicationEvent {
 
     private final GameManager gameManager;
-    private Food food;
-    private long gameId;
+    private final Food food;
+    private final long gameId;
 
     /**
      * Event that is called upon when a snackman collides with food.

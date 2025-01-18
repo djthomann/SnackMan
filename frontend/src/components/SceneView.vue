@@ -6,23 +6,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, ref, onMounted, nextTick } from 'vue';
+import {defineComponent, nextTick, onMounted, onUnmounted, ref} from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
-import { PointerLockControls } from 'three/examples/jsm/Addons.js';
+import {PointerLockControls} from 'three/examples/jsm/Addons.js';
 import modelService from '@/services/modelService';
-import type { Ghost, Snackman, Chicken, Food } from '@/types/SceneTypes';
-import { useEntityStore } from '@/stores/entityStore';
-import { useGameStore } from '@/stores/gameStore';
-import { storeToRefs } from 'pinia';
+import type {Chicken, Food, Ghost, Snackman} from '@/types/SceneTypes';
+import {useEntityStore} from '@/stores/entityStore';
+import {useGameStore} from '@/stores/gameStore';
+import {storeToRefs} from 'pinia';
 import NameTag from '@/services/nameTagService';
-import { useRoute } from 'vue-router';
-import { useUserStore } from '@/stores/userStore';
-import { Mesh } from 'three';
+import {useRoute} from 'vue-router';
+import {useUserStore} from '@/stores/userStore';
 import GameOverlay from './GameOverlay.vue';
 
-import { Logger } from '../util/logger';
+import {Logger} from '@/util/logger';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -34,7 +33,7 @@ let chickenGroup: THREE.Group;
 let box: THREE.Mesh;
 
 const mapScale = 5;
-const wallHeight = 1 * mapScale;
+const wallHeight = mapScale;
 
 export default defineComponent({
   components: {
@@ -53,12 +52,10 @@ export default defineComponent({
     let renderer: THREE.WebGLRenderer;
     let camera: THREE.PerspectiveCamera;
     let scene: THREE.Scene;
-    let plane: THREE.Mesh;
     let ambientLight: THREE.AmbientLight;
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
-    let nameTag: NameTag;
     const animationMixers: THREE.AnimationMixer[] = [];
     const nameTags: NameTag[] = [];
     let gameID = 2;
@@ -179,8 +176,7 @@ export default defineComponent({
 
           // Calculate and apply rotation
           if (moveX !== 0 || moveZ !== 0) {
-            const rotationY = Math.atan2(moveX, moveZ);
-            chicken.rotation.y = rotationY;
+            chicken.rotation.y = Math.atan2(moveX, moveZ);
           }
         }
       })
@@ -410,20 +406,6 @@ export default defineComponent({
       directionalLight.position.set(0, 2, 0);
       directionalLight.castShadow = true;
       scene.add(directionalLight);
-
-      // TODO: For testing, take out later
-      //const ghostGeomatry = new THREE.CylinderGeometry(0.35 * mapScale, 0.35 * mapScale, 0.75 * mapScale);
-      //const ghostMaterial = new THREE.MeshToonMaterial({ color: 0xff0000 });
-      //const ghostMesh = new THREE.Mesh(ghostGeomatry, ghostMaterial);
-      //ghostMesh.position.set(16.5 * mapScale, 0, 20.5 * mapScale)
-      //scene.add(ghostMesh)
-
-      // Dummy Cylinder in the Center to test the Measurements of the Models.
-      //const geometry = new THREE.CylinderGeometry(0.2 * mapScale, 0.2 * mapScale, 3, 32);
-      //const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-      //const cylinder = new THREE.Mesh(geometry, material);
-      //cylinder.position.set( 20.5 * mapScale , 0, 20.5 * mapScale );
-      //scene.add(cylinder);
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
