@@ -41,27 +41,14 @@ const seconds = computed(() => gameStore.remainingTime);
 const calories = computed(() => gameStore.calories);
 const collisions = computed(() => gameStore.collisions);
 
-const toggleVisibility = () => {
+const toggleMenuVisibility = () => {
   menuVisible.value = !menuVisible.value;
-};
-
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key == 'Escape') {
-    toggleVisibility();
-  }
 };
 
 const props = defineProps({
   childRef: Object,
 });
 
-onMounted(() => {
-  window.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
-});
 </script>
 
 <style scoped>
