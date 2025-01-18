@@ -15,7 +15,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord
 
 public class GameState {
 
-    private Game game;
+    private final Game game;
 
     private List<GhostRecord> changedGhosts;
     private List<SnackManRecord> changedSnackMen;
@@ -26,7 +26,7 @@ public class GameState {
     private boolean firstSend = true;
 
     /**
-     * synchronized (chnages to gamestate variables need to be declared to all
+     * synchronized (changes to game state variables need to be declared to all
      * threads) thread that sends out gamestateevent
      * and then clears all lists every 1/30 seconds while uninterrupted.
      */

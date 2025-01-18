@@ -10,7 +10,7 @@ public class Client {
 
     Logger logger = LoggerFactory.getLogger(Client.class);
 
-    private long clientId;
+    private final long clientId;
 
     private String username;
     private GameObjectType role;
@@ -74,11 +74,8 @@ public class Client {
             return false;
         Client other = (Client) obj;
         if (session == null) {
-            if (other.session != null)
-                return false;
-        } else if (!session.equals(other.session))
-            return false;
-        return true;
+            return other.session == null;
+        } else return session.equals(other.session);
     }
 
     @Override
