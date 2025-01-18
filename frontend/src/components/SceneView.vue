@@ -28,6 +28,7 @@ import { Logger } from '../util/logger';
 
 // TODO find and replace with similar free music because these songs are copyrighted
 import gameMusic from '@/assets/sounds/music/Game-music.mp3';
+import chickenCackle from '@/assets/sounds/soundeffects/chicken.mp3';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -48,8 +49,10 @@ export default defineComponent({
   name: 'SceneView',
   setup() {
 
-    // Background music
-    let sound: THREE.Audio<GainNode>;
+    // Background music and other sounds
+    let backgroundSound: THREE.Audio<GainNode>;
+    const listener = new THREE.AudioListener();
+    let chickenAudios: THREE.PositionalAudio[] = [];
 
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
     const audioPlayerRef = ref<InstanceType<typeof AudioPlayer> | null>(null);
@@ -267,6 +270,7 @@ export default defineComponent({
       }
 
       stopBackgroundMusic();
+      stopChickenSounds();
 
       window.removeEventListener('resize', onWindowResize);
     });
@@ -285,6 +289,7 @@ export default defineComponent({
     function loadChickens(chickens: Chicken[]) {
       chickens.forEach(newChicken => {
         const chicken = modelService.createChicken(newChicken.objectId, newChicken.x * mapScale, newChicken.z * mapScale);
+
         chickenGroup.add(chicken);
 
         const chickenMixer = new THREE.AnimationMixer(chicken);
@@ -300,6 +305,23 @@ export default defineComponent({
         // Mixer is stored in a global list, so that it can be used in the update-loop
         animationMixers.push(chickenMixer);
       });
+
+      // Load chicken sound for each chicken
+      const audioLoader = new THREE.AudioLoader();
+
+      audioLoader.load(chickenCackle, function (buffer) {
+
+        chickenGroup.children.forEach(chicken => {
+          const audio = new THREE.PositionalAudio(listener);
+          audio.setBuffer(buffer);
+          audio.setLoop(true);
+          audio.setVolume(5);
+          audio.play();
+          chicken.add(audio);
+          chickenAudios.push(audio);
+        });
+       });
+
       scene.add(chickenGroup);
     }
 
@@ -427,6 +449,7 @@ export default defineComponent({
       // Camera
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, mapScale * 1000);
       camera.position.set(0, 0, 0)
+      camera.add(listener);
       // camera.lookAt(1, 1, 1);
 
       startBackgroundMusic();
@@ -687,22 +710,26 @@ export default defineComponent({
     }
 
     function startBackgroundMusic() {
-      const listener = new THREE.AudioListener();
-      camera.add(listener);
 
-      sound = new THREE.Audio(listener);
+      backgroundSound = new THREE.Audio(listener);
 
       const audioLoader = new THREE.AudioLoader();
       audioLoader.load( gameMusic, function( buffer ) {
-        sound.setBuffer(buffer);
-        sound.setLoop(true);
-        sound.setVolume( 0.5 );
-        sound.play();
+        backgroundSound.setBuffer(buffer);
+        backgroundSound.setLoop(true);
+        backgroundSound.setVolume( 0.5 );
+        backgroundSound.play();
       });
     }
 
     function stopBackgroundMusic() {
-      sound.stop();
+      backgroundSound.stop();
+    }
+
+    function stopChickenSounds() {
+      chickenAudios.forEach((audio => {
+        audio.stop();
+      }));
     }
 
     return {
