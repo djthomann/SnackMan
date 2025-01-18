@@ -1,46 +1,23 @@
 <template>
-  <!--
-  <div v-if="gameData">
-    <h1>Congrats! {{ gameData.winningTeam }} Won!</h1>
-    <div>
-      <div>
-        <h2>Winner</h2>
-        <p>Cheese Thief of the Month</p>
-        <p>{{ gameData.winnerName }}</p>
-        <p>{{ gameData.winnerCaloryCount }}</p>
-      </div>
-      <div>
-        <button type="button">Save Map</button>
-        <button type="button" @click="toLobby">Back To Lobby</button>
-      </div>
-    </div>
-    <div>
-      <h2>Receipt</h2>
-      <ul>
-        <li v-for="player in gameData.players">
-          <b>{{ player.username }}</b>
-          <p>{{ player.score }}</p>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div v-else>
-    <p>Loading Results...</p>
-  </div>
-  -->
   <div class="lobby-grid-wrapper">
-
     <div class="background-component">
-    <BackgroundComponent :title="`Congrats! Snackman Won!`"></BackgroundComponent>
+      <BackgroundComponent :title="`Congrats! ${gameData.winnerName} Won!`"></BackgroundComponent>
     </div>
 
+    <!--Content for when one of the Snackmen wins-->
+    <div v-if="gameData.winningTeam == 'snackman'">
       <div class="lobby-grid">
-
+        <!--Shows the Player that won-->
         <div class="player-panel">
           <PlayerPanelComponent avatar="snackman" variant="white">
-            <template #button>Insert Button Component</template>
-            <template #content>Snacko<br><strong>123456789 CAL</strong></template>
+            <template #button>
+              <h3>Winner</h3>
+              <p>Cheese Thief of the Month</p>
+            </template>
+            <template #content>
+              <p>{{ gameData.winnerName }}</p>
+              <h3>{{ gameData.winnerCaloryCount }} CAL</h3>
+            </template>
           </PlayerPanelComponent>
           <div>
             <button>Save Map</button>
@@ -50,16 +27,107 @@
           </div>
         </div>
 
+        <!--Shows the Ghost Team-->
         <div class="ghost-panel">
-          <GhostPanelComponent></GhostPanelComponent>
+          <GhostPanelComponent>
+            <template #ghost-list>
+              <li
+                v-for="(player, index) in gameData.players?.filter(
+                  (player) => player.role === 'ghost',
+                )"
+                :key="index"
+                class="ghostpanel__item"
+              >
+                <img src="@/assets/images/avatars/avatar_ghost.svg" />
+                <h3>{{ player.username }}</h3>
+              </li>
+            </template>
+          </GhostPanelComponent>
+        </div>
+      </div>
+
+      <!--Shows the Snackman Team with Scores-->
+      <div class="recipe-grid">
+        <ReceiptComponent>
+          <template #receipt-list>
+            <li
+              v-for="(player, index) in gameData.players?.filter(
+                (player) => player.role === 'snackman',
+              )"
+              :key="index"
+              class="receiptpanel__item"
+            >
+              <span class="player-name">{{ player.username }}</span>
+              <div class="seperation-line"></div>
+              <span>{{ player.score }} Kalorien</span>
+            </li>
+          </template>
+        </ReceiptComponent>
+      </div>
+    </div>
+
+    <!--Content for when the Ghost Team wins-->
+    <div v-if="gameData.winningTeam == 'ghost'">
+      <div class="lobby-grid">
+        <!--Content for the Snackman that didn't win-->
+        <div class="player-panel">
+          <PlayerPanelComponent avatar="snackman" variant="white">
+            <template #button>
+              <h3>Winner</h3>
+              <p>Cheese Thief of the Month</p>
+            </template>
+            <template #content>
+              <p>{{ gameData.winnerName }}</p>
+              <h3>{{ gameData.winnerCaloryCount }} CAL</h3>
+            </template>
+            <div class="avatar-overlay">
+              <img src="@/assets/images/avatars/ghost_graffiti.png" />
+            </div>
+          </PlayerPanelComponent>
+          <div>
+            <button>Save Map</button>
+          </div>
+          <div>
+            <button>Back to Lobby</button>
+          </div>
         </div>
 
+        <div class="ghost-panel__ghostWon">
+          <GhostPanelComponent>
+            <template #ghost-list>
+              <li
+                v-for="(player, index) in gameData.players?.filter(
+                  (player) => player.role === 'ghost',
+                )"
+                :key="index"
+                class="ghostpanel__item"
+              >
+                <img src="@/assets/images/avatars/avatar_ghost.svg" />
+                <h3>{{ player.username }}</h3>
+              </li>
+            </template>
+          </GhostPanelComponent>
+        </div>
       </div>
 
-      <div class="recipe-grid">
-        <ReceiptComponent></ReceiptComponent>
+      <div class="recipe-grid__ghostWon">
+        <ReceiptComponent>
+          <template #receipt-list>
+            <li
+              v-for="(player, index) in gameData.players?.filter(
+                (player) => player.role === 'snackman',
+              )"
+              :key="index"
+              class="receiptpanel__item"
+            >
+              <span class="player-name">{{ player.username }}</span>
+              <div class="seperation-line"></div>
+              <span>{{ player.score }} Kalorien</span>
+            </li>
+          </template>
+        </ReceiptComponent>
       </div>
-    
+    </div>
   </div>
 </template>
 
@@ -73,7 +141,7 @@ import ReceiptComponent from './layout/ReceiptComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 import GhostPanelComponent from './layout/GhostPanelComponent.vue';
 // TODO: Testdata, delete later
-// import testData from '@/assets/testData.json';
+import testData from '@/assets/testdata.json';
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
@@ -121,7 +189,7 @@ onMounted(async () => {
   eventBus.on('serverMessage', handleServerMessage);
 
   // TODO: Testing purposes, delete this line later
-  // gameData.value = testData;
+  gameData.value = testData;
 
   try {
     await awaitConnection();
@@ -143,12 +211,13 @@ const toLobby = () => {
 </script>
 
 <style scoped>
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
-} 
+}
 .lobby-grid-wrapper {
   position: relative;
   display: flex;
@@ -190,15 +259,91 @@ html, body {
   margin-bottom: -15px;
 }
 
+.recipe-grid__ghostWon {
+  position: fixed;
+  bottom: 0;
+  left: calc(60%);
+  width: 400px;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+  z-index: 10;
+  overflow-y: auto;
+  margin-bottom: -15px;
+}
+
+.receiptpanel__item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.seperation-line {
+  flex-grow: 1;
+  border-bottom: 3px dotted;
+  margin: 0 5px 5px;
+}
+
 .player-panel {
   padding-left: 200px;
+  height: 80%;
   grid-column: 1;
   z-index: 2;
 }
-.ghost-panel{
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.avatar-overlay img {
+  position: absolute;
+  top: -20px;
+  z-index: 1;
+  width: 50px;
+  height: 50px;
+}
+
+.ghost-panel {
   padding-right: 100px;
   grid-column: 3;
   z-index: 2;
+}
+
+.ghost-panel__ghostWon {
+  padding-right: 100px;
+  grid-column: 2;
+  z-index: 2;
+}
+
+.ghostpanel__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.player-name {
+  color: #ff8c00;
+  font-weight: 500;
+}
+
+h3 {
+  text-align: center;
+}
+
+p {
+  text-align: center;
+  font-size: 12pt;
 }
 
 button {
@@ -209,7 +354,7 @@ button {
   border-width: 5px;
   border-color: white;
   border-radius: 10px;
-  font-family: "Lilita One", "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  font-family: 'Lilita One', 'Helvetica Neue', Helvetica, Arial, 'Segoe UI', sans-serif;
   padding: 5%;
   margin-top: 15px;
   transition-duration: 0.4s;
@@ -219,5 +364,4 @@ button:hover {
   background-color: var(--colorTertiary);
   box-shadow: 10px 10px var(--colorShadow);
 }
-
 </style>
