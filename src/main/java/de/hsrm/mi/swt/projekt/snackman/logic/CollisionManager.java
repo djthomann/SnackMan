@@ -146,6 +146,24 @@ public class CollisionManager {
         return collisions;
     }
 
+    public boolean isBetweenWalls (float x, float z) {
+        boolean stuck = false; 
+        Tile rightTile = snackManMap.getTileAt((int) x + 1, (int) z); 
+        Tile leftTile = snackManMap.getTileAt((int) x - 1, (int) z); 
+
+        Tile upTile = snackManMap.getTileAt((int) x, (int) z + 1);
+        Tile downTile = snackManMap.getTileAt((int) x, (int) z - 1); 
+
+        if (rightTile.getOccupationType() == OccupationType.WALL && leftTile.getOccupationType() == OccupationType.WALL) {
+            stuck = true;; 
+        }
+        if (upTile.getOccupationType() == OccupationType.WALL && downTile.getOccupationType() == OccupationType.WALL) {
+            stuck = true; 
+        }      
+        return stuck; 
+
+    }
+    
     public boolean positionIsWithinMapBounds(float x, float z) {
         return snackManMap.positionIsWithinMapBounds(x, z);
     }

@@ -215,8 +215,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         float maxRadius = gameConfig.getChickenMaxRadius(); 
         float maxCalories = gameConfig.getChickenMaxCalories(); 
         this.radius = minRadius + (maxRadius - minRadius) * Math.min((float) gainedCalories / maxCalories, 1.0f);
+        boolean stuck = collisionManager.isBetweenWalls(x, z); 
 
-        if(radius >= maxRadius) {
+        if(radius >= maxRadius && stuck) {
             stopMovementTemporarily(minRadius);
         }
     }
@@ -233,7 +234,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             public void run() {
                 movementPaused = false; 
                 radius = minRadius; 
-                gainedCalories = 0;
+                resetGainedCalories();
                 layEgg();
             }
         }, 5000); // paused for 5 seconds
