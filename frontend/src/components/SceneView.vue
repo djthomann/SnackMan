@@ -1,8 +1,8 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
     <GameOverlay ref="gameOverlayRef" />
-    <button id="startButton">play</button>
   </div>
+  <div id="clickable-container"></div>
 </template>
 
 <script lang="ts">
@@ -427,8 +427,8 @@ export default defineComponent({
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
-      const startButton = document.getElementById('startButton') as HTMLInputElement;
-      startButton.addEventListener(
+      const clickableContainer = document.getElementById('clickable-container') as HTMLInputElement;
+      clickableContainer.addEventListener(
         'click',
         function () {
           controls.lock();
@@ -438,11 +438,9 @@ export default defineComponent({
 
       // Hide and unhide start button
       controls.addEventListener('lock', () => {
-        startButton.classList.add('hidden'); // Button verstecken
       });
 
       controls.addEventListener('unlock', () => {
-        startButton.classList.remove('hidden'); // Button anzeigen
         camera.rotation.set(0, 0, 0);
       });
 
@@ -664,23 +662,14 @@ body {
   overflow: hidden;
 }
 
-#startButton {
+#clickable-container {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  z-index: 10;
-  display: block;
-}
-
-#startButton.hidden {
-  display: none;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 0;
+  opacity: 0;
+  z-index: 2;
 }
 </style>
