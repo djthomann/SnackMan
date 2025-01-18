@@ -410,6 +410,9 @@ public class Game {
             newTile.addToOccupation(gameObject);
             oldTile.removeFromOccupation(gameObject); 
 
+            if(newTile.getOccupationType() == OccupationType.WALL || oldTile.getOccupationType() == OccupationType.WALL) {
+                return;
+            }
             // Item-occupationType should only be changed in collisionManager to make sure collision with food works
             if (newTile.getOccupationType() == OccupationType.ITEM) {
                 return; 
