@@ -1,11 +1,11 @@
 <template>
   <div class="lobby-grid-wrapper">
-    <div class="background-component">
-      <BackgroundComponent :title="`Congrats! ${gameData.winnerName} Won!`"></BackgroundComponent>
-    </div>
-
+    
     <!--Content for when one of the Snackmen wins-->
     <div v-if="gameData.winningTeam == 'snackman'">
+      <div class="background-component">
+        <BackgroundComponent :title="`Congrats! ${gameData.winnerName} Won!`"></BackgroundComponent>
+      </div>
       <div class="lobby-grid">
         <!--Shows the Player that won-->
         <div class="player-panel">
@@ -34,7 +34,7 @@
               <li
                 v-for="(player, index) in gameData.players?.filter(
                   (player) => player.role === 'ghost',
-                )"
+                  )"
                 :key="index"
                 class="ghostpanel__item"
               >
@@ -68,6 +68,9 @@
 
     <!--Content for when the Ghost Team wins-->
     <div v-if="gameData.winningTeam == 'ghost'">
+      <div class="background-component">
+        <BackgroundComponent :title="`Oh No! Ghosts Won!`"></BackgroundComponent>
+      </div>
       <div class="lobby-grid">
         <!--Content for the Snackman that didn't win-->
         <div class="player-panel">
@@ -80,9 +83,13 @@
               <p>{{ gameData.winnerName }}</p>
               <h3>{{ gameData.winnerCaloryCount }} CAL</h3>
             </template>
-            <div class="avatar-overlay">
-              <img src="@/assets/images/avatars/ghost_graffiti.png" />
-            </div>
+
+            <!--Graffiti Overlay-->
+            <template #avatar-overlay>
+              <div class="avatar-overlay">
+                <img src="@/assets/images/avatars/ghost_graffiti.png" />
+              </div>
+            </template>
           </PlayerPanelComponent>
           <div>
             <button>Save Map</button>
@@ -234,6 +241,13 @@ body {
   z-index: 0;
 }
 
+.background-component :deep(.background__title) {
+  text-align: center;
+  width: 1000px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .lobby-grid {
   position: relative;
   display: grid;
@@ -307,10 +321,10 @@ body {
 
 .avatar-overlay img {
   position: absolute;
-  top: -20px;
+  top: 110px;
   z-index: 1;
-  width: 50px;
-  height: 50px;
+  width: 225px;
+  height: 310px;
 }
 
 .ghost-panel {
