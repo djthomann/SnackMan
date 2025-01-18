@@ -45,15 +45,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         @Override
         public void run() {
 
-            //logger.info("\n \nChicken with id " + objectId + " has passively gained calories");
-            //logger.info(objectId + " previous calories: " + gainedCalories);
             if(!movementPaused) {
                 gainedCalories += passiveCalorieGain;
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
                 updateRadius();            
             }
-
-            // logger.info(objectId + " current calories: " + gainedCalories);        
         }
     };
     private transient Timer passiveCaloriesTimer;
@@ -268,12 +264,12 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     @Override
-public void handle(Event event) {
-    if (event == null || event.getObjectID() != this.objectId) {
-        return;
+    public void handle(Event event) {
+        if (event == null || event.getObjectID() != this.objectId) {
+            return;
+        }
+        //logger.info("Event received for object ID {}: {}", this.objectId, event);
     }
-    //logger.info("Event received for object ID {}: {}", this.objectId, event);
-}
 
     public ChickenRecord toRecord() {
         return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories, radius);
