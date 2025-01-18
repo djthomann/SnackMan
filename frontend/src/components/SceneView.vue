@@ -2,6 +2,7 @@
   <div ref="rendererContainer" class="canvas-container">
     <GameOverlay ref="gameOverlayRef" />
   </div>
+  <div id="clickable-container"></div>
 </template>
 
 <script lang="ts">
@@ -425,7 +426,8 @@ export default defineComponent({
 
       // PointerLock Controls
       controls = new PointerLockControls(camera, renderer.domElement);
-      renderer.domElement.addEventListener(
+      const clickableContainer = document.getElementById('clickable-container') as HTMLInputElement;
+      clickableContainer.addEventListener(
         'click',
         function () {
           controls.lock();
@@ -653,7 +655,13 @@ body {
 }
 
 #clickable-container {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
+  background: 0;
+  opacity: 0;
+  z-index: 2;
 }
 </style>
