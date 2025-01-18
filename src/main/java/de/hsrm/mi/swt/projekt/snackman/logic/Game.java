@@ -325,6 +325,9 @@ public class Game {
      * @return The ID of the player with the highest score.
      */
     private long determineWinner(Map<Long, Integer> scores) {
+
+        logger.info("Given Scores: " + scores.toString());
+
         long winnerId = -1;
         int highestScore = Integer.MIN_VALUE;
         for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
@@ -337,20 +340,44 @@ public class Game {
     }
 
     private void sendGameEndEvent() {
-        // Calculate scores
+        // Create Hashmap for Scores
         Map<Long, Integer> scores = new HashMap<>();
 
+        // Determine lobby (works)
+        Lobby lobby = this.gameManager.getLobbyById(this.id);
+
+        if(lobby != null) {
+            logger.info("Lobby found with id: " + lobby.getId());
+        }
+        
+        // Determine clients (works)
+        List<Client> clientsAsList = lobby.getClientsAsList();
+        
+        for (Client c : clientsAsList) {
+            logger.info("Client in Lobby: " + c.toString());
+        }
+
+        /* 
+        // TODO For some reason, the changedSnackMen are empty
         for (SnackManRecord snackManRecord : this.gameState.getChangedSnackMen()){
             long id = snackManRecord.objectId();
             int gainedCalories = snackManRecord.gainedCalories();
             scores.put(id, gainedCalories);
         }
 
-        // Create content for GameEndEvent
-        Lobby lobby = this.gameManager.getLobbyById(this.id);
-        List<Client> clientsAsList = lobby.getClientsAsList();
+        if (scores.isEmpty()) {
+            logger.info("No scores found");
+        }
+        */
+
+        // Mock scores
+        scores.put((long)2, 500);
 
         long winnerId = determineWinner(scores);
+
+        // does it calculate the winner correctly?
+        logger.info("Winner Client ID: " + winnerId);
+
         String winnerName = lobby.getClient(winnerId).getUsername();
         String winnerTeam = lobby.getClient(winnerId).getRole().toString();
         int winnerCaloryCount = scores.get(winnerId);
