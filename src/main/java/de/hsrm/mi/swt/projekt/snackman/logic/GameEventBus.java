@@ -11,7 +11,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
  */
 public class GameEventBus {
 
-    private ArrayList<Subscribable> subscribers;
+    private final ArrayList<Subscribable> subscribers;
 
     public GameEventBus(ArrayList<Subscribable> subscribers) {
         this.subscribers = subscribers;
@@ -20,9 +20,9 @@ public class GameEventBus {
     /**
      * Registers a new subscriber who gets notified about events
      * 
-     * @param newSubscriber
+     * @param newSubscriber subscriber to be added
      */
-    public void registerSubcriber(Subscribable newSubscriber) {
+    public void registerSubscriber(Subscribable newSubscriber) {
         this.subscribers.add(newSubscriber);
     }
 
@@ -30,7 +30,7 @@ public class GameEventBus {
      * Notifies all subscribers about the new event
      * The subscribers handle the event individually
      * 
-     * @param event
+     * @param event event to be sent
      */
     public void sendEventToSubscribers(Event event) {
 
