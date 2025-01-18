@@ -2,6 +2,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import bananaModelUrl from '@/assets/models/banana.glb';
 import appleModelUrl from '@/assets/models/apple.glb';
+import cheeseModelUrl from '@/assets/models/cheese.glb';
 import orangeModelUrl from '@/assets/models/orange.glb';
 import cakeModelUrl from '@/assets/models/cake.glb';
 import chickenModelUrl from '@/assets/models/chicken.glb';
@@ -49,6 +50,7 @@ class ModelService {
     this.models = {
       banana: bananaModelUrl,
       apple: appleModelUrl,
+      cheese: cheeseModelUrl,
       orange: orangeModelUrl,
       cake: cakeModelUrl,
       chicken: chickenModelUrl,
@@ -60,6 +62,7 @@ class ModelService {
     this.scales = {
       banana: 0.02,
       apple: 0.1,
+      cheese: 0.12,
       orange: 0.0025,
       cake: 0.175,
       chicken: 1,
@@ -300,7 +303,7 @@ class ModelService {
     if (calories > 300) {
       newModel = this.getModel('brokkoli').clone();
     } else if (calories > 200) {
-      newModel = this.getModel('apple').clone();
+      newModel = this.getModel('cheese').clone();
     } else {
       newModel = this.getModel('cake').clone();
     }
