@@ -402,9 +402,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     if (collisions.contains(CollisionType.WALL)) {
                         vector.x = 0.0f;
                         vector.z = 0.0f;
-                    } else if (collisions.contains(CollisionType.ITEM)) {
-                        logger.info("MMMMMM delicious ");
-                    }
+                    } 
                 }
 
             }

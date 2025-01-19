@@ -1,7 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -9,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
@@ -157,6 +155,7 @@ public class CollisionManager {
                                 case Chicken c -> {
                                     logger.info("Collision between Ghost #" + g1.getObjectId() + "and Chicken #"
                                             + c.getObjectId());
+                                    collisions.add(CollisionType.CHICKEN);
                                 }
                                 default -> logger.error("Collision Partner is not a Movable!");
                             }
@@ -168,14 +167,17 @@ public class CollisionManager {
                                 case SnackMan s -> {
                                     logger.info("Collision between Chicken #" + c1.getObjectId() + "and Snackman #"
                                             + s.getObjectId());
+                                    collisions.add(CollisionType.SNACKMAN);
                                 }
                                 case Ghost g -> {
                                     logger.info("Collision between Chicken #" + c1.getObjectId() + "and Ghost #"
                                             + g.getObjectId());
+                                    collisions.add(CollisionType.GHOST);
                                 }
                                 case Chicken c2 -> {
                                     logger.info("Collision between Chicken #" + c1.getObjectId() + "and Chicken #"
                                             + c2.getObjectId());
+                                    collisions.add(CollisionType.CHICKEN);
                                 }
                                 default -> logger.error("Collision Partner is not a Movable!");
                             }
