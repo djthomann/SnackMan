@@ -125,10 +125,9 @@ public class CollisionManager {
         for (MovableAndSubscribable collisionPartner : this.allMovables) {
 
             if (collisionPartner != currentObject) {
-
-                float distance = calculateDistance(wishedX, ((GameObject) collisionPartner).getX() + TRANSLATION,
+                float distance = calculateDistance(wishedX, ((GameObject) collisionPartner).getX(),
                         wishedZ,
-                        ((GameObject) collisionPartner).getZ() + TRANSLATION);
+                        ((GameObject) collisionPartner).getZ());
 
                 switch (currentObject) {
                     case SnackMan s1 -> {
