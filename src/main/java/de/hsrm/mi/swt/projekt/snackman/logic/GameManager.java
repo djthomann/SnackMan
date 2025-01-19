@@ -27,11 +27,8 @@ public class GameManager {
     private final WebSocketHandler webSocketHandler;
     private final GameConfig gameConfig = new GameConfig();
 
-
-    // TODO: To Be Deleted , Constructor for testing purposes with fake game
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
-        //createGame(gameConfig, IDGenerator.getInstance().getUniqueID()); // Game Creation in websocket by MapRquest Event
     }
 
     public Game getGameById(Long id) {

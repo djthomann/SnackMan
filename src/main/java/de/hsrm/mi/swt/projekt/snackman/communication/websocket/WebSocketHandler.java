@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
@@ -44,7 +45,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     Map<WebSocketSession, Client> clients = new HashMap<>();
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) {
         logger.info("New WebSocket Connection: " + session.getId());
         clients.put(session, new Client(session));
     }
@@ -56,7 +57,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * @param message The message that was sent.
      */
     @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleTextMessage(@NotNull WebSocketSession session, TextMessage message) throws Exception {
 
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.create();
@@ -82,10 +83,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
                         client.setRole(GameObjectType.GHOST);
                     }
                 }
-                /**
-                 * User registers without Role, sets Unsername and sends back Client ID for
-                 * later use...
-                 */
+
+                 // User registers without Role, sets Unsername and sends back Client ID for
+                 // later use...
                 case "REGISTERUSERNAME" -> {
                     RegisterUsernameEvent registerUsernameEvent = gson.fromJson(jsonString,
                             RegisterUsernameEvent.class);
@@ -258,8 +258,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     session.sendMessage(new TextMessage(event.getType().toString() + ";" + json));
                 }
 
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -270,7 +268,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * Removes Client from Client Set and informs other Clients
      */
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, @NotNull CloseStatus status) {
         logger.info("WebSocket Connection closed: " + session.getId());
         clients.remove(session);
     }

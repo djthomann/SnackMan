@@ -46,29 +46,14 @@ public class Game {
     public long id;
     private final GameConfig gameConfig;
     private final ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
     private final SnackManMap map;
     private GameEventBus eventBus;
     private final GameManager gameManager;
     private final CollisionManager collisionManager;
     private final GameState gameState;
     private int numSnackmen = 0;
-    private GameStartEvent gameStartEvent;
     private long startTime;
-
-    // Constructor for Game with no Lobby
-    public Game(long id, GameConfig gameConfig, SnackManMap map, GameManager gameManager) {
-        this.id = id;
-        this.gameConfig = gameConfig;
-        this.map = map;
-        this.gameManager = gameManager;
-        this.collisionManager = new CollisionManager(this, map, allMovables); //temporary, (this) to be deleted later
-        this.initialize(null);
-        this.timer = new Timer();
-        startTimer();
-        gameState = new GameState(this);
-        logger.info("created Game with id: " + id);
-    }
 
     // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
@@ -189,8 +174,6 @@ public class Game {
         res.setMap(map.toRecord());
         res.setGameTime(gameConfig.getGameTime());
 
-        this.gameStartEvent = res;
-
         return res;
     }
 
@@ -223,7 +206,7 @@ public class Game {
         if (chickenCount >= 1) {
 
             Tile tileOne = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
-            if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupations().size() == 0) {
+            if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupations().isEmpty()) {
                 Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
                 0.0f, (float) tileOne.getZ()+0.5f, "ChickenPersonalityOne", gameManager, gameConfig, collisionManager);
                 tileOne.addToOccupation(chickenOne);
@@ -233,7 +216,7 @@ public class Game {
         if (chickenCount >= 2) {
 
             Tile tileTwo = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) - 4);
-            if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupations().size() == 0) {
+            if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupations().isEmpty()) {
                 Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileTwo.getX()+0.5f,
                 0.0f, (float) tileTwo.getZ()+0.5f, "ChickenPersonalityTwo", gameManager, gameConfig, collisionManager);
                 tileTwo.addToOccupation(chickenTwo);
@@ -243,7 +226,7 @@ public class Game {
         if (chickenCount >= 3) {
 
             Tile tileThree = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) - 4);
-            if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupations().size() == 0) {
+            if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupations().isEmpty()) {
                 Chicken chickenThree = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileThree.getX()+0.5f,
                 0.0f, (float) tileThree.getZ()+0.5f, "ChickenPersonalityOne", gameManager, gameConfig, collisionManager);
                 tileThree.addToOccupation(chickenThree);
@@ -253,7 +236,7 @@ public class Game {
         if (chickenCount >= 4) {
 
             Tile tileFour = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) + 3);   
-            if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupations().size() == 0) {
+            if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupations().isEmpty()) {
                 Chicken chickenFour = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileFour.getX()+0.5f,
                 0.0f, (float) tileFour.getZ()+0.5f, "ChickenPersonalityTwo", gameManager, gameConfig, collisionManager);
                 tileFour.addToOccupation(chickenFour);
@@ -270,15 +253,9 @@ public class Game {
      */
     private ArrayList<Subscribable> createSubscriberList() {
 
-        logger.info("Movables in Game: " + this.allMovables.toString() + "\n");
+        logger.info("Movables in Game: " + this.allMovables + "\n");
 
-        ArrayList<Subscribable> allSubscribers = new ArrayList<>();
-
-        for (MovableAndSubscribable currentGameObject : this.allMovables) {
-            allSubscribers.add((Subscribable) currentGameObject);
-        }
-
-        return allSubscribers;
+        return new ArrayList<>(this.allMovables);
     }
 
     /**
@@ -433,54 +410,44 @@ public class Game {
                     rowList.add("OUT");
                 } else {
                     switch (tile.getOccupationType()) {
-                        case WALL:
-                            rowList.add("WALL");
-                            break;
-                        case ITEM:
-                        case FREE:
-                            if (tile.getOccupations().size() > 0) {
-                                String highestPriority = "UNKNOWN OCCUPATION"; // default priority 
-    
+                        case WALL -> rowList.add("WALL");
+                        case ITEM, FREE -> {
+                            if (!tile.getOccupations().isEmpty()) {
+                                String highestPriority = "UNKNOWN OCCUPATION"; // default priority
+
                                 for (GameObject go : tile.getOccupations()) {
                                     String className = go.getClass().getSimpleName();
 
                                     // priority from top to bottom (Ghost > SnackMan > Chicken > Food)
                                     switch (className) {
-                                        case "Ghost":
-                                            highestPriority = "GHOST";
-                                            break; 
-                            
-                                        case "SnackMan":
+                                        case "Ghost" -> highestPriority = "GHOST";
+                                        case "SnackMan" -> {
                                             if (!highestPriority.equals("GHOST")) {
                                                 highestPriority = "SNACKMAN";
                                             }
-                                            break;
-                            
-                                        case "Chicken":
+                                        }
+                                        case "Chicken" -> {
                                             if (!highestPriority.equals("GHOST") && !highestPriority.equals("SNACKMAN")) {
                                                 highestPriority = "CHICKEN";
                                             }
-                                            break;
-                            
-                                        case "Food":
+                                        }
+                                        case "Food" -> {
                                             if (!highestPriority.equals("GHOST") && !highestPriority.equals("SNACKMAN") && !highestPriority.equals("CHICKEN")) {
                                                 highestPriority = "FOOD";
                                             }
-                                            break;
-                            
-                                        default:
+                                        }
+                                        default -> {
                                             if (highestPriority.equals("UNKNOWN OCCUPATION")) {
                                                 highestPriority = "UNKNOWN OCCUPATION";
                                             }
-                                            break;
+                                        }
                                     }
                                 }
                                 rowList.add(highestPriority);
+                            } else {
+                                rowList.add("FREE");
                             }
-                            else {
-                                rowList.add("FREE"); 
-                            }
-                            break;
+                        }
                     }
                 }
             }
@@ -505,7 +472,7 @@ public class Game {
             }
             // when snackman's entered the old tile but did not collide with food on it
             if (oldTile.getOccupationType() == OccupationType.ITEM) {
-                return; 
+                return;
             }
             else {
                 oldTile.setOccupationType(OccupationType.FREE);

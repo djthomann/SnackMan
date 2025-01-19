@@ -1,7 +1,9 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +28,8 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
     private final GameManager gameManager;
-    private GameConfig gameConfig;
-    private CollisionManager collisionManager;
+    private final GameConfig gameConfig;
+    private final CollisionManager collisionManager;
     private final Logger logger = LoggerFactory.getLogger(Ghost.class);
 
     private int numCollisions = 0;
@@ -72,36 +74,29 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
             return;
         }
 
-        switch (event.getType()) {
-
-            case MOVE:
-
-                Vector3f vector = ((MoveEvent) event).getMovementVector();
-                logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
-                ArrayList<CollisionType> collisions;
-                float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
-                logger.info("Wished X: " + wishedX);
-                float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
-                logger.info("Wished Z: " + wishedZ);
-                collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
-                if (wishedX != this.getX() || wishedZ != this.getZ()) {
-                    if (this.getY() < gameConfig.getWallHeight()) {
-                        if (collisions.contains(CollisionType.WALL)) {
-                            vector.x = 0;
-                            vector.z = 0;
-                        } 
+        if (Objects.requireNonNull(event.getType()) == EventType.MOVE) {
+            Vector3f vector = ((MoveEvent) event).getMovementVector();
+            logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
+            ArrayList<CollisionType> collisions;
+            float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
+            logger.info("Wished X: " + wishedX);
+            float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
+            logger.info("Wished Z: " + wishedZ);
+            collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
+            if (wishedX != this.getX() || wishedZ != this.getZ()) {
+                if (this.getY() < gameConfig.getWallHeight()) {
+                    if (collisions.contains(CollisionType.WALL)) {
+                        vector.x = 0;
+                        vector.z = 0;
                     }
-
                 }
 
-                this.move(vector.x * gameConfig.getGhostStep(), 0, vector.z * gameConfig.getGhostStep());
+            }
 
-            default:
-                break;
-
+            this.move(vector.x * gameConfig.getGhostStep(), 0, vector.z * gameConfig.getGhostStep());
         }
 
-        logger.info("Event arrived at Ghost :" + event.toString());
+        logger.info("Event arrived at Ghost :" + event);
 
     }
 
