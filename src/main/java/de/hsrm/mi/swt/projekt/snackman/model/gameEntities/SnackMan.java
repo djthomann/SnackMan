@@ -248,10 +248,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     @Override
     public void move(float newX, float newY, float newZ) {
         this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
-        this.x += newX;
-        this.y += newY;
-        this.z += newZ;
-        logger.info("Snackman " + objectId + " moved to " + x + ", " + y + ", " + z);
+        super.move(newX, newY, newZ);
         EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
@@ -394,18 +391,18 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
             }
 
-                // Logic for collision with wall side and food
-                List<CollisionType> collisions;
-                collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
-                if (wishedX != this.getX() || wishedZ != this.getZ()) {
-                    if (this.getY() < gameConfig.getWallHeight()) {
-                        if (collisions.contains(CollisionType.WALL)) {
-                            vector.x = 0.0f;
-                            vector.z = 0.0f;
-                        } else if (collisions.contains(CollisionType.ITEM)) {
-                            logger.info("MMMMMM delicious ");
-                        }
+            // Logic for collision with wall side and food
+            List<CollisionType> collisions;
+            collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
+            if (wishedX != this.getX() || wishedZ != this.getZ()) {
+                if (this.getY() < gameConfig.getWallHeight()) {
+                    if (collisions.contains(CollisionType.WALL)) {
+                        vector.x = 0.0f;
+                        vector.z = 0.0f;
+                    } else if (collisions.contains(CollisionType.ITEM)) {
+                        logger.info("MMMMMM delicious ");
                     }
+                }
 
             }
 

@@ -1,5 +1,9 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 public class GameObject {
 
     protected final long gameId;
@@ -10,6 +14,7 @@ public class GameObject {
     protected float radius;
     protected float height; 
 
+    private final Logger logger = LoggerFactory.getLogger(GameObject.class);
 
     public GameObject(long gameId, float x, float y, float z, float radius, float height) {
         this(IDGenerator.getInstance().getUniqueID(), gameId, x, y, z, radius, height);
@@ -25,6 +30,13 @@ public class GameObject {
         this.height = height;
     }
 
+    public void move(float newX, float newY, float newZ) {
+        x += newX;
+        y += newY;
+        z += newZ;
+        logger.info(this.getClass().getSimpleName() + " moved to " + x + ", " + y + ", " + z);
+    }
+    
     public long getObjectId() {
         return objectId;
     }
