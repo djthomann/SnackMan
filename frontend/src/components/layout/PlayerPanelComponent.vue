@@ -51,6 +51,7 @@ import { computed, useSlots } from 'vue';
                         <img v-if="props.avatar === 'ghost'" src="@/assets/images/avatars/avatar_ghost.svg">
                         <img v-else src="@/assets/images/avatars/avatar_snackman.svg">
 
+                        <slot name="avatar-overlay"></slot>
                     </div>
                     <div class="playerpanel__content-button" v-if="slots.button">
                         <slot name="button"></slot>

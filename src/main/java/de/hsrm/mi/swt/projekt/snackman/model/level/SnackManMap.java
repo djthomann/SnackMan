@@ -241,10 +241,7 @@ public class SnackManMap {
         logger.info("Map bounds: w|h " + w + " " + h);
 
         // Überprüfen, ob die Position innerhalb der Kartenbreite und -höhe liegt
-        if (x < 0 || x >= w || z < 0 || z >= h) {
-            return false; // Position ist außerhalb der Karte
-        }
-        return true;
+        return !(x < 0) && !(x >= w) && !(z < 0) && !(z >= h); // Position ist außerhalb der Karte
     }
 
     public Tile getTileAt(int x, int z) throws IndexOutOfBoundsException {

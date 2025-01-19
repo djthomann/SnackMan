@@ -11,10 +11,10 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 public class Food extends GameObject {
 
     /** The calorie count contained in the Food */
-    private int calories;
+    private final int calories;
 
     /** The type of the Food */
-    private FoodType foodType;
+    private final FoodType foodType;
 
     /**
      * Constructs a new Food with the specified position and
