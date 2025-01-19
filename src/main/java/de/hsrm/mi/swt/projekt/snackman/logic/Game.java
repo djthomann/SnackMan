@@ -327,52 +327,48 @@ public class Game {
     * @return The GameEndEvent.
     */
     public GameEndEvent generateGameEndEvent() {
-        // Create Hashmap for Scores
+        // Create Hashmap for Scores (ID and gainedCalories)
         Map<Long, Integer> scores = new HashMap<>();
 
         // Determine lobby
         Lobby lobby = this.gameManager.getLobbyById(this.id);
 
+        /* Logging
         if(lobby != null) {
             logger.info("Lobby found with id: " + lobby.getId());
         }
+        */
         
         // Determine clients
         List<Client> clientsAsList = lobby.getClientsAsList();
         
+        /* Logging
         for (Client c : clientsAsList) {
             logger.info("Client in Lobby: " + c.toString());
         }
-
-        /* 
-        Get Scores (Mock instead of real scores)
-        for (SnackManRecord snackManRecord : this.gameState.getChangedSnackMen()){
-            long id = snackManRecord.objectId();
-            int gainedCalories = snackManRecord.gainedCalories();
-            scores.put(id, gainedCalories);
-        }
-
-        if (scores.isEmpty()) {
-            logger.info("No scores found");
-        }
         */
-        scores.put((long)2, 500);
-        scores.put((long)3, 1000);
 
-        // Determine winner ID
+        // Determine scores
+        for (MovableAndSubscribable m : allMovables) {
+            if (m instanceof SnackMan snackMan) { // cast to SnackMan to access getObjectId()
+                scores.put(snackMan.getObjectId(), snackMan.getGainedCalories());
+            }
+        }
+    
+        // Determine winner
         long winnerId = determineWinner(scores);
         logger.info("Winner Client ID: " + winnerId);
 
-        // Get winner client
         Client winner = lobby.getClient(winnerId);
         logger.info("Winner Client: " + winner.toString());
 
-        // Get winner name and winner team
         String winnerName = winner.getUsername();
         logger.info("Winner Name: " + winnerName);
 
         String winnerTeam = winner.getRole().toString();
         logger.info("Winner Team: " + winnerTeam);
+
+        int winnerCaloryCount = scores.get(winnerId);
 
         /* Logging: Iterate through scores and log every entry
         for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
@@ -380,12 +376,9 @@ public class Game {
         }
         */
 
-        int winnerCaloryCount = scores.get(winnerId);
-        logger.info("Winner Calory Count: " + winnerCaloryCount);
-
+        // Create PlayerRecords
         List<PlayerRecord> playerRecords = new ArrayList<>();
 
-        /* Further Inspection */
         for (Client c : clientsAsList) {
             long id = c.getClientId();
             String username = c.getUsername();

@@ -129,7 +129,7 @@
             >
               <span class="player-name">{{ player.username }}</span>
               <div class="seperation-line"></div>
-              <span>{{ player.score }} Kalorien</span>
+              <span>{{ player.score }} Calories</span>
             </li>
           </template>
         </ReceiptComponent>
