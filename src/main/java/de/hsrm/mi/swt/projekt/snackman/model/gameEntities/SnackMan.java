@@ -453,6 +453,16 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     vector.z = 0.0f;
                 }
 
+                if (collisions.contains(CollisionType.CHICKEN)) {
+                    if(this.jumping) {
+                        this.jumping = false;
+                        jumpTaskFuture.cancel(false);
+                        this.y = gameConfig.getSnackManHeight() + gameConfig.getSnackManHeight() / 2;
+                    }
+                    vector.x = 0.0f; 
+                    vector.z = 0.0f; 
+                }
+                
                 this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
 
                 // checks if the movementVector is from a jump action or not

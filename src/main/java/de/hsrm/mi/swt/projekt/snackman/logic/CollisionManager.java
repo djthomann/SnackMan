@@ -54,17 +54,21 @@ public class CollisionManager {
 
         switch (wishedTile.getOccupationType()) {
             case WALL:
-            System.out.println("wall");
                 //logger.info(
                     //collisionPartner.toString() + " and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 collisions.add(CollisionType.WALL);
                 break; 
+
+            case FREE: 
+                collisions.addAll(checkModelCollision(collisionPartner, wishedX, wishedZ)); 
+                break; 
+
             case ITEM:
                 // logger.info(
                 //         collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 List<Food> nearbyFoods = new CopyOnWriteArrayList<>(snackManMap.getFoodsOfTile(wishedTile));
                 List <Food> foodsToRemove = new ArrayList<>(); 
-                if (collisionPartner instanceof SnackMan) {
+                if (collisionPartner instanceof SnackMan || collisionPartner instanceof Chicken) {
                     for (Food food: nearbyFoods) {
                         try {
                             float foodPosX = food.getX();
@@ -73,9 +77,27 @@ public class CollisionManager {
                             float heightDistance = calculateHeightDifference(collisionPartner.getY(), food.getY());
                             if (distance < (collisionPartner.getRadius() + food.getRadius())) {
                                 if (heightDistance <= collisionPartner.getHeight()/2 + food.getHeight()/2) {
-                                    foodsToRemove.add(food); 
-                                    ((SnackMan) collisionPartner).eat(food);
+                                    
+                                    if (collisionPartner instanceof SnackMan) {
+                                        foodsToRemove.add(food); 
+                                        ((SnackMan) collisionPartner).eat(food);
+                                    }
+                                    else if (collisionPartner instanceof Chicken) {
+                                        if (food.getFoodType() != FoodType.EGG)  {
+                                            foodsToRemove.add(food);
+                                            wishedTile.removeFromOccupation(food); 
+                                            ((Chicken) collisionPartner).eat(food);
+                                            break; 
+                                        }
+                                        else {
+                                            collisions.clear(); 
+                                            return collisions; 
+                                        }
+                                    }
                                 }
+                            }
+                            else {
+                                collisions.addAll(checkModelCollision(collisionPartner, wishedX, wishedZ)); 
                             }
                         } catch(NullPointerException e) {
                                 logger.error(
@@ -88,44 +110,14 @@ public class CollisionManager {
                     collisions.add(CollisionType.ITEM);
 
                 }
-                else if (collisionPartner instanceof Chicken) {
-                    // List<Food> nearbyFoods2 = new CopyOnWriteArrayList<>(snackManMap.getFoodsOfTile(wishedTile));
-                    for (Food food: nearbyFoods) {
-                        try {
-                        float foodPosX = food.getX();
-                        float foodPosZ = food.getZ();
-                        float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
-
-                        if (distance < (collisionPartner.getRadius() + food.getRadius())) {
-                            if (food.getFoodType() != FoodType.EGG)  {
-                                foodsToRemove.add(food);
-                                wishedTile.removeFromOccupation(food); 
-                                ((Chicken) collisionPartner).eat(food);
-                                System.out.println("fertig 2" + nearbyFoods.size());
-                                // nearbyFoods.clear(); 
-                                break; 
-                            }
-                            else {
-                                collisions.clear(); 
-                                return collisions;   
-                            }
-                        }
-                        
-                    } catch(NullPointerException e) {
-                        logger.error(
-                            "no more food on tile: " + wishedTile.getX() + ", " + wishedTile.getZ());
-                    }
-                    }
-                    nearbyFoods.removeAll(foodsToRemove); 
-                    if (nearbyFoods.size()==0) wishedTile.setOccupationType(OccupationType.FREE);
-                    else wishedTile.setOccupationType(OccupationType.ITEM);
-                    collisions.add(CollisionType.ITEM);
-
-                    
-                }
                 break;
         }
- 
+        return collisions;
+    }
+
+    public List<CollisionType> checkModelCollision(GameObject collisionPartner, float wishedX, float wishedZ) {   
+        // Changed return type from string to array list as several collisions can happen at once, e.g. ghost and item
+        List<CollisionType> collisions = new ArrayList<>();
         // Iterate through all Movables and check for collisions
         for (MovableAndSubscribable aktMovable : this.allMovables) {
 
@@ -167,7 +159,7 @@ public class CollisionManager {
                         float heightDistance = calculateHeightDifference(collisionPartner.getY(), ((SnackMan)aktMovable).getY());
 
                         // Heights /2 because the y-coordinate is in the middle of the object
-                        if (heightDistance <= collisionPartner.getHeight()/2 + ((SnackMan)aktMovable).getHeight()/2){
+                        if (heightDistance <= collisionPartner.getHeight()/2 + ((SnackMan)aktMovable).getHeight()/2) {
                             logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
                             logger.info("This SnackMan: " + collisionPartner.getObjectId());
                             collisions.add(CollisionType.SNACKMAN);
@@ -176,20 +168,39 @@ public class CollisionManager {
                     // When collisionPartner is an instanceof Ghost check if SnackMan is invincible
                     // If not call reactToGhostCollision from the SnackMan (to cover the cases when a SnackMan is standing still
                     // and a ghost runs into them)
-                    } else if(collisionPartner instanceof Ghost && !((SnackMan)aktMovable).isInvincible()){
+                    } else if(collisionPartner instanceof Ghost && !((SnackMan)aktMovable).isInvincible()) {
                         logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
                         logger.info("This Ghost: " + collisionPartner.getObjectId());
                         collisions.add(CollisionType.SNACKMAN);
                         ((SnackMan)aktMovable).reactToGhostCollision();;
                     }
-
+                    else if (collisionPartner instanceof Chicken) {
+                        logger.info ("Collision with SnackMan by Chicken");
+                            collisions.add(CollisionType.SNACKMAN); 
+                        
+                    }
                 }  
-
             }
 
-        }
+            if (aktMovable instanceof Chicken && aktMovable != collisionPartner) {
+                float distance = calculateDistance(wishedX, ((Chicken)aktMovable).getX(), wishedZ, ((Chicken)aktMovable).getZ());
 
+                if (distance <= ((Chicken) aktMovable).getRadius() + collisionPartner.getRadius()) {
+
+                    if (collisionPartner instanceof SnackMan) {
+                        logger.info("Collision with SnackMan!: " + ((Chicken) aktMovable).getObjectId());
+
+                        float heightDistance = calculateHeightDifference(collisionPartner.getY(), ((Chicken) aktMovable).getY());
+
+                        if (heightDistance <= collisionPartner.getHeight()/2 + ((Chicken) aktMovable).getHeight()/2) {
+                            collisions.add(CollisionType.CHICKEN); 
+                        }
+                    }
+                }
+            }
+        }
         return collisions;
+
     }
 
     public boolean isBetweenWalls (float x, float z) {
@@ -270,10 +281,10 @@ public class CollisionManager {
         float dBottom = distances[2];
         float dTop = distances[3];
 
-        // Finde die minimale Entfernung
+        // Calculate the minimum distance
         float dMin = Math.min(Math.min(dLeft, dRight), Math.min(dBottom, dTop));
 
-        // Bestimme den Richtungsvektor
+        // determine the direction vector
         if (dMin == dLeft) {
             vec.x = -1;
             vec.z = 0;
@@ -295,7 +306,7 @@ public class CollisionManager {
         return (float) Math.sqrt((x2 - x1) * (x2 - x1) + (z2 - z1) * (z2 - z1));
     }
 
-        /**
+    /**
      * Calculates the difference in between two coordinates
      * @param y1
      * @param y2
