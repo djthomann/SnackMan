@@ -101,10 +101,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     private void initScriptInterpreter(String script) {
-        this.scriptInterpreter.exec("from "+script+" import *");
+        this.scriptInterpreter.exec("from " + script + " import *");
         new Thread(() -> {
             try {
-                while(!Thread.currentThread().isInterrupted()) {
+                while (!Thread.currentThread().isInterrupted()) {
                 if (gameManager.getGameById(gameId) == null) {
                     Thread.sleep(1000);
                 } else {
