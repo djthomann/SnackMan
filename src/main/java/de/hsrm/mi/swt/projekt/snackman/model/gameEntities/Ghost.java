@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -76,7 +77,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
                 Vector3f vector = ((MoveEvent) event).getMovementVector();
                 logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
-                ArrayList<CollisionType> collisions;
+                List<CollisionType> collisions;
                 float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
                 logger.info("Wished X: " + wishedX);
                 float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());

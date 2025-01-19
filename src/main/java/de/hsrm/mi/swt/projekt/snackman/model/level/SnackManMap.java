@@ -311,9 +311,9 @@ public class SnackManMap {
         return true;
     }
 
-    public Food getFoodOfTile(Tile tile) {
-        Food food = (Food) tile.getFoodOnTile();
-        return food;
+    public List<Food> getFoodsOfTile(Tile tile) {
+        List<Food> foods = tile.getFoodsOnTile();
+        return foods;
     }
 
     public SnackManMapRecord toRecord() {

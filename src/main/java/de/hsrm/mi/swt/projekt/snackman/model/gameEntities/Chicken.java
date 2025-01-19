@@ -18,6 +18,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Lay
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
+import de.hsrm.mi.swt.projekt.snackman.logic.Game;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
@@ -47,9 +48,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
             //logger.info("\n \nChicken with id " + objectId + " has passively gained calories");
             //logger.info(objectId + " previous calories: " + gainedCalories);
-            if(!movementPaused) {
+            Game game = gameManager.getGameById(gameId); 
+            if(!movementPaused && game!= null) {
                 gainedCalories += passiveCalorieGain;
-                gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
+                game.getGameState().addChangedChicken(thisChicken);
                 updateRadius();            
             }
 
@@ -84,7 +86,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.gameManager = gameManager;
         this.gainedCalories = 0;
         //Timer for constant passive calorie gain
-        this.passiveCalorieGain = 500;
+        this.passiveCalorieGain = 100;
         this.passiveCalorieGainDelay = 1000; //in ms
         this.passiveCaloriesTimer = new Timer();
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
@@ -149,7 +151,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 this.wallCollision = (boolean) tuple.get(4);
 
                 if(this.wallCollision == false) {
-                    ArrayList<CollisionType> collisions;
+                    List<CollisionType> collisions;
                     float wishedX = 0.0f;
                     float wishedZ = 0.0f;
 
@@ -199,10 +201,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * @param food the calorie resource to be consumed by the entity
      */
     @Override
-    public void eat(Food food) {
+    public synchronized void eat(Food food) {
         this.gainedCalories += food.getCalories();
         updateRadius(); 
-        gameManager.getGameById(gameId).getGameState().addChangedChicken(this);
+        // gameManager.getGameById(gameId).getGameState().addChangedChicken(this);
         EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId, gameManager));
     }
 
@@ -229,13 +231,20 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      */
     private void stopMovementTemporarily(float minRadius) {
         this.movementPaused = true; 
+        float oldX = this.x; 
+        float oldZ = this.z; 
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 movementPaused = false; 
                 radius = minRadius; 
                 resetGainedCalories();
-                layEgg();
+
+                new Timer().schedule(new TimerTask() { 
+                    @Override public void run() { 
+                        layEgg(oldX, oldZ); 
+                    } 
+                }, 3000);
             }
         }, 5000); // paused for 5 seconds
 
@@ -244,7 +253,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     /**
      * lays an egg
      */
-    private void layEgg() {
+    private void layEgg(float x, float z) {
         Food egg = new Food(gameId, (int) x, (int) z, FoodType.EGG, gameConfig);
         logger.info("Ei gelegt");
         gameManager.getGameById(gameId).getMap().getTileAt((int) x, (int) z).addToOccupation(egg);

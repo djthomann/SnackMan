@@ -13,7 +13,7 @@ public class Tile {
     private final int x;
     private final int z;
     private OccupationType occupationType;
-    private Food foodOnTile;
+    private List<Food> foodsOnTile;
 
     //private GameObject occupation;
     private List<GameObject> occupations;
@@ -29,6 +29,7 @@ public class Tile {
         this.z = z;
         this.occupationType = occupationType;
         this.occupations = new ArrayList<GameObject>(); 
+        this.foodsOnTile = new ArrayList<Food>(); 
     }
 
     public OccupationType getOccupationType() {
@@ -56,7 +57,7 @@ public class Tile {
         } 
         this.occupations.add(occupation);
         if (occupation instanceof Food) {
-            this.foodOnTile = (Food) occupation;
+            this.foodsOnTile.add((Food) occupation);
             occupationType = OccupationType.ITEM;
             return;
         }
@@ -66,17 +67,27 @@ public class Tile {
         if (occupations.contains(occupation) && occupation != null) {
             occupations.remove(occupation); 
         }
+        if (occupation instanceof Food) {
+            foodsOnTile.remove(occupation); 
+
+            if (foodsOnTile.size() == 0) {
+                this.occupationType = OccupationType.FREE; 
+            }
+        }
     }
 
     public TileRecord toRecord () {
-        FoodRecord foodRecord = null;
-        if (foodOnTile != null) {
-            foodRecord = foodOnTile.toRecord();
+        List<FoodRecord> foodRecords = new ArrayList<FoodRecord>();
+        if (foodsOnTile.size() > 0) {
+            for (Food food: foodsOnTile) {
+                foodRecords.add(food.toRecord());
+            }
         }
-        return new TileRecord(x, z, occupationType, foodRecord);
+        FoodRecord[] foodRecordsArray = foodRecords.toArray(new FoodRecord[foodRecords.size()]);
+        return new TileRecord(x, z, occupationType, foodRecordsArray);
     }
 
-    public Food getFoodOnTile() {
-        return foodOnTile;
+    public List<Food> getFoodsOnTile() {
+        return foodsOnTile;
     }
 }

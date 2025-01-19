@@ -1,6 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -413,7 +413,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
 
                 // Logic for collision with wall side and food
-                ArrayList<CollisionType> collisions;
+                List<CollisionType> collisions;
                 collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
                 if (wishedX != this.getX() || wishedZ != this.getZ()) {
                     if (this.getY() < gameConfig.getWallHeight()) {
