@@ -65,16 +65,17 @@ public class CollisionManager {
                 List<Food> nearbyFoods = new CopyOnWriteArrayList<>(snackManMap.getFoodsOfTile(wishedTile));
                 List <Food> foodsToRemove = new ArrayList<>(); 
                 if (collisionPartner instanceof SnackMan) {
-                    
-                    if (collisionPartner instanceof SnackMan) System.out.println("foods auf tile" + nearbyFoods);
                     for (Food food: nearbyFoods) {
                         try {
                             float foodPosX = food.getX();
                             float foodPosZ = food.getZ();
                             float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
+                            float heightDistance = calculateHeightDifference(collisionPartner.getY(), food.getY());
                             if (distance < (collisionPartner.getRadius() + food.getRadius())) {
-                                foodsToRemove.add(food); 
-                                ((SnackMan) collisionPartner).eat(food);
+                                if (heightDistance <= collisionPartner.getHeight()/2 + food.getHeight()/2) {
+                                    foodsToRemove.add(food); 
+                                    ((SnackMan) collisionPartner).eat(food);
+                                }
                             }
                         } catch(NullPointerException e) {
                                 logger.error(
@@ -94,6 +95,7 @@ public class CollisionManager {
                         float foodPosX = food.getX();
                         float foodPosZ = food.getZ();
                         float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
+
                         if (distance < (collisionPartner.getRadius() + food.getRadius())) {
                             if (food.getFoodType() != FoodType.EGG)  {
                                 foodsToRemove.add(food);
@@ -303,151 +305,3 @@ public class CollisionManager {
         return y1 > y2 ? y1-y2 : y2-y1;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//-----------------------------------------------
-// public synchronized List<CollisionType> checkCollision(float wishedX, float wishedZ, GameObject collisionPartner) {
-//     // Changed return type from string to array list as several collisions can happen at once, e.g. ghost and item
-//     ArrayList<CollisionType> collisions = new ArrayList<>();
-//     collisions.clear();
-//     Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
-
-//     switch (wishedTile.getOccupationType()) {
-//         case WALL:
-//             //logger.info(
-//                 //collisionPartner.toString() + " and wall Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
-//             collisions.add(CollisionType.WALL);
-//         case ITEM:
-//             // logger.info(
-//             //         collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
-//             if (collisionPartner instanceof SnackMan || collisionPartner instanceof Chicken) {
-                
-//                 List<Food> nearbyFoods = new CopyOnWriteArrayList<>(snackManMap.getFoodsOfTile(wishedTile));
-//                 if (collisionPartner instanceof SnackMan) System.out.println("foods auf tile" + nearbyFoods);
-//                 for (Food food: nearbyFoods) {
-//                     System.out.println("sdkfj");
-//                     try {
-//                     float foodPosX = food.getX();
-//                     float foodPosZ = food.getZ();
-//                     float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
-//                     if (distance < (collisionPartner.getRadius() + food.getRadius())) {
-//                         if (collisionPartner instanceof SnackMan) {
-//                             nearbyFoods.remove(food); 
-//                             ((SnackMan) collisionPartner).eat(food);
-//                             System.out.println("fertig " + nearbyFoods.size());
-
-//                         } 
-//                         else{
-//                             if (food.getFoodType() != FoodType.EGG) {
-//                                 nearbyFoods.remove(food); 
-//                                 ((Chicken) collisionPartner).eat(food); 
-
-//                             }
-//                             else continue; 
-//                         }
-//                         if (nearbyFoods.size()==0) wishedTile.setOccupationType(OccupationType.FREE);
-//                         else wishedTile.setOccupationType(OccupationType.ITEM);
-//                         collisions.add(CollisionType.ITEM);
-//                     }
-//                 } catch(NullPointerException e) {
-//                     logger.error(
-//                         "no more food on tile: " + wishedTile.getX() + ", " + wishedTile.getZ());
-//                 }
-//                 }
-
-//             }
-//             break;
-//     }
-
-//     // Iterate through all Movables and check for collisions
-//     for (MovableAndSubscribable aktMovable : this.allMovables) {
-
-//         // Check for collisions with ghosts (ghost ghost collision doesn't exist)
-//         if (!(collisionPartner instanceof Ghost) && aktMovable instanceof Ghost && aktMovable != collisionPartner) {
-
-//             float distance = calculateDistance(wishedX, ((Ghost)aktMovable).getX() + TRANSLATION, wishedZ, ((Ghost)aktMovable).getZ() + TRANSLATION);
-
-//             // Check if the cylindrical hitboxes collide 
-//             if (distance <= ((Ghost)aktMovable).getRadius() + collisionPartner.getRadius()) {
-
-//                 // Check if SnackMan is jumping over the Ghost
-//                 float heightDistance = calculateHeightDifference(collisionPartner.getY(), ((Ghost)aktMovable).getY());
-
-//                 // Heights /2 because the y-coordinate is in the middle of the object
-//                 if (heightDistance <= collisionPartner.getHeight()/2 + ((Ghost)aktMovable).getHeight()/2){
-//                     logger.info("Collision with Ghost!");
-//                     collisions.add(CollisionType.GHOST);
-//                 }
-//             }
-            
-//         }
-
-//         // Check for collisions with SnackMan
-//         if (aktMovable instanceof SnackMan && aktMovable != collisionPartner) {
-
-//             float distance = calculateDistance(wishedX, ((SnackMan)aktMovable).getX() + TRANSLATION, wishedZ, ((SnackMan)aktMovable).getZ() + TRANSLATION);
-//             //logger.info("\nDistance between SnackMen: " + distance + "\n");
-
-//             // Get tile of aktMovable
-//             Tile aktMovableTile = snackManMap.getTileAt((int)((SnackMan)aktMovable).getX(), (int)((SnackMan)aktMovable).getZ());
-
-//             if (distance <= ((SnackMan)aktMovable).getRadius() + collisionPartner.getRadius()) {
-
-//                 // If the collisionPartner is also a Snackman, check if they collide when taking into account their y-coordinates
-//                 // (since a SnackMan can jump over other SnackMan or both can be jumping)
-//                 if(collisionPartner instanceof SnackMan) {
-
-//                     float heightDistance = calculateHeightDifference(collisionPartner.getY(), ((SnackMan)aktMovable).getY());
-
-//                     // Heights /2 because the y-coordinate is in the middle of the object
-//                     if (heightDistance <= collisionPartner.getHeight()/2 + ((SnackMan)aktMovable).getHeight()/2){
-//                         logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
-//                         logger.info("This SnackMan: " + collisionPartner.getObjectId());
-//                         collisions.add(CollisionType.SNACKMAN);
-//                     }
-
-//                 // When collisionPartner is an instanceof Ghost check if SnackMan is invincible
-//                 // If not call reactToGhostCollision from the SnackMan (to cover the cases when a SnackMan is standing still
-//                 // and a ghost runs into them)
-//                 } else if(collisionPartner instanceof Ghost && !((SnackMan)aktMovable).isInvincible()){
-//                     logger.info("Collision with SnackMan!: " + ((SnackMan)aktMovable).getObjectId());
-//                     logger.info("This Ghost: " + collisionPartner.getObjectId());
-//                     collisions.add(CollisionType.SNACKMAN);
-//                     ((SnackMan)aktMovable).reactToGhostCollision();;
-//                 }
-
-//             }  
-
-//         }
-
-//     }
-
-//     return collisions;
-// }
