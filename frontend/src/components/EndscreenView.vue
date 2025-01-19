@@ -2,7 +2,7 @@
   <div class="lobby-grid-wrapper">
     
     <!--Content for when one of the Snackmen wins-->
-    <div v-if="gameData.winningTeam == 'snackman'">
+    <div v-if="gameData.winningTeam == 'SNACKMAN'">
       <div class="background-component">
         <BackgroundComponent :title="`Congrats! ${gameData.winnerName} Won!`"></BackgroundComponent>
       </div>
@@ -67,7 +67,7 @@
     </div>
 
     <!--Content for when the Ghost Team wins-->
-    <div v-if="gameData.winningTeam == 'ghost'">
+    <div v-if="gameData.winningTeam == 'GHOST'">
       <div class="background-component">
         <BackgroundComponent :title="`Oh No! Ghosts Won!`"></BackgroundComponent>
       </div>
@@ -148,7 +148,7 @@ import ReceiptComponent from './layout/ReceiptComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 import GhostPanelComponent from './layout/GhostPanelComponent.vue';
 // TODO: Testdata, delete later
-import testData from '@/assets/testdata.json';
+// import testData from '@/assets/testdata.json';
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
@@ -196,7 +196,7 @@ onMounted(async () => {
   eventBus.on('serverMessage', handleServerMessage);
 
   // TODO: Testing purposes, delete this line later
-  gameData.value = testData;
+  // gameData.value = testData;
 
   try {
     await awaitConnection();

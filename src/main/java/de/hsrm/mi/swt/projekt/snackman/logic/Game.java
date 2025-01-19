@@ -320,14 +320,14 @@ public class Game {
         // Create Hashmap for Scores
         Map<Long, Integer> scores = new HashMap<>();
 
-        // Determine lobby (works)
+        // Determine lobby
         Lobby lobby = this.gameManager.getLobbyById(this.id);
 
         if(lobby != null) {
             logger.info("Lobby found with id: " + lobby.getId());
         }
         
-        // Determine clients (works)
+        // Determine clients
         List<Client> clientsAsList = lobby.getClientsAsList();
         
         for (Client c : clientsAsList) {
@@ -335,7 +335,7 @@ public class Game {
         }
 
         /* 
-        // TODO For some reason, the changedSnackMen are empty
+        Get Scores (Mock instead of real scores)
         for (SnackManRecord snackManRecord : this.gameState.getChangedSnackMen()){
             long id = snackManRecord.objectId();
             int gainedCalories = snackManRecord.gainedCalories();
@@ -346,21 +346,36 @@ public class Game {
             logger.info("No scores found");
         }
         */
-
-        // Mock scores
         scores.put((long)2, 500);
+        scores.put((long)3, 1000);
 
+        // Determine winner ID
         long winnerId = determineWinner(scores);
-
-        // does it calculate the winner correctly?
         logger.info("Winner Client ID: " + winnerId);
 
-        String winnerName = lobby.getClient(winnerId).getUsername();
-        String winnerTeam = lobby.getClient(winnerId).getRole().toString();
+        // Get winner client
+        Client winner = lobby.getClient(winnerId);
+        logger.info("Winner Client: " + winner.toString());
+
+        // Get winner name and winner team
+        String winnerName = winner.getUsername();
+        logger.info("Winner Name: " + winnerName);
+
+        String winnerTeam = winner.getRole().toString();
+        logger.info("Winner Team: " + winnerTeam);
+
+        /* Logging: Iterate through scores and log every entry
+        for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
+            logger.info("Player ID: " + entry.getKey() + ", Score: " + entry.getValue());
+        }
+        */
+
         int winnerCaloryCount = scores.get(winnerId);
+        logger.info("Winner Calory Count: " + winnerCaloryCount);
 
         List<PlayerRecord> playerRecords = new ArrayList<>();
 
+        /* Further Inspection */
         for (Client c : clientsAsList) {
             long id = c.getClientId();
             String username = c.getUsername();
@@ -370,6 +385,8 @@ public class Game {
 
         // Create GameEndEvent with winner and scores
         GameEndEvent gameEndEvent = new GameEndEvent(winnerTeam, winnerName, winnerCaloryCount, playerRecords);
+        gameEndEvent.setWinnerName("RESULTS " + gameEndEvent.getWinnerName());
+        logger.info(gameEndEvent.toString());
 
         // Send the event to the frontend
         gameManager.notifyChange(gameEndEvent);

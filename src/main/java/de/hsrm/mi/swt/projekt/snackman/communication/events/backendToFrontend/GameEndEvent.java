@@ -57,4 +57,13 @@ public class GameEndEvent extends Event {
         this.players = players;
     }
 
+    @Override
+    public String toString() {
+        return "GameEndEvent{" +
+                "winnerTeam='" + winnerTeam + '\'' +
+                ", winnerName='" + winnerName + '\'' +
+                ", winnerCaloryCount=" + winnerCaloryCount +
+                ", players=" + players +
+                '}';
+    }
 }
