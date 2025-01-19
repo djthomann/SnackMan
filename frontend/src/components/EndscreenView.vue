@@ -33,7 +33,7 @@
             <template #ghost-list>
               <li
                 v-for="(player, index) in gameData.players?.filter(
-                  (player) => player.role === 'ghost',
+                  (player) => player.role === 'GHOST',
                   )"
                 :key="index"
                 class="ghostpanel__item"
@@ -52,7 +52,7 @@
           <template #receipt-list>
             <li
               v-for="(player, index) in gameData.players?.filter(
-                (player) => player.role === 'snackman',
+                (player) => player.role === 'SNACKMAN',
               )"
               :key="index"
               class="receiptpanel__item"
@@ -147,14 +147,14 @@ import BackgroundComponent from './layout/BackgroundComponent.vue';
 import ReceiptComponent from './layout/ReceiptComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 import GhostPanelComponent from './layout/GhostPanelComponent.vue';
-// TODO: Testdata, delete later
-// import testData from '@/assets/testdata.json';
+import { Logger } from '@/util/logger';
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
 const router = useRouter();
 const lobbyCode = ref(Number(route.params.code));
 const serverMessage = ref<string>('');
+const logger = new Logger();
 
 interface Player {
   username: string;
@@ -178,7 +178,7 @@ const gameData = ref<GameData>({
 
 const handleServerMessage = (message: string) => {
   serverMessage.value = message;
-  if (message.startsWith('RESULTS')) {
+  if (message.startsWith('GAME_END')) {
     gameData.value = JSON.parse(message.split(';')[1]);
   }
 };

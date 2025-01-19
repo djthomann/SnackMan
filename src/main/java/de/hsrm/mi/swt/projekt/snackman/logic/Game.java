@@ -26,7 +26,6 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.PlayerRecord;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
@@ -295,6 +294,12 @@ public class Game {
         sendGameEndEvent();
     }
 
+
+    private void sendGameEndEvent() {
+        GameEndEvent gameEndEvent = new GameEndEvent();
+        this.gameManager.notifyChange(gameEndEvent);
+    }
+
     /**
      * Determines the winner based on the highest score.
      *
@@ -316,7 +321,12 @@ public class Game {
         return winnerId;
     }
 
-    private void sendGameEndEvent() {
+    /**
+     * Generates a GameEndEvent with the winner and the scores of all players.
+     * 
+    * @return The GameEndEvent.
+    */
+    public GameEndEvent generateGameEndEvent() {
         // Create Hashmap for Scores
         Map<Long, Integer> scores = new HashMap<>();
 
@@ -385,11 +395,9 @@ public class Game {
 
         // Create GameEndEvent with winner and scores
         GameEndEvent gameEndEvent = new GameEndEvent(winnerTeam, winnerName, winnerCaloryCount, playerRecords);
-        gameEndEvent.setWinnerName("RESULTS " + gameEndEvent.getWinnerName());
         logger.info(gameEndEvent.toString());
 
-        // Send the event to the frontend
-        gameManager.notifyChange(gameEndEvent);
+        return gameEndEvent;
     }
 
     /**

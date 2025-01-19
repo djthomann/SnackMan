@@ -12,25 +12,29 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.PlayerRecord;
  */
 public class GameEndEvent extends Event {
 
-    private String winnerTeam;
+    private String winningTeam;
     private String winnerName;
     private int winnerCaloryCount;
     private List<PlayerRecord> players;
 
-    public GameEndEvent(String winnerTeam, String winnerName, int winnerCaloryCount, List<PlayerRecord> players) {
+    public GameEndEvent() {
         this.setType(EventType.GAME_END);
-        this.winnerTeam = winnerTeam;
+    }
+
+    public GameEndEvent(String winningTeam, String winnerName, int winnerCaloryCount, List<PlayerRecord> players) {
+        this.setType(EventType.GAME_END);
+        this.winningTeam = winningTeam;
         this.winnerName = winnerName;
         this.winnerCaloryCount = winnerCaloryCount;
         this.players = players;
     }
 
-    public String getWinnerTeam() {
-        return winnerTeam;
+    public String getWinningTeam() {
+        return winningTeam;
     }
 
-    public void setWinnerTeam(String winnerTeam) {
-        this.winnerTeam = winnerTeam;
+    public void setWinningTeam(String winningTeam) {
+        this.winningTeam = winningTeam;
     }
 
     public String getWinnerName() {
@@ -60,7 +64,7 @@ public class GameEndEvent extends Event {
     @Override
     public String toString() {
         return "GameEndEvent{" +
-                "winnerTeam='" + winnerTeam + '\'' +
+                "winningTeam='" + winningTeam + '\'' +
                 ", winnerName='" + winnerName + '\'' +
                 ", winnerCaloryCount=" + winnerCaloryCount +
                 ", players=" + players +
