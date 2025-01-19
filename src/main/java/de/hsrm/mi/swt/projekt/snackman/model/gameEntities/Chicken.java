@@ -168,12 +168,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                             movementZ = 0.0f; 
                             this.wallCollision = true;  
                         }
-                        if (collisions.contains(CollisionType.GHOST)) {
-                            if(movementPaused) {
-                                return; 
-                            }
-                            reactToGhostCollision();
-                        }
                 }
                 move((movementX), (movementY), (movementZ));
                 //logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
@@ -200,39 +194,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
-    public void reactToGhostCollision() {
-        float minRadius = gameConfig.getChickenMinRadius();
-
-        // Stop the passive calorie gain temporarily
-        passiveCaloriesTask.cancel();
-    
-        // Reset the chicken's state
-        this.gainedCalories = 0;
-        this.radius = minRadius;
-    
-        logger.info("Chicken collided with a ghost. Calories and radius reset.");
-    
-        // Restart the timer after a short delay
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                passiveCaloriesTimer = new Timer();
-                passiveCaloriesTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        Game game = gameManager.getGameById(gameId);
-                        if (!movementPaused && game != null) {
-                            gainedCalories += passiveCalorieGain;
-                            game.getGameState().addChangedChicken(thisChicken);
-                            updateRadius();
-                        }
-                    }
-                };
-                passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
-                logger.info("Passive calorie gain resumed.");
-            }
-        }, 3000); // 3 seconds pause
-    }
 
     /**
      * Consumes the food, make the Chicken gain Calories.
