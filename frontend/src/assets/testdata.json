@@ -1,0 +1,47 @@
+{
+  "winningTeam": "ghost",
+  "winnerName": "Snacko",
+  "winnerCaloryCount": 123456789,
+  "players": [
+    {
+      "username": "Snacko",
+      "role": "snackman",
+      "score": 12345678
+    },
+    {
+      "username": "Phantom",
+      "role": "ghost",
+      "score": 987654
+    },
+    {
+      "username": "Hauntling",
+      "role": "ghost",
+      "score": 876543
+    },
+    {
+      "username": "Snackster",
+      "role": "snackman",
+      "score": 234567
+    },
+    {
+        "username": "Snacky",
+        "role": "snackman",
+        "score": 123456789
+      },
+      {
+        "username": "Spirit",
+        "role": "ghost",
+        "score": 987654
+      },
+      {
+        "username": "PolterGeist",
+        "role": "ghost",
+        "score": 876543
+      },
+      {
+        "username": "Snackster",
+        "role": "snackman",
+        "score": 234567
+      }
+  ]
+}

@@ -8,8 +8,8 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 public class LayEggEvent extends ApplicationEvent {
 
 
-    private Food food;
-    private long gameId;
+    private final Food food;
+    private final long gameId;
     private final GameManager gameManager;
 
     /**

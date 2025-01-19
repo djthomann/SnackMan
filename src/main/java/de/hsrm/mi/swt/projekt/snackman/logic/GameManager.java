@@ -27,11 +27,8 @@ public class GameManager {
     private final WebSocketHandler webSocketHandler;
     private final GameConfig gameConfig = new GameConfig();
 
-
-    // TODO: To Be Deleted , Constructor for testing purposes with fake game
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
-        //createGame(gameConfig, IDGenerator.getInstance().getUniqueID()); // Game Creation in websocket by MapRquest Event
     }
 
     public Game getGameById(Long id) {
@@ -108,6 +105,14 @@ public class GameManager {
 
     public List<Lobby> getAllLobbies() {
         return new ArrayList<>(allLobbies.values());
+    }
+
+    public Lobby getLobbyById(Long id) {
+        if (allLobbies.containsKey(id)) {
+            return allLobbies.get(id);
+        } else {
+            return null;
+        }
     }
 
     public Map<Long, Lobby> getLobbyMap() {
