@@ -101,7 +101,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         this.collisionManager = collisionManager;
 
         // TODO Initial calories to make jumping possible, change back to 0 later
-        this.gainedCalories = 1000000;
+        this.gainedCalories = 1000;
         this.gameManager = gameManager;
 
         this.invincible = false;
