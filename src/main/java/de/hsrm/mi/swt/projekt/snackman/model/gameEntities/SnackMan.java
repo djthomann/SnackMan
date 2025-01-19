@@ -462,6 +462,10 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         return invincible;
     }
 
+    public boolean isStunned() {
+        return stunned;
+    }
+
     /**
      * Makes the SnackMan lose the passed calorie amount
      * and sets the SnackMan to dead if its new calorie count is negative or zero
@@ -520,11 +524,13 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     }
 
     public void reactToGhostCollision() {
-        logger.info("SnackMan calories before ghost collision: " + this.gainedCalories);
-        checkIfDead(gameConfig.getGhostCollisionCalories());
-        logger.info("SnackMan calories after ghost collision: " + this.gainedCalories);
-        startStunnedTimer();
-        startInvincibleTimer();
+        if (!isInvincible() && !isStunned()) {
+            logger.info("SnackMan calories before ghost collision: " + this.gainedCalories);
+            checkIfDead(gameConfig.getGhostCollisionCalories());
+            logger.info("SnackMan calories after ghost collision: " + this.gainedCalories);
+            startStunnedTimer();
+            startInvincibleTimer();
+        }
     }
 
 }
