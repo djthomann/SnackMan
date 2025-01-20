@@ -2,7 +2,7 @@
   <div class="lobby-grid-wrapper">
     
     <!--Content for when one of the Snackmen wins-->
-    <div v-if="gameData.winningTeam == 'snackman'">
+    <div v-if="gameData.winningTeam == 'SNACKMAN'">
       <div class="background-component">
         <BackgroundComponent :title="`Congrats! ${gameData.winnerName} Won!`"></BackgroundComponent>
       </div>
@@ -23,7 +23,7 @@
             <button>Save Map</button>
           </div>
           <div>
-            <button>Back to Lobby</button>
+            <button @click="toLobby()">Back to Lobby</button>
           </div>
         </div>
 
@@ -33,7 +33,7 @@
             <template #ghost-list>
               <li
                 v-for="(player, index) in gameData.players?.filter(
-                  (player) => player.role === 'ghost',
+                  (player) => player.role === 'GHOST',
                   )"
                 :key="index"
                 class="ghostpanel__item"
@@ -52,7 +52,7 @@
           <template #receipt-list>
             <li
               v-for="(player, index) in gameData.players?.filter(
-                (player) => player.role === 'snackman',
+                (player) => player.role === 'SNACKMAN',
               )"
               :key="index"
               class="receiptpanel__item"
@@ -67,7 +67,7 @@
     </div>
 
     <!--Content for when the Ghost Team wins-->
-    <div v-if="gameData.winningTeam == 'ghost'">
+    <div v-if="gameData.winningTeam == 'GHOST'">
       <div class="background-component">
         <BackgroundComponent :title="`Oh No! Ghosts Won!`"></BackgroundComponent>
       </div>
@@ -95,7 +95,7 @@
             <button>Save Map</button>
           </div>
           <div>
-            <button>Back to Lobby</button>
+            <button @click="toLobby()">Back to Lobby</button>
           </div>
         </div>
 
@@ -104,7 +104,7 @@
             <template #ghost-list>
               <li
                 v-for="(player, index) in gameData.players?.filter(
-                  (player) => player.role === 'ghost',
+                  (player) => player.role === 'GHOST',
                 )"
                 :key="index"
                 class="ghostpanel__item"
@@ -122,14 +122,14 @@
           <template #receipt-list>
             <li
               v-for="(player, index) in gameData.players?.filter(
-                (player) => player.role === 'snackman',
+                (player) => player.role === 'SNACKMAN',
               )"
               :key="index"
               class="receiptpanel__item"
             >
               <span class="player-name">{{ player.username }}</span>
               <div class="seperation-line"></div>
-              <span>{{ player.score }} Kalorien</span>
+              <span>{{ player.score }} Calories</span>
             </li>
           </template>
         </ReceiptComponent>
@@ -147,14 +147,14 @@ import BackgroundComponent from './layout/BackgroundComponent.vue';
 import ReceiptComponent from './layout/ReceiptComponent.vue';
 import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 import GhostPanelComponent from './layout/GhostPanelComponent.vue';
-// TODO: Testdata, delete later
-import testData from '@/assets/testdata.json';
+import { Logger } from '@/util/logger';
 
 const { sendMessage } = useWebSocket();
 const route = useRoute();
 const router = useRouter();
 const lobbyCode = ref(Number(route.params.code));
 const serverMessage = ref<string>('');
+const logger = new Logger();
 
 interface Player {
   username: string;
@@ -178,7 +178,7 @@ const gameData = ref<GameData>({
 
 const handleServerMessage = (message: string) => {
   serverMessage.value = message;
-  if (message.startsWith('RESULTS')) {
+  if (message.startsWith('GAME_END')) {
     gameData.value = JSON.parse(message.split(';')[1]);
   }
 };
@@ -196,7 +196,7 @@ onMounted(async () => {
   eventBus.on('serverMessage', handleServerMessage);
 
   // TODO: Testing purposes, delete this line later
-  gameData.value = testData;
+  // gameData.value = testData;
 
   try {
     await awaitConnection();

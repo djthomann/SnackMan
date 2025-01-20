@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import org.joml.Vector3f;
@@ -76,6 +77,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
     /** The calorie count of the SnackMan */
     private int gainedCalories;
+    private Consumer<Integer> calorieChangeListener;
 
     // Collision constants
     private final long STUNNED_TIME = 1000;
@@ -316,6 +318,27 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     }
 
     /**
+     * Sets the calorieChangeListener for the SnackMan
+     * 
+     * @param listener the listener to be set
+     */
+    public void setCalorieChangeListener(Consumer<Integer> listener) {
+        this.calorieChangeListener = listener;
+    }
+
+    /**
+     * Handles a change in the calorie count of the `SnackMan`.
+     * 
+     * @param newCalories the new calorie count of the `SnackMan`
+     */
+    private void handleCalorieChange(int newCalories) {
+        this.gainedCalories = newCalories;
+        if (calorieChangeListener != null) {
+            calorieChangeListener.accept(this.gainedCalories);
+        }
+    }
+
+    /**
      * method to Consume Food
      * publishes an eat event to be progressed by the GameState
      *
@@ -323,7 +346,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
      */
     @Override
     public void eat(Food food) {
-        this.gainedCalories += food.getCalories();
+        handleCalorieChange(this.gainedCalories + food.getCalories());
         EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId, gameManager));
     }
 
@@ -525,5 +548,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             startInvincibleTimer();
         }
     }
+
+
 
 }
