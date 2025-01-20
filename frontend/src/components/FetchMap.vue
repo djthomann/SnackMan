@@ -1,5 +1,5 @@
 <template>
-  <div class="fileInputContainer">
+  <div class="fileInputContainer" :class="{ animateGreen: isGreen }">
     <label for="fileInput" class="dropZone" @dragover="handleDragOver" @drop="handleDrop">
       <svg class="uploadIcon" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
         <path
@@ -33,8 +33,15 @@ import { Logger } from '../util/logger';
 const { sendMessage } = useWebSocket();
 const file = ref<File | null>();
 const logger = new Logger();
+const isGreen = ref(false); /* for animation */
 
 const uploadMap = () => {
+  /* Animation */
+  isGreen.value = true;
+  setTimeout(() => {
+    isGreen.value = false;
+  }, 2000);
+
   if (file.value != null) {
     const reader = new FileReader();
 
@@ -65,9 +72,13 @@ const handleFileUpload = (event: Event) => {
 </script>
 
 <style scoped>
+.fileInputContainer.animateGreen {
+  animation: greenBorder 2s ease-in-out;
+}
+
 .fileInputContainer {
   margin-top: 1rem;
-  border: 2px grey;
+  border: 2px;
 }
 
 .fileInput {
@@ -137,5 +148,20 @@ const handleFileUpload = (event: Event) => {
 
 .uploadButton:hover {
   background-color: #f1f1f1;
+}
+
+@keyframes greenBorder {
+  0% {
+    border: 2px solid #00ff7f;;
+    box-shadow: none;
+  }
+  50% {
+    border: 2px solid #00ff7f;
+    box-shadow: 0 0 15px #00ff7f;
+  }
+  100% {
+    border: 2px solid #00ff7f;
+    box-shadow: none;
+  }
 }
 </style>
