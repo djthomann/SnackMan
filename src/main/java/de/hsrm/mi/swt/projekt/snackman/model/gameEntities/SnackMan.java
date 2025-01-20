@@ -166,9 +166,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             }
 
 
+            /*
             MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-
-            gameManager.notifyChange(moveEvent);
+            for(Client c : clients) {
+                gameManager.notifyChange(c, moveEvent);
+            }
+                */
 
             // If the jump is done, the task is not repeated anymore
             if (!jumping) {
@@ -195,8 +198,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 needsResolving = false;
             }
 
+            /*
             MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-            gameManager.notifyChange(moveEvent);
+            for(Client c : clients) {
+                gameManager.notifyChange(c, moveEvent);
+            }
+                */
 
             // If the resolve is done, the task is not repeated anymore
             if (!needsResolving) {
@@ -224,9 +231,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 falling = false;
             }
 
+            /*
             MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-
-            gameManager.notifyChange(moveEvent);
+            for(Client c : clients) {
+                gameManager.notifyChange(c, moveEvent);
+            }
+                 */
 
             // If the fall is done, the task is not repeated anymore
             if (!falling) {
@@ -367,8 +377,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         logger.info("Event " + event.getType() + " in Snackman " + objectId);
         if (Objects.requireNonNull(event.getType()) == EventType.MOVE) {// The SnackMan is unable to move when stunned
             if (this.stunned) {
+                /*
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                gameManager.notifyChange(moveEvent);
+                for(Client c : clients) {
+                    gameManager.notifyChange(c, moveEvent);
+                }
+                    */
                 return;
             }
 
