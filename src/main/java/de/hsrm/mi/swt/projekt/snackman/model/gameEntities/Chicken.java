@@ -1,6 +1,5 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -37,7 +36,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private CollisionManager collisionManager;
     private boolean movementPaused;   
 
-    // Variables for passive calorie gain
     private int passiveCalorieGain;
     private int passiveCalorieGainDelay;
     Chicken thisChicken = this;    
@@ -46,8 +44,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         @Override
         public void run() {
 
-            //logger.info("\n \nChicken with id " + objectId + " has passively gained calories");
-            //logger.info(objectId + " previous calories: " + gainedCalories);
             Game game = gameManager.getGameById(gameId); 
             if(!movementPaused && game!= null) {
                 gainedCalories += passiveCalorieGain;
@@ -83,12 +79,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.collisionManager = collisionManager;
         this.gameManager = gameManager;
         this.gainedCalories = 0;
-        //Timer for constant passive calorie gain
         this.passiveCalorieGain = 100;
-        this.passiveCalorieGainDelay = 1000; //in ms
+        this.passiveCalorieGainDelay = 1000;
         this.passiveCaloriesTimer = new Timer();
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
-        // choose script file
         this.scriptInterpreter = new PythonInterpreter();
         this.scriptInterpreter.exec("import sys");
         this.scriptInterpreter.exec("sys.path.insert(0, '.')");
@@ -106,9 +100,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 if (gameManager.getGameById(gameId) == null) {
                     Thread.sleep(1000);
                 } else {
-                    Thread.sleep(100); // 1000 = 1 sec
+                    Thread.sleep(100);
                     surroundings = gameManager.getGameById(gameId).generateSurroundings(this.x, this.z);
-                    // logger.info(surroundings.toString());
                     executeScript(surroundings);
                 }
             }
@@ -143,25 +136,60 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             if (result instanceof PyTuple) {
                 PyTuple tuple = (PyTuple) result;
 
-                // Retrieve the elements of the tuple and cast them to float
                 float movementX = gameConfig.getChickenSpeed() * (float) (double) tuple.get(0);
                 float movementY = gameConfig.getChickenSpeed() * (float) (double) tuple.get(1);
                 float movementZ = gameConfig.getChickenSpeed() * (float) (double) tuple.get(2);
                 this.direction = (String) tuple.get(3);
                 this.wallCollision = (boolean) tuple.get(4);
 
-                if(this.wallCollision == false) {
+                if (this.wallCollision == false) {
                     List<CollisionType> collisions;
                     float wishedX = 0.0f;
                     float wishedZ = 0.0f;
 
-                    if ( direction.equals("N") || direction.equals("E") ) {
-                        wishedX = this.getX() + (movementX + this.radius);
-                        wishedZ = this.getZ() + (movementZ + this.radius);
-                    } else {
-                        wishedX = this.getX() + (movementX - this.radius);
-                        wishedZ = this.getZ() + (movementZ - this.radius);
+                    switch (direction) {
+                        case "N":
+                            wishedX = this.getX() + (movementX + this.radius);
+                            wishedZ = this.getZ() + (movementZ + this.radius);
+                            System.out.println(wishedX + " N " + wishedZ);
+
+                            break;
+                        case "E":
+                            wishedX = this.getX() + (movementX + this.radius);
+                            wishedZ = this.getZ() + (movementZ + this.radius);
+
+                            break;
+                        case "S":
+                            wishedX = this.getX() + (movementX - this.radius);
+                            wishedZ = this.getZ() + (movementZ - this.radius);
+
+                            break;
+                        case "W":
+                            wishedX = this.getX() + (movementX - this.radius);
+                            wishedZ = this.getZ() + (movementZ - this.radius);
+                            break;
+                            
+                        case "NE":
+                            wishedX = this.getX() + (movementX + this.radius);
+                            wishedZ = this.getZ() + (movementZ + this.radius);
+                            break;
+                        case "NW":
+                            wishedX = this.getX() + (movementX - this.radius);
+                            wishedZ = this.getZ() + (movementZ + this.radius);                            
+                            break;
+                        case "SE":
+                            wishedX = this.getX() + (movementX + this.radius);
+                            wishedZ = this.getZ() + (movementZ - this.radius);
+                            break;
+                        case "SW":
+                            wishedX = this.getX() + (movementX - this.radius);
+                            wishedZ = this.getZ() + (movementZ - this.radius);
+                            break;
+                        default:
+                            logger.warn("Unknown direction: " + direction);
+                            break;
                     }
+
                     collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
                         if (collisions.contains(CollisionType.WALL)) {
                             movementX = 0.0f;
@@ -170,7 +198,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                         }
                 }
                 move((movementX), (movementY), (movementZ));
-                //logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
             }
         } catch (Exception e) {
@@ -202,7 +229,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     public synchronized void eat(Food food) {
         this.gainedCalories += food.getCalories();
         updateRadius(); 
-        // gameManager.getGameById(gameId).getGameState().addChangedChicken(this);
         EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId, gameManager));
     }
 
@@ -244,7 +270,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                     } 
                 }, 3000);
             }
-        }, 5000); // paused for 5 seconds
+        }, 5000);
 
     }
     
@@ -281,8 +307,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     public ChickenRecord toRecord() {
         return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories, radius);
     }
-
-    // String representation used for chickens surroundings
+    /**
+     * Returns string representation used for chicken-surroundings 
+     * 
+     * @return string representation
+     */    
     public String toString() {
         return "Chicken";
     }

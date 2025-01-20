@@ -460,7 +460,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         return new SnackManRecord(gameId, objectId, getUsername(), x, y, z, gainedCalories);
     }
 
-    // String representation used for chickenssurroundings
+
+    /**
+     * Returns string representation used for chicken-surroundings 
+     * 
+     * @return string representation
+     */        
     public String toString() {
         return "SNACKMAN";
     }

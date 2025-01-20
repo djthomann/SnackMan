@@ -116,7 +116,11 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
         return new GhostRecord(gameId, objectId, getUsername(), numCollisions, x, y, z);
     }
 
-    // String representation used for chickenssurroundings
+    /**
+     * Returns string representation used for chicken-surroundings 
+     * 
+     * @return string representation
+     */        
     public String toString() {
         return "GHOST";
     }

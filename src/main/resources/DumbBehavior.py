@@ -51,20 +51,37 @@ def run_behavior(environment, direction, wall_collision, x, z, y):
         return move_vectors["JUMP"] + (direction,) + (wall_collision,)
 
     # If there is a wall, choose a random valid direction
-    if next_tile == "WALL":
-
-        if rand.nextInt(3) == 0: # 1/3 Percentage for repeated running into a wall
-            return move_vectors[direction] + (direction,) + (True,)
+    if wall_collision or (next_tile == "WALL" and 
+                          ((direction in ["N", "S"] and 0.49 < x % 1.0 < 0.51) 
+                           or (direction in ["E", "W"] and 0.49 < z % 1.0 < 0.51) 
+                           or (direction in ["NW", "NE", "SW", "SE"] and 0.49 < x % 1.0 < 0.51 and 0.49 < z % 1.0 < 0.51)
+                          )):
+        valid_directions = []
         
-        valid_directions = [new_direction for new_direction in alternatives[direction]
-                            if get_tile(environment, *direction_offsets[new_direction]) != "WALL"]
+         # Simplify the direction if it's diagonal (NW, NE, SW, SE)
+        if direction in ["NW", "NE", "SW", "SE"]:
+            # Simplify to the main direction
+            direction = {"NW": "N", "NE": "N", "SW": "S", "SE": "S"}[direction]
 
-        if valid_directions:
+        for new_direction in alternatives[direction]:
+            if get_tile(environment,*direction_offsets[new_direction]) != "WALL":
+                valid_directions.append(new_direction)
+
+        if len(valid_directions) > 1:
+            wall_collision = False
             new_direction = valid_directions[int(rand.nextInt(len(valid_directions)))]
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
-
-        new_direction = opposite_directions[direction]
-        return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        
+        if len(valid_directions) == 1:
+            wall_collision = False
+            new_direction = valid_directions[0]
+            return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        
+        else:
+            wall_collision = False
+            new_direction = opposite_directions[direction]
+            return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        
 
     # If nothing special, continue in the current direction
     return move_vectors[direction] + (direction,) + (wall_collision,)

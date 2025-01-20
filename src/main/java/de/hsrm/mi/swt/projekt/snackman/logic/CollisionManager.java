@@ -21,7 +21,6 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
 public class CollisionManager {
 
-    // Translation added to x- and z-values for correct depiction in frontend.
     private final float TRANSLATION = 0.5f;
 
     private SnackManMap snackManMap;
@@ -47,7 +46,6 @@ public class CollisionManager {
     public synchronized List<CollisionType> checkCollision(float wishedX, float wishedZ, 
         GameObject currentObject) {
         
-        // Changed return type from string to array list as several collisions can happen at once, e.g. ghost and item
         ArrayList<CollisionType> collisions = new ArrayList<>();
         collisions.clear();
         Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
@@ -65,8 +63,6 @@ public class CollisionManager {
                 break;
 
             case ITEM:
-                // logger.info(
-                //         collisionPartner.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , " + wishedTile.getZ() + " .");
                 List<Food> nearbyFoods = new CopyOnWriteArrayList<>(snackManMap.getFoodsOfTile(wishedTile));
                 List <Food> foodsToRemove = new ArrayList<>(); 
                 if (currentObject instanceof SnackMan || currentObject instanceof Chicken) {
@@ -123,7 +119,6 @@ public class CollisionManager {
 
         ArrayList<CollisionType> collisions = new ArrayList<>();
 
-        // Iterate through all Movables and check for collisions between Entities:
         for (MovableAndSubscribable collisionPartner : this.allMovables) {
 
             if (collisionPartner != currentObject) {
@@ -134,8 +129,6 @@ public class CollisionManager {
                 switch (currentObject) {
                     case SnackMan s1 -> {
 
-                        // Since Snackman can jump the height distance has to be taken into
-                        // consideration as well. (Height/2 since it is in the middle...)
                         float heightDistance = calculateHeightDifference(currentObject.getY(),
                                 ((GameObject) collisionPartner).getY());
 
@@ -298,10 +291,8 @@ public class CollisionManager {
         float dBottom = distances[2];
         float dTop = distances[3];
 
-        // Calculate the minimum distance
         float dMin = Math.min(Math.min(dLeft, dRight), Math.min(dBottom, dTop));
 
-        // determine the direction vector
         if (dMin == dLeft) {
             vec.x = -1;
             vec.z = 0;

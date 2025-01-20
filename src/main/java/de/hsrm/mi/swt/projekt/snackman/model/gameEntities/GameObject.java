@@ -34,7 +34,6 @@ public class GameObject {
         x += newX;
         y += newY;
         z += newZ;
-        // logger.info(this.getClass().getSimpleName() + " moved to " + x + ", " + y + ", " + z);
     }
     
     public long getObjectId() {
