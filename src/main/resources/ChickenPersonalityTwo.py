@@ -42,8 +42,12 @@ def run_behavior(environment, direction, wall_collision,x,z):
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
     
     # if the Ghost or Snackman is on the same tile, freeze.
-    if current_tile == "GHOST" or current_tile == "SNACKMAN":
+    if current_tile == "SNACKMAN":
          return (0.0, 0.0, 0.0, direction, wall_collision)
+    
+        # if the Ghost is on the same tile, jump up scared.
+    if  current_tile == "GHOST":
+        return move_vectors["JUMP"] + (direction,) + (wall_collision,)
     
     # If the current direction is blocked, check if an alternative is available
     if wall_collision or (next_tile == "WALL" and ((direction in ["N", "S"] and 0.49 < x % 1.0 < 0.51) or (direction in ["E", "W"] and 0.49 < z % 1.0 < 0.51))):

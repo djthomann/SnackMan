@@ -40,9 +40,10 @@ def run_behavior(environment, direction, wall_collision,x,z):
             new_direction = valid_directions[int(rand.nextInt(len(valid_directions)))]
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
     
-    # if the Ghost is on the same tile, freeze.
+    # if the Ghost is on the same tile, jump up scared.
     if  current_tile == "GHOST":
-         return (0.0, 0.0, 0.0, direction, wall_collision)
+        return move_vectors["JUMP"] + (direction,) + (wall_collision,)
+
 
     # If the current direction is not blocked and has no food in it, checks for food right or left
     if next_tile != "FOOD" and wall_collision == False:
