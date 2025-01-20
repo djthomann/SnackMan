@@ -26,6 +26,7 @@ import { Mesh } from 'three';
 import GameOverlay from './GameOverlay.vue';
 import { Logger } from '../util/logger';
 import LoadingOverlayComponent from './layout/LoadingOverlayComponent.vue';
+import router from '@/router';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -91,6 +92,9 @@ const wallHeight = 1 * mapScale;
           isLoading.value = false;
         }
         handleGameStateEvent(message.split(';')[1]);
+      } else if (message.startsWith('GAME_END')) {
+        const code = route.params.code;
+        router.push(`/results/${code}`);
       } else {
         logger.warn(`FE does not support message starting with ${message.split(";")[0]}`)
       }
@@ -191,6 +195,9 @@ const wallHeight = 1 * mapScale;
     }
 
     onMounted(async () => {
+
+      console.log("On Mounted")
+
       await nextTick();
       console.log(gameOverlayRef.value);
       eventBus.on('serverMessage', handleServerMessage);

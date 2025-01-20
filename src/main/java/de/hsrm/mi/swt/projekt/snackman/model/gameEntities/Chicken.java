@@ -19,7 +19,7 @@ import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.Game;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.ChickenRecord;
 
 
 /**
@@ -47,6 +47,13 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             Game game = gameManager.getGameById(gameId); 
             if(!movementPaused && game!= null) {
                 gainedCalories += passiveCalorieGain;
+                /* TODO: NEEDS DEBUGGING
+                game.getGameState().addChangedChicken(thisChicken);
+                GameState gameState = gameManager.getGameById(gameId).getGameState();
+                if(gameState != null) {
+                gameState.addChangedChicken(thisChicken);
+                }
+                 */
                 game.getGameState().addChangedChicken(thisChicken);
                 updateRadius();            
             }

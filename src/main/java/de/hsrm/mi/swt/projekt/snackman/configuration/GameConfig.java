@@ -58,7 +58,7 @@ public class GameConfig {
 
     public GameConfig() {
         // Placeholder default values for the beginning -> change later to reasonable default values
-        this.scoreToWin = 1;
+        this.scoreToWin = 1003000;
         this.speedModifier = 1;
         this.snackManSpeed = 1;
 
