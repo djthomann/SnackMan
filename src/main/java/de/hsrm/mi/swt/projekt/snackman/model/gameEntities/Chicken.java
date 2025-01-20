@@ -15,6 +15,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.LayEggEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.ScareEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
@@ -39,7 +40,13 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     // Variables for passive calorie gain
     private int passiveCalorieGain;
     private int passiveCalorieGainDelay;
-    Chicken thisChicken = this;    
+    private Chicken thisChicken = this;  
+
+    private StateOfObject state;
+
+    private float minRadius;
+    private float maxRadius;
+    private float maxCalories;
 
     private TimerTask passiveCaloriesTask = new TimerTask() {
         @Override
@@ -207,13 +214,14 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      *
      */
     private void updateRadius() {
-        float minRadius = gameConfig.getChickenMinRadius(); 
-        float maxRadius = gameConfig.getChickenMaxRadius(); 
-        float maxCalories = gameConfig.getChickenMaxCalories(); 
+        minRadius = gameConfig.getChickenMinRadius(); 
+        maxRadius = gameConfig.getChickenMaxRadius(); 
+        maxCalories = gameConfig.getChickenMaxCalories(); 
         this.radius = minRadius + (maxRadius - minRadius) * Math.min((float) gainedCalories / maxCalories, 1.0f);
 
         if(radius >= maxRadius) {
-            stopMovementTemporarily(minRadius);
+            stopMovementTemporarily();
+            layEgg();
         }
     }
 
@@ -222,7 +230,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      *
      * @param minRadius the minimum radius to reset to
      */
-    private void stopMovementTemporarily(float minRadius) {
+    private void stopMovementTemporarily() {
         this.movementPaused = true; 
         new Timer().schedule(new TimerTask() {
             @Override
@@ -230,10 +238,22 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 movementPaused = false; 
                 radius = minRadius; 
                 gainedCalories = 0;
-                layEgg();
             }
         }, 5000); // paused for 5 seconds
 
+    }
+
+    /** react to getting scared by a ghost */
+    public void reactToGhostCollision() {
+        stopMovementTemporarily();
+        state = StateOfObject.SCARED;
+        EventService.getInstance().applicationEventPublisher.publishEvent(new ScareEvent(this, gameId, gameManager));
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                state = StateOfObject.NEUTRAL;
+            }
+        }, 5000); // paused for 5 seconds
     }
     
     /**
@@ -267,7 +287,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     public void handle(Event event) {}
 
     public ChickenRecord toRecord() {
-        return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories, radius);
+        return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories, radius, state.toString());
     }
 
     // String representation used for chickens surroundings

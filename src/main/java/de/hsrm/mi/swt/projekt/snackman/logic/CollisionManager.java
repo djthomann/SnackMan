@@ -57,7 +57,6 @@ public class CollisionManager {
                 break;
 
             case FREE:
-                collisions.addAll(checkModelCollision(currentObject, wishedX, wishedZ));
                 break;
 
             case ITEM:
@@ -83,10 +82,10 @@ public class CollisionManager {
                     } catch (NullPointerException e) {
                         logger.warn("No food on tile: " + wishedTile.getX() + ", " + wishedTile.getZ());
                     }
-                    collisions.addAll(checkModelCollision(currentObject, wishedX, wishedZ));
                 }
                 break;
         }
+        collisions.addAll(checkModelCollision(currentObject, wishedX, wishedZ));
         return collisions;
 
     }
@@ -172,6 +171,7 @@ public class CollisionManager {
                                 case Ghost g -> {
                                     logger.info("Collision between Chicken #" + c1.getObjectId() + "and Ghost #"
                                             + g.getObjectId());
+                                    c1.reactToGhostCollision();
                                     collisions.add(CollisionType.GHOST);
                                 }
                                 case Chicken c2 -> {
