@@ -69,7 +69,7 @@ class ModelService {
       brokkoli: 1,
       snackman: 0.12,
       player: 0.12,
-      ghost: 0.11
+      ghost: 0.14
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
