@@ -108,7 +108,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 } else {
                     Thread.sleep(100); // 1000 = 1 sec
                     surroundings = gameManager.getGameById(gameId).generateSurroundings(this.x, this.z);
-                    //logger.info(surroundings.toString());
+                    // logger.info(surroundings.toString());
                     executeScript(surroundings);
                 }
             }
@@ -133,9 +133,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         scriptInterpreter.set("wall_collision", wallCollision );
         scriptInterpreter.set("x", x);
         scriptInterpreter.set("z", z);
+        scriptInterpreter.set("y", y);
+
         try {
 
-            scriptInterpreter.exec("result = run_behavior(environment, direction, wall_collision,x,z)");
+            scriptInterpreter.exec("result = run_behavior(environment, direction, wall_collision, x, z, y)");
             PyObject result = scriptInterpreter.get("result");
 
             if (result instanceof PyTuple) {

@@ -81,6 +81,8 @@ public class CollisionManager {
                                     
                                     if (currentObject instanceof SnackMan) {
                                         foodsToRemove.add(food); 
+                                        wishedTile.removeFromOccupation(food); 
+
                                         ((SnackMan) currentObject).eat(food);
                                     }
                                     else if (currentObject instanceof Chicken) {

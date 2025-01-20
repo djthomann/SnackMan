@@ -203,7 +203,7 @@ public class Game {
             Tile tileOne = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
             if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupations().isEmpty()) {
                 Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
-                0.0f, (float) tileOne.getZ()+0.5f, "GreedyBehavior", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileOne.getZ()+0.5f, "DumbBehavior", gameManager, gameConfig, collisionManager);
                 tileOne.addToOccupation(chickenOne);
                 allMovables.add(chickenOne);
             }
