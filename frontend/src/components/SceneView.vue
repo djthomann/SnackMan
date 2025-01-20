@@ -195,6 +195,9 @@ const wallHeight = 1 * mapScale;
     }
 
     onMounted(async () => {
+
+      console.log("On Mounted")
+
       await nextTick();
       console.log(gameOverlayRef.value);
       eventBus.on('serverMessage', handleServerMessage);

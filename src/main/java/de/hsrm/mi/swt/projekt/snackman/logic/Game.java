@@ -55,6 +55,7 @@ public class Game {
     private int numSnackmen = 0;
     private long startTime;
     private boolean hasSnackManWon = false; // else ghost won
+    private List<Client> clients;
 
     // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
@@ -64,7 +65,8 @@ public class Game {
         this.map = lobby.getMap();
         this.gameManager = gameManager;
         this.collisionManager = new CollisionManager(this, map, allMovables);
-        initialize(lobby.getClientsAsList()); 
+        clients = lobby.getClientsAsList();
+        initialize(clients); 
         startTimer();
         gameState = new GameState(this);
         registerCalorieListeners();
@@ -144,7 +146,7 @@ public class Game {
         x += 0.5f;
         z += 0.5f;
 
-        SnackMan snackMan = new SnackMan(username, id, this.id, x, 0, z, this.gameManager, this.gameConfig, this.collisionManager);
+        SnackMan snackMan = new SnackMan(username, id, clients, this.id, x, 0, z, this.gameManager, this.gameConfig, this.collisionManager);
         allMovables.add(snackMan);
         map.getTileAt((int) x, (int) z).addToOccupation(snackMan);
         numSnackmen++;
@@ -163,10 +165,10 @@ public class Game {
             createMovables(clients);
         } else {
             // for testing setup test SnackMan
-            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), id, 20.5f, 1.1f, 20.5f, 
+            allMovables.add(new SnackMan("Snacko", IDGenerator.getInstance().getUniqueID(), clients, id, 20.5f, 1.1f, 20.5f, 
             gameManager, gameConfig, collisionManager));
             // Ghost to test collision
-            allMovables.add(new Ghost("spookie", IDGenerator.getInstance().getUniqueID(), id, 16.5f, 1.1f, 20.5f, 
+            allMovables.add(new Ghost("spookie", IDGenerator.getInstance().getUniqueID(),  id, 16.5f, 1.1f, 20.5f, 
             gameConfig, gameManager, collisionManager));
         }
 
@@ -180,7 +182,9 @@ public class Game {
 
         // Notify Game Start if clients are provided
         if (clients != null) {
-            this.gameManager.notifyChange(createGameStartEvent());
+            for(Client client : clients) {
+                this.gameManager.notifyChange(client, createGameStartEvent());
+            }
         }
     }
 
@@ -460,6 +464,10 @@ public class Game {
         return gameManager;
     }
 
+    public long getId() {
+        return id;
+    }
+
     //adjust the cases,in case of changing the Occupation in the Tile of the map to records!
     public List<List<String>> generateSurroundings(float x, float z) {
         Tile positionTile = this.map.getTileAt((int) x, (int) z);
@@ -546,6 +554,10 @@ public class Game {
 
     public SnackManMap getMap() {
         return map;
+    }
+
+    public List<Client> getClients() {
+        return clients;
     }
     
 }
