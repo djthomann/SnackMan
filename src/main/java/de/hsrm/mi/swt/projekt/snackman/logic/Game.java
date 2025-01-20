@@ -65,7 +65,27 @@ public class Game {
         initialize(lobby.getClientsAsList()); 
         startTimer();
         gameState = new GameState(this);
+        registerCalorieListeners();
         logger.info("created Game with id: " + id);
+    }
+
+    /**
+     * registers calorie listeners for all snackman to see if calorie target was hit
+     * 
+    */
+    public void registerCalorieListeners() {
+        int scoreToWin = gameConfig.getScoreToWin();
+
+        for (MovableAndSubscribable m : allMovables) {
+            if (m instanceof SnackMan snackMan) {
+                snackMan.setCalorieChangeListener(newCal -> {
+                    if (newCal >= scoreToWin) {
+                        logger.info("targeted calories reached by a SnackMan");
+                        sendGameEndEvent();
+                    }
+                });
+            }
+        }
     }
 
     /**
