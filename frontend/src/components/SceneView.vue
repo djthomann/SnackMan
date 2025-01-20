@@ -1,11 +1,14 @@
 <template>
   <div ref="rendererContainer" class="canvas-container">
+    <Transition name="fade" mode="out-in">
+      <LoadingOverlayComponent v-if="isLoading"></LoadingOverlayComponent>
+    </Transition>
     <GameOverlay ref="gameOverlayRef" />
   </div>
   <div id="clickable-container"></div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { defineComponent, onUnmounted, ref, onMounted, nextTick } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
@@ -21,9 +24,8 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { Mesh } from 'three';
 import GameOverlay from './GameOverlay.vue';
-import AudioPlayer from './AudioPlayer.vue';
-
 import { Logger } from '../util/logger';
+import LoadingOverlayComponent from './layout/LoadingOverlayComponent.vue';
 
 // TODO find and replace with similar free music because these songs are copyrighted
 import gameMusic from '@/assets/sounds/music/Game-music.mp3';
@@ -42,12 +44,6 @@ let box: THREE.Mesh;
 const mapScale = 5;
 const wallHeight = 1 * mapScale;
 
-export default defineComponent({
-  components: {
-    AudioPlayer
-  },
-  name: 'SceneView',
-  setup() {
 
     // Background music and other sounds
     let backgroundSound: THREE.Audio<GainNode>;
@@ -55,7 +51,8 @@ export default defineComponent({
     let chickenAudios: THREE.PositionalAudio[] = [];
 
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
-    const audioPlayerRef = ref<InstanceType<typeof AudioPlayer> | null>(null);
+    const isLoading = ref<boolean>(true);
+    
 
     const { sendMessage } = useWebSocket();
 
@@ -124,12 +121,15 @@ export default defineComponent({
     const handleServerMessage = (message: string) => {
       serverMessage.value = message;
 
-    if (message.startsWith('GAME_START')) {
+      if (message.startsWith('GAME_START')) {
         handleStartEvent(message.split(';')[1]);
         if (startPromiseResolve) {
           startPromiseResolve();
         }
       } else if (message.startsWith('GAME_STATE')) {
+        if(isLoading.value){
+          isLoading.value = false;
+        }
         handleGameStateEvent(message.split(';')[1]);
       } else {
         logger.warn(`FE does not support message starting with ${message.split(";")[0]}`)
@@ -161,6 +161,9 @@ export default defineComponent({
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
+        if(ghost.objectId === userStore.id) {
+          gameStore.setCollisions(ghost.collisions)
+        }
         meshes.get(ghost.objectId)!.position.set(ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
       });
 
@@ -182,7 +185,6 @@ export default defineComponent({
       }
 
       });
-
       loadMap(map.value);
     };
 
@@ -422,9 +424,8 @@ export default defineComponent({
       scene.add(foodGroup);
       scene.add(floorGroup);
 
-      const skyTest = modelService.createSkybox(w);
-      scene.add(skyTest);
-
+      const skyBox = modelService.createSkybox(w);
+      scene.add(skyBox);
     }
 
     function makeDisappear(id: number) {
@@ -524,7 +525,6 @@ export default defineComponent({
       });
 
       controls.addEventListener('unlock', () => {
-        camera.rotation.set(0, 0, 0);
       });
 
       // TODO When entering a user name no move event should be sent to the backend
@@ -764,16 +764,19 @@ export default defineComponent({
     }
 
 
-
-    return {
-      rendererContainer,
-      serverMessage,
-    };
-  },
-});
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 html,
 body {
   margin: 0;

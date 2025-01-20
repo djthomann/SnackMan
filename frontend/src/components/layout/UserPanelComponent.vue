@@ -27,13 +27,10 @@
                 </div>
             </div>
             <div class="playerpanel__content">
-                <div class="playerpanel__content-header">
-                    
-                    <div class="playerpanel__content-image">
-                        <img src="@/assets/images/avatars/avatar_snackman.svg">
-                    </div>
-                    
-                </div>
+
+                <img class="playerpanel__content-pin" src="@/assets/icons/pin.svg">
+
+                        <img class="playerpanel__content-image" src="@/assets/images/avatars/avatar_snackman.svg">
                 <div class="playerpanel__content-body">
                     <p>{{ name }}(#{{ id }})</p>
                 </div>
@@ -56,7 +53,7 @@
 }
 
 .playerpanel__container {
-    width: 100%;
+    width: 200px;
     max-width: 340px;
     position: relative;
     z-index: 3;
@@ -105,9 +102,8 @@
 .playerpanel__content {
     position: relative;
     width: 100%;
-    display: grid;
-    grid-template-columns: 100%;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .playerpanel--height-auto .playerpanel__content {
@@ -124,6 +120,8 @@
     padding: 25px 30px 15px;
     box-sizing: border-box;
     display: flex;
+    align-items: center;
+    justify-content: center;
     flex-direction: column;
     gap: 15px;
 }
@@ -142,11 +140,10 @@
     pointer-events: none;
 }
 
-.playerpanel__content-image img {
-    width: 100%;
+.playerpanel__content-pin {
+    width: 30%;
     height: 100%;
-    object-fit: contain;
-    object-position: center;
+    transform: translateY(-20px);
 }
 
 .playerpanel__content-body {

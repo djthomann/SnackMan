@@ -17,7 +17,7 @@ def run_behavior(environment, direction, wall_collision,x,z):
     current_tile = get_tile(environment, 1, 1)
     next_tile = get_tile(environment, *direction_offsets[direction])
     
-    # If the current direction is blocked, turn around and set wall_collision to True , should not happen!
+    # If the current direction is blocked, turn around and set wall_collision to True
     if current_tile == "WALL":
         wall_collision = True
         new_direction = opposite_directions[direction]
@@ -25,8 +25,20 @@ def run_behavior(environment, direction, wall_collision,x,z):
     
     # If there is a ghost in the way, Turn around.
     if next_tile == "GHOST":
-        new_direction = opposite_directions[direction]
-        return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+        valid_directions = []  
+        
+        valid_directions.append(opposite_directions[direction])  
+        for new_direction in alternatives[direction]:
+            if get_tile(environment,*direction_offsets[new_direction]) != "WALL" and get_tile(environment,*direction_offsets[new_direction]) != "GHOST":
+                valid_directions.append(new_direction)
+                   
+        if len(valid_directions) == 1:
+            new_direction = valid_directions[0]
+            return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+            
+        elif len(valid_directions) > 1:
+            new_direction = valid_directions[int(rand.nextInt(len(valid_directions)))]
+            return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
     
     # if the Ghost is on the same tile, freeze.
     if  current_tile == "GHOST":

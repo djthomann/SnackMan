@@ -16,7 +16,7 @@ public class Tile {
     private Food foodOnTile;
 
     //private GameObject occupation;
-    private List<GameObject> occupations;
+    private final List<GameObject> occupations;
 
     /**
      * Constructor, creates Tile with given parameters:
@@ -28,7 +28,7 @@ public class Tile {
         this.x = x;
         this.z = z;
         this.occupationType = occupationType;
-        this.occupations = new ArrayList<GameObject>(); 
+        this.occupations = new ArrayList<>();
     }
 
     public OccupationType getOccupationType() {
@@ -58,7 +58,6 @@ public class Tile {
         if (occupation instanceof Food) {
             this.foodOnTile = (Food) occupation;
             occupationType = OccupationType.ITEM;
-            return;
         }
     }
     

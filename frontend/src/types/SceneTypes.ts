@@ -12,6 +12,7 @@ export type Snackman = {
     gameId: number;
     objectId: number;
     username: string;
+    collisions: number;
     x: number;
     y: number;
     z: number;

@@ -13,10 +13,8 @@ public class IDGenerator {
     public static IDGenerator getInstance() {
         if(instance == null) {
             instance = new IDGenerator();
-            return instance;
-        } else {
-            return instance;
         }
+        return instance;
     }
 
     synchronized public long getUniqueID() {

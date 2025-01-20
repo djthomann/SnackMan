@@ -1,6 +1,7 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -8,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +23,12 @@ import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord;
+
 /**
  * The `SnackMan` class represents a player character in the game who has an
  * initial position on a plane and has a calorie count.
  * This class extends `PlayerObject` and adds the ability to track and modify
  * the calorie count of the `SnackMan`.
- * 
- * 
  */
 public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscribable {
 
@@ -115,132 +116,117 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     }
 
     public void init() {
-        this.jumpTask = new Runnable() {
+        this.jumpTask = () -> {
 
-            @Override
-            public void run() {
+            logger.info("Jumping");
 
-                logger.info("Jumping");
+            /*
+              The gravity (a negative constant) is applied to the SnackMan's velocity
+              The velocity starts at a positive value
+              It is 0 when the SnackMan is at its highest position
+              It is negative during the falling phase
+              Formula: v = v + deltaT * G where v is the velocity, deltaT the time between
+              position updates and G the gravity constant
+             */
+            currentVelocity += deltaTime * GRAVITY;
 
-                /**
-                 * The gravity (a negative constant) is applied to the SnackMan's velocity
-                 * The velocity starts at a positive value
-                 * It is 0 when the SnackMan is at its highest position
-                 * It is negative during the falling phase
-                 * Formula: v = v + deltaT * G where v is the velocity, deltaT the time between
-                 * position updates and G the gravity constant
-                 */
-                currentVelocity += deltaTime * GRAVITY;
+            /*
+             * Updating the SnackMan's position by applying the velocity to the current
+             * position
+             * Formula: y = y + deltaT * v where y is the position, deltaT the time between
+             * position updates and v the SnackMan's current velocity
+             */
+            heightGain = deltaTime * currentVelocity;
 
-                /**
-                 * Updating the SnackMan's position by applying the velocity to the current
-                 * position
-                 * Formula: y = y + deltaT * v where y is the position, deltaT the time between
-                 * position updates and v the SnackMan's current velocity
-                 */
-                heightGain = deltaTime * currentVelocity;
+            move(0, heightGain, 0);
 
-                move(0, heightGain, 0);
-
-                /**
-                 * Check if the SnackMan has landed at its initial y-position
-                 * If so, the jump is done
-                 */
-                if(collisionManager.positionInWall(x, z)) {
-                    if (y < GameConfig.WALL_HEIGHT) {
-                        y = GameConfig.WALL_HEIGHT;
-                        jumping = false;
-                        needsResolving = true;
-                        resolveOnTopOfWall();
-                    }
-                } else {
-                    // Check if SnackMan has landed on food
-                    collisionManager.checkCollision(x, z, SnackMan.this);
-                    if (y < 0.8f) {
-                        y = 0.8f;
-                        jumping = false;
-                    }
+            /*
+             * Check if the SnackMan has landed at its initial y-position
+             * If so, the jump is done
+             */
+            if(collisionManager.positionInWall(x, z)) {
+                if (y < GameConfig.WALL_HEIGHT) {
+                    y = GameConfig.WALL_HEIGHT;
+                    jumping = false;
+                    needsResolving = true;
+                    resolveOnTopOfWall();
                 }
-                
-
-                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                
-                gameManager.notifyChange(moveEvent);
-
-                // If the jump is done, the task is not repeated anymore
-                if (!jumping) {
-                    boosts = 0;
-                    jumpTaskFuture.cancel(false);
-                }
-            }
-
-        };
-
-        this.resolveTask = new Runnable() {
-
-            @Override
-            public void run() {
-
-                if(resolveVector == null) {
-                    resolveVector = collisionManager.getResolveVector(x, z);
-                }
-                
-                // logger.info("Trying to resolve");
-                logger.info(resolveVector.toString());
-
-                move(resolveVector.x * RESOLVE_SPEED, 0, resolveVector.z * RESOLVE_SPEED);
-
-                /**
-                 * Check if the SnackMan is not over a wall anymore
-                 */
-                if(!collisionManager.positionInWall(x, z)) {
-                    needsResolving = false;
-                }
-                
-                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                gameManager.notifyChange(moveEvent);
-
-                // If the resolve is done, the task is not repeated anymore
-                if (!needsResolving) {
-                    resolveVector = null;
-                    resolveTaskFuture.cancel(false);
-                    fall();
-                }
-            }
-
-        };
-
-        this.fallTask = new Runnable() {
-
-            @Override
-            public void run() {
-
-                
-                currentVelocity += deltaTime * GRAVITY;
-                
-                heightGain = deltaTime * currentVelocity;
-                
-                // logger.info("Falling" + currentVelocity);
-                move(0, heightGain, 0);
-                
-                
-
+            } else {
+                // Check if SnackMan has landed on food
                 collisionManager.checkCollision(x, z, SnackMan.this);
                 if (y < 0.8f) {
                     y = 0.8f;
-                    falling = false;
-                }
-
-                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                
-                gameManager.notifyChange(moveEvent);
-
-                // If the fall is done, the task is not repeated anymore
-                if (!falling) {
-                    fallTaskFuture.cancel(false);
+                    jumping = false;
                 }
             }
 
+
+            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+
+            gameManager.notifyChange(moveEvent);
+
+            // If the jump is done, the task is not repeated anymore
+            if (!jumping) {
+                boosts = 0;
+                jumpTaskFuture.cancel(false);
+            }
+        };
+
+        this.resolveTask = () -> {
+
+            if(resolveVector == null) {
+                resolveVector = collisionManager.getResolveVector(x, z);
+            }
+
+            // logger.info("Trying to resolve");
+            logger.info(resolveVector.toString());
+
+            move(resolveVector.x * RESOLVE_SPEED, 0, resolveVector.z * RESOLVE_SPEED);
+
+            /*
+             * Check if the SnackMan is not over a wall anymore
+             */
+            if(!collisionManager.positionInWall(x, z)) {
+                needsResolving = false;
+            }
+
+            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+            gameManager.notifyChange(moveEvent);
+
+            // If the resolve is done, the task is not repeated anymore
+            if (!needsResolving) {
+                resolveVector = null;
+                resolveTaskFuture.cancel(false);
+                fall();
+            }
+        };
+
+        this.fallTask = () -> {
+
+
+            currentVelocity += deltaTime * GRAVITY;
+
+            heightGain = deltaTime * currentVelocity;
+
+            // logger.info("Falling" + currentVelocity);
+            move(0, heightGain, 0);
+
+
+
+            collisionManager.checkCollision(x, z, SnackMan.this);
+            if (y < 0.8f) {
+                y = 0.8f;
+                falling = false;
+            }
+
+            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+
+            gameManager.notifyChange(moveEvent);
+
+            // If the fall is done, the task is not repeated anymore
+            if (!falling) {
+                fallTaskFuture.cancel(false);
+            }
         };
     }
 
@@ -295,7 +281,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
             
 
-            /**
+            /*
              * If we are already jumping, have not reached the maximum possible number of
              * boosts and have enough calories,
              * apply boost to current velocity, so that we jump higher
@@ -307,7 +293,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             // Time that has passed since pressing the space bar
             float timeDifference = this.jumpEndTime - this.jumpStartTime;
 
-            /**
+            /*
              * Boosts are only possible when enough time has passed since pressing the space
              * bar
              * so that they are not applied immediately
@@ -374,101 +360,93 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         }
 
         logger.info("Event " + event.getType() + " in Snackman " + objectId);
-        switch (event.getType()) {
+        if (Objects.requireNonNull(event.getType()) == EventType.MOVE) {// The SnackMan is unable to move when stunned
+            if (this.stunned) {
+                MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
+                gameManager.notifyChange(moveEvent);
+                return;
+            }
 
-            case MOVE:
+            Vector3f vector = ((MoveEvent) event).getMovementVector();
+            logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
 
-                // The SnackMan is unable to move when stunned
-                if(this.stunned) {
-                    MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                    gameManager.notifyChange(moveEvent);
-                    return;
-                }
+            float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
+            logger.info("Wished X: " + wishedX);
+            float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
+            logger.info("Wished Z: " + wishedZ);
 
-                Vector3f vector = ((MoveEvent) event).getMovementVector();
-                logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
+            if (!collisionManager.positionIsWithinMapBounds(wishedX, wishedZ)) {
+                vector.x = 0.0f;
+                vector.z = 0.0f;
+                return;
+            }
 
-                float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
-                logger.info("Wished X: " + wishedX);
-                float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
-                logger.info("Wished Z: " + wishedZ);
+            if (needsResolving || falling) {
+                logger.info("Can't move during resolving");
+                vector.x = 0;
+                vector.z = 0;
+                return;
+            }
 
-                if(!collisionManager.positionIsWithinMapBounds(wishedX, wishedZ)) {
-                    vector.x = 0.0f;
-                    vector.z = 0.0f;
-                    return;
-                }
-
-                if(needsResolving || falling) {
-                    logger.info("Can't move during resolving");
-                    vector.x = 0;
-                    vector.z = 0;
-                    return;
-                }
-
-                if(collisionManager.positionInWall(x, z) && !jumping) {
-                    if(!collisionManager.positionInWall(wishedX, wishedZ)) {
-                        this.jump();
-                    }
-                }
-
-                // Logic for collision with wall side and food
-                ArrayList<CollisionType> collisions;
-                collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
-                if (wishedX != this.getX() || wishedZ != this.getZ()) {
-                    if (this.getY() < gameConfig.getWallHeight()) {
-                        if (collisions.contains(CollisionType.WALL)) {
-                            vector.x = 0.0f;
-                            vector.z = 0.0f;
-                        } else if (collisions.contains(CollisionType.ITEM)) {
-                            logger.info("MMMMMM delicious ");
-                        }
-                    }
-
-                }
-
-                /**
-                 * In case of a ghost collision the SnackMan loses calories,
-                 * is stunned and unable to move for a certain time period
-                 * and invincible for a certain time period
-                 */
-                if(collisions.contains(CollisionType.GHOST) && !this.invincible) {
-                    reactToGhostCollision();
-                }
-
-                /**
-                 * In case of a SnackMan collision the SnackMan is unable to move through the other SnackMan
-                 */
-                if(collisions.contains(CollisionType.SNACKMAN)) {
-
-                    // If the SnackMan is mid-jump, it has landed on another SnackMan
-                    if(this.jumping) {
-                        this.jumping = false;
-                        jumpTaskFuture.cancel(false);
-                        this.y = gameConfig.getSnackManHeight() + gameConfig.getSnackManHeight() / 2;
-                    }
-
-                    logger.info("Kollision mit Snack Man, aktuelle Kalorien: " + this.gainedCalories);
-                    vector.x = 0.0f;
-                    vector.z = 0.0f;
-                }
-
-                this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
-
-                // checks if the movementVector is from a jump action or not
-                if (vector.y != 0.0) {
-
+            if (collisionManager.positionInWall(x, z) && !jumping) {
+                if (!collisionManager.positionInWall(wishedX, wishedZ)) {
                     this.jump();
+                }
+            }
 
-                    logger.info("SNACKMAN JUMPT");
+            // Logic for collision with wall side and food
+            ArrayList<CollisionType> collisions;
+            collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
+            if (wishedX != this.getX() || wishedZ != this.getZ()) {
+                if (this.getY() < gameConfig.getWallHeight()) {
+                    if (collisions.contains(CollisionType.WALL)) {
+                        vector.x = 0.0f;
+                        vector.z = 0.0f;
+                    } else if (collisions.contains(CollisionType.ITEM)) {
+                        logger.info("MMMMMM delicious ");
+                    }
                 }
 
-            default:
-                break;
+            }
 
+            /*
+             * In case of a ghost collision the SnackMan loses calories,
+             * is stunned and unable to move for a certain time period
+             * and invincible for a certain time period
+             */
+            if (collisions.contains(CollisionType.GHOST) && !this.invincible) {
+                reactToGhostCollision();
+            }
+
+            /*
+             * In case of a SnackMan collision the SnackMan is unable to move through the other SnackMan
+             */
+            if (collisions.contains(CollisionType.SNACKMAN)) {
+
+                // If the SnackMan is mid-jump, it has landed on another SnackMan
+                if (this.jumping) {
+                    this.jumping = false;
+                    jumpTaskFuture.cancel(false);
+                    this.y = gameConfig.getSnackManHeight() + gameConfig.getSnackManHeight() / 2;
+                }
+
+                logger.info("Kollision mit Snack Man, aktuelle Kalorien: " + this.gainedCalories);
+                vector.x = 0.0f;
+                vector.z = 0.0f;
+            }
+
+            this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
+
+            // checks if the movementVector is from a jump action or not
+            if (vector.y != 0.0) {
+
+                this.jump();
+
+                logger.info("SNACKMAN JUMPT");
+            }
         }
 
-        logger.info("Event arrived at SnackMan :" + event.toString());
+        logger.info("Event arrived at SnackMan :" + event);
     }
 
     public SnackManRecord toRecord() {
@@ -484,10 +462,14 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         return invincible;
     }
 
+    public boolean isStunned() {
+        return stunned;
+    }
+
     /**
      * Makes the SnackMan lose the passed calorie amount
      * and sets the SnackMan to dead if its new calorie count is negative or zero
-     * @param calorieLoss
+     * @param calorieLoss amount to be lost
      */
     private void checkIfDead(int calorieLoss) {
         this.gainedCalories -= calorieLoss;
@@ -542,11 +524,13 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     }
 
     public void reactToGhostCollision() {
-        logger.info("SnackMan calories before ghost collision: " + this.gainedCalories);
-        checkIfDead(gameConfig.getGhostCollisionCalories());
-        logger.info("SnackMan calories after ghost collision: " + this.gainedCalories);
-        startStunnedTimer();
-        startInvincibleTimer();
+        if (!isInvincible() && !isStunned()) {
+            logger.info("SnackMan calories before ghost collision: " + this.gainedCalories);
+            checkIfDead(gameConfig.getGhostCollisionCalories());
+            logger.info("SnackMan calories after ghost collision: " + this.gainedCalories);
+            startStunnedTimer();
+            startInvincibleTimer();
+        }
     }
 
 }

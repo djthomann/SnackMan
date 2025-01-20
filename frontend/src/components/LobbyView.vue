@@ -191,6 +191,9 @@ const buildPlayerArrays = (message: string) => {
   const ghostArray: Array<Player> = [];
   const undecidedArray: Array<Player> = [];
   parsedData.players.forEach((player: string[]) => {
+    if(Number(player[1]) == userStore.id) {
+      userStore.setRole(player[2])
+    }
     console.log(`Username: ${player[0]}, Client ID: ${player[1]}`);
     if (player[2] === 'SNACKMAN') {
       snackmanArray.push({ id: Number(player[1]), username: player[0] });
