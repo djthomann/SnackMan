@@ -1,7 +1,9 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStartEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
@@ -17,11 +20,13 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.SnackMan;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.PlayerRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.level.OccupationType;
 import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
@@ -49,6 +54,7 @@ public class Game {
     private final GameState gameState;
     private int numSnackmen = 0;
     private long startTime;
+    private boolean hasSnackManWon = false; // else ghost won
     private List<Client> clients;
 
     // Constructor for Game with Lobby
@@ -63,7 +69,28 @@ public class Game {
         initialize(clients); 
         startTimer();
         gameState = new GameState(this);
+        registerCalorieListeners();
         logger.info("created Game with id: " + id);
+    }
+
+    /**
+     * registers calorie listeners for all snackman to see if calorie target was hit
+     * 
+    */
+    public void registerCalorieListeners() {
+        int scoreToWin = gameConfig.getScoreToWin();
+
+        for (MovableAndSubscribable m : allMovables) {
+            if (m instanceof SnackMan snackMan) {
+                snackMan.setCalorieChangeListener(newCal -> {
+                    if (newCal >= scoreToWin) {
+                        logger.info("targeted calories reached by a SnackMan");
+                        hasSnackManWon = true;
+                        sendGameEndEvent();
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -290,7 +317,133 @@ public class Game {
     }
 
     private void stopGame() {
+        logger.info("TIMER ENDED");
+        sendGameEndEvent();
+    }
 
+
+    /**
+     * Sends a GameEndEvent to all subscribers
+     */
+    private void sendGameEndEvent() {
+        GameEndEvent gameEndEvent = new GameEndEvent();
+
+        for(Client client : clients) {
+            this.gameManager.notifyChange(client, gameEndEvent);
+        }
+    }
+
+    /**
+     * Determines the winner based on the highest score.
+     *
+     * @param scores A map of player IDs to their scores.
+     * @return The ID of the player with the highest score.
+     */
+    private long determineWinner(Map<Long, Integer> scores) {
+
+        logger.info("Given Scores: " + scores.toString());
+
+        long winnerId = -1;
+        int highestScore = Integer.MIN_VALUE;
+        for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
+            if (entry.getValue() > highestScore) {
+                highestScore = entry.getValue();
+                winnerId = entry.getKey();
+            }
+        }
+        return winnerId;
+    }
+
+    /**
+     * Generates a GameEndEvent with the winner and the scores of all players.
+     * 
+    * @return The GameEndEvent.
+    */
+    public GameEndEvent generateGameEndEvent() {
+        // Create Hashmap for Scores (ID and gainedCalories)
+        Map<Long, Integer> scores = new HashMap<>();
+
+        // Determine lobby
+        Lobby lobby = this.gameManager.getLobbyById(this.id);
+
+        /* Logging
+        if(lobby != null) {
+            logger.info("Lobby found with id: " + lobby.getId());
+        }
+        */
+        
+        // Determine clients
+        List<Client> clientsAsList = lobby.getClientsAsList();
+        
+        /* Logging
+        for (Client c : clientsAsList) {
+            logger.info("Client in Lobby: " + c.toString());
+        }
+        */
+
+        // Determine scores
+        for (MovableAndSubscribable m : allMovables) {
+            if (m instanceof SnackMan snackMan) { // cast to SnackMan to access getObjectId()
+                scores.put(snackMan.getObjectId(), snackMan.getGainedCalories());
+            }
+        }
+    
+        // Determine winner
+        String winnerTeam = "";
+        long winnerId = -1;
+        Client winner = null;
+        String winnerName = "";
+        int winnerCaloryCount = 0;
+
+        winnerId = determineWinner(scores);
+        logger.info("Winner Client ID: " + winnerId);
+
+        winner = lobby.getClient(winnerId);
+        logger.info("Winner Client: " + winner.toString());
+
+        winnerName = winner.getUsername();
+        logger.info("Winner Name: " + winnerName);
+
+        winnerCaloryCount = scores.get(winnerId);
+
+        if(hasSnackManWon) {
+            winnerTeam = "SNACKMAN";
+        } else{
+            winnerTeam = "GHOST";
+        }
+
+        /*
+        String winnerTeam = winner.getRole().toString();
+        logger.info("Winner Team: " + winnerTeam);
+        */
+
+        /* Logging: Iterate through scores and log every entry
+        for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
+            logger.info("Player ID: " + entry.getKey() + ", Score: " + entry.getValue());
+        }
+        */
+
+        // Create PlayerRecords
+        List<PlayerRecord> playerRecords = new ArrayList<>();
+
+        for (Client c : clientsAsList) {
+            long id = c.getClientId();
+            String username = c.getUsername();
+            int score = -1;
+
+            // Ghosts don't have calories. Without this check we would receive a NullPointerException
+            if(c.getRole() == GameObjectType.SNACKMAN) { 
+                score = scores.get(id);
+            }
+
+            playerRecords.add(new PlayerRecord(username, c.getRole().toString(), score));
+        }
+
+        // Create GameEndEvent with winner and scores
+        GameEndEvent gameEndEvent = new GameEndEvent(winnerTeam, winnerName, winnerCaloryCount, playerRecords);
+        logger.info(gameEndEvent.toString());
+
+        return gameEndEvent;
     }
 
     /**

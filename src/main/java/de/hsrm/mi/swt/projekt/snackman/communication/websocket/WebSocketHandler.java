@@ -31,7 +31,6 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.Mo
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.StartGameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
-import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import de.hsrm.mi.swt.projekt.snackman.logic.Game;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
@@ -211,19 +210,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                 case "END_GAME" -> {
                     GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
-                    Lobby currLobby = gameManager.getLobbyById(gameEndEvent.getGameID());
-                    logger.info("[CURRENT GAME] : " + gameEndEvent.getGameID());
-                    
-                    logger.info("[WEBSOCKETHANDLER] - currLobby Clients List: " + currLobby.getClientsAsList().get(0));
+                    Game currentGame = gameManager.getGameById(gameEndEvent.getGameID());
+                    GameEndEvent result = currentGame.generateGameEndEvent();
+                    logger.info("GameEndEvent generated: " + result);
 
-                    // TODO: current Game ist nicht mehr null -> anhand von client id und game id alle spieler herausfinden
-
-                    for (Client client : clients.values()) {
-
-                        if (currLobby.getClientsAsList().contains(client)) {
-                            logger.info("[WEBSOCKETHANDLER] - Client: " + client.getUsername());
-                        }
-                    }
+                    TextMessage messageToSend = new TextMessage(result.getType().toString() + ";" + gson.toJson(result));
+                    logger.info("Sending GameEndEvent to all clients: " + messageToSend);
+                    session.sendMessage(new TextMessage(result.getType().toString() + ";" + gson.toJson(result)));
                 }
                 default -> logger.warn("unknown message from FE: " + type);
 

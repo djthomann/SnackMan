@@ -2,7 +2,6 @@ package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStateEvent;
