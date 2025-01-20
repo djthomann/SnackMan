@@ -5,6 +5,7 @@ import { Logger } from '../util/logger';
 import gameMusic from '@/assets/sounds/music/Game-music.mp3';
 import chickenCackle from '@/assets/sounds/soundeffects/chicken.mp3';
 import eatSound from '@/assets/sounds/soundeffects/eat1.mp3';
+import jumpSound from '@/assets/sounds/soundeffects/jump.mp3';
 
 export type SoundParameters = {
     autoplaying: boolean;
@@ -39,13 +40,13 @@ class SoundService {
         this.soundEffects = new Map<SoundEffect, string>([
             [SoundEffect.EAT, eatSound],
             [SoundEffect.CHICKEN, chickenCackle],
-            [SoundEffect.JUMP, gameMusic],  // TODO replace with jump sound
+            [SoundEffect.JUMP, jumpSound],
         ]);
         this.logger = new Logger();
     }
 
-    // Adds a positional audio to a 3D object or group of objects
-    addPositionalAudio(soundType: SoundEffect, soundSource: THREE.Object3D<THREE.Object3DEventMap> | THREE.Group<THREE.Object3DEventMap>, params: SoundParameters) {
+    // Adds a positional audio to every item of a group of objects
+    addPositionalAudio(soundType: SoundEffect, soundSource: THREE.Group<THREE.Object3DEventMap>, params: SoundParameters) {
 
         const sound = this.soundEffects.get(soundType);
 
@@ -54,20 +55,23 @@ class SoundService {
             return;
         }
 
-        if (soundSource instanceof THREE.Group) {
-
-            this.audioLoader.load(sound, (buffer) => {
-            soundSource.children.forEach(item => {
-                this.addAudioToItem(item, buffer, params);
-                });
+        this.audioLoader.load(sound, (buffer) => {
+        soundSource.children.forEach(item => {
+            this.addAudioToItem(item, buffer, params);
             });
-        
-        } else if (soundSource instanceof THREE.Object3D) {
+        });
+    }
 
-            this.audioLoader.load(sound, (buffer) => {
-                this.addAudioToItem(soundSource, buffer, params);
-            });
+    // Adds one single audio to a 3D object or a group of objects
+    addSingleAudio(soundType: SoundEffect, soundSource: THREE.Object3D<THREE.Object3DEventMap> | THREE.Group<THREE.Object3DEventMap>, params: SoundParameters) {
+        const sound = this.soundEffects.get(soundType);
+        if(!sound) {
+            this.logger.error("Sound not found");
+            return;
         }
+        this.audioLoader.load(sound, (buffer) => {
+            this.addAudioToItem(soundSource, buffer, params);
+        });
     }
 
     private addAudioToItem(item: THREE.Object3D, buffer: AudioBuffer, params: SoundParameters) {
@@ -95,7 +99,7 @@ class SoundService {
     }
 
     // Plays the sound attached to a 3D object
-    playSound(mesh: THREE.Object3D) {
+    playSound(mesh: THREE.Object3D | THREE.Group) {
         const sound = mesh.children.find(child => child instanceof THREE.PositionalAudio) as THREE.PositionalAudio;
         if (sound) {
           if (!sound.isPlaying) {
@@ -103,10 +107,11 @@ class SoundService {
           }
         }
       }
+    
 
-      // Stops the sound for a 3D Object or group of objects
-      stopSound(soundSource: THREE.Object3D<THREE.Object3DEventMap> | THREE.Group<THREE.Object3DEventMap>) {
-        
+    // Stops the sound for a 3D Object or group of objects
+    stopSound(soundSource: THREE.Object3D<THREE.Object3DEventMap> | THREE.Group<THREE.Object3DEventMap>) {
+    
         if(soundSource instanceof THREE.Group) {
 
             // Stop the audio for each child of the group
@@ -123,22 +128,26 @@ class SoundService {
                 sound.stop();
             }
         }
-      }
+    }
 
-      // Starts the game's background music
-      startBackgroundMusic() {
+    // Starts the game's background music
+    startBackgroundMusic() {
         this.audioLoader.load(gameMusic, (buffer) => {
-          this.backgroundSound.setBuffer(buffer);
-          this.backgroundSound.setLoop(true);
-          this.backgroundSound.setVolume( 0.5 );
-          this.backgroundSound.play();
+            this.backgroundSound.setBuffer(buffer);
+            this.backgroundSound.setLoop(true);
+            this.backgroundSound.setVolume( 0.5 );
+            this.backgroundSound.play();
         });
-      }
+    }
 
-      // Stops the game's background music
-      stopBackgroundMusic() {
+    // Stops the game's background music
+    stopBackgroundMusic() {
         this.backgroundSound.stop();
-      }
+    }
+
+    get getListener(): THREE.AudioListener {
+        return this.listener;
+    }
 }
 
 export default SoundService;
