@@ -61,8 +61,8 @@ public class CollisionManager {
                 break;
 
             case ITEM:
-                logger.info(currentObject.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , "
-                        + wishedTile.getZ() + " .");
+                // logger.info(currentObject.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , "
+                        //+ wishedTile.getZ() + " .");
 
                 if (currentObject instanceof SnackMan || currentObject instanceof Chicken) {
 
