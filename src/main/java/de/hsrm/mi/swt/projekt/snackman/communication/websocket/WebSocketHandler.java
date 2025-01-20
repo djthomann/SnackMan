@@ -147,6 +147,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     gameManager.addClientToLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
                     broadcastMessage("NEW_LOBBY_JOIN");
                 }
+                case "LEAVE_LOBBY" -> {
+                    gameManager.removeClientFromLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
+                    broadcastMessage("NEW_LOBBY_LEAVE");
+                    break;
+                }
                 case "GET_PLAYERS" -> {
                     JsonObject jo = new JsonObject();
                     long lobbyCode = Long.parseLong(String.valueOf(jsonObject.get("lobbyCode")));

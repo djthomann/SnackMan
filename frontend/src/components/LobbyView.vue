@@ -1,6 +1,7 @@
 <template>
   <div>
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
+      <button @click="leaveLobby(lobbyCode)">←</button>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
@@ -169,6 +170,7 @@ const gameConfig = ref<GameConfig>({
 // Method, to get GameConfig from BE
 const handleServerMessage = (message: string) => {
   serverMessage.value = message;
+
   if (message.startsWith('GAME_CONFIG')) {
     gameConfig.value = JSON.parse(message.split(';')[1]);
   } else if (message.startsWith('GAME_START')) {
@@ -178,6 +180,8 @@ const handleServerMessage = (message: string) => {
     buildPlayerArrays(message);
   } else if (message.startsWith('FOREIGN_GAMESTART')) {
     router.push('/game/' + lobbyCode.value);
+  } else if (message.startsWith('NEW_LOBBY_LEAVE')) {
+    fetchPlayers();
   }
 };
 
@@ -293,6 +297,18 @@ const choose = (role: string) => {
     isSnackMan: role === 'SnackMan' ? true : false,
   });
   sendMessage(message);
+};
+
+const leaveLobby = (code: number) => {
+    logger.info(`Leaving lobby with code: ${code}`);
+
+    const data = JSON.stringify({
+      type: 'LEAVE_LOBBY',
+      lobbyCode: code
+    });
+
+    sendMessage(data);
+    router.push('/home');
 };
 </script>
 

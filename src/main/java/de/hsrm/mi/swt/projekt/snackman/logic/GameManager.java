@@ -70,6 +70,10 @@ public class GameManager {
         this.allLobbies.get(lobbyCode).addClient(c);
     }
 
+    public void removeClientFromLobby(Client c, long lobbyCode) {
+        this.allLobbies.get(lobbyCode).removeClient(c);
+    }
+
     public void createGame(long id) {
         allGames.put(id, allLobbies.get(id).startGame(this));
     }
