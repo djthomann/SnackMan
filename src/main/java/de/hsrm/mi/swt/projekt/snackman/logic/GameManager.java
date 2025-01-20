@@ -56,8 +56,8 @@ public class GameManager {
      * 
      * @param event event to be converted to json and sent so FE
      */
-    public void notifyChange(Event event) {
-        webSocketHandler.notifyFrontend(event);
+    public void notifyChange(Client client, Event event) {
+        webSocketHandler.notifyFrontend(client, event);
     }
 
     public String[][] getPlayersInLobby(long lobbyCode) {
@@ -72,7 +72,10 @@ public class GameManager {
     }
 
     public void createGame(long id) {
-        allGames.put(id, allLobbies.get(id).startGame(this));
+        Lobby lobby = allLobbies.get(id);
+        logger.info("Lobby started game: " + lobby.toString());
+        Game game = lobby.startGame(this);
+        allGames.put(game.getId(), game);
     }
 
     public void setGameConfig(GameConfig gameConfig, long lobbyID) {
