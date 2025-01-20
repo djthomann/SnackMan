@@ -5,18 +5,20 @@ class NameTag {
   private nameTagObj: THREE.Mesh | undefined = undefined;
   private logger: Logger;
 
-  constructor(name: string, parentObject: THREE.Group, scene: THREE.Scene) {
+  constructor(name: string, parentObject: THREE.Group, scene: THREE.Scene, scale: number) {
     this.logger = new Logger();
 
-        // Create Canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = 500;
-        canvas.height = 128;
+    // Create Canvas
+    const baseWidth = 1800;
+    const baseHeight = 450;
+    const canvas = document.createElement('canvas');
+    canvas.width = baseWidth * scale;
+    canvas.height = baseHeight * scale;
 
     // Create Context
     const context = canvas.getContext('2d');
 
-    //Check if Context was generated
+    // Check if Context was generated
     if (!context) {
       console.error('Failed to get 2D context.');
       return;
@@ -25,27 +27,35 @@ class NameTag {
     }
 
     // Write and Style Name
-    context.fillStyle = 'white';
-    context.font = '60px sans-serif';
-    context.fillText(name, 0, 60);
+    context.fillStyle = 'black';
+    context.font = `bold ${90 * scale}px sans-serif`;
+    context.textAlign = 'center'; 
+    context.textBaseline = 'middle'; 
 
-        // Create Texture and Material
-        const texture = new THREE.Texture(canvas);
-        texture.needsUpdate = true;
-        const usernameMaterial = new THREE.MeshBasicMaterial({
-            map: texture,
-            side: THREE.DoubleSide,
-            depthWrite: false
-        })
-        usernameMaterial.transparent = true;
+    const textX = canvas.width / 2;
+    const textY = canvas.height / 2;
 
-        // Create NameTag Object
-        const nameTagObj = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.3), usernameMaterial);
-        scene.add(nameTagObj);
+    context.fillText(name, textX, textY);
 
-        // Position NameTag above ParentObject (Player)
-        nameTagObj.position.set(0, 0, 0); // Relative to parent object's center
-        nameTagObj.position.y += parentObject.position.y/2;
+    // Create Texture and Material
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+
+    const usernameMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      transparent: true
+    });
+
+    const width = 1.5 * scale; 
+    const height = 0.5 * scale;
+    const nameTagObj = new THREE.Mesh(new THREE.PlaneGeometry(width, height), usernameMaterial);
+    
+    scene.add(nameTagObj);
+
+    // Position NameTag above ParentObject (Player)
+    nameTagObj.position.set(0, scale * 1.6, 0);
 
     // Add NameTag to Parent
     parentObject.add(nameTagObj);
@@ -55,7 +65,9 @@ class NameTag {
   }
 
   update(player: THREE.Group) {
-    this.nameTagObj?.lookAt(player.position);
+    this.nameTagObj?.quaternion.copy(player.quaternion);
+    //this.nameTagObj?.lookAt(player.position);
+
   }
 }
 

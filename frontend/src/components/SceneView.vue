@@ -64,7 +64,6 @@ const wallHeight = 1 * mapScale;
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
-    let nameTag: NameTag;
     const animationMixers: THREE.AnimationMixer[] = [];
     const nameTags: NameTag[] = [];
     let gameID = 2;
@@ -324,7 +323,7 @@ const wallHeight = 1 * mapScale;
         } else {
           const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           // Attach a NameTag
-          const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
+          const snackManTag = new NameTag(snackMan.username, snackManMesh, scene, mapScale);
           nameTags.push(snackManTag);
           // Add to snackMen group
           scene.add(snackManMesh);
@@ -345,7 +344,7 @@ const wallHeight = 1 * mapScale;
           scene.add(ghostMesh);
         } else {
           const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
-          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
+          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene, mapScale);
           nameTags.push(ghostTag);
           // Add to ghosts group
           scene.add(ghostMesh);
@@ -597,7 +596,7 @@ const wallHeight = 1 * mapScale;
 
       // Update NameTag Orientation
       nameTags.forEach((nameTag) => {
-        nameTag.update(meshes.get(userStore.id!)!);
+        nameTag.update(camera);
       });
 
       //update all animations
