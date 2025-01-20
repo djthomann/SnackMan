@@ -194,7 +194,6 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         this.fallTask = () -> {
 
-
             currentVelocity += deltaTime * GRAVITY;
 
             heightGain = deltaTime * currentVelocity;
@@ -202,17 +201,11 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             // logger.info("Falling" + currentVelocity);
             move(0, heightGain, 0);
 
-
-
             collisionManager.checkCollision(x, z, SnackMan.this);
             if (y < 0.8f) {
                 y = 0.8f;
                 falling = false;
             }
-
-            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-
-            gameManager.notifyChange(moveEvent);
 
             // If the fall is done, the task is not repeated anymore
             if (!falling) {
