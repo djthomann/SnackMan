@@ -336,8 +336,8 @@ const submitForm = async () => {
 // On Reset-Button press, send message to BE with gameID: 0, to signify default value request
 const resetForm = async () => {
   const reset = JSON.stringify({
-    type: 'GET_GAME_CONFIG',
-    gameID: 0,
+    type: 'RESET_GAME_CONFIG',
+    gameID: lobbyCode.value,
   });
   sendMessage(reset);
 };

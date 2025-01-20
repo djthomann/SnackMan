@@ -35,10 +35,9 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     private final Logger logger = LoggerFactory.getLogger(SnackMan.class);
 
     // Jumping constants
-    // TODO: put into real config file
     private final float GRAVITY = -9.81f; // Gravity constant for physically realistic jumping
     private final float INITIAL_VELOCITY = 8.0f; // Initial velocity at the start of the jump
-    private final float JUMP_BOOST = 5.0f; // Boost applied to the current jump if the SnackMan is already jumping and
+    private final float JUMP_BOOST = 7.0f; // Boost applied to the current jump if the SnackMan is already jumping and
                                            // the jump-method is called again
     private final int MAX_BOOSTS = 2; // Maximum number of velocity boosts that is possible to reach during one jump
     private final long BOOST_PUFFER_TIME = 100; // Time that has to be passed since last space bar press to enable boost
@@ -160,11 +159,6 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 }
             }
 
-
-            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-
-            gameManager.notifyChange(moveEvent);
-
             // If the jump is done, the task is not repeated anymore
             if (!jumping) {
                 boosts = 0;
@@ -190,9 +184,6 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                 needsResolving = false;
             }
 
-            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-            gameManager.notifyChange(moveEvent);
-
             // If the resolve is done, the task is not repeated anymore
             if (!needsResolving) {
                 resolveVector = null;
@@ -203,7 +194,6 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
 
         this.fallTask = () -> {
 
-
             currentVelocity += deltaTime * GRAVITY;
 
             heightGain = deltaTime * currentVelocity;
@@ -211,17 +201,11 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             // logger.info("Falling" + currentVelocity);
             move(0, heightGain, 0);
 
-
-
             collisionManager.checkCollision(x, z, SnackMan.this);
             if (y < 0.8f) {
                 y = 0.8f;
                 falling = false;
             }
-
-            MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-
-            gameManager.notifyChange(moveEvent);
 
             // If the fall is done, the task is not repeated anymore
             if (!falling) {
@@ -462,6 +446,10 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         return invincible;
     }
 
+    public boolean isStunned() {
+        return stunned;
+    }
+
     /**
      * Makes the SnackMan lose the passed calorie amount
      * and sets the SnackMan to dead if its new calorie count is negative or zero
@@ -520,11 +508,13 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     }
 
     public void reactToGhostCollision() {
-        logger.info("SnackMan calories before ghost collision: " + this.gainedCalories);
-        checkIfDead(gameConfig.getGhostCollisionCalories());
-        logger.info("SnackMan calories after ghost collision: " + this.gainedCalories);
-        startStunnedTimer();
-        startInvincibleTimer();
+        if (!isInvincible() && !isStunned()) {
+            logger.info("SnackMan calories before ghost collision: " + this.gainedCalories);
+            checkIfDead(gameConfig.getGhostCollisionCalories());
+            logger.info("SnackMan calories after ghost collision: " + this.gainedCalories);
+            startStunnedTimer();
+            startInvincibleTimer();
+        }
     }
 
 }
