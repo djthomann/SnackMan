@@ -23,7 +23,7 @@
             <button>Save Map</button>
           </div>
           <div>
-            <button>Back to Lobby</button>
+            <button @click="toLobby()">Back to Lobby</button>
           </div>
         </div>
 
@@ -95,7 +95,7 @@
             <button>Save Map</button>
           </div>
           <div>
-            <button>Back to Lobby</button>
+            <button @click="toLobby()">Back to Lobby</button>
           </div>
         </div>
 
