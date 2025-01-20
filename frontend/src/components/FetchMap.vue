@@ -40,7 +40,7 @@ const uploadMap = () => {
   isGreen.value = true;
   setTimeout(() => {
     isGreen.value = false;
-  }, 2000);
+  }, 400);
 
   if (file.value != null) {
     const reader = new FileReader();
@@ -73,12 +73,19 @@ const handleFileUpload = (event: Event) => {
 
 <style scoped>
 .fileInputContainer.animateGreen {
-  animation: greenBorder 2s ease-in-out;
+  background-color: #9cffff;
 }
 
 .fileInputContainer {
-  margin-top: 1rem;
-  border: 2px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  border-radius: 2%;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 200ms ease-in-out;
 }
 
 .fileInput {
@@ -86,20 +93,19 @@ const handleFileUpload = (event: Event) => {
 }
 
 .dropZone {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  padding: 40px 20px;
   text-align: center;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .dropZone:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
 }
 
 .dropZone:hover .uploadIcon {
@@ -143,25 +149,9 @@ const handleFileUpload = (event: Event) => {
   border: none;
   border-radius: 4px;
   padding: 8px 16px;
-  margin-left: 4.75rem;
 }
 
 .uploadButton:hover {
   background-color: #f1f1f1;
-}
-
-@keyframes greenBorder {
-  0% {
-    border: 2px solid #00ff7f;;
-    box-shadow: none;
-  }
-  50% {
-    border: 2px solid #00ff7f;
-    box-shadow: 0 0 15px #00ff7f;
-  }
-  100% {
-    border: 2px solid #00ff7f;
-    box-shadow: none;
-  }
 }
 </style>

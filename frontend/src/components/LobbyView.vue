@@ -1,13 +1,15 @@
 <template>
   <div>
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
-      <button @click="leaveLobby(lobbyCode)">←</button>
+      <button class="icon-button join-button button" @click="leaveLobby(lobbyCode)">
+        <img src="@/assets/icons/leave.svg" />
+      </button>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
             <template #counter>{{ ghostPlayers.length }}/4</template>
             <template #button
-              ><button class="chooseRoleButton" type="button" @click="decide(false)">
+              ><button class="text-button chooseRoleButton" type="button" @click="decide(false)">
                 Ghost
               </button></template
             >
@@ -80,8 +82,8 @@
               </div>
             </template>
             <template #footer>
-              <button class="configButtons" type="button" @click="submitForm">Apply</button>
-              <button class="configButtons" type="button" @click="resetForm">Reset</button>
+              <button class="text-button configButtons" type="button" @click="submitForm">Apply</button>
+              <button class="text-button configButtons" type="button" @click="resetForm">Reset</button>
             </template>
           </ConfigPanelComponent>
         </div>
@@ -89,7 +91,7 @@
           <PlayerPanelComponent avatar="snackman" :selected="selectedRole === 'SNACKMAN'">
             <template #counter>{{ snackManPlayers.length }}/4</template>
             <template #button
-              ><button class="chooseRoleButton" type="button" @click="decide(true)">
+              ><button class="text-button chooseRoleButton" type="button" @click="decide(true)">
                 SnackMan
               </button></template
             >
@@ -101,7 +103,7 @@
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
-          <button class="startGameButton" type="button" @click="startGame">Start Game</button>
+          <button class="text-button startGameButton" type="button" @click="startGame">Start Game</button>
         </div>
       </div>
     </BackgroundComponent>
@@ -357,7 +359,11 @@ const leaveLobby = (code: number) => {
   border: none;
 }
 
-Button {
+button:hover {
+  cursor: pointer;
+}
+
+.text-button {
   padding: 10px;
   font-size: 1.5rem;
   font-weight: bold;
@@ -365,7 +371,7 @@ Button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-Button:hover{
+.text-button:hover{
   color: black;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
@@ -420,5 +426,39 @@ label {
   list-style-type: none;
   text-align: center;
   padding: 5px 0;
+}
+
+.join-button img {
+  transition: transform 0.2s ease;
+}
+
+.icon-button {
+  position: absolute;
+  user-select: none;
+  margin-top: 1%;
+  border: none;
+  background: 0;
+  box-shadow: none;
+}
+
+.icon-button img {
+  height: 60px;
+  user-select: none;
+}
+
+.icon-button img:hover {
+  transform: scale(1.5);
+}
+
+.icon-button button {
+  background: 0;
+  border: 0;
+  user-select: none;
+  box-shadow: none;
+}
+
+.icon-button button:hover {
+  cursor: pointer;
+  box-shadow: none;
 }
 </style>
