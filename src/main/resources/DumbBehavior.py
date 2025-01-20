@@ -54,7 +54,7 @@ def run_behavior(environment, direction, wall_collision, x, z, y):
     if wall_collision or (next_tile == "WALL" and 
                           ((direction in ["N", "S"] and 0.49 < x % 1.0 < 0.51) 
                            or (direction in ["E", "W"] and 0.49 < z % 1.0 < 0.51) 
-                           or (direction in ["NW", "NE", "SW", "SE"] and 0.49 < x % 1.0 < 0.51 and 0.49 < z % 1.0 < 0.51)
+                           or (direction in ["NW", "NE", "SW", "SE"])
                           )):
         valid_directions = []
         
