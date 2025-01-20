@@ -38,45 +38,115 @@
                   >
                     <span>
                       <label for="scoreToWin">Score to Win:</label>
-                      <input type="number" id="scoreToWin" v-model="gameConfig.scoreToWin" />
+                      <input
+                        type="number"
+                        id="scoreToWin"
+                        v-model="gameConfig.scoreToWin"
+                        @input="validateField('scoreToWin')"
+                      />
+                      <p v-if="errors.scoreToWin" class="error-message">{{ errors.scoreToWin }}</p>
                     </span>
                     <span>
                       <label for="speedModifier">Movement-Speed:</label>
-                      <input type="number" id="speedModifier" v-model="gameConfig.speedModifier" />
+                      <input
+                        type="number"
+                        id="speedModifier"
+                        v-model="gameConfig.speedModifier"
+                        @input="validateField('speedModifier')"
+                      />
+                      <p v-if="errors.speedModifier" class="error-message">
+                        {{ errors.speedModifier }}
+                      </p>
                     </span>
                     <span>
                       <label for="snackmanSpeed">Snackman Speed:</label>
-                      <input type="number" id="snackmanSpeed" v-model="gameConfig.snackManSpeed" />
+                      <input
+                        type="number"
+                        id="snackmanSpeed"
+                        v-model="gameConfig.snackManSpeed"
+                        @input="validateField('snackManSpeed')"
+                      />
+                      <p v-if="errors.snackManSpeed" class="error-message">
+                        {{ errors.snackManSpeed }}
+                      </p>
                     </span>
                     <span>
                       <label for="ghostSpeed">Ghost Speed:</label>
-                      <input type="number" id="ghostSpeed" v-model="gameConfig.ghostSpeed" />
+                      <input
+                        type="number"
+                        id="ghostSpeed"
+                        v-model="gameConfig.ghostSpeed"
+                        @input="validateField('ghostSpeed')"
+                      />
+                      <p v-if="errors.ghostSpeed" class="error-message">{{ errors.ghostSpeed }}</p>
                     </span>
                     <span>
                       <label for="chickenSpeed">Chicken Speed:</label>
-                      <input type="number" id="chickenSpeed" v-model="gameConfig.chickenSpeed" />
+                      <input
+                        type="number"
+                        id="chickenSpeed"
+                        v-model="gameConfig.chickenSpeed"
+                        @input="validateField('chickenSpeed')"
+                      />
+                      <p v-if="errors.chickenSpeed" class="error-message">
+                        {{ errors.chickenSpeed }}
+                      </p>
                     </span>
                     <span>
                       <label for="mapWidth">Map Width in tiles:</label>
-                      <input type="number" id="mapWidth" v-model="gameConfig.mapWidth" />
+                      <input
+                        type="number"
+                        id="mapWidth"
+                        v-model="gameConfig.mapWidth"
+                        @input="validateField('mapWidth')"
+                      />
+                      <p v-if="errors.mapWidth" class="error-message">{{ errors.mapWidth }}</p>
                     </span>
                     <span>
                       <label for="mapHeight">Map Height in tiles:</label>
-                      <input type="number" id="mapHeight" v-model="gameConfig.mapHeight" />
+                      <input
+                        type="number"
+                        id="mapHeight"
+                        v-model="gameConfig.mapHeight"
+                        @input="validateField('mapHeight')"
+                      />
+                      <p v-if="errors.mapHeight" class="error-message">{{ errors.mapHeight }}</p>
                     </span>
                     <span>
                       <label for="gameTime">Game Time in seconds:</label>
-                      <input type="number" id="gameTime" v-model="gameConfig.gameTime" />
+                      <input
+                        type="number"
+                        id="gameTime"
+                        v-model="gameConfig.gameTime"
+                        @input="validateField('gameTime')"
+                      />
+                      <p v-if="errors.gameTime" class="error-message">{{ errors.gameTime }}</p>
                     </span>
                     <span>
                       <label for="chickenCount">Number of Chicken:</label>
-                      <input type="number" id="chickenCount" v-model="gameConfig.chickenCount" />
+                      <input
+                        type="number"
+                        id="chickenCount"
+                        v-model="gameConfig.chickenCount"
+                        @input="validateField('chickenCount')"
+                      />
+                      <p v-if="errors.chickenCount" class="error-message">
+                        {{ errors.chickenCount }}
+                      </p>
                     </span>
                     <span>
                       <label for="jumpCalories">Calories Burned on Jump:</label>
-                      <input type="number" id="jumpCalories" v-model="gameConfig.jumpCalories" />
+                      <input
+                        type="number"
+                        id="jumpCalories"
+                        v-model="gameConfig.jumpCalories"
+                        @input="validateField('jumpCalories')"
+                      />
+                      <p v-if="errors.jumpCalories" class="error-message">
+                        {{ errors.jumpCalories }}
+                      </p>
                     </span>
-                    <button type="submit">Apply</button>
+                    <button type="submit" :disabled="hasErrors">Apply</button>
                     <button type="button" @click="resetForm">Reset</button>
                   </form>
                 </FieldsetComponent>
@@ -119,7 +189,7 @@ import PlayerPanelComponent from './layout/PlayerPanelComponent.vue';
 import { Logger } from '../util/logger';
 import ConfigPanelComponent from './layout/ConfigPanelComponent.vue';
 import FieldsetComponent from './layout/FieldsetComponent.vue';
-import FetchMap from "@/components/FetchMap.vue";
+import FetchMap from '@/components/FetchMap.vue';
 
 const logger = new Logger();
 
@@ -187,8 +257,8 @@ const buildPlayerArrays = (message: string) => {
   const ghostArray: Array<Player> = [];
   const undecidedArray: Array<Player> = [];
   parsedData.players.forEach((player: string[]) => {
-    if(Number(player[1]) == userStore.id) {
-      userStore.setRole(player[2])
+    if (Number(player[1]) == userStore.id) {
+      userStore.setRole(player[2]);
     }
     console.log(`Username: ${player[0]}, Client ID: ${player[1]}`);
     if (player[2] === 'SNACKMAN') {
@@ -204,15 +274,63 @@ const buildPlayerArrays = (message: string) => {
   ghostPlayers.value = ghostArray;
 };
 
+const errors = ref<Record<string, string>>({});
+
+const hasErrors = computed(() => {
+  return Object.values(errors.value).some((error) => error !== '');
+});
+
+// Produces error message of config validation
+const validateField = (field: string) => {
+  const value = gameConfig.value[field as keyof GameConfig];
+  let error = '';
+
+  switch (field) {
+    case 'snackManSpeed':
+    case 'ghostSpeed':
+    case 'chickenSpeed':
+    case 'mapWidth':
+    case 'mapHeight':
+    case 'gameTime':
+    case 'jumpCalories':
+    case 'speedModifier':
+      if (!value || value <= 0) {
+        error = 'Value must be greater than 0.';
+      }
+      break;
+
+    case 'scoreToWin':
+      if (!value || value < 1100) {
+        error = 'Value must be greater than 1100.';
+      }
+      break;
+
+    case 'chickenCount':
+      if (!value || value < 0 || value > 4) {
+        error = 'Value must be between 0 and 4.';
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  errors.value[field] = error;
+};
+
 // Method, to send GameConfig to BE as JSON
 const submitForm = async () => {
-  const data = JSON.stringify({
-    type: 'SET_GAME_CONFIG',
-    gameID: lobbyCode.value,
-    objectID: 0,
-    gameConfig: gameConfig.value,
-  });
-  sendMessage(data);
+  Object.keys(gameConfig.value).forEach(validateField);
+
+  if (!hasErrors.value) {
+    const data = JSON.stringify({
+      type: 'SET_GAME_CONFIG',
+      gameID: lobbyCode.value,
+      objectID: 0,
+      gameConfig: gameConfig.value,
+    });
+    sendMessage(data);
+  }
 };
 
 // On Reset-Button press, send message to BE with gameID: 0, to signify default value request
@@ -328,7 +446,7 @@ const choose = (role: string) => {
 
 .startGameButton {
   width: 25%;
-  background-color: #F39325;
+  background-color: #f39325;
   color: white;
   border: 3px solid white;
   border-radius: 10px;
@@ -349,7 +467,7 @@ Button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-Button:hover{
+Button:hover {
   color: black;
   transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -360,7 +478,7 @@ Button:hover{
   border: 3px solid black;
 }
 
-input[type="number"] {
+input[type='number'] {
   appearance: none;
   -moz-appearance: textfield;
   background-color: #f0f0f0;
@@ -371,8 +489,8 @@ input[type="number"] {
   box-sizing: border-box;
 }
 
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -385,5 +503,10 @@ label {
   list-style-type: none;
   text-align: center;
   padding: 5px 0;
+}
+
+.error-message {
+  margin-top: 4px;
+  padding: 0px 5px;
 }
 </style>
