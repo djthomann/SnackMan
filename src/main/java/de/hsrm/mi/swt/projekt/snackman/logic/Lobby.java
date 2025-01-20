@@ -22,6 +22,16 @@ public class Lobby {
         return clientMap.values().stream().toList();
     }
 
+    /**
+     * Retrieves a client by their ID.
+     *
+     * @param id The ID of the client.
+     * @return The Client object if found, otherwise null.
+     */
+    public Client getClient(long id) {
+        return clientMap.get(id);
+    }
+
     public void addClient(Client c) {
         clientMap.put(c.getClientId(), c);
     }
