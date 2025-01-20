@@ -2,12 +2,14 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import org.joml.Vector3f;
@@ -18,6 +20,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
@@ -68,11 +71,13 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     private Runnable fallTask;
 
     private GameManager gameManager;
+    private List<Client> clients;
     private GameConfig gameConfig;
     private CollisionManager collisionManager;
 
     /** The calorie count of the SnackMan */
     private int gainedCalories;
+    private Consumer<Integer> calorieChangeListener;
 
     // Collision constants
     private final long STUNNED_TIME = 1000;
@@ -93,7 +98,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
      * @param y the initial y-coordinate of the `SnackMan`
      * @param z the initial z-coordinate of the `SnackMan`
      */
-    public SnackMan(String username, long id, long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
+    public SnackMan(String username, long id, List<Client> clients, long gameId, float x, float y, float z, GameManager gameManager, GameConfig gameConfig,
             CollisionManager collisionManager) {
         super(username, id, gameId, x, y, z, gameConfig.getSnackManRadius(), gameConfig.getSnackManHeight());
         this.gameConfig = gameConfig;
@@ -108,6 +113,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         this.alive = true;
         this.stunnedTimer = new Timer();
         this.invincibleTimer = new Timer();
+
+        this.clients = clients;
 
         init();
 
@@ -311,6 +318,27 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     }
 
     /**
+     * Sets the calorieChangeListener for the SnackMan
+     * 
+     * @param listener the listener to be set
+     */
+    public void setCalorieChangeListener(Consumer<Integer> listener) {
+        this.calorieChangeListener = listener;
+    }
+
+    /**
+     * Handles a change in the calorie count of the `SnackMan`.
+     * 
+     * @param newCalories the new calorie count of the `SnackMan`
+     */
+    private void handleCalorieChange(int newCalories) {
+        this.gainedCalories = newCalories;
+        if (calorieChangeListener != null) {
+            calorieChangeListener.accept(this.gainedCalories);
+        }
+    }
+
+    /**
      * method to Consume Food
      * publishes an eat event to be progressed by the GameState
      *
@@ -318,7 +346,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
      */
     @Override
     public void eat(Food food) {
-        this.gainedCalories += food.getCalories();
+        handleCalorieChange(this.gainedCalories + food.getCalories());
         EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId, gameManager));
     }
 
@@ -346,8 +374,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         logger.info("Event " + event.getType() + " in Snackman " + objectId);
         if (Objects.requireNonNull(event.getType()) == EventType.MOVE) {// The SnackMan is unable to move when stunned
             if (this.stunned) {
+                /*
                 MoveEvent moveEvent = new MoveEvent(new Vector3f(x, y, z));
-                gameManager.notifyChange(moveEvent);
+                for(Client c : clients) {
+                    gameManager.notifyChange(c, moveEvent);
+                }
+                    */
                 return;
             }
 
@@ -516,5 +548,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             startInvincibleTimer();
         }
     }
+
+
 
 }
