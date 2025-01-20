@@ -158,8 +158,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                         case "N":
                             wishedX = this.getX() + (movementX + this.radius);
                             wishedZ = this.getZ() + (movementZ + this.radius);
-                            System.out.println(wishedX + " N " + wishedZ);
-
                             break;
                         case "E":
                             wishedX = this.getX() + (movementX + this.radius);
