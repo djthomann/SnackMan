@@ -1,7 +1,9 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameStateEvent;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
@@ -17,11 +19,11 @@ public class GameState {
 
     private final Game game;
 
-    private List<GhostRecord> changedGhosts;
-    private List<SnackManRecord> changedSnackMen;
-    private List<ChickenRecord> changedChicken;
-    private List<FoodRecord> eatenFoods;
-    private List<FoodRecord> laidEggs;
+    private Set<GhostRecord> changedGhosts;
+    private Set<SnackManRecord> changedSnackMen;
+    private Set<ChickenRecord> changedChicken;
+    private Set<FoodRecord> eatenFoods;
+    private Set<FoodRecord> laidEggs;
     private long lastSentTime;
     private boolean firstSend = true;
 
@@ -78,32 +80,28 @@ public class GameState {
      */
     public GameState(Game game) {
         this.game = game;
-        this.changedGhosts = new ArrayList<>();
-        this.changedSnackMen = new ArrayList<>();
-        this.changedChicken = new ArrayList<>();
-        this.eatenFoods = new ArrayList<>();
-        this.laidEggs = new ArrayList<>();
+        this.changedGhosts = new HashSet<>();
+        this.changedSnackMen = new HashSet<>();
+        this.changedChicken = new HashSet<>();
+        this.eatenFoods = new HashSet<>();
+        this.laidEggs = new HashSet<>();
         GameStateThread thread = new GameStateThread();
         thread.start();
     }
 
     public synchronized void addChangedGhost(Ghost ghost) {
-        changedGhosts.removeIf(record -> record.objectId() == ghost.getObjectId());
         changedGhosts.add(ghost.toRecord());
     }
 
     public synchronized void addChangedSnackMan(SnackMan snackman) {
-        changedSnackMen.removeIf(record -> record.objectId() == snackman.getObjectId());
         changedSnackMen.add(snackman.toRecord());
     }
 
     public synchronized void addChangedChicken(Chicken chicken) {
-        changedChicken.removeIf(record -> record == null || record.objectId() == chicken.getObjectId());
         changedChicken.add(chicken.toRecord());
     }
 
     public synchronized void addEatenFood(Food food) {
-        eatenFoods.removeIf(record -> record.objectId() == food.getObjectId());
         eatenFoods.add(food.toRecord());
     }
 
@@ -112,43 +110,43 @@ public class GameState {
         laidEggs.add(food.toRecord());
     }
 
-    public List<GhostRecord> getChangedGhosts() {
+    public Set<GhostRecord> getChangedGhosts() {
         return changedGhosts;
     }
 
-    public void setChangedGhosts(List<GhostRecord> changedGhosts) {
+    public void setChangedGhosts(Set<GhostRecord> changedGhosts) {
         this.changedGhosts = changedGhosts;
     }
 
-    public List<SnackManRecord> getChangedSnackMen() {
+    public Set<SnackManRecord> getChangedSnackMen() {
         return changedSnackMen;
     }
 
-    public void setChangedSnackMen(List<SnackManRecord> changedSnackMen) {
+    public void setChangedSnackMen(Set<SnackManRecord> changedSnackMen) {
         this.changedSnackMen = changedSnackMen;
     }
 
-    public List<ChickenRecord> getChangedChicken() {
+    public Set<ChickenRecord> getChangedChicken() {
         return changedChicken;
     }
 
-    public void setChangedChicken(List<ChickenRecord> changedChicken) {
+    public void setChangedChicken(Set<ChickenRecord> changedChicken) {
         this.changedChicken = changedChicken;
     }
 
-    public List<FoodRecord> getEatenFoods() {
+    public Set<FoodRecord> getEatenFoods() {
         return eatenFoods;
     }
 
-    public void setEatenFoods(List<FoodRecord> eatenFoods) {
+    public void setEatenFoods(Set<FoodRecord> eatenFoods) {
         this.eatenFoods = eatenFoods;
     }
 
-    public List<FoodRecord> getLaidEggs() {
+    public Set<FoodRecord> getLaidEggs() {
         return laidEggs;
     }
 
-    public void setLaidEggs(List<FoodRecord> laidEggs) {
+    public void setLaidEggs(Set<FoodRecord> laidEggs) {
         this.laidEggs = laidEggs;
     }
 
