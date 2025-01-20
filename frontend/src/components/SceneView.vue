@@ -28,6 +28,7 @@ import { Logger } from '../util/logger';
 // TODO find and replace with similar free music because these songs are copyrighted
 import gameMusic from '@/assets/sounds/music/Game-music.mp3';
 import chickenCackle from '@/assets/sounds/soundeffects/chicken.mp3';
+import eatSound from '@/assets/sounds/soundeffects/eat1.mp3';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -141,7 +142,8 @@ export default defineComponent({
       gameStore.setRemainingTime(parsedData.remainingSeconds);
 
       parsedData.eatenFoods.forEach((food: Food) => {
-        makeDisappear(food.objectId)
+        playFoodSound(food.objectId);
+        makeDisappear(food.objectId);
       })
 
       parsedData.laidEggs.forEach((food: Food) => {
@@ -402,6 +404,20 @@ export default defineComponent({
           }
         }
       }
+
+      // Load eating sound for each food item
+      const audioLoader = new THREE.AudioLoader();
+
+      audioLoader.load(eatSound, function (buffer) {
+
+      foodGroup.children.forEach(food => {
+          const audio = new THREE.PositionalAudio(listener);
+          audio.setBuffer(buffer);
+          audio.setVolume(8);
+          food.add(audio);
+        });
+      });
+
       scene.add(wallsGroup);
       scene.add(foodGroup);
       scene.add(floorGroup);
@@ -729,6 +745,25 @@ export default defineComponent({
         audio.stop();
       }));
     }
+
+    function playFoodSound(id: number) {
+      foodGroup.children.forEach((food) => {
+        if (food.userData.id == id) {
+          playSound(food);
+        }
+      });
+    }
+
+    function playSound(mesh: THREE.Object3D) {
+      const sound = mesh.children.find(child => child instanceof THREE.PositionalAudio) as THREE.PositionalAudio;
+      if (sound) {
+        if (!sound.isPlaying) {
+          sound.play();
+        }
+      }
+    }
+
+
 
     return {
       rendererContainer,
