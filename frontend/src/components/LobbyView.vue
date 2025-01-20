@@ -1,7 +1,6 @@
 <template>
   <div>
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
-      <FetchMap></FetchMap>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
@@ -26,8 +25,7 @@
             <template #content>
               <div class="config-panel-grid">
                 <FieldsetComponent height-behaviour="stretch">
-                  <span>Slay</span>
-                  <span>Slay</span>
+                  <FetchMap></FetchMap>
                 </FieldsetComponent>
                 <FieldsetComponent height-behaviour="stretch">
                   <form
