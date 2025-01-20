@@ -327,7 +327,10 @@ public class Game {
      */
     private void sendGameEndEvent() {
         GameEndEvent gameEndEvent = new GameEndEvent();
-        this.gameManager.notifyChange(gameEndEvent);
+
+        for(Client client : clients) {
+            this.gameManager.notifyChange(client, gameEndEvent);
+        }
     }
 
     /**
