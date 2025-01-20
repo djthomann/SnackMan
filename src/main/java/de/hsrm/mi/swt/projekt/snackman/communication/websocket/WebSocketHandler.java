@@ -115,9 +115,17 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     gameManager.handleEvent(moveEvent);
                 }
                 case "SET_GAME_CONFIG" -> {
+                    ObjectMapper mapper = new ObjectMapper();
+
                     // Set GameConfig from event as GameConfig object in gameManager
                     GameConfigEvent gameConfigEvent = gson.fromJson(jsonString, GameConfigEvent.class);
                     gameManager.setGameConfig(gameConfigEvent.getGameConfig(), gameConfigEvent.getGameID());
+                    try {
+                        String json = mapper.writeValueAsString(gameConfigEvent.getGameConfig());
+                        notifyClients(session, gameConfigEvent.getGameID(), "GAME_CONFIG;" + json);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
                 }
                 case "GET_GAME_CONFIG" -> {
                     // Get existing GameConfigs from GameManager
@@ -128,22 +136,26 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                     // if there is no GameConfig for the Lobby or the Reset-Button has been pressed,
                     // the form should recieve default values
-                    if (existingConfig == null || gameConfigEvent.getGameID() == 0) {
-                        try {
-                            String json = mapper.writeValueAsString(new GameConfig());
-                            returnString = "GAME_CONFIG;" + json;
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        try {
-                            String json = mapper.writeValueAsString(existingConfig);
-                            returnString = "GAME_CONFIG;" + json;
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
+                    if (existingConfig == null || gameConfigEvent.getGameID() == 0) existingConfig = new GameConfig();
+                    try {
+                        String json = mapper.writeValueAsString(existingConfig);
+                        returnString = "GAME_CONFIG;" + json;
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
                     }
+
                     session.sendMessage(new TextMessage(returnString));
+                    notifyClients(session, gameConfigEvent.getGameID(), returnString);
+                }
+                case "RESET_GAME_CONFIG" -> {
+                    ObjectMapper mapper = new ObjectMapper();
+                    GameConfigEvent gameConfigEvent = gson.fromJson(jsonString, GameConfigEvent.class);
+                    GameConfig newGameConfig = new GameConfig();
+                    gameManager.setGameConfig(newGameConfig, gameConfigEvent.getGameID());
+
+                    String payload = "GAME_CONFIG;" + mapper.writeValueAsString(newGameConfig);
+                    session.sendMessage(new TextMessage(payload));
+                    notifyClients(session, gameConfigEvent.getGameID(), payload);
                 }
                 case "JOIN_LOBBY" -> {
                     gameManager.addClientToLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
@@ -192,7 +204,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                 case "START_GAME" -> {
                     StartGameEvent startGameEvent = gson.fromJson(jsonString, StartGameEvent.class);
-                    notifyClientsAboutForeignGameStart(session, startGameEvent.getGameID());
+                    notifyClients(session, startGameEvent.getGameID(), "FOREIGN_GAMESTART");
 
                     gameManager.createGame(startGameEvent.getGameID());
                 }
@@ -221,13 +233,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void notifyClientsAboutForeignGameStart(WebSocketSession source, long gameId) {
+    private void notifyClients(WebSocketSession source, long gameId, String payload) {
         Lobby lobby = gameManager.getLobbyById(gameId);
 
         for (Client c: lobby.getClientsAsList()) {
             if (c.getSession() != source) {
                 try {
-                    c.getSession().sendMessage(new TextMessage("FOREIGN_GAMESTART"));
+                    c.getSession().sendMessage(new TextMessage(payload));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

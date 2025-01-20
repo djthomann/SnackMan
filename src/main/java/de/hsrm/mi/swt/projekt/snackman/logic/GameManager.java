@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
