@@ -44,8 +44,6 @@ const wallHeight = 1 * mapScale;
     // Background music and soundeffects
     const listener = new THREE.AudioListener();
     const soundService = new SoundService(listener);
-    let jumpSoundPlaying = false;
-    
 
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
     const isLoading = ref<boolean>(true);
@@ -125,12 +123,9 @@ const wallHeight = 1 * mapScale;
         if(snackman.objectId === userStore.id) {
           gameStore.setCalories(snackman.gainedCalories);
 
-          // If the SnackMan jumps, play jump sound once
+          // If the SnackMan jumps, play jump sound
           if(snackmanMesh!.position.y < snackman.y) {
             playJumpSound(snackmanMesh);
-            jumpSoundPlaying = true;
-          } else if(snackmanMesh!.position.y > snackman.y) {
-            jumpSoundPlaying = false;
           }
         }
         snackmanMesh!.position.set(snackman.x * mapScale, snackman.y, snackman.z * mapScale);
@@ -208,6 +203,9 @@ const wallHeight = 1 * mapScale;
     }
 
     onMounted(async () => {
+
+      console.log("On Mounted")
+
       await nextTick();
       console.log(gameOverlayRef.value);
       eventBus.on('serverMessage', handleServerMessage);
@@ -718,9 +716,7 @@ const wallHeight = 1 * mapScale;
         logger.error("Snackman is undefined");
         return;
       }
-      if(!jumpSoundPlaying) {
-        soundService.playSound(snackman);
-      }
+      soundService.playSound(snackman);
     }
 
 </script>
