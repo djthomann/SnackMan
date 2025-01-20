@@ -104,7 +104,7 @@
             <template #ghost-list>
               <li
                 v-for="(player, index) in gameData.players?.filter(
-                  (player) => player.role === 'ghost',
+                  (player) => player.role === 'GHOST',
                 )"
                 :key="index"
                 class="ghostpanel__item"
@@ -122,7 +122,7 @@
           <template #receipt-list>
             <li
               v-for="(player, index) in gameData.players?.filter(
-                (player) => player.role === 'snackman',
+                (player) => player.role === 'SNACKMAN',
               )"
               :key="index"
               class="receiptpanel__item"

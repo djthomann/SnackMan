@@ -20,6 +20,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Chicken;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.FoodType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Ghost;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.MovableAndSubscribable;
@@ -53,6 +54,7 @@ public class Game {
     private final GameState gameState;
     private int numSnackmen = 0;
     private long startTime;
+    private boolean hasSnackManWon = false; // else ghost won
 
     // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
@@ -81,6 +83,7 @@ public class Game {
                 snackMan.setCalorieChangeListener(newCal -> {
                     if (newCal >= scoreToWin) {
                         logger.info("targeted calories reached by a SnackMan");
+                        hasSnackManWon = true;
                         sendGameEndEvent();
                     }
                 });
@@ -315,6 +318,9 @@ public class Game {
     }
 
 
+    /**
+     * Sends a GameEndEvent to all subscribers
+     */
     private void sendGameEndEvent() {
         GameEndEvent gameEndEvent = new GameEndEvent();
         this.gameManager.notifyChange(gameEndEvent);
@@ -376,19 +382,33 @@ public class Game {
         }
     
         // Determine winner
-        long winnerId = determineWinner(scores);
+        String winnerTeam = "";
+        long winnerId = -1;
+        Client winner = null;
+        String winnerName = "";
+        int winnerCaloryCount = 0;
+
+        winnerId = determineWinner(scores);
         logger.info("Winner Client ID: " + winnerId);
 
-        Client winner = lobby.getClient(winnerId);
+        winner = lobby.getClient(winnerId);
         logger.info("Winner Client: " + winner.toString());
 
-        String winnerName = winner.getUsername();
+        winnerName = winner.getUsername();
         logger.info("Winner Name: " + winnerName);
 
+        winnerCaloryCount = scores.get(winnerId);
+
+        if(hasSnackManWon) {
+            winnerTeam = "SNACKMAN";
+        } else{
+            winnerTeam = "GHOST";
+        }
+
+        /*
         String winnerTeam = winner.getRole().toString();
         logger.info("Winner Team: " + winnerTeam);
-
-        int winnerCaloryCount = scores.get(winnerId);
+        */
 
         /* Logging: Iterate through scores and log every entry
         for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
@@ -402,7 +422,13 @@ public class Game {
         for (Client c : clientsAsList) {
             long id = c.getClientId();
             String username = c.getUsername();
-            int score = scores.get(id);
+            int score = -1;
+
+            // Ghosts don't have calories. Without this check we would receive a NullPointerException
+            if(c.getRole() == GameObjectType.SNACKMAN) { 
+                score = scores.get(id);
+            }
+
             playerRecords.add(new PlayerRecord(username, c.getRole().toString(), score));
         }
 
