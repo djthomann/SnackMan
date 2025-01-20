@@ -26,11 +26,7 @@ import { Mesh } from 'three';
 import GameOverlay from './GameOverlay.vue';
 import { Logger } from '../util/logger';
 import LoadingOverlayComponent from './layout/LoadingOverlayComponent.vue';
-
-// TODO find and replace with similar free music because these songs are copyrighted
-import gameMusic from '@/assets/sounds/music/Game-music.mp3';
-import chickenCackle from '@/assets/sounds/soundeffects/chicken.mp3';
-import eatSound from '@/assets/sounds/soundeffects/eat1.mp3';
+import SoundService, { SoundEffect, type SoundParameters } from '@/services/soundService';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -45,10 +41,10 @@ const mapScale = 5;
 const wallHeight = 1 * mapScale;
 
 
-    // Background music and other sounds
-    let backgroundSound: THREE.Audio<GainNode>;
+    // Background music and soundeffects
     const listener = new THREE.AudioListener();
-    let chickenAudios: THREE.PositionalAudio[] = [];
+    const soundService = new SoundService(listener);
+    
 
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
     const isLoading = ref<boolean>(true);
@@ -272,8 +268,9 @@ const wallHeight = 1 * mapScale;
         rendererContainer.value.removeChild(renderer.domElement);
       }
 
-      stopBackgroundMusic();
-      stopChickenSounds();
+      // Stop sounds
+      soundService.stopBackgroundMusic();
+      soundService.stopSound(chickenGroup);
 
       window.removeEventListener('resize', onWindowResize);
     });
@@ -309,23 +306,11 @@ const wallHeight = 1 * mapScale;
         animationMixers.push(chickenMixer);
       });
 
-      // Load chicken sound for each chicken
-      const audioLoader = new THREE.AudioLoader();
-
-      audioLoader.load(chickenCackle, function (buffer) {
-
-        chickenGroup.children.forEach(chicken => {
-          const audio = new THREE.PositionalAudio(listener);
-          audio.setBuffer(buffer);
-          audio.setLoop(true);
-          audio.setVolume(5);
-          audio.play();
-          chicken.add(audio);
-          chickenAudios.push(audio);
-        });
-       });
-
       scene.add(chickenGroup);
+
+      // Load chicken sound for each chicken
+      const chickenSoundParams: SoundParameters = {autoplaying: true, looping: true, volume: 5};
+      soundService.addPositionalAudio(SoundEffect.CHICKEN, chickenGroup, chickenSoundParams);
     }
 
     /*
@@ -407,22 +392,13 @@ const wallHeight = 1 * mapScale;
         }
       }
 
-      // Load eating sound for each food item
-      const audioLoader = new THREE.AudioLoader();
-
-      audioLoader.load(eatSound, function (buffer) {
-
-      foodGroup.children.forEach(food => {
-          const audio = new THREE.PositionalAudio(listener);
-          audio.setBuffer(buffer);
-          audio.setVolume(8);
-          food.add(audio);
-        });
-      });
-
       scene.add(wallsGroup);
       scene.add(foodGroup);
       scene.add(floorGroup);
+
+      // Add eating sound
+      const params: SoundParameters = {autoplaying: false, looping: false, volume: 2, refDistance: 30, rolloff: 0.5, maxDistance: 50};
+      soundService.addPositionalAudio(SoundEffect.EAT, foodGroup, params);
 
       const skyBox = modelService.createSkybox(w);
       scene.add(skyBox);
@@ -469,7 +445,8 @@ const wallHeight = 1 * mapScale;
       camera.add(listener);
       // camera.lookAt(1, 1, 1);
 
-      startBackgroundMusic();
+      // Background music
+      soundService.startBackgroundMusic();
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -723,46 +700,13 @@ const wallHeight = 1 * mapScale;
       }
     }
 
-    function startBackgroundMusic() {
-
-      backgroundSound = new THREE.Audio(listener);
-
-      const audioLoader = new THREE.AudioLoader();
-      audioLoader.load( gameMusic, function( buffer ) {
-        backgroundSound.setBuffer(buffer);
-        backgroundSound.setLoop(true);
-        backgroundSound.setVolume( 0.5 );
-        backgroundSound.play();
-      });
-    }
-
-    function stopBackgroundMusic() {
-      backgroundSound.stop();
-    }
-
-    function stopChickenSounds() {
-      chickenAudios.forEach((audio => {
-        audio.stop();
-      }));
-    }
-
     function playFoodSound(id: number) {
       foodGroup.children.forEach((food) => {
         if (food.userData.id == id) {
-          playSound(food);
+          soundService.playSound(food);
         }
       });
     }
-
-    function playSound(mesh: THREE.Object3D) {
-      const sound = mesh.children.find(child => child instanceof THREE.PositionalAudio) as THREE.PositionalAudio;
-      if (sound) {
-        if (!sound.isPlaying) {
-          sound.play();
-        }
-      }
-    }
-
 
 </script>
 
