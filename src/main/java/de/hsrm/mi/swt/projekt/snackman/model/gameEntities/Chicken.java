@@ -91,6 +91,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.passiveCalorieGainDelay = 1000; //in ms
         this.passiveCaloriesTimer = new Timer();
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
+        this.state = StateOfObject.NEUTRAL;
         // choose script file
         this.scriptInterpreter = new PythonInterpreter();
         this.scriptInterpreter.exec("import sys");
