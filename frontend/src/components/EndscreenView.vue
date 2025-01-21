@@ -20,10 +20,10 @@
             </template>
           </PlayerPanelComponent>
           <div>
-            <button @click="saveMap()">Save Map</button>
+            <button @click="saveMap">Save Map</button>
           </div>
           <div>
-            <button @click="toLobby()">Back to Lobby</button>
+            <button @click="toLobby">Back to Lobby</button>
           </div>
         </div>
 
@@ -92,10 +92,10 @@
             </template>
           </PlayerPanelComponent>
           <div>
-            <button>Save Map</button>
+            <button @click="saveMap">Save Map</button>
           </div>
           <div>
-            <button @click="toLobby()">Back to Lobby</button>
+            <button @click="toLobby">Back to Lobby</button>
           </div>
         </div>
 
