@@ -1,40 +1,73 @@
 package de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend;
 
+import java.util.List;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.PlayerRecord;
 
 /**
- * Event that informs Frontend about End of a Game, who won and the scores of the players
+ * Event that informs Frontend about End of a Game, who won and the scores of
+ * the players
  */
 public class GameEndEvent extends Event {
-    
-    /*private long id;
-    // private Map<Integer, Integer> scores;
 
-    public GameEndEvent(long id) {
+    private String winningTeam;
+    private String winnerName;
+    private int winnerCaloryCount;
+    private List<PlayerRecord> players;
+
+    public GameEndEvent() {
         this.setType(EventType.GAME_END);
-        this.id = id;
-        // this.winner = winner;
-        // this.scores = scores;
-    }
-    /*public int getWinner() {
-        return winner;
-    }
-    public void setWinner(int winner) {
-        this.winner = winner;
-    }
-    public Map<Integer, Integer> getScores() {
-        return scores;
-    }
-    public void setScores(Map<Integer, Integer> scores) {
-        this.scores = scores;
     }
 
-    public long getId() {
-        return id;
+    public GameEndEvent(String winningTeam, String winnerName, int winnerCaloryCount, List<PlayerRecord> players) {
+        this.setType(EventType.GAME_END);
+        this.winningTeam = winningTeam;
+        this.winnerName = winnerName;
+        this.winnerCaloryCount = winnerCaloryCount;
+        this.players = players;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }*/
+    public String getWinningTeam() {
+        return winningTeam;
+    }
 
+    public void setWinningTeam(String winningTeam) {
+        this.winningTeam = winningTeam;
+    }
+
+    public String getWinnerName() {
+        return winnerName;
+    }
+
+    public void setWinnerName(String winnerName) {
+        this.winnerName = winnerName;
+    }
+
+    public int getWinnerCaloryCount() {
+        return winnerCaloryCount;
+    }
+
+    public void setWinnerCaloryCount(int winnerCaloryCount) {
+        this.winnerCaloryCount = winnerCaloryCount;
+    }
+
+    public List<PlayerRecord> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<PlayerRecord> players) {
+        this.players = players;
+    }
+
+    @Override
+    public String toString() {
+        return "GameEndEvent{" +
+                "winningTeam='" + winningTeam + '\'' +
+                ", winnerName='" + winnerName + '\'' +
+                ", winnerCaloryCount=" + winnerCaloryCount +
+                ", players=" + players +
+                '}';
+    }
 }

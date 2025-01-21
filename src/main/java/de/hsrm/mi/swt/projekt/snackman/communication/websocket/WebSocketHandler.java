@@ -31,6 +31,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.Mo
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.RegisterUsernameEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.StartGameEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.logic.Game;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.Lobby;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObjectType;
@@ -113,9 +114,17 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     gameManager.handleEvent(moveEvent);
                 }
                 case "SET_GAME_CONFIG" -> {
+                    ObjectMapper mapper = new ObjectMapper();
+
                     // Set GameConfig from event as GameConfig object in gameManager
                     GameConfigEvent gameConfigEvent = gson.fromJson(jsonString, GameConfigEvent.class);
                     gameManager.setGameConfig(gameConfigEvent.getGameConfig(), gameConfigEvent.getGameID());
+                    try {
+                        String json = mapper.writeValueAsString(gameConfigEvent.getGameConfig());
+                        notifyClients(session, gameConfigEvent.getGameID(), "GAME_CONFIG;" + json);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
                 }
                 case "GET_GAME_CONFIG" -> {
                     // Get existing GameConfigs from GameManager
@@ -126,22 +135,26 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
                     // if there is no GameConfig for the Lobby or the Reset-Button has been pressed,
                     // the form should recieve default values
-                    if (existingConfig == null || gameConfigEvent.getGameID() == 0) {
-                        try {
-                            String json = mapper.writeValueAsString(new GameConfig());
-                            returnString = "GAME_CONFIG;" + json;
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        try {
-                            String json = mapper.writeValueAsString(existingConfig);
-                            returnString = "GAME_CONFIG;" + json;
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
+                    if (existingConfig == null || gameConfigEvent.getGameID() == 0) existingConfig = new GameConfig();
+                    try {
+                        String json = mapper.writeValueAsString(existingConfig);
+                        returnString = "GAME_CONFIG;" + json;
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
                     }
+
                     session.sendMessage(new TextMessage(returnString));
+                    notifyClients(session, gameConfigEvent.getGameID(), returnString);
+                }
+                case "RESET_GAME_CONFIG" -> {
+                    ObjectMapper mapper = new ObjectMapper();
+                    GameConfigEvent gameConfigEvent = gson.fromJson(jsonString, GameConfigEvent.class);
+                    GameConfig newGameConfig = new GameConfig();
+                    gameManager.setGameConfig(newGameConfig, gameConfigEvent.getGameID());
+
+                    String payload = "GAME_CONFIG;" + mapper.writeValueAsString(newGameConfig);
+                    session.sendMessage(new TextMessage(payload));
+                    notifyClients(session, gameConfigEvent.getGameID(), payload);
                 }
                 case "JOIN_LOBBY" -> {
                     gameManager.addClientToLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
@@ -193,28 +206,32 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     session.sendMessage(new TextMessage(returnString));
                 }
 
+                case "MAP_DATA_REQUEST" -> {
+                    long gameID = Long.parseLong(String.valueOf(jsonObject.get("gameID")));
+                    String mapData = gameManager.getGameById(gameID).getMap().original().toString();
+
+                    session.sendMessage(new TextMessage("MAP_DATA;" + mapData));
+                }
+
                 case "START_GAME" -> {
                     StartGameEvent startGameEvent = gson.fromJson(jsonString, StartGameEvent.class);
-                    notifyClientsAboutForeignGameStart(session, startGameEvent.getGameID());
+                    notifyClients(session, startGameEvent.getGameID(), "FOREIGN_GAMESTART");
 
                     gameManager.createGame(startGameEvent.getGameID());
                 }
 
                 case "END_GAME" -> {
                     GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
-                    Lobby currLobby = gameManager.getLobbyById(gameEndEvent.getGameID());
-                    logger.info("[CURRENT GAME] : " + gameEndEvent.getGameID());
-                    
-                    logger.info("[WEBSOCKETHANDLER] - currLobby Clients List: " + currLobby.getClientsAsList().get(0));
+                    Game currentGame = gameManager.getGameById(gameEndEvent.getGameID());
 
-                    // TODO: current Game ist nicht mehr null -> anhand von client id und game id alle spieler herausfinden
+                    sendMapData(currentGame.getMap().original(), session);
 
-                    for (Client client : clients.values()) {
+                    GameEndEvent result = currentGame.generateGameEndEvent();
+                    logger.info("GameEndEvent generated: " + result);
 
-                        if (currLobby.getClientsAsList().contains(client)) {
-                            logger.info("[WEBSOCKETHANDLER] - Client: " + client.getUsername());
-                        }
-                    }
+                    TextMessage messageToSend = new TextMessage(result.getType().toString() + ";" + gson.toJson(result));
+                    logger.info("Sending GameEndEvent to all clients: " + messageToSend);
+                    session.sendMessage(new TextMessage(result.getType().toString() + ";" + gson.toJson(result)));
                 }
                 default -> logger.warn("unknown message from FE: " + type);
 
@@ -224,18 +241,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void notifyClientsAboutForeignGameStart(WebSocketSession source, long gameId) {
+    private void notifyClients(WebSocketSession source, long gameId, String payload) {
         Lobby lobby = gameManager.getLobbyById(gameId);
 
         for (Client c: lobby.getClientsAsList()) {
             if (c.getSession() != source) {
                 try {
-                    c.getSession().sendMessage(new TextMessage("FOREIGN_GAMESTART"));
+                    c.getSession().sendMessage(new TextMessage(payload));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
+    }
+
+    private void sendMapData(SnackManMap map, WebSocketSession session) throws IOException {
+        session.sendMessage(new TextMessage("MAP_DATA;" + map.toString()));
     }
 
     /**
@@ -245,7 +266,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * 
      * @param event said event
      */
-    public void notifyFrontend(Event event) {
+    public void notifyFrontend(Client client, Event event) {
 
         // JSON-Conversion
         GsonBuilder builder = new GsonBuilder();
@@ -253,20 +274,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String json;
 
         // TODO This is a temporary solution, clarify to which sessions events are sent back
-        for (WebSocketSession session : this.clients.keySet()) {
-            try {
-                json = gson.toJson(event);
-                // logger.info("Final JSON for event " + event.getType().toString() + ": " + json);
-                // Synchronize this block to avoid sending messages during invalid states (e.g.
-                // enables moving while jumping)
-                synchronized (session) {
-                    session.sendMessage(new TextMessage(event.getType().toString() + ";" + json));
-                }
+        try {
+            json = gson.toJson(event);
+            // logger.info("Final JSON for event " + event.getType().toString() + ": " + json);
+            // Synchronize this block to avoid sending messages during invalid states (e.g.
+            // enables moving while jumping)
+            synchronized (client.getSession()) {
+                client.getSession().sendMessage(new TextMessage(event.getType().toString() + ";" + json));
+            }
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        
     }
 
     /**
