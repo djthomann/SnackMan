@@ -437,6 +437,8 @@ public class Game {
         GameEndEvent gameEndEvent = new GameEndEvent(winnerTeam, winnerName, winnerCaloryCount, playerRecords);
         logger.info(gameEndEvent.toString());
 
+        gameManager.setLastGameEndEvent(gameEndEvent);
+        gameManager.setLastMapOriginal(map.original());
         return gameEndEvent;
     }
 

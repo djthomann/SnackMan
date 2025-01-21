@@ -227,11 +227,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "END_GAME" -> {
                     GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
                     Game currentGame = gameManager.getGameById(gameEndEvent.getGameID());
-                    GameEndEvent result = currentGame.generateGameEndEvent();
+                    GameEndEvent result = (currentGame != null) ? currentGame.generateGameEndEvent() : gameManager.getLastGameEndEvent();
+                    SnackManMap map = (currentGame != null) ? currentGame.getMap().original() : gameManager.getLastMapOriginal();
                     gameManager.removeGame(gameEndEvent.getGameID());
                     gameManager.removeLobby(gameEndEvent.getGameID());
 
-                    sendMapData(currentGame.getMap().original(), session);
+                    sendMapData(map, session);
                     logger.info("GameEndEvent generated: " + result);
 
                     TextMessage messageToSend = new TextMessage(result.getType().toString() + ";" + gson.toJson(result));
