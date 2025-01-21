@@ -82,7 +82,7 @@ public class GameConfig {
         this.chickenCount = 4;
         this.jumpCalories = 100;
         this.ghostCollisionCalories = 10;
-        this.chickenMaxCalories = 2000; 
+        this.chickenMaxCalories = 10000; 
     }
 
     public float getSnackManHeight() {

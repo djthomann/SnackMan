@@ -2,7 +2,7 @@ from Utils import *
 from java.util import Random
 rand = Random()
 
-def run_behavior(environment, direction, wall_collision,x,z):
+def run_behavior(environment, direction, wall_collision, x, z, y):
     """
     Executes the chicken's behavior based on its surroundings and the last known direction of movement.
     this Chicken looks for food, and is afraid of Ghosts only.
