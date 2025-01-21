@@ -68,7 +68,7 @@ const handleServerMessage = (message: string) => {
   if (message.startsWith('ALL_LOBBIES')) {
     lobbies.value = JSON.parse(message.split(';')[1]);
     logger.info('ALL LOBBIES' + lobbies.value.toString());
-  } else if (message.startsWith('NEW_LOBBY_CREATE') || message.startsWith('NEW_LOBBY_JOIN')) {
+  } else if (message.startsWith('NEW_LOBBY_CREATE') || message.startsWith('NEW_LOBBY_JOIN') || message.startsWith('NEW_LOBBY_LEAVE')) {
     fetchLobbies();
   } else if (message.startsWith('LOBBY_ID')) {
     joinLobby(message.split(';')[1]);

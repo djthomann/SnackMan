@@ -36,6 +36,10 @@ public class Lobby {
         clientMap.put(c.getClientId(), c);
     }
 
+    public void removeClient(Client c) {
+        clientMap.remove(c.getClientId());
+    }
+
     public long getId() {
         return id;
     }

@@ -1,7 +1,9 @@
 <template>
   <div>
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
-      <FetchMap></FetchMap>
+      <button class="icon-button join-button button" @click="leaveLobby(lobbyCode)">
+        <img src="@/assets/icons/Back_Button.svg" />
+      </button>
       <div class="icon-button add-button button volume-button">
             <button @click="toggleMute">
               <img v-if="volume > 0" src="@/assets/icons/volume.svg" />
@@ -14,7 +16,7 @@
           <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
             <template #counter>{{ ghostPlayers.length }}/4</template>
             <template #button
-              ><button class="chooseRoleButton" type="button" @click="decide(false)">
+              ><button class="text-button chooseRoleButton" type="button" @click="decide(false)">
                 Ghost
               </button></template
             >
@@ -33,8 +35,7 @@
             <template #content>
               <div class="config-panel-grid">
                 <FieldsetComponent height-behaviour="stretch">
-                  <span>Slay</span>
-                  <span>Slay</span>
+                  <FetchMap></FetchMap>
                 </FieldsetComponent>
                 <FieldsetComponent height-behaviour="stretch">
                   <form
@@ -153,11 +154,13 @@
                         {{ errors.jumpCalories }}
                       </p>
                     </span>
-                    <button type="submit" :disabled="hasErrors">Apply</button>
-                    <button type="button" @click="resetForm">Reset</button>
                   </form>
                 </FieldsetComponent>
               </div>
+            </template>
+            <template #footer>
+              <button class="text-button configButtons" type="button" @click="submitForm" :disabled="hasErrors">Apply</button>
+              <button class="text-button configButtons" type="button" @click="resetForm">Reset</button>
             </template>
           </ConfigPanelComponent>
         </div>
@@ -165,7 +168,7 @@
           <PlayerPanelComponent avatar="snackman" :selected="selectedRole === 'SNACKMAN'">
             <template #counter>{{ snackManPlayers.length }}/4</template>
             <template #button
-              ><button class="chooseRoleButton" type="button" @click="decide(true)">
+              ><button class="text-button chooseRoleButton" type="button" @click="decide(true)">
                 SnackMan
               </button></template
             >
@@ -177,8 +180,7 @@
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
-          
-          <button class="startGameButton" type="button" @click="startGame">Start Game</button>
+          <button class="text-button startGameButton" type="button" @click="startGame">Start Game</button>
         </div>
       
       </div>
@@ -257,6 +259,7 @@ const gameConfig = ref<GameConfig>({
 // Method, to get GameConfig from BE
 const handleServerMessage = (message: string) => {
   serverMessage.value = message;
+
   if (message.startsWith('GAME_CONFIG')) {
     gameConfig.value = JSON.parse(message.split(';')[1]);
   } else if (message.startsWith('GAME_START')) {
@@ -266,6 +269,8 @@ const handleServerMessage = (message: string) => {
     buildPlayerArrays(message);
   } else if (message.startsWith('FOREIGN_GAMESTART')) {
     router.push('/game/' + lobbyCode.value);
+  } else if (message.startsWith('NEW_LOBBY_LEAVE')) {
+    fetchPlayers();
   }
 };
 
@@ -455,6 +460,17 @@ const choose = (role: string) => {
   sendMessage(message);
 };
 
+const leaveLobby = (code: number) => {
+    logger.info(`Leaving lobby with code: ${code}`);
+
+    const data = JSON.stringify({
+      type: 'LEAVE_LOBBY',
+      lobbyCode: code
+    });
+
+    sendMessage(data);
+    router.push('/home');
+};
 </script>
 
 <style scoped>
@@ -464,8 +480,8 @@ const choose = (role: string) => {
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-rows: 1fr auto;
-  gap: 40px 60px;
-  padding: 4dvw;
+  gap: 30px 60px;
+  padding: 6dvw 4dvw 4dvw;
   box-sizing: border-box;
 }
 
@@ -498,11 +514,15 @@ const choose = (role: string) => {
 .chooseRoleButton {
   width: 100%;
   background-color: white;
-  color: #ff8c00;
+  color: #F39325;
   border: none;
 }
 
-Button {
+button:hover {
+  cursor: pointer;
+}
+
+.text-button {
   padding: 10px;
   font-size: 1.5rem;
   font-weight: bold;
@@ -510,15 +530,50 @@ Button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-Button:hover {
+.text-button:hover{
   color: black;
-  transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.chooseRoleButton:hover {
+  transform: scale(1.05);
 }
 
 .startGameButton:hover {
   background-color: white;
   border: 3px solid black;
+}
+
+.configButtons{
+  width: 20%;
+  background-color: #F39325;
+  color: white;
+  border: 1px black;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.configButtons:hover{
+  background-color: white;
+}
+
+.configButtons{
+  width: 20%;
+  background-color: #F39325;
+  color: white;
+  border: 1px black;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.configButtons:hover{
+  background-color: white;
 }
 
 input[type='number'] {
@@ -548,9 +603,113 @@ label {
   padding: 5px 0;
 }
 
+.join-button img {
+  transition: transform 0.2s ease;
+}
+
 .error-message {
   margin-top: 4px;
   padding: 0px 5px;
+}
+
+.icon-button {
+  position: absolute;
+  user-select: none;
+  margin-top: 1%;
+  border: none;
+  background: 0;
+  box-shadow: none;
+  padding-left: 15px;
+}
+
+.icon-button img {
+  height: 60px;
+  user-select: none;
+}
+
+.icon-button img:hover {
+  transform: scale(1.5);
+}
+
+.icon-button button {
+  background: 0;
+  border: 0;
+  user-select: none;
+  box-shadow: none;
+}
+
+.icon-button button:hover {
+  cursor: pointer;
+  box-shadow: none;
+}
+
+#volume-slider {
+  opacity: 0;
+  width: 0;
+  transition: none;
+}
+
+.volume-button {
+  position: absolute;
+  bottom: 2%;
+  left: 0;
+  width: auto;
+  display: flex;
+  align-items: center;
+}
+
+.button {
+  user-select: none;
+  margin-left: 1%;
+}
+
+.icon-button img {
+  height: 40px;
+  transition: transform 0.5s ease;
+  user-select: none;
+}
+
+.icon-button button {
+  display: flex;
+  background: 0;
+  box-shadow: none;
+  border: 0;
+  user-select: none;
+}
+
+.icon-button button:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.volume-button:hover #volume-slider {
+  animation: expandVolumeSlider 0.2s forwards;
+}
+
+.volume-button:not(:hover) #volume-slider {
+  animation: collapseVolumeSlider 0.2s forwards;
+}
+
+@keyframes expandVolumeSlider {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  100% {
+    width: 100px;
+    opacity: 1;
+  }
+}
+
+@keyframes collapseVolumeSlider {
+  0% {
+    width: 100px;
+    opacity: 1;
+  }
+  100% {
+    width: 0;
+    opacity: 0;
+  }
 }
 
 #volume-slider {
