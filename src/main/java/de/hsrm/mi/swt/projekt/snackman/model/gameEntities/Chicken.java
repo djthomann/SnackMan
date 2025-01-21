@@ -54,13 +54,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             Game game = gameManager.getGameById(gameId); 
             if(!movementPaused && game!= null) {
                 gainedCalories += passiveCalorieGain;
-                /* TODO: NEEDS DEBUGGING
-                game.getGameState().addChangedChicken(thisChicken);
-                GameState gameState = gameManager.getGameById(gameId).getGameState();
-                if(gameState != null) {
-                gameState.addChangedChicken(thisChicken);
-                }
-                 */
                 game.getGameState().addChangedChicken(thisChicken);
                 updateRadius();            
             }
@@ -92,12 +85,15 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.gameConfig = gameConfig;
         this.collisionManager = collisionManager;
         this.gameManager = gameManager;
+
         this.gainedCalories = 0;
         this.passiveCalorieGain = 100;
         this.passiveCalorieGainDelay = 1000;
         this.passiveCaloriesTimer = new Timer();
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
+
         this.state = StateOfObject.NEUTRAL;
+
         this.scriptInterpreter = new PythonInterpreter();
         this.scriptInterpreter.exec("import sys");
         this.scriptInterpreter.exec("sys.path.insert(0, '.')");
@@ -154,6 +150,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 float movementX = gameConfig.getChickenSpeed() * (float) (double) tuple.get(0);
                 float movementY = gameConfig.getChickenSpeed() * (float) (double) tuple.get(1);
                 float movementZ = gameConfig.getChickenSpeed() * (float) (double) tuple.get(2);
+
                 this.direction = (String) tuple.get(3);
                 this.wallCollision = (boolean) tuple.get(4);
 
@@ -276,13 +273,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                 movementPaused = false; 
                 radius = minRadius; 
                 resetGainedCalories();
-
-                new Timer().schedule(new TimerTask() { 
-                    @Override public void run() { 
-                        if (state != StateOfObject.SCARED)
-                        layEgg(oldX, oldZ); 
-                    } 
-                }, 3000);
+                    new Timer().schedule(new TimerTask() { 
+                        @Override public void run() { 
+                            layEgg(oldX, oldZ); 
+                        } 
+                    }, 3000);
             }
         }, 5000);
 
@@ -291,14 +286,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     /** react to getting scared by a ghost */
     public void reactToGhostCollision() {
         state = StateOfObject.SCARED;
-        stopMovementTemporarily();
-        EventService.getInstance().applicationEventPublisher.publishEvent(new ScareEvent(this, gameId, gameManager));
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                state = StateOfObject.NEUTRAL;
-            }
-        }, 5000); // paused for 5 seconds
+        radius = minRadius; 
+        EventService.getInstance().applicationEventPublisher.publishEvent(new ScareEvent(this, gameId, gameManager)); // paused for 5 seconds
     }
     
     /**
