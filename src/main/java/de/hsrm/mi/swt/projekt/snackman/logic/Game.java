@@ -356,7 +356,7 @@ public class Game {
      * @param scores A map of player IDs to their scores.
      * @return The ID of the player with the highest score.
      */
-    private long determineWinner(Map<Long, Integer> scores) {
+    public long determineWinner(Map<Long, Integer> scores) {
 
         logger.info("Given Scores: " + scores.toString());
 
@@ -560,5 +560,8 @@ public class Game {
     public List<Client> getClients() {
         return clients;
     }
-    
+
+    public GameConfig getGameConfig() {
+        return gameConfig;
+    }
 }
