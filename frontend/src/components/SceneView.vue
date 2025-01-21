@@ -649,87 +649,15 @@ const wallHeight = 1 * mapScale;
 
     // Method to turn the player body according to camera forward direction
     function rotateBody() {
-      const forward = new THREE.Vector3();
-      const playerForward = new THREE.Vector3();
-      camera.getWorldDirection(forward);
+      
+      const cameraQuat = camera.quaternion;
+      const cameraEuler = new THREE.Euler();
+      cameraEuler.setFromQuaternion(cameraQuat, 'YXZ'); 
+      const yQuaternion = new THREE.Quaternion(); 
+      yQuaternion.setFromEuler(new THREE.Euler(0, cameraEuler.y, 0, 'YXZ'));
 
-      meshes.get(userStore.id!)!.getObjectByName("model")!.getWorldDirection(playerForward);
-      forward.normalize();
-      playerForward.normalize();
-
-      if (controls.isLocked) {
-        if (mouseMovement) {
-          const angleYCameraDirection = Math.atan2(
-            playerForward.x - forward.x,
-            playerForward.z - forward.z,
-          );
-
-          // Interpolation for smooth rotation
-          const smoothingFactor = 0.1;
-          const currentAngle = meshes.get(userStore.id!)!.rotation.y;
-
-          // Player body facing forward
-          if (forward.z < 0 && angleYCameraDirection < 0.125 && angleYCameraDirection > -0.125) {
-            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, 0, smoothingFactor);
-
-            // Player body facing forward-right
-          } else if (
-            forward.z < 0 &&
-            angleYCameraDirection < -0.125 &&
-            angleYCameraDirection > -0.375
-          ) {
-            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 4, smoothingFactor);
-
-            // Player body facing right
-          } else if (angleYCameraDirection < -0.375) {
-            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, -Math.PI / 2, smoothingFactor);
-
-            // Player body facing backwards-right
-          } else if (
-            forward.z > 0 &&
-            angleYCameraDirection < -0.125 &&
-            angleYCameraDirection > -0.375
-          ) {
-            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(
-              currentAngle,
-              -Math.PI / 2 - Math.PI / 4,
-              smoothingFactor,
-            );
-
-            // Player body facing backwards
-          } else if (
-            forward.z > 0 &&
-            angleYCameraDirection < 0.125 &&
-            angleYCameraDirection > -0.125
-          ) {
-            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI, smoothingFactor);
-
-            // Player body facing backwards-left
-          } else if (
-            forward.z > 0 &&
-            angleYCameraDirection > 0.125 &&
-            angleYCameraDirection < 0.375
-          ) {
-            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(
-              currentAngle,
-              Math.PI / 2 + Math.PI / 4,
-              smoothingFactor,
-            );
-
-            // Player body facing left
-          } else if (angleYCameraDirection > 0.375) {
-            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 2, smoothingFactor);
-
-            // Player body facing forward-left
-          } else if (
-            forward.z < 0 &&
-            angleYCameraDirection > 0.125 &&
-            angleYCameraDirection < 0.375
-          ) {
-            meshes.get(userStore.id!)!.getObjectByName("model")!.rotation.y = THREE.MathUtils.lerp(currentAngle, Math.PI / 4, smoothingFactor);
-          }
-        }
-      }
+      // Apply rotation to the model
+      meshes.get(userStore.id!)!.getObjectByName("model")!.quaternion.copy(yQuaternion);
     }
 
     // Play eating sound for eaten food
