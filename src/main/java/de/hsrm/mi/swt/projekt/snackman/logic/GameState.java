@@ -70,7 +70,7 @@ public class GameState {
                             laidEggs.clear();
                             lastSentTime = game.getRemainingSeconds();
                         }
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         this.interrupt();
                     }
                 }
