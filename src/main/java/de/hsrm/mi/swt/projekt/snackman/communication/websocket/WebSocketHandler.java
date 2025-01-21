@@ -232,7 +232,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "CHAT" -> {
                     ChatEvent chatEvent = gson.fromJson(jsonObject, ChatEvent.class);
                     logger.info("ChatEvent received: " + chatEvent);
-                    broadcastMessage("CHAT;" + gson.toJson(chatEvent));
+
+                    notifyClients(session, chatEvent.getLobbyID(), "CHAT;" + gson.toJson(chatEvent));
                 }
 
                 default -> logger.warn("unknown message from FE: " + type);

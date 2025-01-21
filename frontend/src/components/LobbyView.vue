@@ -446,7 +446,7 @@ const choose = (role: string) => {
 
 const chat = (message: string) => {
   // Display your own message for yourself
-  // chatMessages.value.push({ username: userStore.username, text: chatInput.value });
+  chatMessages.value.push({ username: userStore.username, text: chatInput.value });
   
   // Send the message to the server
   const data = JSON.stringify({
