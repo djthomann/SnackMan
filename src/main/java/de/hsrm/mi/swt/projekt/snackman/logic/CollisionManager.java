@@ -1,6 +1,8 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -18,7 +20,6 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.Tile;
 
 public class CollisionManager {
 
-    // Translation added to x- and z-values for correct depiction in frontend.
     private final float TRANSLATION = 0.5f;
 
     private SnackManMap snackManMap;
@@ -41,9 +42,9 @@ public class CollisionManager {
      * @return List of The types of entity/object collided with, or empty list if no
      *         collision is detected.
      */
-    public synchronized ArrayList<CollisionType> checkCollision(float wishedX, float wishedZ,
-            GameObject currentObject) {
-
+    public synchronized List<CollisionType> checkCollision(float wishedX, float wishedZ, 
+        GameObject currentObject) {
+        
         ArrayList<CollisionType> collisions = new ArrayList<>();
         collisions.clear();
         Tile wishedTile = snackManMap.getTileAt((int) wishedX, (int) wishedZ);
@@ -60,28 +61,51 @@ public class CollisionManager {
                 break;
 
             case ITEM:
-                logger.info(currentObject.toString() + " and item Collision ! Tile :" + wishedTile.getX() + " , "
-                        + wishedTile.getZ() + " .");
-
+                List<Food> nearbyFoods = new CopyOnWriteArrayList<>(snackManMap.getFoodsOfTile(wishedTile));
+                List <Food> foodsToRemove = new ArrayList<>(); 
                 if (currentObject instanceof SnackMan || currentObject instanceof Chicken) {
+                    for (Food food: nearbyFoods) {
+                        try {
+                            float foodPosX = food.getX();
+                            float foodPosZ = food.getZ();
+                            float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
+                            float heightDistance = calculateHeightDifference(currentObject.getY(), food.getY());
+                            if (distance < (currentObject.getRadius() + food.getRadius())) {
+                                if (heightDistance <= currentObject.getHeight()/2 + food.getHeight()/2) {
+                                    
+                                    if (currentObject instanceof SnackMan) {
+                                        foodsToRemove.add(food); 
+                                        wishedTile.removeFromOccupation(food); 
 
-                    Food nearbyFood = snackManMap.getFoodOfTile(wishedTile);
-
-                    try {
-                        float foodPosX = nearbyFood.getX();
-                        float foodPosZ = nearbyFood.getZ();
-                        float distance = calculateDistance(wishedX, foodPosX, wishedZ, foodPosZ);
-                        if (distance < (currentObject.getRadius() + nearbyFood.getRadius())) {
-                            if (currentObject instanceof SnackMan)
-                                ((SnackMan) currentObject).eat(nearbyFood);
-                            else
-                                ((Chicken) currentObject).eat(nearbyFood);
-                            wishedTile.setOccupationType(OccupationType.FREE);
-                            collisions.add(CollisionType.ITEM);
+                                        ((SnackMan) currentObject).eat(food);
+                                    }
+                                    else if (currentObject instanceof Chicken) {
+                                        if (food.getFoodType() != FoodType.EGG)  {
+                                            foodsToRemove.add(food);
+                                            wishedTile.removeFromOccupation(food); 
+                                            ((Chicken) currentObject).eat(food);
+                                            break; 
+                                        }
+                                        else {
+                                            collisions.clear(); 
+                                            return collisions; 
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                collisions.addAll(checkModelCollision(currentObject, wishedX, wishedZ)); 
+                            }
+                        } catch(NullPointerException e) {
+                                logger.error(
+                                    "no more food on tile: " + wishedTile.getX() + ", " + wishedTile.getZ());
                         }
-                    } catch (NullPointerException e) {
-                        logger.warn("No food on tile: " + wishedTile.getX() + ", " + wishedTile.getZ());
-                    }
+                    }   
+                    nearbyFoods.removeAll(foodsToRemove); 
+                    if (nearbyFoods.size() == 0) wishedTile.setOccupationType(OccupationType.FREE);
+                    else wishedTile.setOccupationType(OccupationType.ITEM);
+                    collisions.add(CollisionType.ITEM);
+
                 }
                 break;
         }
@@ -94,20 +118,16 @@ public class CollisionManager {
 
         ArrayList<CollisionType> collisions = new ArrayList<>();
 
-        // Iterate through all Movables and check for collisions between Entities:
         for (MovableAndSubscribable collisionPartner : this.allMovables) {
 
             if (collisionPartner != currentObject) {
-
-                float distance = calculateDistance(wishedX, ((GameObject) collisionPartner).getX() + TRANSLATION,
+                float distance = calculateDistance(wishedX, ((GameObject) collisionPartner).getX(),
                         wishedZ,
-                        ((GameObject) collisionPartner).getZ() + TRANSLATION);
+                        ((GameObject) collisionPartner).getZ());
 
                 switch (currentObject) {
                     case SnackMan s1 -> {
 
-                        // Since Snackman can jump the height distance has to be taken into
-                        // consideration as well. (Height/2 since it is in the middle...)
                         float heightDistance = calculateHeightDifference(currentObject.getY(),
                                 ((GameObject) collisionPartner).getY());
 
@@ -191,7 +211,9 @@ public class CollisionManager {
         }
 
         return collisions;
+
     }
+
 
     public boolean isBetweenWalls(float x, float z) {
         boolean stuck = false;
@@ -273,10 +295,8 @@ public class CollisionManager {
         float dBottom = distances[2];
         float dTop = distances[3];
 
-        // Calculate the minimum distance
         float dMin = Math.min(Math.min(dLeft, dRight), Math.min(dBottom, dTop));
 
-        // determine the direction vector
         if (dMin == dLeft) {
             vec.x = -1;
             vec.z = 0;

@@ -1,9 +1,10 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
 import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
+
+
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +62,7 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
     @Override
     public void move(float newX, float newY, float newZ) {
         this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
-        x += newX;
-        y += newY;
-        z += newZ;
+        super.move(newX, newY, newZ);
         EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
@@ -74,10 +73,11 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
             return;
         }
 
+
         if (Objects.requireNonNull(event.getType()) == EventType.MOVE) {
             Vector3f vector = ((MoveEvent) event).getMovementVector();
             logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
-            ArrayList<CollisionType> collisions;
+            List<CollisionType> collisions;
             float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
             logger.info("Wished X: " + wishedX);
             float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
@@ -116,7 +116,11 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
         return new GhostRecord(gameId, objectId, getUsername(), numCollisions, x, y, z);
     }
 
-    // String representation used for chickenssurroundings
+    /**
+     * Returns string representation used for chicken-surroundings 
+     * 
+     * @return string representation
+     */        
     public String toString() {
         return "GHOST";
     }

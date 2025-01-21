@@ -26,6 +26,8 @@ import { Mesh } from 'three';
 import GameOverlay from './GameOverlay.vue';
 import { Logger } from '../util/logger';
 import LoadingOverlayComponent from './layout/LoadingOverlayComponent.vue';
+import router from '@/router';
+import SoundService, { SoundEffect, type SoundParameters } from '@/services/soundService';
 
 // Groups of different map objects
 let wallsGroup: THREE.Group;
@@ -40,8 +42,13 @@ const mapScale = 5;
 const wallHeight = 1 * mapScale;
 
 
+    // Background music and soundeffects
+    const listener = new THREE.AudioListener();
+    const soundService = new SoundService(listener);
+
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
     const isLoading = ref<boolean>(true);
+    
 
     const { sendMessage } = useWebSocket();
 
@@ -57,7 +64,6 @@ const wallHeight = 1 * mapScale;
     let directionalLight: THREE.DirectionalLight;
     let controls: PointerLockControls;
     let mouseMovement = false;
-    let nameTag: NameTag;
     const animationMixers: THREE.AnimationMixer[] = [];
     const nameTags: NameTag[] = [];
     let gameID = 2;
@@ -91,6 +97,9 @@ const wallHeight = 1 * mapScale;
           isLoading.value = false;
         }
         handleGameStateEvent(message.split(';')[1]);
+      } else if (message.startsWith('GAME_END')) {
+        const code = route.params.code;
+        router.push(`/results/${code}`);
       } else {
         logger.warn(`FE does not support message starting with ${message.split(";")[0]}`)
       }
@@ -102,7 +111,8 @@ const wallHeight = 1 * mapScale;
       gameStore.setRemainingTime(parsedData.remainingSeconds);
 
       parsedData.eatenFoods.forEach((food: Food) => {
-        makeDisappear(food.objectId)
+        playFoodSound(food.objectId);
+        makeDisappear(food.objectId);
       })
 
       parsedData.laidEggs.forEach((food: Food) => {
@@ -111,12 +121,17 @@ const wallHeight = 1 * mapScale;
       });
 
       parsedData.updatesSnackMen.forEach((snackman: Snackman) => {
+        const snackmanMesh = meshes.get(snackman.objectId);
+
         if(snackman.objectId === userStore.id) {
           gameStore.setCalories(snackman.gainedCalories);
+
+          // If the SnackMan jumps, play jump sound
+          if(snackmanMesh!.position.y < snackman.y) {
+            playJumpSound(snackmanMesh);
+          }
         }
-        meshes
-          .get(snackman.objectId)!
-          .position.set(snackman.x * mapScale, snackman.y, snackman.z * mapScale);
+        snackmanMesh!.position.set(snackman.x * mapScale, snackman.y, snackman.z * mapScale);
       });
 
       parsedData.updatesGhosts.forEach((ghost: Ghost) => {
@@ -234,6 +249,10 @@ const wallHeight = 1 * mapScale;
         rendererContainer.value.removeChild(renderer.domElement);
       }
 
+      // Stop sounds
+      soundService.stopBackgroundMusic();
+      soundService.stopSound(chickenGroup);
+
       window.removeEventListener('resize', onWindowResize);
     });
 
@@ -251,6 +270,7 @@ const wallHeight = 1 * mapScale;
     function loadChickens(chickens: Chicken[]) {
       chickens.forEach(newChicken => {
         const chicken = modelService.createChicken(newChicken.objectId, newChicken.x * mapScale, newChicken.z * mapScale);
+
         chickenGroup.add(chicken);
 
         const chickenMixer = new THREE.AnimationMixer(chicken);
@@ -266,7 +286,12 @@ const wallHeight = 1 * mapScale;
         // Mixer is stored in a global list, so that it can be used in the update-loop
         animationMixers.push(chickenMixer);
       });
+
       scene.add(chickenGroup);
+
+      // Load chicken sound for each chicken
+      const chickenSoundParams: SoundParameters = {autoplaying: true, looping: true, volume: 6};
+      soundService.addPositionalAudio(SoundEffect.CHICKEN, chickenGroup, chickenSoundParams);
     }
 
     /*
@@ -290,10 +315,15 @@ const wallHeight = 1 * mapScale;
           playerMesh.add(controls.object);
           meshes.set(snackMan.objectId, playerMesh);
           scene.add(playerMesh);
+
+          // Load jump sound
+          const jumpSoundParams: SoundParameters = {autoplaying: false, looping: false, volume: 6};
+          soundService.addSingleAudio(SoundEffect.JUMP, playerMesh, jumpSoundParams);
+
         } else {
           const snackManMesh = modelService.createSnackman(snackMan.objectId, snackMan.x * mapScale, snackMan.y * mapScale, snackMan.z * mapScale);
           // Attach a NameTag
-          const snackManTag = new NameTag(snackMan.username, snackManMesh, scene);
+          const snackManTag = new NameTag(snackMan.username, snackManMesh, scene, mapScale);
           nameTags.push(snackManTag);
           // Add to snackMen group
           scene.add(snackManMesh);
@@ -314,7 +344,7 @@ const wallHeight = 1 * mapScale;
           scene.add(ghostMesh);
         } else {
           const ghostMesh = modelService.createGhost(ghost.objectId, ghost.x * mapScale, ghost.y * mapScale, ghost.z * mapScale);
-          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene);
+          const ghostTag = new NameTag(ghost.username || 'Ghost', ghostMesh, scene, mapScale);
           nameTags.push(ghostTag);
           // Add to ghosts group
           scene.add(ghostMesh);
@@ -338,8 +368,8 @@ const wallHeight = 1 * mapScale;
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, tile.food.calories, mapScale);
-            food.userData.id = tile.food.objectId;
+            const food = modelService.createFood(tile.foods[0].objectId, tile.x, tile.z, tile.foods[0].calories, mapScale);
+            food.userData.id = tile.foods[0].objectId;
             foodGroup.add(food);
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
           } else if (occupationType == 'FREE') {
@@ -347,9 +377,22 @@ const wallHeight = 1 * mapScale;
           }
         }
       }
+
       scene.add(wallsGroup);
       scene.add(foodGroup);
       scene.add(floorGroup);
+
+      // Add eating sound
+      const params: SoundParameters = {
+        autoplaying: false,
+        looping: false,
+        volume: 1,
+        refDistance: 30,
+        rolloff: 0.2,
+        maxDistance: 5
+      };
+
+      soundService.addPositionalAudio(SoundEffect.EAT, foodGroup, params);
 
       const skyBox = modelService.createSkybox(w);
       scene.add(skyBox);
@@ -371,9 +414,21 @@ const wallHeight = 1 * mapScale;
       foodGroup.add(food);
       scene.remove(foodGroup)
       scene.add(foodGroup)
+      // Add eating sound
+      const params: SoundParameters = {
+        autoplaying: false,
+        looping: false,
+        volume: 1,
+        refDistance: 30,
+        rolloff: 0.5,
+        maxDistance: 20
+      };
+      soundService.addPositionalAudio(SoundEffect.EAT, food, params);
     }
 
     function initScene() {
+
+
       // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x111111);
@@ -391,7 +446,11 @@ const wallHeight = 1 * mapScale;
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, mapScale * 1000);
       camera.position.set(0, 0, 0)
       camera.getWorldDirection(lastRotation);
+      camera.add(listener);
       // camera.lookAt(1, 1, 1);
+
+      // Background music
+      soundService.startBackgroundMusic();
 
       // Vectors
       const forward = new THREE.Vector3();
@@ -537,7 +596,7 @@ const wallHeight = 1 * mapScale;
 
       // Update NameTag Orientation
       nameTags.forEach((nameTag) => {
-        nameTag.update(meshes.get(userStore.id!)!);
+        nameTag.update(camera);
       });
 
       //update all animations
@@ -644,6 +703,25 @@ const wallHeight = 1 * mapScale;
         }
       }
     }
+
+    // Play eating sound for eaten food
+    function playFoodSound(id: number) {
+      foodGroup.children.forEach((food) => {
+        if (food.userData.id == id) {
+          soundService.playSound(food);
+        }
+      });
+    }
+
+    // Play jump sound if snackman jumps
+    function playJumpSound(snackman: THREE.Group | undefined) {  
+      if(!snackman) {
+        logger.error("Snackman is undefined");
+        return;
+      }
+      soundService.playSound(snackman);
+    }
+
 </script>
 
 <style scoped>

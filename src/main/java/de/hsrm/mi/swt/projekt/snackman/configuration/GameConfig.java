@@ -1,5 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.configuration;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -24,6 +25,7 @@ public class GameConfig {
     @Positive
     private int gameTime;
     @PositiveOrZero
+    @Max(4)
     private int chickenCount;
     @Positive
     private int jumpCalories;
@@ -57,11 +59,9 @@ public class GameConfig {
     private int chickenMaxCalories; 
 
     public GameConfig() {
-        // Placeholder default values for the beginning -> change later to reasonable default values
-        this.scoreToWin = 1;
+        this.scoreToWin = 100000;
         this.speedModifier = 1;
         this.snackManSpeed = 1;
-
         this.ghostSpeed = 1;
         this.chickenSpeed = 1;
         this.gameTime = 300;
@@ -82,7 +82,7 @@ public class GameConfig {
         this.chickenCount = 4;
         this.jumpCalories = 100;
         this.ghostCollisionCalories = 10;
-        this.chickenMaxCalories = 2000; 
+        this.chickenMaxCalories = 10000; 
     }
 
     public float getSnackManHeight() {

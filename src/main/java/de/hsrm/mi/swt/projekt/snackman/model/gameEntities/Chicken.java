@@ -1,6 +1,5 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,9 +18,9 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.Sca
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
 import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
+import de.hsrm.mi.swt.projekt.snackman.logic.Game;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
-import de.hsrm.mi.swt.projekt.snackman.logic.GameState;
-import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.ChickenRecord;
 
 
 /**
@@ -38,7 +37,6 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     private CollisionManager collisionManager;
     private boolean movementPaused;   
 
-    // Variables for passive calorie gain
     private int passiveCalorieGain;
     private int passiveCalorieGainDelay;
     private Chicken thisChicken = this;  
@@ -53,15 +51,17 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         @Override
         public void run() {
 
-            if(!movementPaused) {
+            Game game = gameManager.getGameById(gameId); 
+            if(!movementPaused && game!= null) {
                 gainedCalories += passiveCalorieGain;
                 /* TODO: NEEDS DEBUGGING
-                gameManager.getGameById(gameId).getGameState().addChangedChicken(thisChicken);
+                game.getGameState().addChangedChicken(thisChicken);
                 GameState gameState = gameManager.getGameById(gameId).getGameState();
                 if(gameState != null) {
                 gameState.addChangedChicken(thisChicken);
                 }
                  */
+                game.getGameState().addChangedChicken(thisChicken);
                 updateRadius();            
             }
         }
@@ -93,13 +93,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         this.collisionManager = collisionManager;
         this.gameManager = gameManager;
         this.gainedCalories = 0;
-        //Timer for constant passive calorie gain
-        this.passiveCalorieGain = 500;
-        this.passiveCalorieGainDelay = 1000; //in ms
+        this.passiveCalorieGain = 100;
+        this.passiveCalorieGainDelay = 1000;
         this.passiveCaloriesTimer = new Timer();
         this.passiveCaloriesTimer.scheduleAtFixedRate(passiveCaloriesTask, 0, passiveCalorieGainDelay);
         this.state = StateOfObject.NEUTRAL;
-        // choose script file
         this.scriptInterpreter = new PythonInterpreter();
         this.scriptInterpreter.exec("import sys");
         this.scriptInterpreter.exec("sys.path.insert(0, '.')");
@@ -110,16 +108,15 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     }
 
     private void initScriptInterpreter(String script) {
-        this.scriptInterpreter.exec("from "+script+" import *");
+        this.scriptInterpreter.exec("from " + script + " import *");
         new Thread(() -> {
             try {
-                while(!Thread.currentThread().isInterrupted()) {
+                while (!Thread.currentThread().isInterrupted()) {
                 if (gameManager.getGameById(gameId) == null) {
                     Thread.sleep(1000);
                 } else {
-                    Thread.sleep(100); // 1000 = 1 sec
+                    Thread.sleep(100);
                     surroundings = gameManager.getGameById(gameId).generateSurroundings(this.x, this.z);
-                    //logger.info(surroundings.toString());
                     executeScript(surroundings);
                 }
             }
@@ -144,33 +141,68 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         scriptInterpreter.set("wall_collision", wallCollision );
         scriptInterpreter.set("x", x);
         scriptInterpreter.set("z", z);
+        scriptInterpreter.set("y", y);
+
         try {
 
-            scriptInterpreter.exec("result = run_behavior(environment, direction, wall_collision,x,z)");
+            scriptInterpreter.exec("result = run_behavior(environment, direction, wall_collision, x, z, y)");
             PyObject result = scriptInterpreter.get("result");
 
             if (result instanceof PyTuple) {
                 PyTuple tuple = (PyTuple) result;
 
-                // Retrieve the elements of the tuple and cast them to float
                 float movementX = gameConfig.getChickenSpeed() * (float) (double) tuple.get(0);
                 float movementY = gameConfig.getChickenSpeed() * (float) (double) tuple.get(1);
                 float movementZ = gameConfig.getChickenSpeed() * (float) (double) tuple.get(2);
                 this.direction = (String) tuple.get(3);
                 this.wallCollision = (boolean) tuple.get(4);
 
-                if(this.wallCollision == false) {
-                    ArrayList<CollisionType> collisions;
+                if (this.wallCollision == false) {
+                    List<CollisionType> collisions;
                     float wishedX = 0.0f;
                     float wishedZ = 0.0f;
 
-                    if ( direction.equals("N") || direction.equals("E") ) {
-                        wishedX = this.getX() + (movementX + this.radius);
-                        wishedZ = this.getZ() + (movementZ + this.radius);
-                    } else {
-                        wishedX = this.getX() + (movementX - this.radius);
-                        wishedZ = this.getZ() + (movementZ - this.radius);
+                    switch (direction) {
+                        case "N":
+                            wishedX = this.getX() + (movementX + this.radius);
+                            wishedZ = this.getZ() + (movementZ + this.radius);
+                            break;
+                        case "E":
+                            wishedX = this.getX() + (movementX + this.radius);
+                            wishedZ = this.getZ() + (movementZ + this.radius);
+
+                            break;
+                        case "S":
+                            wishedX = this.getX() + (movementX - this.radius);
+                            wishedZ = this.getZ() + (movementZ - this.radius);
+
+                            break;
+                        case "W":
+                            wishedX = this.getX() + (movementX - this.radius);
+                            wishedZ = this.getZ() + (movementZ - this.radius);
+                            break;
+                            
+                        case "NE":
+                            wishedX = this.getX() + (movementX + this.radius);
+                            wishedZ = this.getZ() + (movementZ + this.radius);
+                            break;
+                        case "NW":
+                            wishedX = this.getX() + (movementX - this.radius);
+                            wishedZ = this.getZ() + (movementZ + this.radius);                            
+                            break;
+                        case "SE":
+                            wishedX = this.getX() + (movementX + this.radius);
+                            wishedZ = this.getZ() + (movementZ - this.radius);
+                            break;
+                        case "SW":
+                            wishedX = this.getX() + (movementX - this.radius);
+                            wishedZ = this.getZ() + (movementZ - this.radius);
+                            break;
+                        default:
+                            logger.warn("Unknown direction: " + direction);
+                            break;
                     }
+
                     collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
                         if (collisions.contains(CollisionType.WALL)) {
                             movementX = 0.0f;
@@ -179,9 +211,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
                         }
                 }
                 move((movementX), (movementY), (movementZ));
-                //logger.info("Chicken: x = " + this.x + ", y = " + this.y + ", z = " + this.z + ", direction = " + this.direction);
                 gameManager.getGameById(gameId).getGameState().addChangedChicken(this); 
-                
             }
         } catch (Exception e) {
             logger.error("Error executing Python script: ", e);
@@ -198,11 +228,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     @Override
     public void move(float newX, float newY, float newZ) {
         this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
-        this.x += newX;
-        this.y += newY;
-        this.z += newZ;
+        super.move(newX, newY, newZ);
         EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
+
 
     /**
      * Consumes the food, make the Chicken gain Calories.
@@ -210,10 +239,9 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      * @param food the calorie resource to be consumed by the entity
      */
     @Override
-    public void eat(Food food) {
+    public synchronized void eat(Food food) {
         this.gainedCalories += food.getCalories();
         updateRadius(); 
-        gameManager.getGameById(gameId).getGameState().addChangedChicken(this);
         EventService.getInstance().applicationEventPublisher.publishEvent(new EatEvent(this, food, gameId, gameManager));
     }
 
@@ -226,10 +254,10 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
         maxRadius = gameConfig.getChickenMaxRadius(); 
         maxCalories = gameConfig.getChickenMaxCalories(); 
         this.radius = minRadius + (maxRadius - minRadius) * Math.min((float) gainedCalories / maxCalories, 1.0f);
+        boolean stuck = collisionManager.isBetweenWalls(x, z); 
 
         if(radius >= maxRadius) {
             stopMovementTemporarily();
-            layEgg();
         }
     }
 
@@ -240,21 +268,30 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      */
     private void stopMovementTemporarily() {
         this.movementPaused = true; 
+        float oldX = this.x; 
+        float oldZ = this.z; 
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 movementPaused = false; 
                 radius = minRadius; 
-                gainedCalories = 0;
+                resetGainedCalories();
+
+                new Timer().schedule(new TimerTask() { 
+                    @Override public void run() { 
+                        if (state != StateOfObject.SCARED)
+                        layEgg(oldX, oldZ); 
+                    } 
+                }, 3000);
             }
-        }, 5000); // paused for 5 seconds
+        }, 5000);
 
     }
 
     /** react to getting scared by a ghost */
     public void reactToGhostCollision() {
-        stopMovementTemporarily();
         state = StateOfObject.SCARED;
+        stopMovementTemporarily();
         EventService.getInstance().applicationEventPublisher.publishEvent(new ScareEvent(this, gameId, gameManager));
         new Timer().schedule(new TimerTask() {
             @Override
@@ -267,7 +304,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     /**
      * lays an egg
      */
-    private void layEgg() {
+    private void layEgg(float x, float z) {
         Food egg = new Food(gameId, (int) x, (int) z, FoodType.EGG, gameConfig);
         logger.info("Ei gelegt");
         gameManager.getGameById(gameId).getMap().getTileAt((int) x, (int) z).addToOccupation(egg);
@@ -297,8 +334,11 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     public ChickenRecord toRecord() {
         return new ChickenRecord(gameId, objectId, x, y, z, gainedCalories, radius, state.toString());
     }
-
-    // String representation used for chickens surroundings
+    /**
+     * Returns string representation used for chicken-surroundings 
+     * 
+     * @return string representation
+     */    
     public String toString() {
         return "Chicken";
     }

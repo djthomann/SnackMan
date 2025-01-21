@@ -53,4 +53,8 @@ public class Food extends GameObject {
         return "FOOD";
     }
 
+    public FoodType getFoodType() {
+        return this.foodType; 
+    }
+
 }

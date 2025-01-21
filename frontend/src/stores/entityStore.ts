@@ -37,10 +37,10 @@ export const useEntityStore = defineStore('entityStore', () => {
           gameId: Number(ghost.gameId),
           objectId: Number(ghost.objectId),
           username: ghost.username,
+          collisions: ghost.collisions,
           x: Number(ghost.x),
           y: Number(ghost.y),
-          z: Number(ghost.z),
-          collisions: ghost.collisions
+          z: Number(ghost.z)
         })
       })
       parsedData.chickens.forEach((chicken: Chicken) => {
