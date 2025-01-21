@@ -59,6 +59,21 @@ onMessage(handleServerMessage);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+  animation-name: zoom;
+  animation-duration: 10s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate-reverse;
+  animation-timing-function: ease-in-out ;
+}
+
+@keyframes zoom {
+    0% {
+        background-size: 100%;
+    }
+
+    100% {
+        background-size: 120%;
+    }
 }
 
 .titleview__titleimage {
