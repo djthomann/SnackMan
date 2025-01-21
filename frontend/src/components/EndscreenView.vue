@@ -23,7 +23,7 @@
             <button @click="saveMap">Save Map</button>
           </div>
           <div>
-            <button @click="toLobby">Back to Lobby</button>
+            <button @click="toHome()">Back to Home</button>
           </div>
         </div>
 
@@ -95,7 +95,7 @@
             <button @click="saveMap">Save Map</button>
           </div>
           <div>
-            <button @click="toLobby">Back to Lobby</button>
+            <button @click="toHome()">Back to Home Screen</button>
           </div>
         </div>
 
@@ -212,8 +212,8 @@ onMounted(async () => {
   }
 });
 
-const toLobby = () => {
-  router.push('/lobby/' + lobbyCode.value);
+const toHome = () => {
+  router.push('/home/');
 };
 
 const getFormattedTimestamp = (): string => {

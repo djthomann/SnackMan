@@ -26,6 +26,7 @@ public class GameState {
     private Set<FoodRecord> laidEggs;
     private long lastSentTime;
     private boolean firstSend = true;
+    private GameStateThread thread = new GameStateThread();
 
     /**
      * synchronized (changes to game state variables need to be declared to all
@@ -150,6 +151,10 @@ public class GameState {
 
     public void setLaidEggs(Set<FoodRecord> laidEggs) {
         this.laidEggs = laidEggs;
+    }
+
+    public void interrupt() {
+        thread.interrupt();
     }
 
 }

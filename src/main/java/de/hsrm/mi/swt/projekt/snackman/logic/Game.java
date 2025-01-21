@@ -47,7 +47,7 @@ public class Game {
     private final GameConfig gameConfig;
     private final ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
     private final Timer timer = new Timer();
-    private final SnackManMap map;
+    private SnackManMap map;
     private GameEventBus eventBus;
     private final GameManager gameManager;
     private final CollisionManager collisionManager;
@@ -56,10 +56,13 @@ public class Game {
     private long startTime;
     private boolean hasSnackManWon = false; // else ghost won
     private List<Client> clients;
+    private TimerTask task;
+    private Lobby lobby;
 
     // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
         logger.info("in Game Constructor");
+        this.lobby = lobby;
         this.id = lobby.getId();
         this.gameConfig = lobby.getGameConfig();
         this.map = lobby.getMap();
@@ -86,7 +89,7 @@ public class Game {
                     if (newCal >= scoreToWin) {
                         logger.info("targeted calories reached by a SnackMan");
                         hasSnackManWon = true;
-                        sendGameEndEvent();
+                        stopGame();
                     }
                 });
             }
@@ -290,8 +293,6 @@ public class Game {
      * 
      */
     private void startTimer() {
-
-        TimerTask task;
         task = new TimerTask() {
 
             @Override
@@ -317,8 +318,12 @@ public class Game {
     }
 
     private void stopGame() {
-        logger.info("TIMER ENDED");
+        logger.info("game ended");
+        task.cancel();
+        gameState.interrupt();
+        timer.cancel();
         sendGameEndEvent();
+        this.lobby.emptyMap();
     }
 
 
