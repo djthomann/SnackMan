@@ -38,9 +38,9 @@ import { computed, onMounted, ref } from 'vue';
 <style scoped>
     .fieldset {
         width: 100%;
+        height: 100%;
         background-color: var(--colorSecondary);
         border-radius: 9px;
-        padding: 10px;
         box-sizing: border-box;
     }
 
@@ -64,7 +64,7 @@ import { computed, onMounted, ref } from 'vue';
     }
 
     .fieldset__scroll-container:not(.fieldset__scroll-container--has-overflow) .fieldset__content {
-        padding-right: 0;
+        
     }
 
     .fieldset__scroll-container--has-overflow::-webkit-scrollbar {
@@ -82,12 +82,12 @@ import { computed, onMounted, ref } from 'vue';
     }
 
     .fieldset__content {
-        width: 100%;
-        height: max-content;
+        height: 100%;
         display: flex;
         flex-direction: column;
+        align-items: center;
         gap: 10px;
-        padding-right: 10px;
+        padding: 3%;
         box-sizing: border-box;
     }
 

@@ -125,4 +125,8 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
         return "GHOST";
     }
 
+    public boolean isChicken() {
+        return false;
+    }
+
 }

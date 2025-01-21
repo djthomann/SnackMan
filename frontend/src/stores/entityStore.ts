@@ -55,9 +55,6 @@ export const useEntityStore = defineStore('entityStore', () => {
           state: chicken.state
         })
       })
-
-    } else if (message.startsWith('GAME_STATE')) {
-
     }
   }
 
