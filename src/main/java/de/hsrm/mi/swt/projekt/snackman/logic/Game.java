@@ -47,7 +47,7 @@ public class Game {
     private final GameConfig gameConfig;
     private final ArrayList<MovableAndSubscribable> allMovables = new ArrayList<>();
     private final Timer timer = new Timer();
-    private final SnackManMap map;
+    private SnackManMap map;
     private GameEventBus eventBus;
     private final GameManager gameManager;
     private final CollisionManager collisionManager;
@@ -56,10 +56,14 @@ public class Game {
     private long startTime;
     private boolean hasSnackManWon = false; // else ghost won
     private List<Client> clients;
+    private TimerTask task;
+    private Lobby lobby;
+    private boolean isOver = false;
 
     // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
         logger.info("in Game Constructor");
+        this.lobby = lobby;
         this.id = lobby.getId();
         this.gameConfig = lobby.getGameConfig();
         this.map = lobby.getMap();
@@ -86,7 +90,7 @@ public class Game {
                     if (newCal >= scoreToWin) {
                         logger.info("targeted calories reached by a SnackMan");
                         hasSnackManWon = true;
-                        sendGameEndEvent();
+                        stopGame();
                     }
                 });
             }
@@ -290,8 +294,6 @@ public class Game {
      * 
      */
     private void startTimer() {
-
-        TimerTask task;
         task = new TimerTask() {
 
             @Override
@@ -317,10 +319,25 @@ public class Game {
     }
 
     private void stopGame() {
-        logger.info("TIMER ENDED");
+        logger.info("game ended");
+        this.isOver = true;
+        task.cancel();
+        gameState.interrupt();
+        timer.cancel();
+        killChickens();
         sendGameEndEvent();
+        eventBus.clearSubscribers();
+        this.lobby.emptyMap();
     }
 
+    private void killChickens() {
+        for (MovableAndSubscribable object: this.allMovables) {
+
+            if (object.isChicken()) {
+                ((Chicken)object).kill();
+            }
+        }
+    }
 
     /**
      * Sends a GameEndEvent to all subscribers
@@ -365,21 +382,9 @@ public class Game {
 
         // Determine lobby
         Lobby lobby = this.gameManager.getLobbyById(this.id);
-
-        /* Logging
-        if(lobby != null) {
-            logger.info("Lobby found with id: " + lobby.getId());
-        }
-        */
         
         // Determine clients
         List<Client> clientsAsList = lobby.getClientsAsList();
-        
-        /* Logging
-        for (Client c : clientsAsList) {
-            logger.info("Client in Lobby: " + c.toString());
-        }
-        */
 
         // Determine scores
         for (MovableAndSubscribable m : allMovables) {
@@ -412,17 +417,6 @@ public class Game {
             winnerTeam = "GHOST";
         }
 
-        /*
-        String winnerTeam = winner.getRole().toString();
-        logger.info("Winner Team: " + winnerTeam);
-        */
-
-        /* Logging: Iterate through scores and log every entry
-        for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
-            logger.info("Player ID: " + entry.getKey() + ", Score: " + entry.getValue());
-        }
-        */
-
         // Create PlayerRecords
         List<PlayerRecord> playerRecords = new ArrayList<>();
 
@@ -453,6 +447,10 @@ public class Game {
      * @param event the event to be published
      */
     public void receiveEvent(Event event) {
+        if (isOver) {
+            return;
+        }
+
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
 

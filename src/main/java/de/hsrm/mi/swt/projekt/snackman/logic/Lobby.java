@@ -38,6 +38,10 @@ public class Lobby {
         clientMap.put(c.getClientId(), c);
     }
 
+    public void removeClient(Client c) {
+        clientMap.remove(c.getClientId());
+    }
+
     public long getId() {
         return id;
     }
@@ -56,6 +60,10 @@ public class Lobby {
 
     public void setMap(SnackManMap map) {
         this.map = map;
+    }
+
+    public void emptyMap() {
+        this.map = null;
     }
 
     public Game startGame(GameManager gameManager) {

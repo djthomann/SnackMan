@@ -139,19 +139,16 @@ public class CollisionManager {
                             switch (collisionPartner) {
 
                                 case SnackMan s2 -> {
-                                    logger.info("Collision between Snackman #" + s1.getObjectId() + "and Snackman #"
-                                            + s2.getObjectId());
+                                    // logger.info("Collision between Snackman #" + s1.getObjectId() + "and Snackman #" + s2.getObjectId());
                                     collisions.add(CollisionType.SNACKMAN);
                                 }
                                 case Ghost g -> {
-                                    logger.info("Collision between Snackman #" + s1.getObjectId() + "and Ghost #"
-                                            + g.getObjectId());
+                                    // logger.info("Collision between Snackman #" + s1.getObjectId() + "and Ghost #" + g.getObjectId());
                                     s1.reactToGhostCollision();
                                     collisions.add(CollisionType.GHOST);
                                 }
                                 case Chicken c -> {
-                                    logger.info("Collision between Snackman #" + s1.getObjectId() + "and Chicken #"
-                                            + c.getObjectId());
+                                    // logger.info("Collision between Snackman #" + s1.getObjectId() + "and Chicken #" + c.getObjectId());
                                     collisions.add(CollisionType.CHICKEN);
                                 }
 
@@ -163,18 +160,15 @@ public class CollisionManager {
                         if (distance <= ((GameObject) collisionPartner).getRadius() + currentObject.getRadius()) {
                             switch (collisionPartner) {
                                 case SnackMan s -> {
-                                    logger.info("Collision between Ghost #" + g1.getObjectId() + "and Snackman #"
-                                            + s.getObjectId());
+                                    // logger.info("Collision between Ghost #" + g1.getObjectId() + "and Snackman #" + s.getObjectId());
                                     s.reactToGhostCollision();
                                     collisions.add(CollisionType.SNACKMAN);
                                 }
                                 case Ghost g2 -> {
-                                    logger.info("Collision between Ghost #" + g1.getObjectId() + "and Ghost #"
-                                            + g2.getObjectId());
+                                    // logger.info("Collision between Ghost #" + g1.getObjectId() + "and Ghost #" + g2.getObjectId());
                                 }
                                 case Chicken c -> {
-                                    logger.info("Collision between Ghost #" + g1.getObjectId() + "and Chicken #"
-                                            + c.getObjectId());
+                                    // logger.info("Collision between Ghost #" + g1.getObjectId() + "and Chicken #" + c.getObjectId());
                                 }
                                 default -> logger.error("Collision Partner is not a Movable!");
                             }
@@ -184,16 +178,13 @@ public class CollisionManager {
                         if (distance <= ((GameObject) collisionPartner).getRadius() + currentObject.getRadius()) {
                             switch (collisionPartner) {
                                 case SnackMan s -> {
-                                    logger.info("Collision between Chicken #" + c1.getObjectId() + "and Snackman #"
-                                            + s.getObjectId());
+                                    // logger.info("Collision between Chicken #" + c1.getObjectId() + "and Snackman #" + s.getObjectId());
                                 }
                                 case Ghost g -> {
-                                    logger.info("Collision between Chicken #" + c1.getObjectId() + "and Ghost #"
-                                            + g.getObjectId());
+                                    // logger.info("Collision between Chicken #" + c1.getObjectId() + "and Ghost #" + g.getObjectId());
                                 }
                                 case Chicken c2 -> {
-                                    logger.info("Collision between Chicken #" + c1.getObjectId() + "and Chicken #"
-                                            + c2.getObjectId());
+                                    // logger.info("Collision between Chicken #" + c1.getObjectId() + "and Chicken #" + c2.getObjectId());
                                 }
                                 default -> logger.error("Collision Partner is not a Movable!");
                             }
