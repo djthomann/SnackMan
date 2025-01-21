@@ -285,8 +285,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     /** react to getting scared by a ghost */
     public void reactToGhostCollision() {
-        state = StateOfObject.SCARED;
         radius = minRadius; 
+        resetGainedCalories();
         EventService.getInstance().applicationEventPublisher.publishEvent(new ScareEvent(this, gameId, gameManager)); // paused for 5 seconds
     }
     
