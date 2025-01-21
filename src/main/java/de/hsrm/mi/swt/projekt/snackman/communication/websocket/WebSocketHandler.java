@@ -25,6 +25,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChooseRoleEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
@@ -160,6 +161,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     gameManager.addClientToLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
                     broadcastMessage("NEW_LOBBY_JOIN");
                 }
+                case "LEAVE_LOBBY" -> {
+                    gameManager.removeClientFromLobby(clients.get(session), jsonObject.get("lobbyCode").getAsLong());
+                    broadcastMessage("NEW_LOBBY_LEAVE");
+                    break;
+                }
                 case "GET_PLAYERS" -> {
                     JsonObject jo = new JsonObject();
                     long lobbyCode = Long.parseLong(String.valueOf(jsonObject.get("lobbyCode")));
@@ -213,21 +219,33 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     notifyClients(session, startGameEvent.getGameID(), "FOREIGN_GAMESTART");
 
                     gameManager.createGame(startGameEvent.getGameID());
+
+                    // TODO gameManager.removeLobby();
+                    broadcastMessage("NEW_LOBBY_DELETE"); // now that the game has started, the lobby is no longer needed
                 }
 
                 case "END_GAME" -> {
                     GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
                     Game currentGame = gameManager.getGameById(gameEndEvent.getGameID());
+                    GameEndEvent result = (currentGame != null) ? currentGame.generateGameEndEvent() : gameManager.getLastGameEndEvent();
+                    SnackManMap map = (currentGame != null) ? currentGame.getMap().original() : gameManager.getLastMapOriginal();
+                    gameManager.removeGame(gameEndEvent.getGameID());
+                    gameManager.removeLobby(gameEndEvent.getGameID());
 
-                    sendMapData(currentGame.getMap().original(), session);
-
-                    GameEndEvent result = currentGame.generateGameEndEvent();
+                    sendMapData(map, session);
                     logger.info("GameEndEvent generated: " + result);
 
                     TextMessage messageToSend = new TextMessage(result.getType().toString() + ";" + gson.toJson(result));
                     logger.info("Sending GameEndEvent to all clients: " + messageToSend);
                     session.sendMessage(new TextMessage(result.getType().toString() + ";" + gson.toJson(result)));
                 }
+                case "CHAT" -> {
+                    ChatEvent chatEvent = gson.fromJson(jsonObject, ChatEvent.class);
+                    logger.info("ChatEvent received: " + chatEvent);
+
+                    notifyClients(session, chatEvent.getLobbyID(), "CHAT;" + gson.toJson(chatEvent));
+                }
+
                 default -> logger.warn("unknown message from FE: " + type);
 
             }
@@ -236,6 +254,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Sends all clients a String (except the source)
+     * @param source WebSocketSession that is the source of the message
+     * @param gameId ID of the looby/game
+     * @param payload Message to send
+     */
     private void notifyClients(WebSocketSession source, long gameId, String payload) {
         Lobby lobby = gameManager.getLobbyById(gameId);
 

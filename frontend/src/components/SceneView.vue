@@ -4,12 +4,20 @@
       <LoadingOverlayComponent v-if="isLoading"></LoadingOverlayComponent>
     </Transition>
     <GameOverlay ref="gameOverlayRef" />
+    
   </div>
   <div id="clickable-container"></div>
+  <div class="icon-button add-button button volume-button">
+      <button @click="toggleMute">
+        <img v-if="volume > 0" src="@/assets/icons/volume.svg" />
+        <img v-if="volume == 0" src="@/assets/icons/volume_muted.svg" />
+      </button>
+      <input v-model="volume" type="range" id="volume-slider" name="volume" min="0" max="1" step="0.01" />
+    </div>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onUnmounted, ref, onMounted, nextTick } from 'vue';
+import { defineComponent, onUnmounted, ref, onMounted, nextTick, watch } from 'vue';
 import eventBus from '@/services/eventBus';
 import useWebSocket from '@/services/socketService';
 import * as THREE from 'three';
@@ -45,6 +53,11 @@ const wallHeight = 1 * mapScale;
     // Background music and soundeffects
     const listener = new THREE.AudioListener();
     const soundService = new SoundService(listener);
+    let oldVolume: number = 1
+    let muted: boolean = false
+    const volume = ref<number>(1)
+    const volumeIcon = "@/assets/icons/volume.svg";
+    const mutedIcon = "@/assets/icons/mute.svg";
 
     const gameOverlayRef = ref<InstanceType<typeof GameOverlay> | null>(null);
     const isLoading = ref<boolean>(true);
@@ -82,6 +95,21 @@ const wallHeight = 1 * mapScale;
       'Snackman Names:',
       [...snackMen.value.values()].map((item: Snackman) => item.username),
     );
+
+    const toggleMute = () => {
+      if(muted) {
+        muted = false
+        volume.value = oldVolume;
+      } else {
+        muted = true
+        oldVolume = volume.value
+        volume.value = 0;
+      }
+    }
+
+    watch(volume, (newValue, oldValue) => {
+      soundService.setVolume(newValue)
+    });
 
     // React to server message (right now only simple movement)
     const handleServerMessage = (message: string) => {
@@ -685,5 +713,75 @@ body {
   background: 0;
   opacity: 0;
   z-index: 2;
+}
+
+#volume-slider {
+  opacity: 0;
+  width: 0;
+  transition: none;
+}
+
+.volume-button {
+  position: absolute;
+  bottom: 2%;
+  left: 0;
+  width: auto;
+  display: flex;
+  align-items: center;
+  z-index: 3;
+}
+
+.button {
+  user-select: none;
+  margin-left: 1%;
+}
+
+.icon-button img {
+  height: 40px;
+  transition: transform 0.5s ease;
+  user-select: none;
+}
+
+.icon-button button {
+  display: flex;
+  background: 0;
+  box-shadow: none;
+  border: 0;
+  user-select: none;
+}
+
+.icon-button button:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.volume-button:hover #volume-slider {
+  animation: expandVolumeSlider 0.2s forwards;
+}
+
+.volume-button:not(:hover) #volume-slider {
+  animation: collapseVolumeSlider 0.2s forwards;
+}
+
+@keyframes expandVolumeSlider {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  100% {
+    width: 100px;
+    opacity: 1;
+  }
+}
+
+@keyframes collapseVolumeSlider {
+  0% {
+    width: 100px;
+    opacity: 1;
+  }
+  100% {
+    width: 0;
+    opacity: 0;
+  }
 }
 </style>
