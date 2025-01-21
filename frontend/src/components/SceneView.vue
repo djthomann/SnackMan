@@ -368,8 +368,8 @@ const wallHeight = 1 * mapScale;
           if (occupationType == 'WALL') {
             wallsGroup.add(modelService.createWall(tile.x, tile.z, mapScale, wallHeight));
           } else if (occupationType == 'ITEM') {
-            const food = modelService.createFood(tile.food.objectId, tile.x, tile.z, tile.food.calories, mapScale);
-            food.userData.id = tile.food.objectId;
+            const food = modelService.createFood(tile.foods[0].objectId, tile.x, tile.z, tile.foods[0].calories, mapScale);
+            food.userData.id = tile.foods[0].objectId;
             foodGroup.add(food);
             floorGroup.add(modelService.createFloorTile(tile.x, tile.z, mapScale));
           } else if (occupationType == 'FREE') {

@@ -311,8 +311,9 @@ public class SnackManMap implements Cloneable {
         return true;
     }
 
-    public Food getFoodOfTile(Tile tile) {
-        return tile.getFoodOnTile();
+    public List<Food> getFoodsOfTile(Tile tile) {
+        List<Food> foods = tile.getFoodsOnTile();
+        return foods;
     }
 
     public SnackManMapRecord toRecord() {

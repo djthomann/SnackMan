@@ -234,7 +234,7 @@ public class Game {
             Tile tileOne = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) + 3);
             if (tileOne.getOccupationType() == OccupationType.FREE && tileOne.getOccupations().isEmpty()) {
                 Chicken chickenOne = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileOne.getX()+0.5f,
-                0.0f, (float) tileOne.getZ()+0.5f, "ChickenPersonalityOne", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileOne.getZ()+0.5f, "DumbBehavior", gameManager, gameConfig, collisionManager);
                 tileOne.addToOccupation(chickenOne);
                 allMovables.add(chickenOne);
             }
@@ -244,7 +244,7 @@ public class Game {
             Tile tileTwo = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) - 4);
             if (tileTwo.getOccupationType() == OccupationType.FREE && tileTwo.getOccupations().isEmpty()) {
                 Chicken chickenTwo = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileTwo.getX()+0.5f,
-                0.0f, (float) tileTwo.getZ()+0.5f, "ChickenPersonalityTwo", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileTwo.getZ()+0.5f, "FearfulBehavior", gameManager, gameConfig, collisionManager);
                 tileTwo.addToOccupation(chickenTwo);
                 allMovables.add(chickenTwo);
             }
@@ -254,7 +254,7 @@ public class Game {
             Tile tileThree = map.getTileAt((map.getW() / 2) + 3, (map.getH() / 2) - 4);
             if (tileThree.getOccupationType() == OccupationType.FREE && tileThree.getOccupations().isEmpty()) {
                 Chicken chickenThree = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileThree.getX()+0.5f,
-                0.0f, (float) tileThree.getZ()+0.5f, "ChickenPersonalityOne", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileThree.getZ()+0.5f, "GreedyBehavior", gameManager, gameConfig, collisionManager);
                 tileThree.addToOccupation(chickenThree);
                 allMovables.add(chickenThree);
             }
@@ -264,7 +264,7 @@ public class Game {
             Tile tileFour = map.getTileAt((map.getW() / 2) - 4, (map.getH() / 2) + 3);   
             if (tileFour.getOccupationType() == OccupationType.FREE && tileFour.getOccupations().isEmpty()) {
                 Chicken chickenFour = new Chicken(IDGenerator.getInstance().getUniqueID(), id, (float) tileFour.getX()+0.5f,
-                0.0f, (float) tileFour.getZ()+0.5f, "ChickenPersonalityTwo", gameManager, gameConfig, collisionManager);
+                0.0f, (float) tileFour.getZ()+0.5f, "FearfulBehavior", gameManager, gameConfig, collisionManager);
                 tileFour.addToOccupation(chickenFour);
                 allMovables.add(chickenFour);
             }

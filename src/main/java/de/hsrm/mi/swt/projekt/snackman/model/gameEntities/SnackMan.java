@@ -1,6 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.List;
 import java.util.Timer;
@@ -239,10 +239,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
     @Override
     public void move(float newX, float newY, float newZ) {
         this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
-        this.x += newX;
-        this.y += newY;
-        this.z += newZ;
-        logger.info("Snackman " + objectId + " moved to " + x + ", " + y + ", " + z);
+        super.move(newX, newY, newZ);
         EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
@@ -411,7 +408,7 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
             }
 
             // Logic for collision with wall side and food
-            ArrayList<CollisionType> collisions;
+            List<CollisionType> collisions;
             collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
             if (wishedX != this.getX() || wishedZ != this.getZ()) {
                 if (this.getY() < gameConfig.getWallHeight()) {
@@ -446,12 +443,22 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
                     this.y = gameConfig.getSnackManHeight() + gameConfig.getSnackManHeight() / 2;
                 }
 
-                logger.info("Kollision mit Snack Man, aktuelle Kalorien: " + this.gainedCalories);
-                vector.x = 0.0f;
-                vector.z = 0.0f;
-            }
+                    logger.info("Kollision mit Snack Man, aktuelle Kalorien: " + this.gainedCalories);
+                    vector.x = 0.0f;
+                    vector.z = 0.0f;
+                }
 
-            this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
+                if (collisions.contains(CollisionType.CHICKEN)) {
+                    if(this.jumping) {
+                        this.jumping = false;
+                        jumpTaskFuture.cancel(false);
+                        this.y = gameConfig.getSnackManHeight() + gameConfig.getSnackManHeight() / 2;
+                    }
+                    vector.x = 0.0f; 
+                    vector.z = 0.0f; 
+                }
+                
+                this.move(vector.x * gameConfig.getSnackManStep(), 0, vector.z * gameConfig.getSnackManStep());
 
             // checks if the movementVector is from a jump action or not
             if (vector.y != 0.0) {
@@ -469,7 +476,12 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         return new SnackManRecord(gameId, objectId, getUsername(), x, y, z, gainedCalories);
     }
 
-    // String representation used for chickenssurroundings
+
+    /**
+     * Returns string representation used for chicken-surroundings 
+     * 
+     * @return string representation
+     */        
     public String toString() {
         return "SNACKMAN";
     }
