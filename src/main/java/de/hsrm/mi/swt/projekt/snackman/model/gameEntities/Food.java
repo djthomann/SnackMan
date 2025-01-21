@@ -11,10 +11,10 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 public class Food extends GameObject {
 
     /** The calorie count contained in the Food */
-    private int calories;
+    private final int calories;
 
     /** The type of the Food */
-    private FoodType foodType;
+    private final FoodType foodType;
 
     /**
      * Constructs a new Food with the specified position and
@@ -26,7 +26,7 @@ public class Food extends GameObject {
      * @param gameConfig the configuration of the game
      */
     public Food(long gameId, float x, float z, FoodType foodType, GameConfig gameConfig) {
-        super(gameId, x, 0.5f, z, gameConfig.getFoodRadius());
+        super(gameId, x, 0.5f, z, gameConfig.getFoodRadius(), gameConfig.getFoodHeight());
         this.foodType = foodType;
         this.calories = foodType.getCalories();
 
@@ -46,6 +46,15 @@ public class Food extends GameObject {
      */
     public FoodRecord toRecord() {
         return new FoodRecord(gameId, objectId, x, y, z, calories, foodType);
+    }
+
+    // String representation used for chickenssurroundings
+    public String toString() {
+        return "FOOD";
+    }
+
+    public FoodType getFoodType() {
+        return this.foodType; 
     }
 
 }

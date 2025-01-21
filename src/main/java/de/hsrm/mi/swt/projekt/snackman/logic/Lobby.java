@@ -1,13 +1,13 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.LobbyRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.IDGenerator;
@@ -15,19 +15,32 @@ import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import org.springframework.web.socket.WebSocketSession;
 
 public class Lobby {
-    
-    Logger logger = LoggerFactory.getLogger(Lobby.class);
     private final long id = IDGenerator.getInstance().getUniqueID();
     private GameConfig gameConfig = new GameConfig();
     private SnackManMap map;
-    private Map<Long, Client> clientMap = new HashMap<>();
+    private final Map<Long, Client> clientMap = new HashMap<>();
+    private final List<String> chatMessages = new ArrayList<>();
 
     public List<Client> getClientsAsList() {
         return clientMap.values().stream().toList();
     }
 
+    /**
+     * Retrieves a client by their ID.
+     *
+     * @param id The ID of the client.
+     * @return The Client object if found, otherwise null.
+     */
+    public Client getClient(long id) {
+        return clientMap.get(id);
+    }
+
     public void addClient(Client c) {
         clientMap.put(c.getClientId(), c);
+    }
+
+    public void removeClient(Client c) {
+        clientMap.remove(c.getClientId());
     }
 
     public long getId() {
@@ -50,8 +63,13 @@ public class Lobby {
         this.map = map;
     }
 
+    public void emptyMap() {
+        this.map = null;
+    }
+
     public Game startGame(GameManager gameManager) {
         if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
+
         return new Game(this, gameManager);
     }
 
@@ -63,4 +81,11 @@ public class Lobby {
         return new LobbyRecord(this.getClientsAsList().size(), this.id);
     }
 
+    public void addChatMessage(String message) {
+        chatMessages.add(message);
+    }
+
+    public String[] getChatMessages() {
+        return chatMessages.toArray(new String[0]);
+    }
 }

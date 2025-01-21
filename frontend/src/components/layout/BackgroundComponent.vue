@@ -40,9 +40,9 @@ const props = defineProps<Props>();
 
 <style scoped lang="css">
 .background {
-    width: 100dvw;
-    height: 100dvh;
-    position: relative;
+  width: 100dvw;
+  height: 100dvh;
+  position: relative;
 }
 
 .background__image {
@@ -57,6 +57,21 @@ const props = defineProps<Props>();
     background-position: center;
     user-select: none;
     pointer-events: none;
+    animation-name: zoom;
+    animation-duration: 10s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate-reverse;
+    animation-timing-function: ease-in-out ;
+}
+
+@keyframes zoom {
+    0% {
+        background-size: 100%;
+    }
+
+    100% {
+        background-size: 120%;
+    }
 }
 
 .background__container {
@@ -86,8 +101,7 @@ const props = defineProps<Props>();
 }
 
 .background__sheet-tile {
-    height: 100%;
-
+  height: 100%;
 }
 
 .background__sheet-tile--left,
@@ -110,8 +124,30 @@ const props = defineProps<Props>();
 }
 
 .background__sheet-tile--stretch .background__sheet-image {
-    width:100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.background__title {
+    position: absolute;
+    width: max-content;
+    height: 90px;
+    left: 4dvw;
+    top: -32px;
+    z-index: 2;
+    background-color: var(--colorPrimary);
+    border: 9px solid var(--colorLight);
+    border-radius: 2px;
+    box-sizing: border-box;
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.2);
+    padding: 10px 25px;
+}
+
+.background__headline {
+    color: var(--colorLight);
+    margin: 0;
+    font-size: 45px;
+    font-weight: normal;
 }
 
 .background__content {

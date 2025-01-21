@@ -1,6 +1,10 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
+import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.GameObject;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
 
@@ -9,10 +13,10 @@ public class Tile {
     private final int x;
     private final int z;
     private OccupationType occupationType;
-    private Food foodOnTile;
+    private List<Food> foodsOnTile;
 
-    private Object occupation;
-
+    //private GameObject occupation;
+    private final List<GameObject> occupations;
 
     /**
      * Constructor, creates Tile with given parameters:
@@ -24,6 +28,8 @@ public class Tile {
         this.x = x;
         this.z = z;
         this.occupationType = occupationType;
+        this.occupations = new ArrayList<>();
+        this.foodsOnTile = new ArrayList<Food>(); 
     }
 
     public OccupationType getOccupationType() {
@@ -42,22 +48,46 @@ public class Tile {
         return z;
     }
 
-    public Object getOccupation() {
-        return occupation;
+    public List <GameObject> getOccupations() {
+        return occupations;
     }
-
-    public void setOccupation(Object occupation) {
-        this.occupation = occupation;
+    public void addToOccupation(GameObject occupation) {
+        if (occupation == null) {
+            return;
+        } 
+        this.occupations.add(occupation);
         if (occupation instanceof Food) {
-            this.foodOnTile = (Food)occupation;
+            this.foodsOnTile.add((Food) occupation);
+            occupationType = OccupationType.ITEM;
+        }
+    }
+    
+    public void removeFromOccupation(GameObject occupation) {
+        if (occupations.contains(occupation) && occupation != null) {
+            occupations.remove(occupation); 
+        }
+        if (occupation instanceof Food) {
+            foodsOnTile.remove(occupation); 
+
+            if (foodsOnTile.size() == 0) {
+                this.occupationType = OccupationType.FREE; 
+            }
         }
     }
 
     public TileRecord toRecord () {
-        FoodRecord foodRecord = null;
-        if (foodOnTile != null) {
-            foodRecord = foodOnTile.toRecord();
+        List<FoodRecord> foodRecords = new ArrayList<FoodRecord>();
+        if (foodsOnTile.size() > 0) {
+            for (Food food: foodsOnTile) {
+                foodRecords.add(food.toRecord());
+            }
         }
-        return new TileRecord(x, z, occupationType, foodRecord);
+        FoodRecord[] foodRecordsArray = foodRecords.toArray(new FoodRecord[foodRecords.size()]);
+        return new TileRecord(x, z, occupationType, foodRecordsArray);
     }
+
+    public List<Food> getFoodsOnTile() {
+        return foodsOnTile;
+    }
+
 }

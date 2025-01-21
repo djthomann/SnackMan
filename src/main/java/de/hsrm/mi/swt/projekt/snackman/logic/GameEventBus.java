@@ -20,9 +20,9 @@ public class GameEventBus {
     /**
      * Registers a new subscriber who gets notified about events
      * 
-     * @param newSubscriber
+     * @param newSubscriber subscriber to be added
      */
-    public void registerSubcriber(Subscribable newSubscriber) {
+    public void registerSubscriber(Subscribable newSubscriber) {
         this.subscribers.add(newSubscriber);
     }
 
@@ -30,7 +30,7 @@ public class GameEventBus {
      * Notifies all subscribers about the new event
      * The subscribers handle the event individually
      * 
-     * @param event
+     * @param event event to be sent
      */
     public void sendEventToSubscribers(Event event) {
 
@@ -46,6 +46,10 @@ public class GameEventBus {
      */
     public ArrayList<Subscribable> getSubscribers() {
         return subscribers;
+    }
+
+    public void clearSubscribers() {
+        this.subscribers = new ArrayList<>();
     }
     
 }

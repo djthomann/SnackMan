@@ -1,20 +1,27 @@
 package de.hsrm.mi.swt.projekt.snackman.model.level;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Food;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManMapRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.TileRecord;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.logging.Logger;
-
-import org.python.antlr.ast.Index;
-
-public class SnackManMap {
+public class SnackManMap implements Cloneable {
 
     // due to sidewinder (and Simon's brain):
     // Tile at (x, z) (y is always at 0, we view the map as 2D) can be reached via
@@ -23,6 +30,7 @@ public class SnackManMap {
     private int w; // x-coordinate
     private int h; // z-coordinate
     private Tile[][] allTiles;
+    private SnackManMap originalMap;
     private static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     /**
@@ -38,6 +46,7 @@ public class SnackManMap {
         this.h = (h % 2 == 1) ? h : h + 1;
         this.makeBlankMap();
         this.sidewinder();
+        this.saveOriginal();
     }
 
     /**
@@ -57,6 +66,7 @@ public class SnackManMap {
             logger.warning("Something went wrong while loading file:");
             logger.warning(e.getMessage());
         }
+        saveOriginal();
     }
 
     private void parseFileContent(BufferedReader reader) throws IOException {
@@ -114,7 +124,6 @@ public class SnackManMap {
                     occupationType = OccupationType.ITEM;
                 }
                 allTiles[z][x] = new Tile(x, z, occupationType);
-                allTiles[z][x].setOccupation(null);
             }
         }
     }
@@ -235,10 +244,7 @@ public class SnackManMap {
         logger.info("Map bounds: w|h " + w + " " + h);
 
         // Überprüfen, ob die Position innerhalb der Kartenbreite und -höhe liegt
-        if (x < 0 || x >= w || z < 0 || z >= h) {
-            return false; // Position ist außerhalb der Karte
-        }
-        return true;
+        return !(x < 0) && !(x >= w) && !(z < 0) && !(z >= h); // Position ist außerhalb der Karte
     }
 
     public Tile getTileAt(int x, int z) throws IndexOutOfBoundsException {
@@ -278,7 +284,6 @@ public class SnackManMap {
                 }
             }
         }
-
         return surroudings;
     }
 
@@ -306,9 +311,9 @@ public class SnackManMap {
         return true;
     }
 
-    public Food getFoodOfTile(Tile tile) {
-        Food food = (Food) tile.getOccupation();
-        return food;
+    public List<Food> getFoodsOfTile(Tile tile) {
+        List<Food> foods = tile.getFoodsOnTile();
+        return foods;
     }
 
     public SnackManMapRecord toRecord() {
@@ -320,4 +325,49 @@ public class SnackManMap {
         }
         return new SnackManMapRecord(w, h, tileRecords);
     }
+
+    public SnackManMap original() {
+        return this.originalMap;
+    }
+
+    private void saveOriginal() {
+        this.originalMap = this.clone();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder res = new StringBuilder();
+        for (int j = 0; j < h; j++) {
+            for (int i = 0; i < w; i++) {
+                res.append(allTiles[j][i].getOccupationType().c);
+                if (i < w - 1) {
+                    res.append(",");
+                } else {
+                    res.append("\n");
+                }
+            }
+        }
+        return res.toString();
+    }
+
+    @Override
+    public SnackManMap clone() {
+        try {
+            SnackManMap clone = (SnackManMap) super.clone();
+
+            Tile[][] newAllTiles = new Tile[h][w];
+            for (int row = 0; row < this.h; row++) {
+                for (int col = 0; col < this.w; col++) {
+                    newAllTiles[row][col] = new Tile(col, row, this.allTiles[row][col].getOccupationType());
+                }
+            }
+
+            clone.allTiles = newAllTiles;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            logger.warning("Something went wrong while cloning Map: " + e);
+        }
+        return null;
+    }
+
 }

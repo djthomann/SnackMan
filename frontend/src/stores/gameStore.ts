@@ -4,17 +4,17 @@ export const useGameStore = defineStore('game', {
   state: () => ({
     remainingTime: 0,
     calories: 0,
+    collisions: 0
   }),
   actions: {
     setRemainingTime(time: number) {
       this.remainingTime = time;
     },
-    addCalories(amount: number) {
-      this.calories += amount;
-      console.log(this.calories);
+    setCalories(amount: number) {
+      this.calories = amount;
     },
-    removeCalories(amount: number) {
-      this.calories = Math.max(0, this.calories - amount);
-    },
+    setCollisions(amount: number) {
+      this.collisions = amount;
+    }
   },
 });

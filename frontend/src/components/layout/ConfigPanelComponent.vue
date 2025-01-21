@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { log } from 'three/webgpu';
 import { onMounted, ref, useSlots } from 'vue';
 
     type Props = {

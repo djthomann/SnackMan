@@ -11,49 +11,44 @@
       </div>
     </div>
     <div class="info-box timer">
-      <img class="timer-icon" src="@/assets/icons/clock.svg" alt="Clock Icon" />
-      <p v-text="seconds" class="timer-info"></p>
+      <img class="icon" src="@/assets/icons/clock.svg" alt="Clock Icon" />
+      <p v-text="seconds" class="overlay-info timer-info"></p>
     </div>
-    <div class="info-box calories">
-      <!-- Insert Icon here pls :) -->
-      <p>Calories:</p>
-      <p class="calories-info">{{ calories }}</p>
+    
+    <div v-if="userStore.isSnackman" class="info-box calories">
+      <img class="icon" src="@/assets/icons/calories.svg" alt="Clock Icon" />
+      <p class="overlay-info calories-info">{{ calories }}</p>
+    </div>
+
+    <div v-if="!userStore.isSnackman" class="info-box calories">
+      <img class="icon" src="@/assets/icons/ghost_icon.svg" alt="Clock Icon" />
+      <p class="overlay-info calories-info">{{ collisions }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useGameStore } from '@/stores/gameStore';
+import { useUserStore } from '@/stores/userStore';
 import { computed, ref } from 'vue';
 import { onMounted, onUnmounted } from 'vue';
 
 const gameStore = useGameStore();
+const userStore = useUserStore();
 
 const menuVisible = ref<boolean>(false);
 const seconds = computed(() => gameStore.remainingTime);
 const calories = computed(() => gameStore.calories);
+const collisions = computed(() => gameStore.collisions);
 
-const toggleVisibility = () => {
+const toggleMenuVisibility = () => {
   menuVisible.value = !menuVisible.value;
-};
-
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key == 'Escape') {
-    toggleVisibility();
-  }
 };
 
 const props = defineProps({
   childRef: Object,
 });
 
-onMounted(() => {
-  window.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
-});
 </script>
 
 <style scoped>
@@ -81,14 +76,17 @@ onUnmounted(() => {
   flex-direction: row;
   align-items: center;
 }
-p {
-}
 .overlay-container {
   position: absolute;
   width: 100%;
   height: 100%;
   z-index: 1;
 }
+
+.overlay-info {
+  user-select: none;
+}
+
 .info-box {
   margin: 2%;
   height: 5vh;
@@ -105,7 +103,7 @@ p {
   font-size: 5vh;
   margin-left: 10%;
 }
-.timer-icon {
+.icon {
   position: relative;
   height: 100%;
 }

@@ -12,6 +12,7 @@ export type Snackman = {
     gameId: number;
     objectId: number;
     username: string;
+    collisions: number;
     x: number;
     y: number;
     z: number;
@@ -24,9 +25,13 @@ export type Snackman = {
     y: number;
     z: number;
     gainedCalories: number;
+    radius: number;
+    state: StateOfObject;
   }
 
-  export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY';
+  export type StateOfObject = 'NEUTRAL'|'SCARED'|'FULL'|'INVINCIBLE'|'POWERED_UP';
+
+  export type FoodType = 'UNHEALTHY'|'OKAY'|'HEALTHY'|'EGG';
 
   export type Food = {
     gameId: number;

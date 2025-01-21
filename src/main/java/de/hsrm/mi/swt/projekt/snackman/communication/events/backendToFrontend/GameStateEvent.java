@@ -14,18 +14,21 @@ public class GameStateEvent extends Event {
 
     private List<GhostRecord> updatesGhosts;
     private List<SnackManRecord> updatesSnackMen;
-    private List<ChickenRecord> updatesChicken;
+    private List<ChickenRecord> updatesChickens;
     private List<FoodRecord> eatenFoods;
+    private List<FoodRecord> laidEggs;
+    private long remainingSeconds;
 
     // gameStateEvent sends any Object or Food where soemthin has changed.
-    public GameStateEvent(List<GhostRecord> updatesGhosts, List<SnackManRecord> updatesSnackMen, List<ChickenRecord> updatesChicken,
-            List<FoodRecord> updatesFoods) {
+    public GameStateEvent(List<GhostRecord> updatesGhosts, List<SnackManRecord> updatesSnackMen, List<ChickenRecord> updatesChickens,
+            List<FoodRecord> updatesFoods, List<FoodRecord> updatesEggs, long remainingSeconds) {
         this.setType(EventType.GAME_STATE);
         this.updatesGhosts = updatesGhosts;
         this.updatesSnackMen = updatesSnackMen;
-        this.updatesChicken = updatesChicken;
+        this.updatesChickens = updatesChickens;
         this.eatenFoods = updatesFoods;
-
+        this.laidEggs = updatesEggs;
+        this.remainingSeconds = remainingSeconds;
     }
 
     public List<FoodRecord> getEatenFoods() {
@@ -34,6 +37,14 @@ public class GameStateEvent extends Event {
 
     public void setUpdatesFoods(List<FoodRecord> eatenFoods) {
         this.eatenFoods = eatenFoods;
+    }
+
+    public List<FoodRecord> getLaidEggs() {
+        return laidEggs;
+    }
+
+    public void setUpdatesEggs(List<FoodRecord> laidEggs) {
+        this.laidEggs = laidEggs;
     }
 
     public List<GhostRecord> getUpdatesGhosts() {
@@ -52,12 +63,21 @@ public class GameStateEvent extends Event {
         this.updatesSnackMen = updatesSnackMen;
     }
 
-    public List<ChickenRecord> getUpdatesChicken() {
-        return updatesChicken;
+    public List<ChickenRecord> getUpdatesChickens() {
+        return updatesChickens;
     }
 
-    public void setUpdatesChicken(List<ChickenRecord> updatesChicken) {
-        this.updatesChicken = updatesChicken;
+
+    public void setUpdatesChickens(List<ChickenRecord> updatesChickens) {
+        this.updatesChickens = updatesChickens;
+    }
+
+    public long getRemainingSeconds() {
+        return remainingSeconds;
+    }
+
+    public void setRemainingSeconds(long remainingSeconds) {
+        this.remainingSeconds = remainingSeconds;
     }
 
 }

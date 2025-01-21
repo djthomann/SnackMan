@@ -1,8 +1,20 @@
 package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
+import java.util.List;
+import java.util.Objects;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
+
+
+import org.joml.Vector3f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.configuration.GameConfig;
+import de.hsrm.mi.swt.projekt.snackman.logic.CollisionManager;
+import de.hsrm.mi.swt.projekt.snackman.logic.CollisionType;
 import de.hsrm.mi.swt.projekt.snackman.logic.GameManager;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 
@@ -17,6 +29,11 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.*;
 public class Ghost extends PlayerObject implements MovableAndSubscribable {
 
     private final GameManager gameManager;
+    private final GameConfig gameConfig;
+    private final CollisionManager collisionManager;
+    private final Logger logger = LoggerFactory.getLogger(Ghost.class);
+
+    private int numCollisions = 0;
 
     /**
      * Constructs a new `Ghost` with the specified starting position.
@@ -28,10 +45,11 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
      * 
      */
 
-    public Ghost(String username, long id, long gameId, float x, float y, float z, GameConfig gameConfig, GameManager gameManager) {
-        super(username, id, gameId, x, y, z, gameConfig.getGhostRadius());
+    public Ghost(String username, long id, long gameId, float x, float y, float z, GameConfig gameConfig, GameManager gameManager, CollisionManager collisionManager) {
+        super(username, id, gameId, x, y, z, gameConfig.getGhostRadius(), gameConfig.getGhostHeight());
         this.gameManager = gameManager;
-
+        this.gameConfig = gameConfig;
+        this.collisionManager = collisionManager;
     }
 
     /**
@@ -43,18 +61,72 @@ public class Ghost extends PlayerObject implements MovableAndSubscribable {
      */
     @Override
     public void move(float newX, float newY, float newZ) {
-        x = newX;
-        y = newY;
-        z = newZ;
+        this.gameManager.getGameById(gameId).updateTileOccupation(this, x, z, x + newX, z + newZ);
+        super.move(newX, newY, newZ);
         EventService.getInstance().applicationEventPublisher.publishEvent(new InternalMoveEvent(this, gameManager));
     }
 
     @Override
     public void handle(Event event) {
+
+        if (event.getObjectID() != this.objectId) {
+            return;
+        }
+
+
+        if (Objects.requireNonNull(event.getType()) == EventType.MOVE) {
+            Vector3f vector = ((MoveEvent) event).getMovementVector();
+            logger.info("Movement-Vektor: x = " + vector.x + ", y = " + vector.y + ", z = " + vector.z);
+            List<CollisionType> collisions;
+            float wishedX = this.getX() + (vector.x * gameConfig.getSnackManStep());
+            logger.info("Wished X: " + wishedX);
+            float wishedZ = this.getZ() + (vector.z * gameConfig.getSnackManStep());
+            logger.info("Wished Z: " + wishedZ);
+            collisions = collisionManager.checkCollision(wishedX, wishedZ, this);
+            if (wishedX != this.getX() || wishedZ != this.getZ()) {
+                if (this.getY() < gameConfig.getWallHeight()) {
+                    if (collisions.contains(CollisionType.WALL)) {
+                        vector.x = 0;
+                        vector.z = 0;
+                    }
+                }
+
+            }
+
+            this.move(vector.x * gameConfig.getGhostStep(), 0, vector.z * gameConfig.getGhostStep());
+        }
+
+        logger.info("Event arrived at Ghost :" + event);
+
+    }
+
+    public int getNumCollisions() {
+        return numCollisions;
+    }
+
+    public void setNumCollisions(int numCollisions) {
+        this.numCollisions = numCollisions;
+    }
+
+    public void addCollision() {
+        numCollisions += 1;
     }
 
     public GhostRecord toRecord() {
-        return new GhostRecord(gameId, objectId, getUsername(), x, y, z);
+        return new GhostRecord(gameId, objectId, getUsername(), numCollisions, x, y, z);
+    }
+
+    /**
+     * Returns string representation used for chicken-surroundings 
+     * 
+     * @return string representation
+     */        
+    public String toString() {
+        return "GHOST";
+    }
+
+    public boolean isChicken() {
+        return false;
     }
 
 }
