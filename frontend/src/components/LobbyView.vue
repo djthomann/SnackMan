@@ -147,14 +147,12 @@
                         {{ errors.jumpCalories }}
                       </p>
                     </span>
-                    <button type="submit" :disabled="hasErrors">Apply</button>
-                    <button type="button" @click="resetForm">Reset</button>
                   </form>
                 </FieldsetComponent>
               </div>
             </template>
             <template #footer>
-              <button class="text-button configButtons" type="button" @click="submitForm">Apply</button>
+              <button class="text-button configButtons" type="button" @click="submitForm" :disabled="hasErrors">Apply</button>
               <button class="text-button configButtons" type="button" @click="resetForm">Reset</button>
             </template>
           </ConfigPanelComponent>
