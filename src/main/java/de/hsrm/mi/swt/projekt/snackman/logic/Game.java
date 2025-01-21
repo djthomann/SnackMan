@@ -326,7 +326,6 @@ public class Game {
         this.lobby.emptyMap();
     }
 
-
     /**
      * Sends a GameEndEvent to all subscribers
      */
@@ -370,21 +369,9 @@ public class Game {
 
         // Determine lobby
         Lobby lobby = this.gameManager.getLobbyById(this.id);
-
-        /* Logging
-        if(lobby != null) {
-            logger.info("Lobby found with id: " + lobby.getId());
-        }
-        */
         
         // Determine clients
         List<Client> clientsAsList = lobby.getClientsAsList();
-        
-        /* Logging
-        for (Client c : clientsAsList) {
-            logger.info("Client in Lobby: " + c.toString());
-        }
-        */
 
         // Determine scores
         for (MovableAndSubscribable m : allMovables) {
