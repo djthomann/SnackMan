@@ -69,6 +69,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
     /** Jython-Interpreter for the script logic */
     private final PythonInterpreter scriptInterpreter;
 
+    private Thread chickenThread;
+
     /**
      * Constructs a new Chicken with the objectId, and specified starting Coords.
      *
@@ -101,7 +103,7 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
 
     private void initScriptInterpreter(String script) {
         this.scriptInterpreter.exec("from " + script + " import *");
-        new Thread(() -> {
+        this.chickenThread = new Thread(() -> {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                 if (gameManager.getGameById(gameId) == null) {
@@ -115,7 +117,8 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }).start();
+        });
+        this.chickenThread.start();
     }
 
     /**
@@ -319,6 +322,14 @@ public class Chicken extends GameObject implements CanEat, MovableAndSubscribabl
      */    
     public String toString() {
         return "Chicken";
+    }
+
+    public boolean isChicken() {
+        return true;
+    }
+
+    public void kill() {
+        this.chickenThread.interrupt();
     }
 
 }

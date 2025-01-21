@@ -183,7 +183,6 @@ const handleServerMessage = (message: string) => {
     gameData.value = JSON.parse(message.split(';')[1]);
   }
   if (message.startsWith('MAP_DATA')) {
-    console.log(message.split(';')[1]);
     mapData.value = message.split(';')[1];
   }
 };

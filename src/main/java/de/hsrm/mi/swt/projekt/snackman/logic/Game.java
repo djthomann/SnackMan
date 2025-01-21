@@ -58,6 +58,7 @@ public class Game {
     private List<Client> clients;
     private TimerTask task;
     private Lobby lobby;
+    private boolean isOver = false;
 
     // Constructor for Game with Lobby
     public Game(Lobby lobby, GameManager gameManager) {
@@ -319,11 +320,23 @@ public class Game {
 
     private void stopGame() {
         logger.info("game ended");
+        this.isOver = true;
         task.cancel();
         gameState.interrupt();
         timer.cancel();
+        killChickens();
         sendGameEndEvent();
+        eventBus.clearSubscribers();
         this.lobby.emptyMap();
+    }
+
+    private void killChickens() {
+        for (MovableAndSubscribable object: this.allMovables) {
+
+            if (object.isChicken()) {
+                ((Chicken)object).kill();
+            }
+        }
     }
 
     /**
@@ -404,17 +417,6 @@ public class Game {
             winnerTeam = "GHOST";
         }
 
-        /*
-        String winnerTeam = winner.getRole().toString();
-        logger.info("Winner Team: " + winnerTeam);
-        */
-
-        /* Logging: Iterate through scores and log every entry
-        for (Map.Entry<Long, Integer> entry : scores.entrySet()) {
-            logger.info("Player ID: " + entry.getKey() + ", Score: " + entry.getValue());
-        }
-        */
-
         // Create PlayerRecords
         List<PlayerRecord> playerRecords = new ArrayList<>();
 
@@ -445,6 +447,10 @@ public class Game {
      * @param event the event to be published
      */
     public void receiveEvent(Event event) {
+        if (isOver) {
+            return;
+        }
+
         logger.info("event received by game\n");
         logger.info("Subscribers: " + eventBus.getSubscribers().toString());
 

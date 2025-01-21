@@ -560,6 +560,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         }
     }
 
-
+    public boolean isChicken() {
+        return false;
+    }
 
 }
