@@ -198,10 +198,25 @@ const fetchLobbies = () => {
 .lobbies {
   position: relative;
   height: 60%;
-  width: 80%;
+  width: 75%;
   display: flex;
   flex-wrap: wrap;
-  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.lobbies::-webkit-scrollbar {
+  width: 12px;
+}
+
+.lobbies::-webkit-scrollbar-track {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+}
+
+.lobbies::-webkit-scrollbar-thumb {
+  background-color: var(--colorLight);
+  border-radius: 6px;
 }
 
 .lobbies-headline {
