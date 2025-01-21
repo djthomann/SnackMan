@@ -17,12 +17,20 @@ def run_behavior(environment, direction, wall_collision, x, z, y):
     # Check the tile in the current direction and the next tile
     current_tile = get_tile(environment, 1, 1)
     next_tile = get_tile(environment, *direction_offsets[direction])
+
+    # make sure to fall after jump 
+    if y > 0:
+        return move_vectors["FALL"] + (direction,) + (wall_collision,)
     
     # If the current direction is blocked, turn around and set wall_collision to True
     if current_tile == "WALL":
         wall_collision = True
         new_direction = opposite_directions[direction]
         return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
+    
+    # if the Ghost is on the same tile, jump up scared.
+    if current_tile == "GHOST":
+        return move_vectors["JUMP"] + (direction,) + (wall_collision,)
     
     # If there is an Entity in the way, Turn around.
     if next_tile == "GHOST" or next_tile == "SNACKMAN" or next_tile == "CHICKEN":
@@ -42,7 +50,7 @@ def run_behavior(environment, direction, wall_collision, x, z, y):
             return move_vectors[new_direction] + (new_direction,) + (wall_collision,)
     
     # if the Ghost or Snackman is on the same tile, freeze.
-    if current_tile == "GHOST" or current_tile == "SNACKMAN":
+    if current_tile == "SNACKMAN":
          return (0.0, 0.0, 0.0, direction, wall_collision)
     
     # If the current direction is blocked, check if an alternative is available

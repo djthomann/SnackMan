@@ -28,7 +28,7 @@ export const useEntityStore = defineStore('entityStore', () => {
           x: Number(snackman.x),
           y: Number(snackman.y),
           z: Number(snackman.z),
-          gainedCalories: Number(snackman.gainedCalories)
+          gainedCalories: Number(snackman.gainedCalories),
         })
       })
       parsedData.ghosts.forEach((ghost: Ghost) => {
@@ -51,7 +51,8 @@ export const useEntityStore = defineStore('entityStore', () => {
           y: Number(chicken.y),
           z: Number(chicken.z),
           gainedCalories: Number(chicken.gainedCalories),
-          radius: chicken.radius
+          radius: chicken.radius,
+          state: chicken.state
         })
       })
     }
@@ -65,8 +66,8 @@ export const useEntityStore = defineStore('entityStore', () => {
   */
 
   const ghosts = ref<Map<number, Ghost>>(new Map([
-    [101, { gameId: 1, objectId: 101, username: "Ghosty1", collisions: 0, x: 108, y: 0, z: 102 }],
-    [102, { gameId: 1, objectId: 102, username: "Ghosty2", collisions: 0, x: 104, y: 0, z: 102 }]
+    [101, { gameId: 1, objectId: 101, username: "Ghosty1", x: 108, y: 0, z: 102, collisions: 2 }],
+    [102, { gameId: 1, objectId: 102, username: "Ghosty2", x: 104, y: 0, z: 102, collisions: 2 }]
   ]));
   const snackMen = ref<Map<number, Snackman>>(new Map([
     [201, { gameId: 1, objectId: 201, username: "SnackMan1", x: 110, y: 0, z: 102, gainedCalories: 0 }],
