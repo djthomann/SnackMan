@@ -173,6 +173,20 @@
           <button class="startGameButton" type="button" @click="startGame">Start Game</button>
         </div>
       </div>
+      <div class="chat-container">
+        <ul class="chat-messages">
+          <li v-for="(message, index) in chatMessages" :key="index">
+            <strong>{{ message.username }}:</strong> {{ message.text }}
+          </li>
+        </ul>
+        <input
+          v-model="chatInput"
+          type="text"
+          placeholder="Type your message..."
+          @keyup.enter="sendChat"
+        />
+        <button class="chatButton" @click="sendChat">Send</button>
+      </div>
     </BackgroundComponent>
   </div>
 </template>
@@ -212,6 +226,8 @@ const undecidedPlayers = ref<Array<Player>>([
 ]);
 const selectedRole = ref<'SNACKMAN' | 'GHOST' | null>(null);
 const audio = new Audio(lobbyMusic);
+const chatMessages = ref<Array<{ username: string; text: string }>>([]);
+const chatInput = ref('');
 
 // Type definition of GameConfig interface
 interface GameConfig {
@@ -360,7 +376,6 @@ const decide = (snackman: boolean) => {
 
 // Automatic call on load
 onMounted(async () => {
-
   // Start background music on load of the lobby view
   audio.play();
 
@@ -426,9 +441,59 @@ const choose = (role: string) => {
   sendMessage(message);
 };
 
+
+function sendChat() {
+  if (chatInput.value.trim()) {
+    chatMessages.value.push({ username: userStore.username, text: chatInput.value });
+    chatInput.value = '';
+  }
+}
+
 </script>
 
 <style scoped>
+.chat-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 250px;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 1000;
+}
+
+.chat-messages {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.chat-messages li {
+  padding: 5px 0;
+}
+
+.chatButton {
+  color: white;
+  background-color: #f39325;
+  padding: 10px 20px;
+  text-align: center;
+  display: inline-block;
+  font-size: 16px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.chatButton:hover {
+  background-color: white;
+  color: black;
+}
+
 .lobby-grid {
   width: 100%;
   height: 100%;
