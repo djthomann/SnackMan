@@ -4,6 +4,13 @@
       <button class="icon-button join-button button" @click="leaveLobby(lobbyCode)">
         <img src="@/assets/icons/Back_Button.svg" />
       </button>
+      <div class="icon-button add-button button volume-button">
+            <button @click="toggleMute">
+              <img v-if="volume > 0" src="@/assets/icons/volume.svg" />
+              <img v-if="volume == 0" src="@/assets/icons/volume_muted.svg" />
+            </button>
+            <input v-model="volume" type="range" id="volume-slider" name="volume" min="0" max="1" step="0.01" />
+          </div>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
@@ -175,6 +182,7 @@
         <div class="lobby-grid__column lobby-grid__column--span-all">
           <button class="text-button startGameButton" type="button" @click="startGame">Start Game</button>
         </div>
+      
       </div>
     </BackgroundComponent>
   </div>
@@ -182,7 +190,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import useWebSocket from '@/services/socketService';
 import eventBus from '@/services/eventBus';
 import { useUserStore } from '@/stores/userStore';
@@ -215,6 +223,11 @@ const undecidedPlayers = ref<Array<Player>>([
 ]);
 const selectedRole = ref<'SNACKMAN' | 'GHOST' | null>(null);
 const audio = new Audio(lobbyMusic);
+let oldVolume: number = 1
+let muted: boolean = false
+const volume = ref<number>(1)
+const volumeIcon = "@/assets/icons/volume.svg";
+const mutedIcon = "@/assets/icons/mute.svg";
 
 // Type definition of GameConfig interface
 interface GameConfig {
@@ -364,6 +377,17 @@ const decide = (snackman: boolean) => {
   fetchPlayers();
 };
 
+const toggleMute = () => {
+  if(muted) {
+    muted = false
+    volume.value = oldVolume;
+  } else {
+    muted = true
+    oldVolume = volume.value
+    volume.value = 0;
+  }
+}
+
 // Automatic call on load
 onMounted(async () => {
 
@@ -378,6 +402,10 @@ onMounted(async () => {
       }, 1000);
     });
   };
+
+  watch(volume, (newValue, oldValue) => {
+    audio.volume = volume.value;
+  });
 
   //Stops the background music when leaving the lobby view
   onBeforeUnmount(() => {
@@ -579,6 +607,11 @@ label {
   transition: transform 0.2s ease;
 }
 
+.error-message {
+  margin-top: 4px;
+  padding: 0px 5px;
+}
+
 .icon-button {
   position: absolute;
   user-select: none;
@@ -608,5 +641,143 @@ label {
 .icon-button button:hover {
   cursor: pointer;
   box-shadow: none;
+}
+
+#volume-slider {
+  opacity: 0;
+  width: 0;
+  transition: none;
+}
+
+.volume-button {
+  position: absolute;
+  bottom: 2%;
+  left: 0;
+  width: auto;
+  display: flex;
+  align-items: center;
+}
+
+.button {
+  user-select: none;
+  margin-left: 1%;
+}
+
+.icon-button img {
+  height: 40px;
+  transition: transform 0.5s ease;
+  user-select: none;
+}
+
+.icon-button button {
+  display: flex;
+  background: 0;
+  box-shadow: none;
+  border: 0;
+  user-select: none;
+}
+
+.icon-button button:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.volume-button:hover #volume-slider {
+  animation: expandVolumeSlider 0.2s forwards;
+}
+
+.volume-button:not(:hover) #volume-slider {
+  animation: collapseVolumeSlider 0.2s forwards;
+}
+
+@keyframes expandVolumeSlider {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  100% {
+    width: 100px;
+    opacity: 1;
+  }
+}
+
+@keyframes collapseVolumeSlider {
+  0% {
+    width: 100px;
+    opacity: 1;
+  }
+  100% {
+    width: 0;
+    opacity: 0;
+  }
+}
+
+#volume-slider {
+  opacity: 0;
+  width: 0;
+  transition: none;
+}
+
+.volume-button {
+  position: absolute;
+  bottom: 2%;
+  left: 0;
+  width: auto;
+  display: flex;
+  align-items: center;
+}
+
+.button {
+  user-select: none;
+  margin-left: 1%;
+}
+
+.icon-button img {
+  height: 40px;
+  transition: transform 0.5s ease;
+  user-select: none;
+}
+
+.icon-button button {
+  display: flex;
+  background: 0;
+  box-shadow: none;
+  border: 0;
+  user-select: none;
+}
+
+.icon-button button:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.volume-button:hover #volume-slider {
+  animation: expandVolumeSlider 0.2s forwards;
+}
+
+.volume-button:not(:hover) #volume-slider {
+  animation: collapseVolumeSlider 0.2s forwards;
+}
+
+@keyframes expandVolumeSlider {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  100% {
+    width: 100px;
+    opacity: 1;
+  }
+}
+
+@keyframes collapseVolumeSlider {
+  0% {
+    width: 100px;
+    opacity: 1;
+  }
+  100% {
+    width: 0;
+    opacity: 0;
+  }
 }
 </style>
