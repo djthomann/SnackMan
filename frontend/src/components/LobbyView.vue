@@ -5,12 +5,20 @@
         <img src="@/assets/icons/Back_Button.svg" />
       </button>
       <div class="icon-button add-button button volume-button">
-            <button @click="toggleMute">
-              <img v-if="volume > 0" src="@/assets/icons/volume.svg" />
-              <img v-if="volume == 0" src="@/assets/icons/volume_muted.svg" />
-            </button>
-            <input v-model="volume" type="range" id="volume-slider" name="volume" min="0" max="1" step="0.01" />
-          </div>
+        <button @click="toggleMute">
+          <img v-if="volume > 0" src="@/assets/icons/volume.svg" />
+          <img v-if="volume == 0" src="@/assets/icons/volume_muted.svg" />
+        </button>
+        <input
+          v-model="volume"
+          type="range"
+          id="volume-slider"
+          name="volume"
+          min="0"
+          max="1"
+          step="0.01"
+        />
+      </div>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
           <PlayerPanelComponent avatar="ghost" :selected="selectedRole === 'GHOST'">
@@ -159,8 +167,17 @@
               </div>
             </template>
             <template #footer>
-              <button class="text-button configButtons" type="button" @click="submitForm" :disabled="hasErrors">Apply</button>
-              <button class="text-button configButtons" type="button" @click="resetForm">Reset</button>
+              <button
+                class="text-button configButtons"
+                type="button"
+                @click="submitForm"
+                :disabled="hasErrors"
+              >
+                Apply
+              </button>
+              <button class="text-button configButtons" type="button" @click="resetForm">
+                Reset
+              </button>
             </template>
           </ConfigPanelComponent>
         </div>
@@ -180,9 +197,10 @@
           </PlayerPanelComponent>
         </div>
         <div class="lobby-grid__column lobby-grid__column--span-all">
-          <button class="text-button startGameButton" type="button" @click="startGame">Start Game</button>
+          <button class="text-button startGameButton" type="button" @click="startGame">
+            Start Game
+          </button>
         </div>
-      
       </div>
       <div class="chat-container">
         <ul class="chat-messages">
@@ -190,27 +208,15 @@
             <strong>{{ message.username }}:</strong> {{ message.text }}
           </li>
         </ul>
-        <input
-          v-model="chatInput"
-          type="text"
-          placeholder="Type your message..."
-          @keyup.enter="chat(chatInput)"
-        />
-        <button class="chatButton" @click="chat(chatInput)">Send</button>
-      </div>
-      <div class="chat-container">
-        <ul class="chat-messages">
-          <li v-for="(message, index) in chatMessages" :key="index">
-            <strong>{{ message.username }}:</strong> {{ message.text }}
-          </li>
-        </ul>
-        <input
-          v-model="chatInput"
-          type="text"
-          placeholder="Type your message..."
-          @keyup.enter="chat(chatInput)"
-        />
-        <button class="chatButton" @click="chat(chatInput)">Send</button>
+        <div class="chat-input-container">
+          <input
+            v-model="chatInput"
+            type="text"
+            placeholder="Type your message..."
+            @keyup.enter="chat(chatInput)"
+          />
+          <button class="chatButton" @click="chat(chatInput)">Send</button>
+        </div>
       </div>
     </BackgroundComponent>
   </div>
@@ -251,11 +257,11 @@ const undecidedPlayers = ref<Array<Player>>([
 ]);
 const selectedRole = ref<'SNACKMAN' | 'GHOST' | null>(null);
 const audio = new Audio(lobbyMusic);
-let oldVolume: number = 1
-let muted: boolean = false
-const volume = ref<number>(1)
-const volumeIcon = "@/assets/icons/volume.svg";
-const mutedIcon = "@/assets/icons/mute.svg";
+let oldVolume: number = 1;
+let muted: boolean = false;
+const volume = ref<number>(1);
+const volumeIcon = '@/assets/icons/volume.svg';
+const mutedIcon = '@/assets/icons/mute.svg';
 const chatMessages = ref<Array<{ username: string; text: string }>>([]);
 const chatInput = ref('');
 
@@ -411,15 +417,15 @@ const decide = (snackman: boolean) => {
 };
 
 const toggleMute = () => {
-  if(muted) {
-    muted = false
+  if (muted) {
+    muted = false;
     volume.value = oldVolume;
   } else {
-    muted = true
-    oldVolume = volume.value
+    muted = true;
+    oldVolume = volume.value;
     volume.value = 0;
   }
-}
+};
 
 // Automatic call on load
 onMounted(async () => {
@@ -493,20 +499,20 @@ const choose = (role: string) => {
 };
 
 const leaveLobby = (code: number) => {
-    logger.info(`Leaving lobby with code: ${code}`);
+  logger.info(`Leaving lobby with code: ${code}`);
 
-    const data = JSON.stringify({
-      type: 'LEAVE_LOBBY',
-      lobbyCode: code
-    });
+  const data = JSON.stringify({
+    type: 'LEAVE_LOBBY',
+    lobbyCode: code,
+  });
 
-    sendMessage(data);
-    router.push('/home');
+  sendMessage(data);
+  router.push('/home');
 };
 const chat = (message: string) => {
   // Display your own message for yourself
   chatMessages.value.push({ username: userStore.username, text: chatInput.value });
-  
+
   // Send the message to the server
   const data = JSON.stringify({
     type: 'CHAT',
@@ -548,18 +554,31 @@ const chat = (message: string) => {
   padding: 5px 0;
 }
 
-.chatButton {
+.chat-input-container {
+  display: flex;
+  margin-top: 8px;
+  position: sticky;
+}
+
+.chat-input-container input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.chat-input-container .chatButton {
+  margin-left: 8px;
+  padding: 8px 16px;
   color: white;
   background-color: #f39325;
-  padding: 10px 20px;
   text-align: center;
   display: inline-block;
   font-size: 16px;
-  margin-left: 8px;
   cursor: pointer;
 }
 
-.chatButton:hover {
+.chat-input-container .chatButton:hover {
   background-color: white;
   color: black;
 }
@@ -604,7 +623,7 @@ const chat = (message: string) => {
 .chooseRoleButton {
   width: 100%;
   background-color: white;
-  color: #F39325;
+  color: #f39325;
   border: none;
 }
 
@@ -620,7 +639,7 @@ button:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.text-button:hover{
+.text-button:hover {
   color: black;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
@@ -634,9 +653,9 @@ button:hover {
   border: 3px solid black;
 }
 
-.configButtons{
+.configButtons {
   width: 20%;
-  background-color: #F39325;
+  background-color: #f39325;
   color: white;
   border: 1px black;
   border-radius: 10px;
@@ -646,13 +665,13 @@ button:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.configButtons:hover{
+.configButtons:hover {
   background-color: white;
 }
 
-.configButtons{
+.configButtons {
   width: 20%;
-  background-color: #F39325;
+  background-color: #f39325;
   color: white;
   border: 1px black;
   border-radius: 10px;
@@ -662,7 +681,7 @@ button:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.configButtons:hover{
+.configButtons:hover {
   background-color: white;
 }
 
