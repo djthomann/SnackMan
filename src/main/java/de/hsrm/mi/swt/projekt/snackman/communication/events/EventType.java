@@ -20,5 +20,6 @@ public enum EventType {
     REQUEST_GAMESTART,
     NEW_LOBBY_CREATE,
     NEW_LOBBY_JOIN,
-    LOBBY_ID
+    LOBBY_ID,
+    CHAT
 }

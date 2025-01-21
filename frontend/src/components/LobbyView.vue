@@ -183,9 +183,9 @@
           v-model="chatInput"
           type="text"
           placeholder="Type your message..."
-          @keyup.enter="sendChat"
+          @keyup.enter="chat(chatInput)"
         />
-        <button class="chatButton" @click="sendChat">Send</button>
+        <button class="chatButton" @click="chat(chatInput)">Send</button>
       </div>
     </BackgroundComponent>
   </div>
@@ -268,6 +268,9 @@ const handleServerMessage = (message: string) => {
     buildPlayerArrays(message);
   } else if (message.startsWith('FOREIGN_GAMESTART')) {
     router.push('/game/' + lobbyCode.value);
+  } else if (message.startsWith('CHAT')) {
+    const parsedData = JSON.parse(message.split(';')[1]);
+    chatMessages.value.push({ username: parsedData.username, text: parsedData.text });
   }
 };
 
@@ -441,14 +444,22 @@ const choose = (role: string) => {
   sendMessage(message);
 };
 
+const chat = (message: string) => {
+  // Display your own message for yourself
+  // chatMessages.value.push({ username: userStore.username, text: chatInput.value });
+  
+  // Send the message to the server
+  const data = JSON.stringify({
+    type: 'CHAT',
+    lobbyID: lobbyCode.value,
+    username: userStore.username,
+    text: chatInput.value,
+  });
+  sendMessage(data);
 
-function sendChat() {
-  if (chatInput.value.trim()) {
-    chatMessages.value.push({ username: userStore.username, text: chatInput.value });
-    chatInput.value = '';
-  }
-}
-
+  // Empty the chat input field
+  chatInput.value = '';
+};
 </script>
 
 <style scoped>

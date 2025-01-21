@@ -25,6 +25,7 @@ import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.GameConfigEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.ClientIdEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.ChooseRoleEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.LobbyCreateEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
@@ -228,6 +229,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     logger.info("Sending GameEndEvent to all clients: " + messageToSend);
                     session.sendMessage(new TextMessage(result.getType().toString() + ";" + gson.toJson(result)));
                 }
+                case "CHAT" -> {
+                    ChatEvent chatEvent = gson.fromJson(jsonObject, ChatEvent.class);
+                    logger.info("ChatEvent received: " + chatEvent);
+                    broadcastMessage("CHAT;" + gson.toJson(chatEvent));
+                }
+
                 default -> logger.warn("unknown message from FE: " + type);
 
             }
@@ -236,6 +243,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * Sends all clients a String (except the source)
+     * @param source WebSocketSession that is the source of the message
+     * @param gameId ID of the looby/game
+     * @param payload Message to send
+     */
     private void notifyClients(WebSocketSession source, long gameId, String payload) {
         Lobby lobby = gameManager.getLobbyById(gameId);
 

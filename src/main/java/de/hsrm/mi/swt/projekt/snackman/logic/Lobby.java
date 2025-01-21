@@ -1,5 +1,6 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class Lobby {
     private GameConfig gameConfig = new GameConfig();
     private SnackManMap map;
     private final Map<Long, Client> clientMap = new HashMap<>();
+    private final List<String> chatMessages = new ArrayList<>();
 
     public List<Client> getClientsAsList() {
         return clientMap.values().stream().toList();
@@ -70,4 +72,11 @@ public class Lobby {
         return new LobbyRecord(this.getClientsAsList().size(), this.id);
     }
 
+    public void addChatMessage(String message) {
+        chatMessages.add(message);
+    }
+
+    public String[] getChatMessages() {
+        return chatMessages.toArray(new String[0]);
+    } 
 }
