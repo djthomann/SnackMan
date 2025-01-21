@@ -27,6 +27,12 @@ import counter_top2URL from '@/assets/images/counter/counter_top2.png';
 import counter_top3URL from '@/assets/images/counter/counter_top3.png';
 import counter_top4URL from '@/assets/images/counter/counter_top4.png';
 import counter_top5URL from '@/assets/images/counter/counter_top5.png';
+import snackman_blueURL from '@/assets/models/snackman_blue.glb';
+import snackman_redURL from '@/assets/models/snackman_red.glb';
+import snackman_greenURL from '@/assets/models/snackman_green.glb';
+import snackman_yellowURL from '@/assets/models/snackman_yellow.glb';
+
+
 
 import { Logger } from '../util/logger';
 
@@ -43,6 +49,7 @@ class ModelService {
   private skyBoxTextures: THREE.MeshBasicMaterial[];
   private counterTextures: THREE.MeshBasicMaterial[];
   private topTextures: THREE.Texture[];
+  private modelVariants: string[];
 
   constructor() {
     this.logger = new Logger();
@@ -56,6 +63,10 @@ class ModelService {
       chicken: chickenModelUrl,
       brokkoli: brokkoliModelUrl,
       snackman: snackmanModelUrl,
+      snackman_blue: snackman_blueURL,
+      snackman_red: snackman_redURL,
+      snackman_green: snackman_greenURL,
+      snackman_yellow: snackman_yellowURL,
       player: playerModelUrl,
       ghost: ghostModelUrl
     };
@@ -68,13 +79,19 @@ class ModelService {
       chicken: 1,
       brokkoli: 1,
       snackman: 0.12,
+      snackman_blue: 0.12,
+      snackman_red: 0.12,
+      snackman_green: 0.12,
+      snackman_yellow: 0.12,
       player: 0.12,
-      ghost: 0.11
+      ghost: 0.14
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
     this.isInitialized = false;
     this.texture_dn = new THREE.TextureLoader().load(floorURL);
+    this.modelVariants = ['snackman_blue', 'snackman_red', 'snackman_green', 'snackman_yellow'];
+
 
     this.skyBoxTextures = [
       new THREE.MeshBasicMaterial({ map: this.loadTexture(skybox_ftURL) }),
@@ -287,11 +304,21 @@ class ModelService {
 
   //Creates Snackman and positions it
   public createSnackman(id: number, x: number, y: number, z: number) {
-    const newModel = this.getModel('snackman').clone();
+    if (this.modelVariants.length === 0) {
+        this.modelVariants = ['snackman_blue', 'snackman_red', 'snackman_green', 'snackman_yellow'];
+    }
+
+    // Assign a model from the list
+    const modelName = this.modelVariants.pop() as string;
+    const newModel = this.getModel(modelName).clone();
+
     newModel.userData.id = id;
-    newModel.position.set(x,0,z );
+    newModel.position.set(x, 0, z);
+
     return newModel;
-  }
+}
+
+
 
   public createGhostPlayer(id: number | undefined, x: number, y: number,  z: number) {
     const res = new THREE.Group();

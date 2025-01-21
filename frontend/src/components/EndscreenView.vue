@@ -1,6 +1,6 @@
 <template>
   <div class="lobby-grid-wrapper">
-    
+
     <!--Content for when one of the Snackmen wins-->
     <div v-if="gameData.winningTeam == 'SNACKMAN'">
       <div class="background-component">
@@ -20,10 +20,10 @@
             </template>
           </PlayerPanelComponent>
           <div>
-            <button>Save Map</button>
+            <button @click="saveMap">Save Map</button>
           </div>
           <div>
-            <button @click="toLobby()">Back to Lobby</button>
+            <button @click="toLobby">Back to Lobby</button>
           </div>
         </div>
 
@@ -92,10 +92,10 @@
             </template>
           </PlayerPanelComponent>
           <div>
-            <button>Save Map</button>
+            <button @click="saveMap">Save Map</button>
           </div>
           <div>
-            <button @click="toLobby()">Back to Lobby</button>
+            <button @click="toLobby">Back to Lobby</button>
           </div>
         </div>
 
@@ -154,6 +154,7 @@ const route = useRoute();
 const router = useRouter();
 const lobbyCode = ref(Number(route.params.code));
 const serverMessage = ref<string>('');
+const mapData = ref<string>('')
 const logger = new Logger();
 
 interface Player {
@@ -181,6 +182,10 @@ const handleServerMessage = (message: string) => {
   if (message.startsWith('GAME_END')) {
     gameData.value = JSON.parse(message.split(';')[1]);
   }
+  if (message.startsWith('MAP_DATA')) {
+    console.log(message.split(';')[1]);
+    mapData.value = message.split(';')[1];
+  }
 };
 
 onMounted(async () => {
@@ -194,9 +199,6 @@ onMounted(async () => {
   };
 
   eventBus.on('serverMessage', handleServerMessage);
-
-  // TODO: Testing purposes, delete this line later
-  // gameData.value = testData;
 
   try {
     await awaitConnection();
@@ -213,6 +215,31 @@ onMounted(async () => {
 const toLobby = () => {
   router.push('/lobby/' + lobbyCode.value);
 };
+
+const getFormattedTimestamp = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+};
+
+const saveMap = () => {
+  const timestamp = getFormattedTimestamp();
+  const filename = `snackmanMap_${timestamp}.csv`;
+  const blob = new Blob([mapData.value], { type: "text/plain" });
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
 // TODO: Save Map Button
 </script>

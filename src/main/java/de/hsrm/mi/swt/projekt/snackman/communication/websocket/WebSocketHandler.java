@@ -201,6 +201,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     session.sendMessage(new TextMessage(returnString));
                 }
 
+                case "MAP_DATA_REQUEST" -> {
+                    long gameID = Long.parseLong(String.valueOf(jsonObject.get("gameID")));
+                    String mapData = gameManager.getGameById(gameID).getMap().original().toString();
+
+                    session.sendMessage(new TextMessage("MAP_DATA;" + mapData));
+                }
+
                 case "START_GAME" -> {
                     StartGameEvent startGameEvent = gson.fromJson(jsonString, StartGameEvent.class);
                     notifyClients(session, startGameEvent.getGameID(), "FOREIGN_GAMESTART");
@@ -211,6 +218,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case "END_GAME" -> {
                     GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
                     Game currentGame = gameManager.getGameById(gameEndEvent.getGameID());
+
+                    sendMapData(currentGame.getMap().original(), session);
+
                     GameEndEvent result = currentGame.generateGameEndEvent();
                     logger.info("GameEndEvent generated: " + result);
 
@@ -238,6 +248,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
             }
         }
+    }
+
+    private void sendMapData(SnackManMap map, WebSocketSession session) throws IOException {
+        session.sendMessage(new TextMessage("MAP_DATA;" + map.toString()));
     }
 
     /**
