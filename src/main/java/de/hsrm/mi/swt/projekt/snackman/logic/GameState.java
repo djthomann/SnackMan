@@ -44,34 +44,34 @@ public class GameState {
                 while (!this.isInterrupted()) {
                     try {
                         Thread.sleep(10);
+                        if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
+                                || !eatenFoods.isEmpty() || !laidEggs.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
+
+                            // clone lists to prevent concurrent modification
+                            GameStateEvent gameStateEvent = new GameStateEvent(
+                                    new ArrayList<>(changedGhosts),
+                                    new ArrayList<>(changedSnackMen),
+                                    new ArrayList<>(changedChicken),
+                                    new ArrayList<>(eatenFoods),
+                                    new ArrayList<>(laidEggs),
+                                    game.getRemainingSeconds()
+                            );
+                            for(Client client : game.getClients()) {
+                                game.getGameManager().notifyChange(client, gameStateEvent);
+                            }
+                            if(firstSend) {
+                                firstSend = false;
+                            }
+
+                            changedGhosts.clear();
+                            changedSnackMen.clear();
+                            changedChicken.clear();
+                            eatenFoods.clear();
+                            laidEggs.clear();
+                            lastSentTime = game.getRemainingSeconds();
+                        }
                     } catch (InterruptedException e) {
                         this.interrupt();
-                    }
-                    if (!changedGhosts.isEmpty() || !changedSnackMen.isEmpty() || !changedChicken.isEmpty()
-                            || !eatenFoods.isEmpty() || !laidEggs.isEmpty() || lastSentTime != game.getRemainingSeconds() || firstSend) {
-
-                        // clone lists to prevent concurrent modification
-                        GameStateEvent gameStateEvent = new GameStateEvent(
-                                new ArrayList<>(changedGhosts),
-                                new ArrayList<>(changedSnackMen),
-                                new ArrayList<>(changedChicken),
-                                new ArrayList<>(eatenFoods),
-                                new ArrayList<>(laidEggs),
-                                game.getRemainingSeconds()
-                        );
-                        for(Client client : game.getClients()) {
-                            game.getGameManager().notifyChange(client, gameStateEvent);
-                        }
-                        if(firstSend) {
-                            firstSend = false;
-                        }
-
-                        changedGhosts.clear();
-                        changedSnackMen.clear();
-                        changedChicken.clear();
-                        eatenFoods.clear();
-                        laidEggs.clear();
-                        lastSentTime = game.getRemainingSeconds();
                     }
                 }
             }
