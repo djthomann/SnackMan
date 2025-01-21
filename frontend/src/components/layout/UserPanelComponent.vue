@@ -143,7 +143,8 @@
 .playerpanel__content-pin {
     width: 30%;
     height: 100%;
-    transform: translateY(-20px);
+    transform: translateY(-30px);
+    padding-left: 20px;
 }
 
 .playerpanel__content-body {

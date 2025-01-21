@@ -57,6 +57,21 @@ const props = defineProps<Props>();
     background-position: center;
     user-select: none;
     pointer-events: none;
+    animation-name: zoom;
+    animation-duration: 10s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate-reverse;
+    animation-timing-function: ease-in-out ;
+}
+
+@keyframes zoom {
+    0% {
+        background-size: 100%;
+    }
+
+    100% {
+        background-size: 120%;
+    }
 }
 
 .background__container {
