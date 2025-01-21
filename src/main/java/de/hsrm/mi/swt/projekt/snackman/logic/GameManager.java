@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
+import de.hsrm.mi.swt.projekt.snackman.model.level.SnackManMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,8 @@ public class GameManager {
     private final Map<Long, Lobby> allLobbies = new HashMap<>();
     private final WebSocketHandler webSocketHandler;
     private final GameConfig gameConfig = new GameConfig();
+    private GameEndEvent lastGameEndEvent;
+    private SnackManMap lastMapOriginal;
 
     public GameManager(WebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;
@@ -130,4 +134,19 @@ public class GameManager {
         return allLobbies.get(id);
     }
 
+    public GameEndEvent getLastGameEndEvent() {
+        return lastGameEndEvent;
+    }
+
+    public void setLastGameEndEvent(GameEndEvent lastGameEndEvent) {
+        this.lastGameEndEvent = lastGameEndEvent;
+    }
+
+    public SnackManMap getLastMapOriginal() {
+        return lastMapOriginal;
+    }
+
+    public void setLastMapOriginal(SnackManMap lastMapOriginal) {
+        this.lastMapOriginal = lastMapOriginal;
+    }
 }

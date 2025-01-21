@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.LobbyRecord;
 
@@ -86,5 +87,5 @@ public class Lobby {
 
     public String[] getChatMessages() {
         return chatMessages.toArray(new String[0]);
-    } 
+    }
 }
