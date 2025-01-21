@@ -31,6 +31,7 @@ import snackman_blueURL from '@/assets/models/snackman_blue.glb';
 import snackman_redURL from '@/assets/models/snackman_red.glb';
 import snackman_greenURL from '@/assets/models/snackman_green.glb';
 import snackman_yellowURL from '@/assets/models/snackman_yellow.glb';
+import eggModelURL from '@/assets/models/egg.glb';
 
 
 
@@ -68,7 +69,8 @@ class ModelService {
       snackman_green: snackman_greenURL,
       snackman_yellow: snackman_yellowURL,
       player: playerModelUrl,
-      ghost: ghostModelUrl
+      ghost: ghostModelUrl,
+      egg: eggModelURL
     };
     this.scales = {
       banana: 0.02,
@@ -84,7 +86,8 @@ class ModelService {
       snackman_green: 0.12,
       snackman_yellow: 0.12,
       player: 0.12,
-      ghost: 0.14
+      ghost: 0.14,
+      egg: 0.11
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
@@ -340,7 +343,9 @@ class ModelService {
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
   public createFood(id: number, x: number, z: number, calories: number, scale: number) {
     let newModel;
-    if (calories > 300) {
+    if(calories > 699){
+      newModel = this.getModel('egg').clone();
+    } else if (calories > 300) {
       newModel = this.getModel('brokkoli').clone();
     } else if (calories > 200) {
       newModel = this.getModel('cheese').clone();
