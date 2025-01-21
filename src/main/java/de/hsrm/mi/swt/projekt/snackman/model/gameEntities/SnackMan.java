@@ -2,7 +2,6 @@ package de.hsrm.mi.swt.projekt.snackman.model.gameEntities;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -11,12 +10,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.hsrm.mi.swt.projekt.snackman.communication.events.Event;
+import de.hsrm.mi.swt.projekt.snackman.communication.events.EventType;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.EatEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToBackend.InternalMoveEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.events.frontendToBackend.MoveEvent;
@@ -559,6 +558,8 @@ public class SnackMan extends PlayerObject implements CanEat, MovableAndSubscrib
         }
     }
 
-
+    public boolean isChicken() {
+        return false;
+    }
 
 }

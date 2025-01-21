@@ -11,7 +11,7 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.Subscribable;
  */
 public class GameEventBus {
 
-    private final ArrayList<Subscribable> subscribers;
+    private ArrayList<Subscribable> subscribers;
 
     public GameEventBus(ArrayList<Subscribable> subscribers) {
         this.subscribers = subscribers;
@@ -46,6 +46,10 @@ public class GameEventBus {
      */
     public ArrayList<Subscribable> getSubscribers() {
         return subscribers;
+    }
+
+    public void clearSubscribers() {
+        this.subscribers = new ArrayList<>();
     }
     
 }

@@ -1,21 +1,4 @@
 <template>
-  <div>
-    <!--<h1>Home</h1>
-    <p>Welcome, {{ name }} with the ID {{ id }}</p>
-    <h2>Lobbies</h2>
-    <ul>
-      <li v-for="lobby in lobbies" :key="lobby.lobbyCode ?? 'default-key'">
-        <p>Lobby Code: {{ lobby.lobbyCode }}</p>
-        <p>{{ lobby.numPlayers }}/{{ maxPlayers }} Players</p>
-        <button @click="joinLobby(lobby.lobbyCode?.toString() ?? '')">Enter Lobby</button>
-      </li>
-    </ul>
-
-    <button @click="fetchLobbies">Refresh Lobbies</button>
-    
-    <button @click="createLobby">Create Lobby</button>
-    <h2>Enter Lobby Code</h2>-->
-  </div>
   <BackgroundComponent :title="`JOIN A LOBBY`">
     <div class="home-grid">
       <div class="player-box">
@@ -85,7 +68,7 @@ const handleServerMessage = (message: string) => {
   if (message.startsWith('ALL_LOBBIES')) {
     lobbies.value = JSON.parse(message.split(';')[1]);
     logger.info('ALL LOBBIES' + lobbies.value.toString());
-  } else if (message.startsWith('NEW_LOBBY_CREATE') || message.startsWith('NEW_LOBBY_JOIN')) {
+  } else if (message.startsWith('NEW_LOBBY_CREATE') || message.startsWith('NEW_LOBBY_JOIN') || message.startsWith('NEW_LOBBY_LEAVE')) {
     fetchLobbies();
   } else if (message.startsWith('LOBBY_ID')) {
     joinLobby(message.split(';')[1]);

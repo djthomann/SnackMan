@@ -23,7 +23,7 @@
             <button @click="saveMap">Save Map</button>
           </div>
           <div>
-            <button @click="toLobby">Back to Lobby</button>
+            <button @click="toHome()">Back to Home</button>
           </div>
         </div>
 
@@ -95,7 +95,7 @@
             <button @click="saveMap">Save Map</button>
           </div>
           <div>
-            <button @click="toLobby">Back to Lobby</button>
+            <button @click="toHome()">Back to Home Screen</button>
           </div>
         </div>
 
@@ -183,7 +183,6 @@ const handleServerMessage = (message: string) => {
     gameData.value = JSON.parse(message.split(';')[1]);
   }
   if (message.startsWith('MAP_DATA')) {
-    console.log(message.split(';')[1]);
     mapData.value = message.split(';')[1];
   }
 };
@@ -212,8 +211,8 @@ onMounted(async () => {
   }
 });
 
-const toLobby = () => {
-  router.push('/lobby/' + lobbyCode.value);
+const toHome = () => {
+  router.push('/home/');
 };
 
 const getFormattedTimestamp = (): string => {

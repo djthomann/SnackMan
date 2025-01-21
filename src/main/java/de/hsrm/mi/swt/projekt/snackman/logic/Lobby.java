@@ -1,9 +1,11 @@
 package de.hsrm.mi.swt.projekt.snackman.logic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hsrm.mi.swt.projekt.snackman.communication.events.backendToFrontend.GameEndEvent;
 import de.hsrm.mi.swt.projekt.snackman.communication.websocket.Client;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.LobbyRecord;
 
@@ -17,6 +19,7 @@ public class Lobby {
     private GameConfig gameConfig = new GameConfig();
     private SnackManMap map;
     private final Map<Long, Client> clientMap = new HashMap<>();
+    private final List<String> chatMessages = new ArrayList<>();
 
     public List<Client> getClientsAsList() {
         return clientMap.values().stream().toList();
@@ -34,6 +37,10 @@ public class Lobby {
 
     public void addClient(Client c) {
         clientMap.put(c.getClientId(), c);
+    }
+
+    public void removeClient(Client c) {
+        clientMap.remove(c.getClientId());
     }
 
     public long getId() {
@@ -56,6 +63,10 @@ public class Lobby {
         this.map = map;
     }
 
+    public void emptyMap() {
+        this.map = null;
+    }
+
     public Game startGame(GameManager gameManager) {
         if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
 
@@ -70,4 +81,11 @@ public class Lobby {
         return new LobbyRecord(this.getClientsAsList().size(), this.id);
     }
 
+    public void addChatMessage(String message) {
+        chatMessages.add(message);
+    }
+
+    public String[] getChatMessages() {
+        return chatMessages.toArray(new String[0]);
+    }
 }
