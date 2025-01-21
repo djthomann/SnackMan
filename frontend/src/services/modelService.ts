@@ -31,6 +31,10 @@ import snackman_blueURL from '@/assets/models/snackman_blue.glb';
 import snackman_redURL from '@/assets/models/snackman_red.glb';
 import snackman_greenURL from '@/assets/models/snackman_green.glb';
 import snackman_yellowURL from '@/assets/models/snackman_yellow.glb';
+import ghost_blueURL from '@/assets/models/ghost_blue.glb';
+import ghost_redURL from '@/assets/models/ghost_red.glb';
+import ghost_greenURL from '@/assets/models/ghost_green.glb';
+import ghost_yellowURL from '@/assets/models/ghost_yellow.glb';
 import eggModelURL from '@/assets/models/egg.glb';
 
 
@@ -50,7 +54,9 @@ class ModelService {
   private skyBoxTextures: THREE.MeshBasicMaterial[];
   private counterTextures: THREE.MeshBasicMaterial[];
   private topTextures: THREE.Texture[];
-  private modelVariants: string[];
+  private snackmanVariants: string[];
+  private ghostVariants: string[];
+
 
   constructor() {
     this.logger = new Logger();
@@ -70,7 +76,11 @@ class ModelService {
       snackman_yellow: snackman_yellowURL,
       player: playerModelUrl,
       ghost: ghostModelUrl,
-      egg: eggModelURL
+      egg: eggModelURL,
+      ghost_blue: ghost_blueURL,
+      ghost_red: ghost_redURL,
+      ghost_green: ghost_greenURL,
+      ghost_yellow: ghost_yellowURL
     };
     this.scales = {
       banana: 0.02,
@@ -87,13 +97,19 @@ class ModelService {
       snackman_yellow: 0.12,
       player: 0.12,
       ghost: 0.14,
+      ghost_blue: 0.14,
+      ghost_red: 0.14,
+      ghost_green: 0.14,
+      ghost_yellow: 0.14,
       egg: 0.11
     };
     this.modelCache = new Map();
     this.animationCache = new Map();
     this.isInitialized = false;
     this.texture_dn = new THREE.TextureLoader().load(floorURL);
-    this.modelVariants = ['snackman_blue', 'snackman_red', 'snackman_green', 'snackman_yellow'];
+    this.snackmanVariants = ['snackman_blue', 'snackman_red', 'snackman_green', 'snackman_yellow'];
+    this.ghostVariants = ['ghost_blue', 'ghost_red', 'ghost_green', 'ghost_yellow'];
+
 
 
     this.skyBoxTextures = [
@@ -307,12 +323,12 @@ class ModelService {
 
   //Creates Snackman and positions it
   public createSnackman(id: number, x: number, y: number, z: number) {
-    if (this.modelVariants.length === 0) {
-        this.modelVariants = ['snackman_blue', 'snackman_red', 'snackman_green', 'snackman_yellow'];
+    if (this.snackmanVariants.length === 0) {
+        this.snackmanVariants = ['snackman_blue', 'snackman_red', 'snackman_green', 'snackman_yellow'];
     }
 
     // Assign a model from the list
-    const modelName = this.modelVariants.pop() as string;
+    const modelName = this.snackmanVariants.pop() as string;
     const newModel = this.getModel(modelName).clone();
 
     newModel.userData.id = id;
@@ -335,11 +351,16 @@ class ModelService {
 
     //Creates Ghost and positions it
   public createGhost(id: number, x: number, y: number, z: number) {
-    const newModel = this.getModel('ghost').clone();
+    if (this.ghostVariants.length === 0){
+      this.ghostVariants = ['ghost_blue', 'ghost_red', 'ghost_green', 'ghost_yellow'];
+    }
+    const modelName = this.ghostVariants.pop() as string;
+    const newModel = this.getModel(modelName).clone();
     newModel.userData.id = id;
     newModel.position.set(x, 0, z);
     return newModel;
   }
+  
   // Creates Food item, chooses model depending on calories --> randomnly generated in frontend right now (not good)
   public createFood(id: number, x: number, z: number, calories: number, scale: number) {
     let newModel;
