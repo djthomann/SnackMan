@@ -46,9 +46,10 @@ def run_behavior(environment, direction, wall_collision, x, z, y):
                 new_direction = dir_key
                 return move_vectors[new_direction] + (new_direction,) + (False,)
 
-    # If chicken sees another chicken, it jumps happy
-    if next_tile == "CHICKEN":
+    # If chicken sees another chicken/ghost, it jumps happy/scared
+    if next_tile == "CHICKEN" or next_tile == "GHOST" or current_tile == "GHOST":
         return move_vectors["JUMP"] + (direction,) + (wall_collision,)
+    
 
     # If there is a wall, choose a random valid direction
     if wall_collision or (next_tile == "WALL" and 
