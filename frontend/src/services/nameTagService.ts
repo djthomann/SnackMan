@@ -64,7 +64,7 @@ class NameTag {
     this.nameTagObj = nameTagObj;
   }
 
-  update(player: THREE.Group) {
+  update(player: THREE.PerspectiveCamera) {
     this.nameTagObj?.quaternion.copy(player.quaternion);
     //this.nameTagObj?.lookAt(player.position);
 
