@@ -2,7 +2,7 @@
   <div>
     <BackgroundComponent :title="`LOBBY #${lobbyCode}`">
       <button class="icon-button join-button button" @click="leaveLobby(lobbyCode)">
-        <img src="@/assets/icons/leave.svg" />
+        <img src="@/assets/icons/Back_Button.svg" />
       </button>
       <div class="lobby-grid">
         <div class="lobby-grid__column">
@@ -452,8 +452,8 @@ const leaveLobby = (code: number) => {
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-rows: 1fr auto;
-  gap: 40px 60px;
-  padding: 4dvw;
+  gap: 30px 60px;
+  padding: 6dvw 4dvw 4dvw;
   box-sizing: border-box;
 }
 
@@ -586,6 +586,7 @@ label {
   border: none;
   background: 0;
   box-shadow: none;
+  padding-left: 15px;
 }
 
 .icon-button img {
