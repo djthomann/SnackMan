@@ -30,6 +30,7 @@ class SoundService {
     private backgroundSound: THREE.Audio<GainNode>;
     private soundEffects: Map<SoundEffect, string>;
     private logger: Logger;
+    private volume: number;
  
 
     constructor(listener: THREE.AudioListener) {
@@ -43,6 +44,7 @@ class SoundService {
             [SoundEffect.JUMP, jumpSound],
         ]);
         this.logger = new Logger();
+        this.volume = 0.5
     }
 
     // Adds a positional audio to every item of a group of objects
@@ -103,11 +105,11 @@ class SoundService {
         const sound = mesh.children.find(child => child instanceof THREE.PositionalAudio) as THREE.PositionalAudio;
         if (sound) {
           if (!sound.isPlaying) {
+            sound.setVolume(this.volume)
             sound.play();
           }
         }
       }
-    
 
     // Stops the sound for a 3D Object or group of objects
     stopSound(soundSource: THREE.Object3D<THREE.Object3DEventMap> | THREE.Group<THREE.Object3DEventMap>) {
@@ -135,7 +137,7 @@ class SoundService {
         this.audioLoader.load(gameMusic, (buffer) => {
             this.backgroundSound.setBuffer(buffer);
             this.backgroundSound.setLoop(true);
-            this.backgroundSound.setVolume( 0.5 );
+            this.backgroundSound.setVolume( this.volume );
             this.backgroundSound.play();
         });
     }
@@ -143,6 +145,11 @@ class SoundService {
     // Stops the game's background music
     stopBackgroundMusic() {
         this.backgroundSound.stop();
+    }
+
+    setVolume(volume: number) {
+        this.backgroundSound.setVolume(volume)
+        this.volume = volume;
     }
 
     get getListener(): THREE.AudioListener {
