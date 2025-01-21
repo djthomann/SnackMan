@@ -14,6 +14,8 @@ import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.ChickenRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.FoodRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.GhostRecord;
 import de.hsrm.mi.swt.projekt.snackman.model.gameEntities.records.SnackManRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GameState {
 
@@ -26,6 +28,8 @@ public class GameState {
     private Set<FoodRecord> laidEggs;
     private long lastSentTime;
     private boolean firstSend = true;
+    private final GameStateThread thread = new GameStateThread();
+    private final Logger logger = LoggerFactory.getLogger(GameState.class);
 
     /**
      * synchronized (changes to game state variables need to be declared to all
@@ -37,7 +41,7 @@ public class GameState {
         @Override
         public void run() {
             synchronized (this) {
-                while (!Thread.currentThread().isInterrupted()) {
+                while (!this.isInterrupted()) {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
@@ -87,8 +91,7 @@ public class GameState {
         this.changedChicken = new HashSet<>();
         this.eatenFoods = new HashSet<>();
         this.laidEggs = new HashSet<>();
-        GameStateThread thread = new GameStateThread();
-        thread.start();
+        this.thread.start();
     }
 
     public synchronized void addChangedGhost(Ghost ghost) {
@@ -150,6 +153,10 @@ public class GameState {
 
     public void setLaidEggs(Set<FoodRecord> laidEggs) {
         this.laidEggs = laidEggs;
+    }
+
+    public void interrupt() {
+        this.thread.interrupt();
     }
 
 }

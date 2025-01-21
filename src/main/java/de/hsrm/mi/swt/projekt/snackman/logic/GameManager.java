@@ -81,6 +81,10 @@ public class GameManager {
         allGames.put(game.getId(), game);
     }
 
+    public void removeGame(long id) {
+        allGames.remove(id);
+    }
+
     public void setGameConfig(GameConfig gameConfig, long lobbyID) {
         allLobbies.get(lobbyID).setGameConfig(gameConfig);
     }
@@ -97,6 +101,10 @@ public class GameManager {
         allLobbies.put(lobby.getId(), lobby);
         //createGame(gameConfig, lobby.getId());
         return lobby;
+    }
+
+    public void removeLobby(long id) {
+        allLobbies.remove(id);
     }
 
     public Lobby getLobbyFromClient(Client c) {

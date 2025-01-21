@@ -60,6 +60,10 @@ public class Lobby {
         this.map = map;
     }
 
+    public void emptyMap() {
+        this.map = null;
+    }
+
     public Game startGame(GameManager gameManager) {
         if (map == null) map = new SnackManMap(this.gameConfig.getMapWidth(), this.gameConfig.getMapHeight());
 

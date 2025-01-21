@@ -54,9 +54,6 @@ export const useEntityStore = defineStore('entityStore', () => {
           radius: chicken.radius
         })
       })
-
-    } else if (message.startsWith('GAME_STATE')) {
-
     }
   }
 

@@ -218,15 +218,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     notifyClients(session, startGameEvent.getGameID(), "FOREIGN_GAMESTART");
 
                     gameManager.createGame(startGameEvent.getGameID());
+
+                    // TODO gameManager.removeLobby();
+                    broadcastMessage("NEW_LOBBY_DELETE"); // now that the game has started, the lobby is no longer needed
                 }
 
                 case "END_GAME" -> {
                     GameEndEvent gameEndEvent = gson.fromJson(jsonObject, GameEndEvent.class);
                     Game currentGame = gameManager.getGameById(gameEndEvent.getGameID());
+                    GameEndEvent result = currentGame.generateGameEndEvent();
+                    gameManager.removeGame(gameEndEvent.getGameID());
+                    gameManager.removeLobby(gameEndEvent.getGameID());
 
                     sendMapData(currentGame.getMap().original(), session);
-
-                    GameEndEvent result = currentGame.generateGameEndEvent();
                     logger.info("GameEndEvent generated: " + result);
 
                     TextMessage messageToSend = new TextMessage(result.getType().toString() + ";" + gson.toJson(result));
