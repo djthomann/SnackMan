@@ -2,6 +2,18 @@
 
 SnackMan is a multiplayer browser game you can play with your friends. It's closely inspired by PacMan but in 3D and First-Person. Snack on the Food, Chase your friends, get stuck on chickens und skate your way to victory!
 
+# Home Screen
+
+![Home Screen](/doku/main.png "Home Screen")
+
+# Lobby 
+
+![Lobby Screen](/doku/lobby.png "Lobby Screen")
+
+# In Game
+
+![Lobby Screen](/doku/In%20Game2.png "In Game")
+
 ## Start from bootJar
 In the root directory build and run the project from bootJar
 
