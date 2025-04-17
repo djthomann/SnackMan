@@ -14,6 +14,9 @@ SnackMan is a multiplayer browser game you can play with your friends. It's clos
 
 ![Lobby Screen](/doku/In%20Game2.png "In Game")
 
+# Demo Video
+https://www.youtube.com/watch?v=g0UpAkZlYK4
+
 ## Start from bootJar
 In the root directory build and run the project from bootJar
 
